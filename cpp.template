@@ -1,0 +1,11 @@
+#include "{HFile}"
+
+{Class}::{Class}()
+{{
+
+}}
+
+{Class}::~{Class}()
+{{
+
+}}
