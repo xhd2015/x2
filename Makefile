@@ -2,7 +2,7 @@
 # args="0 0 0 0 1 2 3"
 dir = /home/Fulton Shaw/x2-devel
 f16 = main libx2 PMLoader Descriptor
-f32 = protected_main libx2 Descriptor TSS interrupts IOProgramer
+f32 = protected_main libx2 Descriptor TSS interrupts IOProgramer Memory
 
 fall = main libx2 PMLoader Descriptor protected_main TSS interrupts IOProgramer
 

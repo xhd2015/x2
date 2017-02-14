@@ -25,14 +25,26 @@ void M::m()
 {
 	printf("m");
 }
+int mark(int a)
+{
+}
+__attribute__((always_inline)) inline void L2();
+__attribute__((always_inline)) inline void L1()
+{
+	mark(0x1);
+	L2();
+}
+__attribute__((always_inline)) inline void L2()
+{
+	L1();
+	mark(0x2);
+}
+
 
 void test()
 {
 	int a=10;
 
-	printf("10");
-	v();
-	t();
-	M::t();
-	M::m();
+	printf("10 \n");
+	L2();
 }

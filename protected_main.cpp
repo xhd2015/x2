@@ -31,7 +31,9 @@ __asm__(
 void protectedEntryHolder() //0x2016
 {
     Util::clr();
-    Util::printStr("Entered Protected Mode.\n");
+    Printer stdp(10,20,5,20,Util::MODE_COMMON);//系统的标准打印器
+    stdp.clr();
+    stdp.putsz("Entered Protected Mode.\n");
     TSS tss0;//
     
     *(short*)tss0.SS0 = Util::makeSel(4);
@@ -39,11 +41,11 @@ void protectedEntryHolder() //0x2016
     tss0.writeToMemory(SEG_CURRENT,TSS_AREA_START);
     //SS0:ESP0之后会被int用到，发生到高特权级的中断会切换堆栈
     
-    Util::printStr("tss0 written\n");
+    stdp.putsz("tss0 written\n");
     SegmentDescriptor tss0_descr(TSS_AREA_START,TSS_MIN_SIZE-1,SegmentDescriptor::TYPE_S_TSS_32_AVL,0,0,0);
     tss0_descr.writeToMemory(SEG_CURRENT,GDT_START+5*8);//TSS0描述符所处的位置
     Util::ltr(Util::makeSel(5));// load task register
-    Util::printStr("Had ltr done.\n",Util::MODE_COMMON);
+    stdp.putsz("Had ltr done.\n");
     
     //======== 循环设置所有中断===
     SelectorDescriptor reuse_sel;
@@ -99,10 +101,9 @@ void protectedEntryHolder() //0x2016
     tss1_sel.writeToMemory(SEG_CURRENT,GDT_START+9*8);
     
     //允许中断
-    STI();
-    
+    Util::sti();
     //利用iret切换到特权级3
-    Util::printStr("Changing CPL to 3.\n");
+    stdp.putsz("Changing CPL to 3.\n");
     Util::changeCPL(afterCPL3,0x33,Util::getEflags(),4*512-4,0x43);
     
     
@@ -117,8 +118,7 @@ void afterCPL3()
     CALL_INT_3(0x24,c,SEG_CURRENT,b,"int 0x24 by CPL3.\n",d,Util::MODE_COMMON);//int n
     Util::insertMark(0x55678);
     SimpleCharRotator scr(0,40);//一个简单的task
-    scr.run();
-    
+    scr.run();   
 }
 void forTss1()
 {

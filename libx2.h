@@ -41,16 +41,25 @@ public:
     static void ltr(int sel);
     AS_MACRO static void cli();
     AS_MACRO static void sti();
-    AS_MACRO static void enterDs(int seg,int temp);
+    AS_MACRO static void enterDs(int seg,int& temp);
     AS_MACRO static void leaveDs(int seg,int temp);
+    AS_MACRO static void enterEs(int seg,int& temp);
+    AS_MACRO static void leaveEs(int temp);
     AS_MACRO static void jmpDie();
-    AS_MACRO static void intReturn();
     static void changeCPL(int eip,int cs,int eflags,int esp,int ss);
     static int getEflags();
     static char getCPL();
     static char getDPL(int sel);
     static void outb(int port,int byte);
+    
+    //========与调用相关的宏
+    /**
+    *获取一个返回class类型的成员函数的返回对象的参数
+    *如果不明确返回所声明的类型，g++是允许编译通过的。（即什么都不返回）
+    */
+    AS_MACRO static void initTarget(void* target);
 
+    AS_MACRO static void intReturn();
 #endif
     
     
@@ -108,6 +117,46 @@ private:
     int Status;
     int Direction;
 };
+/**
+*标准屏幕打印管理器
+*   通过限制一个矩形区域让打印个性化！！！
+*/
+class Printer{
+public:
+    const static int SCREEN_MAX_X,SCREEN_MAX_Y;
+public:
+    Printer(int x0=0,int y0=0,int rows=Printer::SCREEN_MAX_X,int cols=Printer::SCREEN_MAX_Y,int mode=Util::MODE_COMMON);
+    ~Printer();
+    
+    void putc(int chr);
+    void putsz(char* str);
+    void putsn(char *str,int n);
+    void setPos(int x,int y);
+    void move(int n);
+    void setMode(int mode);
+    void clr();
+    int getPos();
+    
+protected:
+    int x0,y0,cols,rows;
+    int x,y;
+    int mode;
+    
+private:
+    /**
+    *处理特殊字符
+    *   1 --    已经处理
+    *   -1 --   是NULL字符
+    *   0   --  正常打印
+    *
+    */
+    int specailCharProcessor(int chr);
+    /**
+    *提供核心部分代码，不包括设置es和显示模式
+    *dl提供显示属性
+    */
+    void __putc(int chr);
+};
 #endif
 
 //================函数宏区：使用 __attribute__((always_inline))===============
@@ -120,7 +169,7 @@ void Util::sti()
 {
     __asm__("sti \n\t");
 }
-void Util::enterDs(int seg,int temp)
+void Util::enterDs(int seg,int& temp)
 {
     if(seg!=SEG_CURRENT)
     {
@@ -139,6 +188,31 @@ void Util::leaveDs(int seg,int temp)
         __asm__ __volatile__("mov %%ax,%%ds \n\t"::"a"(temp):);
     }
 }
+ void Util::enterEs(int seg,int& temp)
+ {
+     __asm__ __volatile__("mov %%es,%%ax\n\t":"=a"(temp)::);
+    if(seg==SEG_CURRENT)
+    {
+        __asm__ __volatile__(
+            "mov %%ds,%%ax \n\t"
+            "mov %%ax,%%es \n\t"
+            :
+            :
+            :"eax"
+        );
+    }else{
+        __asm__ __volatile__(
+        "mov %%ax,%%es \n\t"
+        :
+        :"a"(seg)
+        :
+        );
+    }
+ }
+void Util::leaveEs(int temp)
+{
+    __asm__ __volatile__("mov %%ax,%%es \n\t"::"a"(temp):);
+}
 void Util::jmpDie()
 {
     __asm__("jmp .\n\t");
@@ -149,6 +223,10 @@ void Util::intReturn()
     "leave \n\t"
     "iret \n\t"
     );
+}
+void Util::initTarget(void* target)
+{
+    __asm__ __volatile__("":"=c"(target)::);
 }
 #endif
 

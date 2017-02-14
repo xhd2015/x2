@@ -1952,7 +1952,7 @@ L99:
 	popa 
 	
  # 0 "" 2
- # 151 "libx2.h" 1
+ # 225 "libx2.h" 1
 	leave 
 	iret 
 	
@@ -1978,43 +1978,41 @@ _int0x24:
 	movl	%ebx, -16(%ebp)
 	movl	%eax, -20(%ebp)
 	movl	-12(%ebp), %eax
-	movl	%eax, -28(%ebp)
-	movl	-24(%ebp), %eax
-	movl	%eax, -40(%ebp)
-	cmpl	$65536, -28(%ebp)
+	movl	%eax, -24(%ebp)
+	cmpl	$65536, -24(%ebp)
 	je	L101
-	movl	-28(%ebp), %eax
+	movl	-24(%ebp), %eax
 /APP
- # 132 "libx2.h" 1
+ # 181 "libx2.h" 1
 	mov %ds,%bx 
 	mov %ax,%ds 
 	
  # 0 "" 2
 /NO_APP
 	movl	%ebx, %eax
-	movl	%eax, -40(%ebp)
+	movl	%eax, -36(%ebp)
 L101:
 	movl	-16(%ebp), %eax
 	movl	-20(%ebp), %edx
 	movl	%edx, 4(%esp)
 	movl	%eax, (%esp)
 	call	__ZN4Util8printStrEPKci
-	movl	-12(%ebp), %eax
-	movl	%eax, -32(%ebp)
-	movl	-24(%ebp), %eax
-	movl	%eax, -36(%ebp)
-	cmpl	$65536, -32(%ebp)
-	je	L102
 	movl	-36(%ebp), %eax
+	movl	-12(%ebp), %edx
+	movl	%edx, -28(%ebp)
+	movl	%eax, -32(%ebp)
+	cmpl	$65536, -28(%ebp)
+	je	L102
+	movl	-32(%ebp), %eax
 /APP
- # 139 "libx2.h" 1
+ # 188 "libx2.h" 1
 	mov %ax,%ds 
 	
  # 0 "" 2
 /NO_APP
 L102:
 /APP
- # 151 "libx2.h" 1
+ # 225 "libx2.h" 1
 	leave 
 	iret 
 	
@@ -2072,35 +2070,33 @@ _intDefault:
 	cwtl
 	movl	%eax, -12(%ebp)
 	movl	-12(%ebp), %eax
-	movl	%eax, -20(%ebp)
-	movl	-16(%ebp), %eax
-	movl	%eax, -32(%ebp)
-	cmpl	$65536, -20(%ebp)
+	movl	%eax, -16(%ebp)
+	cmpl	$65536, -16(%ebp)
 	je	L105
-	movl	-20(%ebp), %eax
+	movl	-16(%ebp), %eax
 /APP
- # 132 "libx2.h" 1
+ # 181 "libx2.h" 1
 	mov %ds,%bx 
 	mov %ax,%ds 
 	
  # 0 "" 2
 /NO_APP
 	movl	%ebx, %eax
-	movl	%eax, -32(%ebp)
+	movl	%eax, -28(%ebp)
 L105:
 	movl	__ZN4Util11MODE_COMMONE, %eax
 	movl	%eax, 4(%esp)
 	movl	$LC31, (%esp)
 	call	__ZN4Util8printStrEPKci
-	movl	-12(%ebp), %eax
-	movl	%eax, -24(%ebp)
-	movl	-16(%ebp), %eax
-	movl	%eax, -28(%ebp)
-	cmpl	$65536, -24(%ebp)
-	je	L106
 	movl	-28(%ebp), %eax
+	movl	-12(%ebp), %edx
+	movl	%edx, -20(%ebp)
+	movl	%eax, -24(%ebp)
+	cmpl	$65536, -20(%ebp)
+	je	L106
+	movl	-24(%ebp), %eax
 /APP
- # 139 "libx2.h" 1
+ # 188 "libx2.h" 1
 	mov %ax,%ds 
 	
  # 0 "" 2
@@ -2109,7 +2105,7 @@ L106:
 	movl	$354185, (%esp)
 	call	__ZN4Util10insertMarkEi
 /APP
- # 151 "libx2.h" 1
+ # 225 "libx2.h" 1
 	leave 
 	iret 
 	

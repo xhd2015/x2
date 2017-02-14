@@ -168,9 +168,10 @@ void Util::setl(int seg,int off,int word)
 }
 
 void Util::memcopy(int srcSeg,int srcOff,int dstSeg,int dstOff,int len)
-{
-    ENTER_DS(srcSeg,s1);
+{   
     ENTER_ES(dstSeg,s2);
+    ENTER_DS(srcSeg,s1);
+
     __asm__( //ds:si --> es:di
     "push %esi \n\t"
     "push %edi \n\t"
@@ -182,8 +183,9 @@ void Util::memcopy(int srcSeg,int srcOff,int dstSeg,int dstOff,int len)
     "pop %edi \n\t"
     "pop %esi \n\t"
     );
-    LEAVE_ES(dstSeg,s2);
+    
     LEAVE_DS(srcSeg,s1);
+    LEAVE_ES(dstSeg,s2);
 }
 void Util::clr()
 {
@@ -282,8 +284,168 @@ void SimpleCharRotator::run()
     }
 }
 
+//=================class:Printer
+const int Printer::SCREEN_MAX_X=25,
+        Printer::SCREEN_MAX_Y=80; //起始const static 也算是编译期常数，
+Printer::Printer(int x0,int y0,int rows,int cols,int mode):
+x0(x0>SCREEN_MAX_X?SCREEN_MAX_X-1:x0),
+y0(y0>SCREEN_MAX_Y?SCREEN_MAX_Y-1:y0),
+x(this->x0),y(this->y0),
+rows(rows>SCREEN_MAX_X?SCREEN_MAX_X:rows),
+cols(cols>SCREEN_MAX_Y?SCREEN_MAX_Y:cols),
+mode(mode)
+{
+     
+}
+Printer::~Printer()
+{
+    
+}
 
-#endif
+void Printer::move(int n)
+{
+    this->y+=n;
+    while(this->y < 0)
+    {
+        this->y+=this->cols;
+        this->x--;
+        if(this->x == -1)
+        {
+            this->x=this->rows;
+        }
+    }
+    while(this->y >= this->cols)
+    {
+        this->y -= this->cols;
+        this->x++;
+        if(this->x==this->rows)
+        {
+            this->x = this->rows - 1 ;
+        }
+    }
+    
+    
+    
+}
+void Printer::putc(int chr)
+{
+    int oldes;
+    Util::enterEs(Util::videoSelector,oldes);
+    switch(this->specailCharProcessor(chr))
+    {
+        case 0:
+            this->__putc(chr);
+            this->move(1);
+            break;
+        case 1:
+        case -1:
+        default:
+            break;
+    }
+    Util::leaveEs(oldes);
+}
+void Printer::putsz(char* str)
+{
+    int oldes;
+    char *p=str;
+    Util::enterEs(Util::videoSelector,oldes);
+    int rt;
+    while((rt=this->specailCharProcessor(*p))!=-1)
+    {
+        if(rt==0)
+        {
+            this->__putc(*p);
+            this->move(1);
+        }
+        p++;
+    }
+    Util::leaveEs(oldes);
+
+}
+void Printer::putsn(char *str,int n)
+{
+    int oldes;
+    char *p=str;
+    Util::enterEs(Util::videoSelector,oldes);
+    int rt;
+    int i=0;
+    while((rt=this->specailCharProcessor(*p))!=-1 && i!=n )
+    {
+        if(rt==0)
+        {
+            this->__putc(*p);
+            this->move(1);
+        }
+        p++;
+        i++;
+    }
+    Util::leaveEs(oldes);
+}
+void Printer::setPos(int x,int y)
+{
+    this->x=x % this->rows;
+    this->y=y % this->cols;
+}
+void Printer::setMode(int mode)
+{
+    this->mode=mode;
+}
+int Printer::specailCharProcessor(int chr)
+{
+    int rt=1;
+    switch(chr)
+    {
+        case '\n':
+            this->x = (this->x + 1) % this->rows;
+            this->y = 0;
+            break;
+        case '\r':
+            this->y = 0;
+            break;
+        case '\b':
+            this->move(-1);
+            break;
+        case '\t':
+            this->move(4);
+            break;
+        case '\0':
+            rt=-1;
+            break;
+        default://
+            rt=0;
+            break;
+    }
+    return rt;
+}
+
+int Printer::getPos()
+{
+    return (this->x0+this->x)*Printer::SCREEN_MAX_Y*2+(this->y0+this->y)*2;
+}
+void Printer::__putc(int chr)
+{
+    __asm__ __volatile__(
+    "mov %%al,%%es:(%%edi) \n\t"
+    "mov %%dl,%%es:1(%%edi) \n\t"
+    :
+    :"a"(chr),"D"(this->getPos()),"d"(this->mode)
+    :
+    );
+}
+void Printer::clr()
+{
+    this->setPos(0,0);
+    for(int i=0;i!=this->rows;i++)
+    {
+        for(int j=0;j!=this->cols;j++)
+        {
+            this->putc(' ');
+        }
+    }
+    this->setPos(0,0);
+}
+
+#endif  //CODE32
 #ifdef CODE16
 //======================仅16位===========
 //ebp + 4 = 返回地址

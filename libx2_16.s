@@ -490,11 +490,37 @@ __ZN4Util7memcopyEiiiii:
 	movl	%esp, %ebp
 	pushl	%ebx
 	subl	$16, %esp
-	cmpl	$65536, 8(%ebp)
-	je	L35
-	movl	8(%ebp), %eax
 /APP
  # 172 "libx2.cpp" 1
+	mov %es,%ax 
+	
+ # 0 "" 2
+/NO_APP
+	movl	%eax, -12(%ebp)
+	cmpl	$65536, 16(%ebp)
+	jne	L35
+/APP
+ # 172 "libx2.cpp" 1
+	push %ds 
+	pop %es 
+	
+ # 0 "" 2
+/NO_APP
+	jmp	L36
+L35:
+	movl	16(%ebp), %eax
+/APP
+ # 172 "libx2.cpp" 1
+	movw %ax,%es 
+	
+ # 0 "" 2
+/NO_APP
+L36:
+	cmpl	$65536, 8(%ebp)
+	je	L37
+	movl	8(%ebp), %eax
+/APP
+ # 173 "libx2.cpp" 1
 	mov %ds,%ebx
 	movw %ax,%ds 
 	
@@ -502,35 +528,9 @@ __ZN4Util7memcopyEiiiii:
 /NO_APP
 	movl	%ebx, %eax
 	movl	%eax, -8(%ebp)
-L35:
-/APP
- # 173 "libx2.cpp" 1
-	mov %es,%ax 
-	
- # 0 "" 2
-/NO_APP
-	movl	%eax, -12(%ebp)
-	cmpl	$65536, 16(%ebp)
-	jne	L36
-/APP
- # 173 "libx2.cpp" 1
-	push %ds 
-	pop %es 
-	
- # 0 "" 2
-/NO_APP
-	jmp	L37
-L36:
-	movl	16(%ebp), %eax
-/APP
- # 173 "libx2.cpp" 1
-	movw %ax,%es 
-	
- # 0 "" 2
-/NO_APP
 L37:
 /APP
- # 184 "libx2.cpp" 1
+ # 185 "libx2.cpp" 1
 	push %esi 
 	push %edi 
 	mov 4+4*2(%ebp),%esi 
@@ -543,23 +543,23 @@ L37:
 	
  # 0 "" 2
 /NO_APP
-	movl	-12(%ebp), %eax
-/APP
- # 185 "libx2.cpp" 1
-	mov %ax,%es 
-	
- # 0 "" 2
-/NO_APP
 	cmpl	$65536, 8(%ebp)
-	je	L39
+	je	L38
 	movl	-8(%ebp), %eax
 /APP
- # 186 "libx2.cpp" 1
+ # 187 "libx2.cpp" 1
 	mov %ax,%ds 
 	
  # 0 "" 2
 /NO_APP
-L39:
+L38:
+	movl	-12(%ebp), %eax
+/APP
+ # 188 "libx2.cpp" 1
+	mov %ax,%es 
+	
+ # 0 "" 2
+/NO_APP
 	nop
 	addl	$16, %esp
 	popl	%ebx
@@ -576,22 +576,22 @@ __ZN4Util3clrEv:
 	movl	$0, (%esp)
 	call	__ZN4Util9setCursorEii
 	movl	$0, -12(%ebp)
-L44:
-	cmpl	$25, -12(%ebp)
-	je	L41
-	movl	$0, -16(%ebp)
 L43:
+	cmpl	$25, -12(%ebp)
+	je	L40
+	movl	$0, -16(%ebp)
+L42:
 	cmpl	$80, -16(%ebp)
-	je	L42
+	je	L41
 	movl	$7, 4(%esp)
 	movl	$32, (%esp)
 	call	__ZN4Util9printCharEci
 	addl	$1, -16(%ebp)
-	jmp	L43
-L42:
-	addl	$1, -12(%ebp)
-	jmp	L44
+	jmp	L42
 L41:
+	addl	$1, -12(%ebp)
+	jmp	L43
+L40:
 	movl	$0, 4(%esp)
 	movl	$0, (%esp)
 	call	__ZN4Util9setCursorEii
@@ -646,7 +646,7 @@ __ZN4Util14readSectorsCHSEiiiiiii:
 	movl	%esp, %ebp
 	subl	$16, %esp
 /APP
- # 315 "libx2.cpp" 1
+ # 477 "libx2.cpp" 1
 	push %es
 	mov 4+4*1(%ebp),%eax 
 	movw %ax,%es

@@ -102,8 +102,8 @@
     );
 
 //======中断保护、恢复现场
-#define CLI()   __asm__("cli \n\t")
-#define STI()   __asm__("sti \n\t")
+//#define CLI()   __asm__("cli \n\t")
+//#define STI()   __asm__("sti \n\t")
 
 
 
