@@ -1,6 +1,6 @@
 #ifdef CODE16
     __asm__(".code16gcc \n\t");//此处开始为保护模式写代码
-#elseif defined CODE32
+#elif defined CODE32
     __asm__(".code32 \n\t");
 #endif
 
@@ -24,11 +24,12 @@ Descriptor::~Descriptor()
 
 }
 //==========For SegmentDescriptor===========
-const int       SegmentDescriptor::TYPE_U_STACK = 0b0110,
+const int       SegmentDescriptor::TYPE_U_STACK = 0b0010,
+                SegmentDescriptor::TYPE_U_EXPANEDDOWN=0b0110,
                 SegmentDescriptor::TYPE_U_DATA = 0b0010,
                 SegmentDescriptor::TYPE_U_CODE_NONCONFORMING = 0b1010,
-                SegmentDescriptor::TYPE_U_CODE_CONFORMING = 0b1110;
-const int       SegmentDescriptor::TYPE_S_UNUSED_1=0,
+                SegmentDescriptor::TYPE_U_CODE_CONFORMING = 0b1110,
+                SegmentDescriptor::TYPE_S_UNUSED_1=0b0000,
                 SegmentDescriptor::TYPE_S_UNUSED_2=0b1000,
                 SegmentDescriptor::TYPE_S_UNUSED_3=0b1010,
                 SegmentDescriptor::TYPE_S_UNUSED_4=0b1101,
@@ -51,7 +52,7 @@ SegmentDescriptor::~SegmentDescriptor()
 {
 
 }
-SegmentDescriptor::SegmentDescriptor(char* baseaddr,int limit,char type,char dpl):AVL(0),G(0),B(1),P(1),S(1),L(0),DPL(dpl),Type(type)
+SegmentDescriptor::SegmentDescriptor(char* baseaddr,int limit,char type,char dpl,char s,char b,char p):AVL(0),G(0),B(b),P(p),S(s),L(0),DPL(dpl),Type(type)
 {
     *(char**)this->BaseAddr = baseaddr;
     *(short*)this->Limit = limit & 0xffff;
@@ -148,3 +149,79 @@ void SegmentDescriptor::fromMemory(SegmentDescriptor *sd,int seg,char* addr)
     
     
 }
+void SegmentDescriptor::init(char* baseaddr,int limit,char type,char dpl,char s,char b,char p,char g,char l,char avl)
+{
+    *(char**)this->BaseAddr=baseaddr;
+    *(short*)this->Limit = limit & 0xffff;
+    *((char*)this->Limit+2) = (limit & 0xf0000) >> 16;
+    this->Type = type;
+    this->DPL = dpl;
+    this->S = s;
+    this->B = b;
+    this->P = p;
+    this->G = g;
+    this->L = l;
+    this->AVL = avl;
+}
+/**
+*门描述符 ，仅32位
+*/
+//===============For SelectorDescriptor==============
+#ifdef CODE32
+const int SelectorDescriptor::TYPE_INT= 0x0600,//0b0000 0110 0000 0000,
+            SelectorDescriptor::TYPE_TASK=0x0500,//0b0000 0101 0000 0000
+            SelectorDescriptor::TYPE_TRAP=0x0700;
+const int SelectorDescriptor::SIZE_16=0,
+        SelectorDescriptor::SIZE_32=1;
+SelectorDescriptor::SelectorDescriptor()
+{
+
+}
+
+SelectorDescriptor::~SelectorDescriptor()
+{
+
+}
+void SelectorDescriptor::DPL(int dpl)
+{
+    *(this->I2+1) |= (char) ( (dpl & 0x3 ) << 5);
+}
+void SelectorDescriptor::P(int p)
+{
+    *(this->I2+1) |= (char) ( (p & 0x1 ) << 7);
+}
+void SelectorDescriptor::D(int d)
+{
+    
+    *(this->I2+1) |= (char) ( (d & 0x1 ) << 3);
+}
+void SelectorDescriptor::Offset(int offset){
+    *(short*)this->I0=(short)offset;
+    *(short*)this->I3=(short)(offset >> 16);
+}
+void SelectorDescriptor::Selector(int selector)
+{
+    *(short*)this->I1=(short)selector;
+}
+void SelectorDescriptor::Type(int type)//0 task gate,1 int gate,2 trap gate
+{
+    *(short*)this->I2=(short)type;
+}
+void SelectorDescriptor::init(int sel,int offset,int type,int dpl,int p,int segSize)
+{
+    this->Offset(offset);
+    this->Selector(sel);
+    this->Type(type);
+    this->D(segSize);
+    this->DPL(dpl);
+    this->P(p);
+}
+void SelectorDescriptor::writeToMemory(int seg,int off)
+{
+    Util::memcopy(SEG_CURRENT,this->I0,seg,off,this->I3  - this->I0 + 2);
+}
+void SelectorDescriptor::fromMemory(SelectorDescriptor &self,int seg,int off)
+{
+    Util::memcopy(seg,off,SEG_CURRENT,self.I0,self.I3-self.I0+2);
+}
+#endif

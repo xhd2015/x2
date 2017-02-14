@@ -8,10 +8,12 @@ __asm__(
 #include "libx2.h"
 #include "PMLoader.h"
 #include "Descriptor.h"
+#include "def.h"
 //开始引导
 __asm__(
 "ljmp $STARTSEG,$HERE \n\t"
 "HERE: \n\t"
+"cli \n\t"
 "mov $STARTSEG,%ax \n\t"
 "mov %ax,%ds \n\t"
 "mov %ax,%ss \n\t"
@@ -28,7 +30,7 @@ __asm__(
 extern "C" void readLaterSectors()
 {
     __asm__(
-        "READLEN = 20 \n\t"
+        "READLEN =  16-2\n\t"
         "push %es\n\t"
         "mov $STARTSEG,%ax \n\t"
         "mov %ax,%es\n\t"
@@ -55,16 +57,15 @@ __attribute__((section(".test_section"))) int theEntry() //this is placed in .te
     
     //===========Util Test Start============
     Util::memcopy(0x7c0,512,0x7c0,0,512);//将第一个扇区清空
-    if(Util::readSectors(0x7c0,0,0,0,0,1,1))//重新读取
+    Util::insertMark(0x555);
+    if(Util::readSectors(0x7c0,0,0,0,1))
     {
         Util::printStr("Load Tested.\n");
     }
     SegmentDescriptor sd1(0x7c00,1024);
     char saver[8];
-    Util::insertMark(0x1233);
     sd1.writeToMemory(0x10000,saver);
     SegmentDescriptor sd2;
-    Util::insertMark(0x1232);
     SegmentDescriptor::fromMemory(&sd2,0x10000,saver);
     char saver2[8];
     sd2.writeToMemory(0x10000,saver2);
@@ -75,33 +76,11 @@ __attribute__((section(".test_section"))) int theEntry() //this is placed in .te
     Util::printStr("Util The End.\n");
     //===========Util Test End============
     
-    //===========PMLoader Start============
-    //定义宏 Driver Head Cylinder SecStart SecNum CodeSeg CodeOff
-    PMLoader pmldr(Driver,Head,Cylinder,SecStart,SecNum,CodeSeg,CodeOff);
-    pmldr.enableA20();
-    pmldr.setidtr(50*8,0x400);
-    pmldr.setgdtr(100*8,0x400+50*8);
-    SegmentDescriptor nullSeg,
-                        loaderSegCode(0x7c00,512*20,SegmentDescriptor::TYPE_U_CODE_CONFORMING,0),
-                        loaderSegData(0x7c00,512*20,SegmentDescriptor::TYPE_U_DATA,0),
-                        loaderSegStack(0x7c00,512*20,SegmentDescriptor::TYPE_U_STACK,0),
-                        videoSeg(0xb8000,25*80*2,SegmentDescriptor::TYPE_U_DATA,0);
-    Util::insertMark(0x1234);
-    nullSeg={0};//not really all zeros.
-    nullSeg.writeToMemory(0,0x400+50*8);
-    videoSeg.writeToMemory(0,0x400+50*8+1*8);
-    loaderSegCode.writeToMemory(0,0x400+50*8+2*8); 
-    loaderSegData.writeToMemory(0,0x400+50*8+3*8);
-    loaderSegStack.writeToMemory(0,0x400+50*8+4*8);
-    pmldr.adjustProtectedCode();
-    Util::printStr("Entering Protected Mode.");
-    pmldr.enterProtected();
-    
-    //Util::videoSelector=0b1000; //第1项就是视频缓冲区
-    //===========PMLoader End==============
+    PMLoader pmldr(DRIVER,SECSTART,SECNUM,CODESEG,CODEOFF);
+    //多容纳N(比如20)个扇区
+    pmldr.mainProcess(IDT_START,IDT_SIZE,GDT_START,GDT_SIZE,CODESEG << 4,0xfffff,512*4);
+
 }
-
-
 
 __asm__(
 ".section .last_section \n\t"

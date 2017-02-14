@@ -6,22 +6,23 @@ MEMORY {
 */
 SECTIONS {
 	.seclt 0:{
-		main.o(.text)
+		main_16.o(.text)
 	}
 	.secld :{
-		main.o(.rdata)
+		main_16.o(.rdata)
 	}
 	.secle :{
-		main.o(.data)
+		main_16.o(.data)
 	}
 	.seclb :{
-		main.o(.bss)
+		main_16.o(.bss)
 	}
 	.secmain 1024:{
-		main.o(.test_section) *(.text)	*(.data) *(.rdata)	*(.bss)
+		main_16.o(.test_section) *(.text)	*(.data) *(.rdata)	*(.bss)
+		. = 16*512-1024; /*共占有16个扇区*/
 	}
 	.lastsec 508: { /*lastsection长度有限制，只能使用lastsec*/
-		main.o( .last_section )
+		main_16.o( .last_section )
 	}
 	/DISCARD/ : {
 		*( ".rdata$zzz" )

@@ -2,14 +2,18 @@
 #ifndef __PMLoder__
 #define __PMLoder__
 //实模式下的 “保护模式加载器”
+// 主加载过程：（顺序有严格要求，见mainProcess）
+//
+//  设置idtr,gdtr以及其中相关的数据。
+//  读取保护模式代码
+//  启用A20
 //  设置 gdtr,idtr
-// 启用A20
 //  进入保护模式
 class PMLoader{
 public:
-    int Driver,Head,Cylinder,SecStart,SecNum,CodeSeg,CodeOff;
+    int Driver,SecStart,SecNum,CodeSeg,CodeOff;
 public:
-    PMLoader(int driver=0,int head=0,int cylinder=0,int secStart=1,int secNum=0,int codeSeg=0,int codeOff=0);//指定保护模式的代码区域： 1.磁盘区域:驱动器，c，h，s，数目  2.内存区域 段：偏移
+    PMLoader(int driver=0,int secStart=0,int secNum=0,int codeSeg=0,int codeOff=0);//指定保护模式的代码区域： 1.磁盘区域:驱动器，逻辑起始地址 2.内存区域 段：偏移
     //一般而言，如果代码在同一个磁盘上，为保护模式预留12~20个扇区是足够测试用的。因此取值可以认为保护模式代码在第16个扇区
     ~PMLoader();
     /**
@@ -32,8 +36,12 @@ public:
     * 或者必须将保护模式代码置于 0b10000:0 处开始
     */
     void enterProtected();
-    void ajustProtectedCode();
-    void mainProcess();
+    void adjustProtectedCode();
+    /**
+    *主要用于指定与代码相关的数据，初始化时指定的是读取相关的数据
+    *指定gdt,idt,
+    */
+    void mainProcess(int idtaddr,short idtlen,int gdtaddr,short gdtlen,int loaderSeg,int loaderLimit,int stackPointer);
 #endif
     
 };
