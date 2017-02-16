@@ -41,11 +41,12 @@ extern "C" {
     
     void int0x1e();
     void int0x1f();//---- 32  ===== 0~31 used by intel
-    void int0x20();
+   // int int0x20;//超越堆栈框架的中断处理程序
     void int0x24();
     void int0x25();
     void intDefault();
 }
+extern int int0x20,int0x21;
 
 
 #endif

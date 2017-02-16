@@ -1,5 +1,10 @@
 #ifndef __IOProgramer__
 #define __IOProgramer__
+
+
+#include "def.h"
+#include "libx2.h"
+
 #ifdef CODE32
 class IO_8259A{
 public:
@@ -61,6 +66,90 @@ public:
     
     
 };
+
+class Keyboard{
+public:
+    const static int PORT_DATA,PORT_CONTROL,PORT_PPI;
+    const static int NO_DATA_ERROR;//0x10000
+    const static int KEY_MAP_STD_LEN;
+    const static char* KEY_MAP_STD[];
+    /**
+    *在此处定义标准键盘 把键盘线性化、连续化以便处理.需要标准化的键指那些不必依赖其他键就能产生输出的键
+    *那些控制键不包括在内，控制键是 ctrl,shift,alt,caps lock,num lock
+    *
+    *按键类型：
+    *   单键  --  不包括
+    *   双键  --  ctrl+单键 shift+单键
+    *   三键  --  ctrl+shift+单键
+    *
+    *接受到一个接通码
+    *接受到一个断开码，判断上一个码是否是该码的接通码，是：放入队列， 否：丢弃
+    *
+    *或者，接受到一个接通码，加入队列
+    *接收到一个断开码，丢弃
+    *
+    */
+
+public:
+    Keyboard();
+    ~Keyboard();
+    
+    /**
+    *输入端口0x60 0x64有数据就是busy
+    */
+    AS_MACRO int isBusy();
+    /**
+    *0x60端口是否有给系统的数据？即数据是否已经准备好
+    */
+    AS_MACRO int hasData();
+    
+    /**
+    *读取扫描码
+    * -1 表示出错
+    */
+    AS_MACRO int readScanCode();
+    
+    /**
+    *禁止/允许键盘工作
+    *通过 0x61位1来设置
+    */
+    AS_MACRO void enable();
+    AS_MACRO void disable();
+    
+    
+    
+    void waitToWrite();
+   
+    const char* getAsciiChar(unsigned char code);
+    
+    
+protected:
+    int leds;
+    
+    
+};
+int Keyboard::isBusy()
+{
+    return Util::inb(Keyboard::PORT_CONTROL) & 0x2;
+}
+int Keyboard::hasData()
+{
+    return Util::inb(Keyboard::PORT_CONTROL) & 0x1;
+}
+int Keyboard::readScanCode()
+{
+    return Util::inb(Keyboard::PORT_DATA);
+}
+void Keyboard::enable()
+{
+    int a=Util::inb(Keyboard::PORT_PPI);
+    Util::outb(Keyboard::PORT_PPI,a & 0x7f);
+}
+void Keyboard::disable()
+{
+    int a=Util::inb(Keyboard::PORT_PPI);
+    Util::outb(Keyboard::PORT_PPI,a | 0x80);
+}
 #endif //CODE32
 
 #endif

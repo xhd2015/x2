@@ -1,4 +1,8 @@
 	.file	"TSS.cpp"
+/APP
+	.code32 
+	
+/NO_APP
 	.text
 	.align 2
 	.globl	__ZN3TSSC2Ev
@@ -45,15 +49,17 @@ __ZN3TSS13writeToMemoryEii:
 	movl	%esp, %ebp
 	subl	$56, %esp
 	movl	%ecx, -12(%ebp)
+	movl	__ZN8PMLoader12TSS_MIN_SIZEE, %edx
 	movl	-12(%ebp), %eax
-	movl	%eax, %edx
-	movl	$104, 16(%esp)
-	movl	12(%ebp), %eax
-	movl	%eax, 12(%esp)
-	movl	8(%ebp), %eax
-	movl	%eax, 8(%esp)
-	movl	%edx, 4(%esp)
-	movl	$65536, (%esp)
+	movl	%eax, %ecx
+	movl	__ZN4Util11SEG_CURRENTE, %eax
+	movl	%edx, 16(%esp)
+	movl	12(%ebp), %edx
+	movl	%edx, 12(%esp)
+	movl	8(%ebp), %edx
+	movl	%edx, 8(%esp)
+	movl	%ecx, 4(%esp)
+	movl	%eax, (%esp)
 	call	__ZN4Util7memcopyEiiiii
 	nop
 	leave
@@ -139,10 +145,13 @@ __ZN3TSS10fromMemoryERS_ii:
 	pushl	%ebp
 	movl	%esp, %ebp
 	subl	$40, %esp
+	movl	__ZN8PMLoader12TSS_MIN_SIZEE, %edx
 	movl	8(%ebp), %eax
-	movl	$104, 16(%esp)
-	movl	%eax, 12(%esp)
-	movl	$65536, 8(%esp)
+	movl	%eax, %ecx
+	movl	__ZN4Util11SEG_CURRENTE, %eax
+	movl	%edx, 16(%esp)
+	movl	%ecx, 12(%esp)
+	movl	%eax, 8(%esp)
 	movl	16(%ebp), %eax
 	movl	%eax, 4(%esp)
 	movl	12(%ebp), %eax

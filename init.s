@@ -51,6 +51,18 @@ __Z4testv:
 	call	__ZN1TC1Eii
 	subl	$8, %esp
 	movl	%eax, -12(%ebp)
+	movl	$0, -12(%ebp)
+	movl	$0, -12(%ebp)
+	movl	__ZN1K1bE, %eax
+	movl	%eax, -12(%ebp)
+	movl	__ZN8PMLoader1aE, %eax
+	movl	%eax, -12(%ebp)
+	movl	__ZN8PMLoader6JMPSEGE, %eax
+	movl	%eax, -12(%ebp)
+	movl	__ZN8PMLoader10CODE_STARTE, %eax
+	movl	%eax, -12(%ebp)
+	movl	__ZN8PMLoader12rEAL_SECNUMSE, %eax
+	movl	%eax, -12(%ebp)
 	leal	-20(%ebp), %eax
 	movl	%eax, %ecx
 	call	__ZN1TD1Ev

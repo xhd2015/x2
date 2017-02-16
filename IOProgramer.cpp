@@ -47,7 +47,7 @@ void IO_8259A::sendICW1(int chip,int electTriggerMode,int singleChip,int require
     
     Util::insertMark(0x7788991);
     __asm__ __volatile__(
-    "out %%al,%%dx \n\t"
+    "outb %%al,%%dx \n\t"
     :
     :"a"(0x10 | 
         ((electTriggerMode & 0x1) << 3) |
@@ -62,7 +62,7 @@ void IO_8259A::sendICW2(int chip,int base)
     
     Util::insertMark(0x7788992);
         __asm__ __volatile__(
-    "out %%al,%%dx \n\t"
+    "outb %%al,%%dx \n\t"
     :
     :"a"(base),
      "d"(IO_8259A::PORTS[chip+2])
@@ -74,7 +74,7 @@ void IO_8259A::sendICW3(int chip,int linkage)
     
     Util::insertMark(0x7788993);
     __asm__ __volatile__(
-    "out %%al,%%dx \n\t"
+    "outb %%al,%%dx \n\t"
     :
     :"a"(linkage),
      "d"(IO_8259A::PORTS[chip+2])
@@ -86,7 +86,7 @@ void IO_8259A::sendICW4(int chip,int specCompNest,int buf,int autoEndEOI,int use
     
     Util::insertMark(0x7788994);
     __asm__ __volatile__(
-    "out %%al,%%dx \n\t"
+    "outb %%al,%%dx \n\t"
     :
     :"a"(((specCompNest & 0x1) << 4) |
         ((buf & 0x1) << 3) |
@@ -99,7 +99,7 @@ void IO_8259A::sendICW4(int chip,int specCompNest,int buf,int autoEndEOI,int use
 void IO_8259A::sendOCW1(int chip,int mask)
 {
     __asm__ __volatile__(
-    "out %%al,%%dx \n\t"
+    "outb %%al,%%dx \n\t"
     :
     :"a"(mask),
      "d"(IO_8259A::PORTS[chip+2])
@@ -110,7 +110,7 @@ void IO_8259A::sendOCW2(int chip,int eoi)
 {
     Util::insertMark(0x7788997);
     __asm__ __volatile__(
-    "out %%al,%%dx \n\t"
+    "outb %%al,%%dx \n\t"
     :
     :"a"(eoi & 0b11100111),//D3,D4恒为0
      "d"(IO_8259A::PORTS[chip])
@@ -156,6 +156,42 @@ void IO_8253::sendControlByte(int tunel,int writeOrder,int workingMode,int BCDMo
                     ((writeOrder & 0b11) << 4) |
                     ((workingMode & 0b111) << 1) |
                     (BCDMode & 0b1));
+}
+
+//=========class: Keyboard
+const int Keyboard::PORT_DATA=0x60,
+            Keyboard::PORT_CONTROL=0x64,
+            Keyboard::PORT_PPI=0x61;
+const int Keyboard::NO_DATA_ERROR=0x10000;
+
+const char* Keyboard::KEY_MAP_STD[]={
+    "UNUSED","ESC","1","2","3","4","5","6","7","8","9","0","_","=","BS","TAB","q","w","e","r","t",
+    "y","u","i","o","p","[","]","Enter","CNTL","a","s","d","f","g","h","j","k","l",";","'","`","LSHFT",
+    "\\","z","x","c","v","b","n","m",",",".","/","RSHFT","*","ALT"," ","CAP","F1","F2","F3","F4","F5","F6",
+    "F7","F8","F9","F10","NUML","CtrlBreak","Home","Up","PgUp","-","Left","Center","Right","+","End","Down","PgDn","Ins","Del","Unknown","Unknown","Unknown","F11","F12","Unkown","Unknown","Windows","Unknown","Menu"
+};
+//e0 x e0 x -- up down left right  _  表示需要接受两个e0
+//长按无用
+const int Keyboard::KEY_MAP_STD_LEN=sizeof(Keyboard::KEY_MAP_STD)/sizeof(char*);
+Keyboard::Keyboard()
+{
+    
+    
+}
+
+Keyboard::~Keyboard(){
+    
+}
+void Keyboard::waitToWrite()
+{
+    while(this->isBusy());
+}
+const char* Keyboard::getAsciiChar(unsigned char code)
+{
+    if(code<=Keyboard::KEY_MAP_STD_LEN)
+        return Keyboard::KEY_MAP_STD[code];
+    else
+        return "Exceed.";
 }
 
 #endif

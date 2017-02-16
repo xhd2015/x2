@@ -43,8 +43,8 @@ int __intAddresses[]={
      int0x1f,//---- 32
     
     
-     int0x20,
-     intDefault,
+     -1,//单独设置
+     -1,
      intDefault,
      intDefault,
      int0x24,
@@ -495,13 +495,14 @@ namespace Int_0x20{
     //GDT[5] -- task0
     //GDT[9] -- task1
 }
-
-void int0x20()
+__asm__(
+".text \n\t"  //如果是第一个函数，就要将其汇编进入.text中
+".global _int0x20 \n\t"
+"_int0x20:\n\t "
+"pusha \n\t"
+);
+void _int0x20()  //保护现场只能发生在堆栈框架之前，所以编写中断有所不同
 {
-    //保护现场   
-   __asm__(
-        "pusha \n\t"
-    );
     //CALL_INT_3(0x24,c,SEG_CURRENT,b,"int 0x20.\n",d,Util::MODE_COMMON);
     Util::insertMark(0x55520);
     IO_8259A p1;
@@ -515,11 +516,89 @@ void int0x20()
         __asm__("ljmp $0b101000,$0 \n\t");
     }
     
-    __asm__("popa \n\t");
-    Util::intReturn();
+    __asm__(
+    "leave \n\t"
+    "popa \n\t"
+    "iret \n\t"
+    );
 }
 //==========================================
 
+//=================中断处理程序: 33=========
+/**
+*键盘中断,直到发送EOI，键盘中断都不会再响应，在这之前处理是安全的。
+*
+*/
+__asm__(
+".text \n\t"  //如果是第一个函数，就要将其汇编进入.text中
+".global _int0x21 \n\t"
+"_int0x21:\n\t "
+"pusha \n\t"
+);
+void _int0x21()
+{
+    static int times=0;
+    static int lastx=0,lasty=0;
+    static char save[10]={0};
+    static unsigned char lasts[4];
+    static unsigned int index=-1;
+    Keyboard k;
+    
+    
+    Printer p(10,0,8,80);
+    p.setPos(lastx,lasty);
+    /*
+    times++;
+    p.putsz("int 0x21:");
+    Util::digitToStr(save,sizeof(save),times);
+    p.putsz(save);
+    p.putc('\n');
+    */
+    
+    unsigned char code=k.readScanCode();
+    
+    //==fordebug
+    
+    
+    Util::digitToStr(save,sizeof(save),code);
+   
+    if((code & 0x80) == 0)
+    { 
+        p.putsz(save);
+        p.putsz("->");
+        p.putsz(k.getAsciiChar(code));
+        p.putsz("  ");
+    }else{
+        if(code == 0xe1) //还需要接受两个，然后合成一个
+        {
+            
+        }else if(code==0xe0){ //还需要接受一个
+            
+        }
+        Util::digitToHex(save,sizeof(save),code);
+        p.putsz(save);
+        p.putsz("  ");
+    }
+    
+   
+    
+
+    
+    lastx=p.getX();
+    lasty=p.getY();
+    //允许键盘工作
+    k.disable();
+    k.enable(); //先禁止，再允许
+    
+    IO_8259A p1;
+    p1.sendOCW2(0,0x20);
+    __asm__(
+    "leave \n\t"
+    "popa \n\t"
+    "iret \n\t"
+    );
+}
+//==========================================
 //============中断处理程序: 36============
 /**
 *打印字符串

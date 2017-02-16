@@ -896,14 +896,15 @@ __ZN18SelectorDescriptor13writeToMemoryEii:
 	subl	$56, %esp
 	movl	%ecx, -12(%ebp)
 	movl	-12(%ebp), %eax
-	movl	%eax, %edx
+	movl	%eax, %ecx
+	movl	__ZN4Util11SEG_CURRENTE, %eax
 	movl	$8, 16(%esp)
-	movl	12(%ebp), %eax
-	movl	%eax, 12(%esp)
-	movl	8(%ebp), %eax
-	movl	%eax, 8(%esp)
-	movl	%edx, 4(%esp)
-	movl	$65536, (%esp)
+	movl	12(%ebp), %edx
+	movl	%edx, 12(%esp)
+	movl	8(%ebp), %edx
+	movl	%edx, 8(%esp)
+	movl	%ecx, 4(%esp)
+	movl	%eax, (%esp)
 	call	__ZN4Util7memcopyEiiiii
 	nop
 	leave
@@ -916,9 +917,11 @@ __ZN18SelectorDescriptor10fromMemoryERS_ii:
 	movl	%esp, %ebp
 	subl	$40, %esp
 	movl	8(%ebp), %eax
+	movl	%eax, %edx
+	movl	__ZN4Util11SEG_CURRENTE, %eax
 	movl	$8, 16(%esp)
-	movl	%eax, 12(%esp)
-	movl	$65536, 8(%esp)
+	movl	%edx, 12(%esp)
+	movl	%eax, 8(%esp)
 	movl	16(%ebp), %eax
 	movl	%eax, 4(%esp)
 	movl	12(%ebp), %eax

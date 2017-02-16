@@ -39,8 +39,8 @@ ___intAddresses:
 	.long	_int0x1d
 	.long	_int0x1e
 	.long	_int0x1f
-	.long	_int0x20
-	.long	_intDefault
+	.long	-1
+	.long	-1
 	.long	_intDefault
 	.long	_intDefault
 	.long	_int0x24
@@ -82,7 +82,8 @@ _int0x0:
 	call	__ZN4Util7makeSelEiii
 	cwtl
 	movl	%eax, -16(%ebp)
-	cmpl	$65536, -16(%ebp)
+	movl	__ZN4Util11SEG_CURRENTE, %eax
+	cmpl	%eax, -16(%ebp)
 	je	L2
 	movl	-16(%ebp), %eax
 /APP
@@ -99,7 +100,8 @@ L2:
 	movl	%eax, 4(%esp)
 	movl	$LC0, (%esp)
 	call	__ZN4Util8printStrEPKci
-	cmpl	$65536, -16(%ebp)
+	movl	__ZN4Util11SEG_CURRENTE, %eax
+	cmpl	%eax, -16(%ebp)
 	je	L3
 	movl	-12(%ebp), %eax
 /APP
@@ -158,7 +160,8 @@ _int0x1:
 	call	__ZN4Util7makeSelEiii
 	cwtl
 	movl	%eax, -16(%ebp)
-	cmpl	$65536, -16(%ebp)
+	movl	__ZN4Util11SEG_CURRENTE, %eax
+	cmpl	%eax, -16(%ebp)
 	je	L5
 	movl	-16(%ebp), %eax
 /APP
@@ -175,7 +178,8 @@ L5:
 	movl	%eax, 4(%esp)
 	movl	$LC1, (%esp)
 	call	__ZN4Util8printStrEPKci
-	cmpl	$65536, -16(%ebp)
+	movl	__ZN4Util11SEG_CURRENTE, %eax
+	cmpl	%eax, -16(%ebp)
 	je	L6
 	movl	-12(%ebp), %eax
 /APP
@@ -214,7 +218,8 @@ _int0x2:
 	call	__ZN4Util7makeSelEiii
 	cwtl
 	movl	%eax, -16(%ebp)
-	cmpl	$65536, -16(%ebp)
+	movl	__ZN4Util11SEG_CURRENTE, %eax
+	cmpl	%eax, -16(%ebp)
 	je	L8
 	movl	-16(%ebp), %eax
 /APP
@@ -231,7 +236,8 @@ L8:
 	movl	%eax, 4(%esp)
 	movl	$LC2, (%esp)
 	call	__ZN4Util8printStrEPKci
-	cmpl	$65536, -16(%ebp)
+	movl	__ZN4Util11SEG_CURRENTE, %eax
+	cmpl	%eax, -16(%ebp)
 	je	L9
 	movl	-12(%ebp), %eax
 /APP
@@ -270,7 +276,8 @@ _int0x3:
 	call	__ZN4Util7makeSelEiii
 	cwtl
 	movl	%eax, -16(%ebp)
-	cmpl	$65536, -16(%ebp)
+	movl	__ZN4Util11SEG_CURRENTE, %eax
+	cmpl	%eax, -16(%ebp)
 	je	L11
 	movl	-16(%ebp), %eax
 /APP
@@ -287,7 +294,8 @@ L11:
 	movl	%eax, 4(%esp)
 	movl	$LC3, (%esp)
 	call	__ZN4Util8printStrEPKci
-	cmpl	$65536, -16(%ebp)
+	movl	__ZN4Util11SEG_CURRENTE, %eax
+	cmpl	%eax, -16(%ebp)
 	je	L12
 	movl	-12(%ebp), %eax
 /APP
@@ -326,7 +334,8 @@ _int0x4:
 	call	__ZN4Util7makeSelEiii
 	cwtl
 	movl	%eax, -16(%ebp)
-	cmpl	$65536, -16(%ebp)
+	movl	__ZN4Util11SEG_CURRENTE, %eax
+	cmpl	%eax, -16(%ebp)
 	je	L14
 	movl	-16(%ebp), %eax
 /APP
@@ -343,7 +352,8 @@ L14:
 	movl	%eax, 4(%esp)
 	movl	$LC4, (%esp)
 	call	__ZN4Util8printStrEPKci
-	cmpl	$65536, -16(%ebp)
+	movl	__ZN4Util11SEG_CURRENTE, %eax
+	cmpl	%eax, -16(%ebp)
 	je	L15
 	movl	-12(%ebp), %eax
 /APP
@@ -382,7 +392,8 @@ _int0x5:
 	call	__ZN4Util7makeSelEiii
 	cwtl
 	movl	%eax, -16(%ebp)
-	cmpl	$65536, -16(%ebp)
+	movl	__ZN4Util11SEG_CURRENTE, %eax
+	cmpl	%eax, -16(%ebp)
 	je	L17
 	movl	-16(%ebp), %eax
 /APP
@@ -399,7 +410,8 @@ L17:
 	movl	%eax, 4(%esp)
 	movl	$LC5, (%esp)
 	call	__ZN4Util8printStrEPKci
-	cmpl	$65536, -16(%ebp)
+	movl	__ZN4Util11SEG_CURRENTE, %eax
+	cmpl	%eax, -16(%ebp)
 	je	L18
 	movl	-12(%ebp), %eax
 /APP
@@ -438,7 +450,8 @@ _int0x6:
 	call	__ZN4Util7makeSelEiii
 	cwtl
 	movl	%eax, -16(%ebp)
-	cmpl	$65536, -16(%ebp)
+	movl	__ZN4Util11SEG_CURRENTE, %eax
+	cmpl	%eax, -16(%ebp)
 	je	L20
 	movl	-16(%ebp), %eax
 /APP
@@ -455,7 +468,8 @@ L20:
 	movl	%eax, 4(%esp)
 	movl	$LC6, (%esp)
 	call	__ZN4Util8printStrEPKci
-	cmpl	$65536, -16(%ebp)
+	movl	__ZN4Util11SEG_CURRENTE, %eax
+	cmpl	%eax, -16(%ebp)
 	je	L21
 	movl	-12(%ebp), %eax
 /APP
@@ -494,7 +508,8 @@ _int0x7:
 	call	__ZN4Util7makeSelEiii
 	cwtl
 	movl	%eax, -16(%ebp)
-	cmpl	$65536, -16(%ebp)
+	movl	__ZN4Util11SEG_CURRENTE, %eax
+	cmpl	%eax, -16(%ebp)
 	je	L23
 	movl	-16(%ebp), %eax
 /APP
@@ -511,7 +526,8 @@ L23:
 	movl	%eax, 4(%esp)
 	movl	$LC7, (%esp)
 	call	__ZN4Util8printStrEPKci
-	cmpl	$65536, -16(%ebp)
+	movl	__ZN4Util11SEG_CURRENTE, %eax
+	cmpl	%eax, -16(%ebp)
 	je	L24
 	movl	-12(%ebp), %eax
 /APP
@@ -550,7 +566,8 @@ _int0x8:
 	call	__ZN4Util7makeSelEiii
 	cwtl
 	movl	%eax, -16(%ebp)
-	cmpl	$65536, -16(%ebp)
+	movl	__ZN4Util11SEG_CURRENTE, %eax
+	cmpl	%eax, -16(%ebp)
 	je	L26
 	movl	-16(%ebp), %eax
 /APP
@@ -567,7 +584,8 @@ L26:
 	movl	%eax, 4(%esp)
 	movl	$LC8, (%esp)
 	call	__ZN4Util8printStrEPKci
-	cmpl	$65536, -16(%ebp)
+	movl	__ZN4Util11SEG_CURRENTE, %eax
+	cmpl	%eax, -16(%ebp)
 	je	L27
 	movl	-12(%ebp), %eax
 /APP
@@ -602,7 +620,8 @@ _int0x9:
 	call	__ZN4Util7makeSelEiii
 	cwtl
 	movl	%eax, -16(%ebp)
-	cmpl	$65536, -16(%ebp)
+	movl	__ZN4Util11SEG_CURRENTE, %eax
+	cmpl	%eax, -16(%ebp)
 	je	L29
 	movl	-16(%ebp), %eax
 /APP
@@ -619,7 +638,8 @@ L29:
 	movl	%eax, 4(%esp)
 	movl	$LC8, (%esp)
 	call	__ZN4Util8printStrEPKci
-	cmpl	$65536, -16(%ebp)
+	movl	__ZN4Util11SEG_CURRENTE, %eax
+	cmpl	%eax, -16(%ebp)
 	je	L30
 	movl	-12(%ebp), %eax
 /APP
@@ -658,7 +678,8 @@ _int0xa:
 	call	__ZN4Util7makeSelEiii
 	cwtl
 	movl	%eax, -16(%ebp)
-	cmpl	$65536, -16(%ebp)
+	movl	__ZN4Util11SEG_CURRENTE, %eax
+	cmpl	%eax, -16(%ebp)
 	je	L32
 	movl	-16(%ebp), %eax
 /APP
@@ -675,7 +696,8 @@ L32:
 	movl	%eax, 4(%esp)
 	movl	$LC9, (%esp)
 	call	__ZN4Util8printStrEPKci
-	cmpl	$65536, -16(%ebp)
+	movl	__ZN4Util11SEG_CURRENTE, %eax
+	cmpl	%eax, -16(%ebp)
 	je	L33
 	movl	-12(%ebp), %eax
 /APP
@@ -714,7 +736,8 @@ _int0xb:
 	call	__ZN4Util7makeSelEiii
 	cwtl
 	movl	%eax, -16(%ebp)
-	cmpl	$65536, -16(%ebp)
+	movl	__ZN4Util11SEG_CURRENTE, %eax
+	cmpl	%eax, -16(%ebp)
 	je	L35
 	movl	-16(%ebp), %eax
 /APP
@@ -731,7 +754,8 @@ L35:
 	movl	%eax, 4(%esp)
 	movl	$LC10, (%esp)
 	call	__ZN4Util8printStrEPKci
-	cmpl	$65536, -16(%ebp)
+	movl	__ZN4Util11SEG_CURRENTE, %eax
+	cmpl	%eax, -16(%ebp)
 	je	L36
 	movl	-12(%ebp), %eax
 /APP
@@ -770,7 +794,8 @@ _int0xc:
 	call	__ZN4Util7makeSelEiii
 	cwtl
 	movl	%eax, -16(%ebp)
-	cmpl	$65536, -16(%ebp)
+	movl	__ZN4Util11SEG_CURRENTE, %eax
+	cmpl	%eax, -16(%ebp)
 	je	L38
 	movl	-16(%ebp), %eax
 /APP
@@ -787,7 +812,8 @@ L38:
 	movl	%eax, 4(%esp)
 	movl	$LC11, (%esp)
 	call	__ZN4Util8printStrEPKci
-	cmpl	$65536, -16(%ebp)
+	movl	__ZN4Util11SEG_CURRENTE, %eax
+	cmpl	%eax, -16(%ebp)
 	je	L39
 	movl	-12(%ebp), %eax
 /APP
@@ -848,7 +874,8 @@ _int0xd:
 	call	__ZN4Util7makeSelEiii
 	cwtl
 	movl	%eax, -32(%ebp)
-	cmpl	$65536, -32(%ebp)
+	movl	__ZN4Util11SEG_CURRENTE, %eax
+	cmpl	%eax, -32(%ebp)
 	je	L41
 	movl	-32(%ebp), %eax
 /APP
@@ -865,7 +892,8 @@ L41:
 	movl	%eax, 4(%esp)
 	movl	$LC12, (%esp)
 	call	__ZN4Util8printStrEPKci
-	cmpl	$65536, -32(%ebp)
+	movl	__ZN4Util11SEG_CURRENTE, %eax
+	cmpl	%eax, -32(%ebp)
 	je	L42
 	movl	-12(%ebp), %eax
 /APP
@@ -907,7 +935,8 @@ _int0xe:
 	call	__ZN4Util7makeSelEiii
 	cwtl
 	movl	%eax, -16(%ebp)
-	cmpl	$65536, -16(%ebp)
+	movl	__ZN4Util11SEG_CURRENTE, %eax
+	cmpl	%eax, -16(%ebp)
 	je	L44
 	movl	-16(%ebp), %eax
 /APP
@@ -924,7 +953,8 @@ L44:
 	movl	%eax, 4(%esp)
 	movl	$LC13, (%esp)
 	call	__ZN4Util8printStrEPKci
-	cmpl	$65536, -16(%ebp)
+	movl	__ZN4Util11SEG_CURRENTE, %eax
+	cmpl	%eax, -16(%ebp)
 	je	L45
 	movl	-12(%ebp), %eax
 /APP
@@ -963,7 +993,8 @@ _int0xf:
 	call	__ZN4Util7makeSelEiii
 	cwtl
 	movl	%eax, -16(%ebp)
-	cmpl	$65536, -16(%ebp)
+	movl	__ZN4Util11SEG_CURRENTE, %eax
+	cmpl	%eax, -16(%ebp)
 	je	L47
 	movl	-16(%ebp), %eax
 /APP
@@ -980,7 +1011,8 @@ L47:
 	movl	%eax, 4(%esp)
 	movl	$LC14, (%esp)
 	call	__ZN4Util8printStrEPKci
-	cmpl	$65536, -16(%ebp)
+	movl	__ZN4Util11SEG_CURRENTE, %eax
+	cmpl	%eax, -16(%ebp)
 	je	L48
 	movl	-12(%ebp), %eax
 /APP
@@ -1019,7 +1051,8 @@ _int0x10:
 	call	__ZN4Util7makeSelEiii
 	cwtl
 	movl	%eax, -16(%ebp)
-	cmpl	$65536, -16(%ebp)
+	movl	__ZN4Util11SEG_CURRENTE, %eax
+	cmpl	%eax, -16(%ebp)
 	je	L50
 	movl	-16(%ebp), %eax
 /APP
@@ -1036,7 +1069,8 @@ L50:
 	movl	%eax, 4(%esp)
 	movl	$LC15, (%esp)
 	call	__ZN4Util8printStrEPKci
-	cmpl	$65536, -16(%ebp)
+	movl	__ZN4Util11SEG_CURRENTE, %eax
+	cmpl	%eax, -16(%ebp)
 	je	L51
 	movl	-12(%ebp), %eax
 /APP
@@ -1075,7 +1109,8 @@ _int0x11:
 	call	__ZN4Util7makeSelEiii
 	cwtl
 	movl	%eax, -16(%ebp)
-	cmpl	$65536, -16(%ebp)
+	movl	__ZN4Util11SEG_CURRENTE, %eax
+	cmpl	%eax, -16(%ebp)
 	je	L53
 	movl	-16(%ebp), %eax
 /APP
@@ -1092,7 +1127,8 @@ L53:
 	movl	%eax, 4(%esp)
 	movl	$LC16, (%esp)
 	call	__ZN4Util8printStrEPKci
-	cmpl	$65536, -16(%ebp)
+	movl	__ZN4Util11SEG_CURRENTE, %eax
+	cmpl	%eax, -16(%ebp)
 	je	L54
 	movl	-12(%ebp), %eax
 /APP
@@ -1131,7 +1167,8 @@ _int0x12:
 	call	__ZN4Util7makeSelEiii
 	cwtl
 	movl	%eax, -16(%ebp)
-	cmpl	$65536, -16(%ebp)
+	movl	__ZN4Util11SEG_CURRENTE, %eax
+	cmpl	%eax, -16(%ebp)
 	je	L56
 	movl	-16(%ebp), %eax
 /APP
@@ -1148,7 +1185,8 @@ L56:
 	movl	%eax, 4(%esp)
 	movl	$LC17, (%esp)
 	call	__ZN4Util8printStrEPKci
-	cmpl	$65536, -16(%ebp)
+	movl	__ZN4Util11SEG_CURRENTE, %eax
+	cmpl	%eax, -16(%ebp)
 	je	L57
 	movl	-12(%ebp), %eax
 /APP
@@ -1187,7 +1225,8 @@ _int0x13:
 	call	__ZN4Util7makeSelEiii
 	cwtl
 	movl	%eax, -16(%ebp)
-	cmpl	$65536, -16(%ebp)
+	movl	__ZN4Util11SEG_CURRENTE, %eax
+	cmpl	%eax, -16(%ebp)
 	je	L59
 	movl	-16(%ebp), %eax
 /APP
@@ -1204,7 +1243,8 @@ L59:
 	movl	%eax, 4(%esp)
 	movl	$LC18, (%esp)
 	call	__ZN4Util8printStrEPKci
-	cmpl	$65536, -16(%ebp)
+	movl	__ZN4Util11SEG_CURRENTE, %eax
+	cmpl	%eax, -16(%ebp)
 	je	L60
 	movl	-12(%ebp), %eax
 /APP
@@ -1243,7 +1283,8 @@ _int0x14:
 	call	__ZN4Util7makeSelEiii
 	cwtl
 	movl	%eax, -16(%ebp)
-	cmpl	$65536, -16(%ebp)
+	movl	__ZN4Util11SEG_CURRENTE, %eax
+	cmpl	%eax, -16(%ebp)
 	je	L62
 	movl	-16(%ebp), %eax
 /APP
@@ -1260,7 +1301,8 @@ L62:
 	movl	%eax, 4(%esp)
 	movl	$LC19, (%esp)
 	call	__ZN4Util8printStrEPKci
-	cmpl	$65536, -16(%ebp)
+	movl	__ZN4Util11SEG_CURRENTE, %eax
+	cmpl	%eax, -16(%ebp)
 	je	L63
 	movl	-12(%ebp), %eax
 /APP
@@ -1299,7 +1341,8 @@ _int0x15:
 	call	__ZN4Util7makeSelEiii
 	cwtl
 	movl	%eax, -16(%ebp)
-	cmpl	$65536, -16(%ebp)
+	movl	__ZN4Util11SEG_CURRENTE, %eax
+	cmpl	%eax, -16(%ebp)
 	je	L65
 	movl	-16(%ebp), %eax
 /APP
@@ -1316,7 +1359,8 @@ L65:
 	movl	%eax, 4(%esp)
 	movl	$LC20, (%esp)
 	call	__ZN4Util8printStrEPKci
-	cmpl	$65536, -16(%ebp)
+	movl	__ZN4Util11SEG_CURRENTE, %eax
+	cmpl	%eax, -16(%ebp)
 	je	L66
 	movl	-12(%ebp), %eax
 /APP
@@ -1355,7 +1399,8 @@ _int0x16:
 	call	__ZN4Util7makeSelEiii
 	cwtl
 	movl	%eax, -16(%ebp)
-	cmpl	$65536, -16(%ebp)
+	movl	__ZN4Util11SEG_CURRENTE, %eax
+	cmpl	%eax, -16(%ebp)
 	je	L68
 	movl	-16(%ebp), %eax
 /APP
@@ -1372,7 +1417,8 @@ L68:
 	movl	%eax, 4(%esp)
 	movl	$LC21, (%esp)
 	call	__ZN4Util8printStrEPKci
-	cmpl	$65536, -16(%ebp)
+	movl	__ZN4Util11SEG_CURRENTE, %eax
+	cmpl	%eax, -16(%ebp)
 	je	L69
 	movl	-12(%ebp), %eax
 /APP
@@ -1411,7 +1457,8 @@ _int0x17:
 	call	__ZN4Util7makeSelEiii
 	cwtl
 	movl	%eax, -16(%ebp)
-	cmpl	$65536, -16(%ebp)
+	movl	__ZN4Util11SEG_CURRENTE, %eax
+	cmpl	%eax, -16(%ebp)
 	je	L71
 	movl	-16(%ebp), %eax
 /APP
@@ -1428,7 +1475,8 @@ L71:
 	movl	%eax, 4(%esp)
 	movl	$LC22, (%esp)
 	call	__ZN4Util8printStrEPKci
-	cmpl	$65536, -16(%ebp)
+	movl	__ZN4Util11SEG_CURRENTE, %eax
+	cmpl	%eax, -16(%ebp)
 	je	L72
 	movl	-12(%ebp), %eax
 /APP
@@ -1467,7 +1515,8 @@ _int0x18:
 	call	__ZN4Util7makeSelEiii
 	cwtl
 	movl	%eax, -16(%ebp)
-	cmpl	$65536, -16(%ebp)
+	movl	__ZN4Util11SEG_CURRENTE, %eax
+	cmpl	%eax, -16(%ebp)
 	je	L74
 	movl	-16(%ebp), %eax
 /APP
@@ -1484,7 +1533,8 @@ L74:
 	movl	%eax, 4(%esp)
 	movl	$LC23, (%esp)
 	call	__ZN4Util8printStrEPKci
-	cmpl	$65536, -16(%ebp)
+	movl	__ZN4Util11SEG_CURRENTE, %eax
+	cmpl	%eax, -16(%ebp)
 	je	L75
 	movl	-12(%ebp), %eax
 /APP
@@ -1523,7 +1573,8 @@ _int0x19:
 	call	__ZN4Util7makeSelEiii
 	cwtl
 	movl	%eax, -16(%ebp)
-	cmpl	$65536, -16(%ebp)
+	movl	__ZN4Util11SEG_CURRENTE, %eax
+	cmpl	%eax, -16(%ebp)
 	je	L77
 	movl	-16(%ebp), %eax
 /APP
@@ -1540,7 +1591,8 @@ L77:
 	movl	%eax, 4(%esp)
 	movl	$LC24, (%esp)
 	call	__ZN4Util8printStrEPKci
-	cmpl	$65536, -16(%ebp)
+	movl	__ZN4Util11SEG_CURRENTE, %eax
+	cmpl	%eax, -16(%ebp)
 	je	L78
 	movl	-12(%ebp), %eax
 /APP
@@ -1579,7 +1631,8 @@ _int0x1a:
 	call	__ZN4Util7makeSelEiii
 	cwtl
 	movl	%eax, -16(%ebp)
-	cmpl	$65536, -16(%ebp)
+	movl	__ZN4Util11SEG_CURRENTE, %eax
+	cmpl	%eax, -16(%ebp)
 	je	L80
 	movl	-16(%ebp), %eax
 /APP
@@ -1596,7 +1649,8 @@ L80:
 	movl	%eax, 4(%esp)
 	movl	$LC25, (%esp)
 	call	__ZN4Util8printStrEPKci
-	cmpl	$65536, -16(%ebp)
+	movl	__ZN4Util11SEG_CURRENTE, %eax
+	cmpl	%eax, -16(%ebp)
 	je	L81
 	movl	-12(%ebp), %eax
 /APP
@@ -1635,7 +1689,8 @@ _int0x1b:
 	call	__ZN4Util7makeSelEiii
 	cwtl
 	movl	%eax, -16(%ebp)
-	cmpl	$65536, -16(%ebp)
+	movl	__ZN4Util11SEG_CURRENTE, %eax
+	cmpl	%eax, -16(%ebp)
 	je	L83
 	movl	-16(%ebp), %eax
 /APP
@@ -1652,7 +1707,8 @@ L83:
 	movl	%eax, 4(%esp)
 	movl	$LC26, (%esp)
 	call	__ZN4Util8printStrEPKci
-	cmpl	$65536, -16(%ebp)
+	movl	__ZN4Util11SEG_CURRENTE, %eax
+	cmpl	%eax, -16(%ebp)
 	je	L84
 	movl	-12(%ebp), %eax
 /APP
@@ -1691,7 +1747,8 @@ _int0x1c:
 	call	__ZN4Util7makeSelEiii
 	cwtl
 	movl	%eax, -16(%ebp)
-	cmpl	$65536, -16(%ebp)
+	movl	__ZN4Util11SEG_CURRENTE, %eax
+	cmpl	%eax, -16(%ebp)
 	je	L86
 	movl	-16(%ebp), %eax
 /APP
@@ -1708,7 +1765,8 @@ L86:
 	movl	%eax, 4(%esp)
 	movl	$LC27, (%esp)
 	call	__ZN4Util8printStrEPKci
-	cmpl	$65536, -16(%ebp)
+	movl	__ZN4Util11SEG_CURRENTE, %eax
+	cmpl	%eax, -16(%ebp)
 	je	L87
 	movl	-12(%ebp), %eax
 /APP
@@ -1747,7 +1805,8 @@ _int0x1d:
 	call	__ZN4Util7makeSelEiii
 	cwtl
 	movl	%eax, -16(%ebp)
-	cmpl	$65536, -16(%ebp)
+	movl	__ZN4Util11SEG_CURRENTE, %eax
+	cmpl	%eax, -16(%ebp)
 	je	L89
 	movl	-16(%ebp), %eax
 /APP
@@ -1764,7 +1823,8 @@ L89:
 	movl	%eax, 4(%esp)
 	movl	$LC28, (%esp)
 	call	__ZN4Util8printStrEPKci
-	cmpl	$65536, -16(%ebp)
+	movl	__ZN4Util11SEG_CURRENTE, %eax
+	cmpl	%eax, -16(%ebp)
 	je	L90
 	movl	-12(%ebp), %eax
 /APP
@@ -1803,7 +1863,8 @@ _int0x1e:
 	call	__ZN4Util7makeSelEiii
 	cwtl
 	movl	%eax, -16(%ebp)
-	cmpl	$65536, -16(%ebp)
+	movl	__ZN4Util11SEG_CURRENTE, %eax
+	cmpl	%eax, -16(%ebp)
 	je	L92
 	movl	-16(%ebp), %eax
 /APP
@@ -1820,7 +1881,8 @@ L92:
 	movl	%eax, 4(%esp)
 	movl	$LC29, (%esp)
 	call	__ZN4Util8printStrEPKci
-	cmpl	$65536, -16(%ebp)
+	movl	__ZN4Util11SEG_CURRENTE, %eax
+	cmpl	%eax, -16(%ebp)
 	je	L93
 	movl	-12(%ebp), %eax
 /APP
@@ -1859,7 +1921,8 @@ _int0x1f:
 	call	__ZN4Util7makeSelEiii
 	cwtl
 	movl	%eax, -16(%ebp)
-	cmpl	$65536, -16(%ebp)
+	movl	__ZN4Util11SEG_CURRENTE, %eax
+	cmpl	%eax, -16(%ebp)
 	je	L95
 	movl	-16(%ebp), %eax
 /APP
@@ -1876,7 +1939,8 @@ L95:
 	movl	%eax, 4(%esp)
 	movl	$LC30, (%esp)
 	call	__ZN4Util8printStrEPKci
-	cmpl	$65536, -16(%ebp)
+	movl	__ZN4Util11SEG_CURRENTE, %eax
+	cmpl	%eax, -16(%ebp)
 	je	L96
 	movl	-12(%ebp), %eax
 /APP
@@ -1903,19 +1967,20 @@ L96:
 	.align 4
 __ZN8Int_0x207currentE:
 	.space 4
+/APP
+	.text 
+	.global _int0x20 
+	_int0x20:
+	 pusha 
+	
+/NO_APP
 	.text
-	.globl	_int0x20
-	.def	_int0x20;	.scl	2;	.type	32;	.endef
-_int0x20:
+	.globl	__Z8_int0x20v
+	.def	__Z8_int0x20v;	.scl	2;	.type	32;	.endef
+__Z8_int0x20v:
 	pushl	%ebp
 	movl	%esp, %ebp
 	subl	$40, %esp
-/APP
- # 506 "interrupts.cpp" 1
-	pusha 
-	
- # 0 "" 2
-/NO_APP
 	movl	$349472, (%esp)
 	call	__ZN4Util10insertMarkEi
 	leal	-9(%ebp), %eax
@@ -1932,7 +1997,7 @@ _int0x20:
 	jne	L98
 	movl	$1, __ZN8Int_0x207currentE
 /APP
- # 514 "interrupts.cpp" 1
+ # 515 "interrupts.cpp" 1
 	ljmp $0b1001000,$0 
 	
  # 0 "" 2
@@ -1941,19 +2006,16 @@ _int0x20:
 L98:
 	movl	$0, __ZN8Int_0x207currentE
 /APP
- # 517 "interrupts.cpp" 1
+ # 518 "interrupts.cpp" 1
 	ljmp $0b101000,$0 
 	
  # 0 "" 2
 /NO_APP
 L99:
 /APP
- # 520 "interrupts.cpp" 1
-	popa 
-	
- # 0 "" 2
- # 225 "libx2.h" 1
+ # 525 "interrupts.cpp" 1
 	leave 
+	popa 
 	iret 
 	
  # 0 "" 2
@@ -1961,6 +2023,199 @@ L99:
 	leal	-9(%ebp), %eax
 	movl	%eax, %ecx
 	call	__ZN8IO_8259AD1Ev
+	nop
+	leave
+	ret
+/APP
+	.text 
+	.global _int0x21 
+	_int0x21:
+	 pusha 
+	
+	.section .rdata,"dr"
+LC31:
+	.ascii "->\0"
+LC32:
+	.ascii "  \0"
+/NO_APP
+	.text
+	.globl	__Z8_int0x21v
+	.def	__Z8_int0x21v;	.scl	2;	.type	32;	.endef
+__Z8_int0x21v:
+	pushl	%ebp
+	movl	%esp, %ebp
+	subl	$136, %esp
+	leal	-64(%ebp), %eax
+	movl	%eax, %ecx
+	call	__ZN8KeyboardC1Ev
+	movl	__ZN4Util11MODE_COMMONE, %edx
+	leal	-92(%ebp), %eax
+	movl	%edx, 16(%esp)
+	movl	$80, 12(%esp)
+	movl	$8, 8(%esp)
+	movl	$0, 4(%esp)
+	movl	$10, (%esp)
+	movl	%eax, %ecx
+	call	__ZN7PrinterC1Ejjjji
+	subl	$20, %esp
+	movl	__ZZ8_int0x21vE5lasty, %ecx
+	movl	__ZZ8_int0x21vE5lastx, %edx
+	leal	-92(%ebp), %eax
+	movl	%ecx, 4(%esp)
+	movl	%edx, (%esp)
+	movl	%eax, %ecx
+	call	__ZN7Printer6setPosEii
+	subl	$8, %esp
+	movl	__ZN8Keyboard9PORT_DATAE, %eax
+	movl	%eax, -16(%ebp)
+	movl	-16(%ebp), %eax
+	movl	%eax, %edx
+/APP
+ # 354 "libx2.h" 1
+	inb %dx,%al 
+	
+ # 0 "" 2
+/NO_APP
+	movl	%eax, -20(%ebp)
+	movl	-20(%ebp), %eax
+	movb	%al, -9(%ebp)
+	movzbl	-9(%ebp), %eax
+	movl	%eax, 8(%esp)
+	movl	$10, 4(%esp)
+	movl	$__ZZ8_int0x21vE4save, (%esp)
+	call	__ZN4Util10digitToStrEPcji
+	movzbl	-9(%ebp), %eax
+	testb	%al, %al
+	js	L103
+	leal	-92(%ebp), %eax
+	movl	$__ZZ8_int0x21vE4save, (%esp)
+	movl	%eax, %ecx
+	call	__ZN7Printer5putszEPc
+	subl	$4, %esp
+	leal	-92(%ebp), %eax
+	movl	$LC31, (%esp)
+	movl	%eax, %ecx
+	call	__ZN7Printer5putszEPc
+	subl	$4, %esp
+	movzbl	-9(%ebp), %edx
+	leal	-64(%ebp), %eax
+	movl	%edx, (%esp)
+	movl	%eax, %ecx
+	call	__ZN8Keyboard12getAsciiCharEh
+	subl	$4, %esp
+	movl	%eax, %edx
+	leal	-92(%ebp), %eax
+	movl	%edx, (%esp)
+	movl	%eax, %ecx
+	call	__ZN7Printer5putszEPc
+	subl	$4, %esp
+	leal	-92(%ebp), %eax
+	movl	$LC32, (%esp)
+	movl	%eax, %ecx
+	call	__ZN7Printer5putszEPc
+	subl	$4, %esp
+	jmp	L104
+L103:
+	movzbl	-9(%ebp), %eax
+	movl	%eax, 8(%esp)
+	movl	$10, 4(%esp)
+	movl	$__ZZ8_int0x21vE4save, (%esp)
+	call	__ZN4Util10digitToHexEPcjj
+	leal	-92(%ebp), %eax
+	movl	$__ZZ8_int0x21vE4save, (%esp)
+	movl	%eax, %ecx
+	call	__ZN7Printer5putszEPc
+	subl	$4, %esp
+	leal	-92(%ebp), %eax
+	movl	$LC32, (%esp)
+	movl	%eax, %ecx
+	call	__ZN7Printer5putszEPc
+	subl	$4, %esp
+L104:
+	movl	-76(%ebp), %eax
+	movl	%eax, __ZZ8_int0x21vE5lastx
+	movl	-72(%ebp), %eax
+	movl	%eax, __ZZ8_int0x21vE5lasty
+	movl	__ZN8Keyboard8PORT_PPIE, %eax
+	movl	%eax, -44(%ebp)
+	movl	-44(%ebp), %eax
+	movl	%eax, %edx
+/APP
+ # 354 "libx2.h" 1
+	inb %dx,%al 
+	
+ # 0 "" 2
+/NO_APP
+	movl	%eax, -48(%ebp)
+	movl	-48(%ebp), %eax
+	movl	%eax, -52(%ebp)
+	movl	-52(%ebp), %eax
+	orb	$-128, %al
+	movl	%eax, %edx
+	movl	__ZN8Keyboard8PORT_PPIE, %eax
+	movl	%eax, -56(%ebp)
+	movl	%edx, -60(%ebp)
+	movl	-56(%ebp), %edx
+	movl	-60(%ebp), %eax
+/APP
+ # 344 "libx2.h" 1
+	outb %al,%dx 
+	
+ # 0 "" 2
+/NO_APP
+	movl	__ZN8Keyboard8PORT_PPIE, %eax
+	movl	%eax, -24(%ebp)
+	movl	-24(%ebp), %eax
+	movl	%eax, %edx
+/APP
+ # 354 "libx2.h" 1
+	inb %dx,%al 
+	
+ # 0 "" 2
+/NO_APP
+	movl	%eax, -28(%ebp)
+	movl	-28(%ebp), %eax
+	movl	%eax, -32(%ebp)
+	movl	-32(%ebp), %eax
+	andl	$127, %eax
+	movl	%eax, %edx
+	movl	__ZN8Keyboard8PORT_PPIE, %eax
+	movl	%eax, -36(%ebp)
+	movl	%edx, -40(%ebp)
+	movl	-36(%ebp), %edx
+	movl	-40(%ebp), %eax
+/APP
+ # 344 "libx2.h" 1
+	outb %al,%dx 
+	
+ # 0 "" 2
+/NO_APP
+	leal	-93(%ebp), %eax
+	movl	%eax, %ecx
+	call	__ZN8IO_8259AC1Ev
+	leal	-93(%ebp), %eax
+	movl	$32, 4(%esp)
+	movl	$0, (%esp)
+	movl	%eax, %ecx
+	call	__ZN8IO_8259A8sendOCW2Eii
+	subl	$8, %esp
+/APP
+ # 601 "interrupts.cpp" 1
+	leave 
+	popa 
+	iret 
+	
+ # 0 "" 2
+/NO_APP
+	leal	-93(%ebp), %eax
+	movl	%eax, %ecx
+	call	__ZN8IO_8259AD1Ev
+	leal	-92(%ebp), %eax
+	movl	%eax, %ecx
+	call	__ZN7PrinterD1Ev
+	leal	-64(%ebp), %eax
+	movl	%eax, %ecx
+	call	__ZN8KeyboardD1Ev
 	nop
 	leave
 	ret
@@ -1979,11 +2234,12 @@ _int0x24:
 	movl	%eax, -20(%ebp)
 	movl	-12(%ebp), %eax
 	movl	%eax, -24(%ebp)
-	cmpl	$65536, -24(%ebp)
-	je	L101
+	movl	__ZN4Util11SEG_CURRENTE, %eax
+	cmpl	%eax, -24(%ebp)
+	je	L110
 	movl	-24(%ebp), %eax
 /APP
- # 181 "libx2.h" 1
+ # 287 "libx2.h" 1
 	mov %ds,%bx 
 	mov %ax,%ds 
 	
@@ -1991,7 +2247,7 @@ _int0x24:
 /NO_APP
 	movl	%ebx, %eax
 	movl	%eax, -36(%ebp)
-L101:
+L110:
 	movl	-16(%ebp), %eax
 	movl	-20(%ebp), %edx
 	movl	%edx, 4(%esp)
@@ -2001,18 +2257,19 @@ L101:
 	movl	-12(%ebp), %edx
 	movl	%edx, -28(%ebp)
 	movl	%eax, -32(%ebp)
-	cmpl	$65536, -28(%ebp)
-	je	L102
+	movl	__ZN4Util11SEG_CURRENTE, %eax
+	cmpl	%eax, -28(%ebp)
+	je	L111
 	movl	-32(%ebp), %eax
 /APP
- # 188 "libx2.h" 1
+ # 294 "libx2.h" 1
 	mov %ax,%ds 
 	
  # 0 "" 2
 /NO_APP
-L102:
+L111:
 /APP
- # 225 "libx2.h" 1
+ # 331 "libx2.h" 1
 	leave 
 	iret 
 	
@@ -2029,21 +2286,21 @@ _int0x25:
 	pushl	%ebp
 	movl	%esp, %ebp
 /APP
- # 560 "interrupts.cpp" 1
+ # 639 "interrupts.cpp" 1
 	pusha 
 	
  # 0 "" 2
- # 565 "interrupts.cpp" 1
+ # 644 "interrupts.cpp" 1
 	mov 4*3(%ebp),%eax 
 	or $0x200,%eax 
 	mov %eax,4*3(%ebp) 
 	
  # 0 "" 2
- # 566 "interrupts.cpp" 1
+ # 645 "interrupts.cpp" 1
 	popa 
 	
  # 0 "" 2
- # 567 "interrupts.cpp" 1
+ # 646 "interrupts.cpp" 1
 	leave 
 	iret 
 	
@@ -2053,7 +2310,7 @@ _int0x25:
 	popl	%ebp
 	ret
 	.section .rdata,"dr"
-LC31:
+LC33:
 	.ascii "Default int process called.\12\0"
 	.text
 	.globl	_intDefault
@@ -2071,11 +2328,12 @@ _intDefault:
 	movl	%eax, -12(%ebp)
 	movl	-12(%ebp), %eax
 	movl	%eax, -16(%ebp)
-	cmpl	$65536, -16(%ebp)
-	je	L105
+	movl	__ZN4Util11SEG_CURRENTE, %eax
+	cmpl	%eax, -16(%ebp)
+	je	L114
 	movl	-16(%ebp), %eax
 /APP
- # 181 "libx2.h" 1
+ # 287 "libx2.h" 1
 	mov %ds,%bx 
 	mov %ax,%ds 
 	
@@ -2083,29 +2341,30 @@ _intDefault:
 /NO_APP
 	movl	%ebx, %eax
 	movl	%eax, -28(%ebp)
-L105:
+L114:
 	movl	__ZN4Util11MODE_COMMONE, %eax
 	movl	%eax, 4(%esp)
-	movl	$LC31, (%esp)
+	movl	$LC33, (%esp)
 	call	__ZN4Util8printStrEPKci
 	movl	-28(%ebp), %eax
 	movl	-12(%ebp), %edx
 	movl	%edx, -20(%ebp)
 	movl	%eax, -24(%ebp)
-	cmpl	$65536, -20(%ebp)
-	je	L106
+	movl	__ZN4Util11SEG_CURRENTE, %eax
+	cmpl	%eax, -20(%ebp)
+	je	L115
 	movl	-24(%ebp), %eax
 /APP
- # 188 "libx2.h" 1
+ # 294 "libx2.h" 1
 	mov %ax,%ds 
 	
  # 0 "" 2
 /NO_APP
-L106:
+L115:
 	movl	$354185, (%esp)
 	call	__ZN4Util10insertMarkEi
 /APP
- # 225 "libx2.h" 1
+ # 331 "libx2.h" 1
 	leave 
 	iret 
 	
@@ -2116,6 +2375,15 @@ L106:
 	popl	%ebx
 	popl	%ebp
 	ret
+.lcomm __ZZ8_int0x21vE5lasty,4,4
+.lcomm __ZZ8_int0x21vE5lastx,4,4
+.lcomm __ZZ8_int0x21vE4save,10,4
+	.data
+	.align 4
+__ZZ8_int0x21vE5index:
+	.long	-1
+.lcomm __ZZ8_int0x21vE5lasts,4,4
+.lcomm __ZZ8_int0x21vE5times,4,4
 	.ident	"GCC: (GNU) 5.4.0"
 	.def	__ZN4Util10insertMarkEi;	.scl	2;	.type	32;	.endef
 	.def	__ZN4Util7makeSelEiii;	.scl	2;	.type	32;	.endef
@@ -2123,3 +2391,12 @@ L106:
 	.def	__ZN8IO_8259AC1Ev;	.scl	2;	.type	32;	.endef
 	.def	__ZN8IO_8259A8sendOCW2Eii;	.scl	2;	.type	32;	.endef
 	.def	__ZN8IO_8259AD1Ev;	.scl	2;	.type	32;	.endef
+	.def	__ZN8KeyboardC1Ev;	.scl	2;	.type	32;	.endef
+	.def	__ZN7PrinterC1Ejjjji;	.scl	2;	.type	32;	.endef
+	.def	__ZN7Printer6setPosEii;	.scl	2;	.type	32;	.endef
+	.def	__ZN4Util10digitToStrEPcji;	.scl	2;	.type	32;	.endef
+	.def	__ZN7Printer5putszEPc;	.scl	2;	.type	32;	.endef
+	.def	__ZN8Keyboard12getAsciiCharEh;	.scl	2;	.type	32;	.endef
+	.def	__ZN4Util10digitToHexEPcjj;	.scl	2;	.type	32;	.endef
+	.def	__ZN7PrinterD1Ev;	.scl	2;	.type	32;	.endef
+	.def	__ZN8KeyboardD1Ev;	.scl	2;	.type	32;	.endef

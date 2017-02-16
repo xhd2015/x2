@@ -1,12 +1,17 @@
 #ifdef CODE32 //we are now at Protected Mode
 __asm__(".code32 \n\t");
 
+
+
+
 #include "libx2.h"
 #include "Descriptor.h"
 #include "TSS.h"
 #include "interrupts.h"
 #include "def.h"
 #include "IOProgramer.h"
+#include "test.h"
+#include "PMLoader.h"
 
 extern "C" {
     void protectedEntryHolder();
@@ -29,21 +34,25 @@ __asm__(
 );
 
 void protectedEntryHolder() //0x2016
-{
+{      
     Util::clr();
-    Printer stdp(10,20,5,20,Util::MODE_COMMON);//系统的标准打印器
+    Printer stdp(3,30,6,20,Util::MODE_COMMON);//系统的标准打印器
     stdp.clr();
     stdp.putsz("Entered Protected Mode.\n");
+    //从这里插入test的hook
+    stdp.putsz("Running Test.\n");
+    Test test;
+    test.run();
     TSS tss0;//
     
     *(short*)tss0.SS0 = Util::makeSel(4);
     *(int*)tss0.ESP0 = 3*512 - 4;
-    tss0.writeToMemory(SEG_CURRENT,TSS_AREA_START);
+    tss0.writeToMemory(Util::SEG_CURRENT,PMLoader::TSS_AREA_START);
     //SS0:ESP0之后会被int用到，发生到高特权级的中断会切换堆栈
     
     stdp.putsz("tss0 written\n");
-    SegmentDescriptor tss0_descr(TSS_AREA_START,TSS_MIN_SIZE-1,SegmentDescriptor::TYPE_S_TSS_32_AVL,0,0,0);
-    tss0_descr.writeToMemory(SEG_CURRENT,GDT_START+5*8);//TSS0描述符所处的位置
+    SegmentDescriptor tss0_descr(PMLoader::TSS_AREA_START,PMLoader::TSS_MIN_SIZE-1,SegmentDescriptor::TYPE_S_TSS_32_AVL,0,0,0);
+    tss0_descr.writeToMemory(Util::SEG_CURRENT,PMLoader::GDT_START+5*8);//TSS0描述符所处的位置
     Util::ltr(Util::makeSel(5));// load task register
     stdp.putsz("Had ltr done.\n");
     
@@ -53,11 +62,15 @@ void protectedEntryHolder() //0x2016
     for(int i=0;i!=intLen;i++)//根据已经定义的中断表长度设置中断
     {
         reuse_sel.init(0x10,intAddresses[i],SelectorDescriptor::TYPE_INT,SegmentDescriptor::DPL_3);
-        reuse_sel.writeToMemory(SEG_CURRENT,IDT_START+8*i);
+        reuse_sel.writeToMemory(Util::SEG_CURRENT,PMLoader::IDT_START+8*i);
     }
+    reuse_sel.init(0x10,&int0x20,SelectorDescriptor::TYPE_INT,SegmentDescriptor::DPL_3);//重新设置int0x20
+    reuse_sel.writeToMemory(Util::SEG_CURRENT,PMLoader::IDT_START+0x20*8);
+    reuse_sel.init(0x10,&int0x21,SelectorDescriptor::TYPE_INT,SegmentDescriptor::DPL_3);//重新设置int0x20
+    reuse_sel.writeToMemory(Util::SEG_CURRENT,PMLoader::IDT_START+0x21*8);
     
     Util::insertMark(0x12345);
-    CALL_INT_3(0x24,c,SEG_CURRENT,b,"int 0x24 by CPL0.\n",d,Util::MODE_COMMON);
+    CALL_INT_3(0x24,c,Util::SEG_CURRENT,b,"int 0x24 by CPL0.\n",d,Util::MODE_COMMON);
     
     //对8259A两片外部芯片接口编程
     IO_8259A p1;
@@ -69,7 +82,7 @@ void protectedEntryHolder() //0x2016
     p1.sendICW3(1,0x2);
     p1.sendICW4(0,0,0,0,1);
     p1.sendICW4(1,0,0,0,1); //普通全嵌套，非缓冲，非自动结束，用于80x86
-    p1.sendOCW1(0,0xfe);//屏蔽掉除0中断之外的中断
+    p1.sendOCW1(0,0xfc);//屏蔽一些中断
     p1.sendOCW1(1,0xff);
     
     //对8253编程
@@ -81,9 +94,9 @@ void protectedEntryHolder() //0x2016
     SegmentDescriptor ds3(0,0xffff,SegmentDescriptor::TYPE_U_DATA,3);
     SegmentDescriptor ss3(0,4*512,SegmentDescriptor::TYPE_U_STACK,3);
     
-    cs3.writeToMemory(SEG_CURRENT,GDT_START+6*8);
-    ds3.writeToMemory(SEG_CURRENT,GDT_START+7*8);
-    ss3.writeToMemory(SEG_CURRENT,GDT_START+8*8);
+    cs3.writeToMemory(Util::SEG_CURRENT,PMLoader::GDT_START+6*8);
+    ds3.writeToMemory(Util::SEG_CURRENT,PMLoader::GDT_START+7*8);
+    ss3.writeToMemory(Util::SEG_CURRENT,PMLoader::GDT_START+8*8);
     
     
     //一个闲置任务
@@ -96,9 +109,10 @@ void protectedEntryHolder() //0x2016
     *(int*)tss1.ESP0 = 512 - 4;
     *(int*)tss1.EFLAGS =0x202 ;//| 0x100;
     *(short*)tss1.DS = 0x3b;
-    tss1.writeToMemory(SEG_CURRENT,TSS_AREA_START+TSS_MIN_SIZE);
-    SegmentDescriptor tss1_sel(TSS_AREA_START+TSS_MIN_SIZE,TSS_MIN_SIZE-1,SegmentDescriptor::TYPE_S_TSS_32_AVL,0,0,0);
-    tss1_sel.writeToMemory(SEG_CURRENT,GDT_START+9*8);
+    tss1.writeToMemory(Util::SEG_CURRENT,PMLoader::TSS_AREA_START+PMLoader::TSS_MIN_SIZE);
+    SegmentDescriptor tss1_sel(PMLoader::TSS_AREA_START+PMLoader::TSS_MIN_SIZE,PMLoader::TSS_MIN_SIZE-1,SegmentDescriptor::TYPE_S_TSS_32_AVL,0,0,0);
+    tss1_sel.writeToMemory(Util::SEG_CURRENT,PMLoader::GDT_START+9*8);
+    
     
     //允许中断
     Util::sti();
@@ -115,7 +129,7 @@ void afterCPL3()
     "pushw $0x3b \n\t" //数据段ds
     "popw %ds \n\t"
     );
-    CALL_INT_3(0x24,c,SEG_CURRENT,b,"int 0x24 by CPL3.\n",d,Util::MODE_COMMON);//int n
+    CALL_INT_3(0x24,c,Util::SEG_CURRENT,b,"int 0x24 by CPL3.\n",d,Util::MODE_COMMON);//int n
     Util::insertMark(0x55678);
     SimpleCharRotator scr(0,40);//一个简单的task
     scr.run();   
@@ -125,10 +139,9 @@ void forTss1()
     SimpleCharRotator scr(0,50,Util::MODE_COMMON|Util::MODE_FL_ON|Util::MODE_BG_BLUE);
     scr.run();
 }
-
-
 __asm__(
-".section .stack \n\t"
-".org 512*4 \n\t"
+".section .free \n\t"
+". = . + 512*"
 );
+
 #endif

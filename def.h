@@ -2,50 +2,6 @@
 #ifndef __DEF__
 #define __DEF__
 
-//默认检查所有的宏定义
-//定义 NO_CHECK_MACROS 来取消此检查
-#ifndef NO_CHECK_MACROS
-#warning "Checking macros."
-#if ! ( (defined IDT_START) &&\
-        (defined IDT_SIZE) &&\
-        (defined GDT_START) &&\
-        (defined GDT_SIZE)\
-      )
-      #warning "Missing MACROS:IDT or GDT related."
-      #error
-#endif
-#if ! ( (defined CODE16) || (defined CODE32))
-    #warning "None of CODE16 or CODE32 defined."
-    #error
-
-#endif
-
-#ifdef CODE16
-#if ! ( (defined DRIVER) &&\
-        (defined SECSTART) &&\
-        (defined SECNUM) &&\
-        (defined CODESEG) &&\
-        (defined CODEOFF) &&\
-        (defined SEG_CURRENT)\
-      )
-    #warning "Missing MACROS:Protected Loader related."
-    #error
-    
-#endif
-#endif 
-
-#ifdef CODE32
-#if ! ((defined TSS_MIN_SIZE) &&\
-        (defined TSS_AREA_START) &&\
-        (defined TSS_AREA_SIZE))
-    #warning "Missing MACROS:TSS related."
-    #error
-#endif
-
-#endif
-
-#endif //check macros
-
 //====字符串宏
 #define __STR(x) #x
 #define STR(x) __STR(x)
@@ -54,6 +10,7 @@
 //除非特别短的函数 或者必须作为宏来实现的函数
 //否则这样做会增加代码长度
 #define AS_MACRO inline __attribute__((always_inline))
+#define DEPRECATED __attribute__((deprecated))
 
 //==进入死循环
 #define JMP_DIE() __asm__("jmp . \n\t")
@@ -114,7 +71,7 @@
 */
 #define ENTER_DS(seg,saver) \
     int saver;\
-    if(seg!=SEG_CURRENT){\
+    if(seg!=Util::SEG_CURRENT){\
     __asm__ __volatile__(\
     "mov %%ds,%%ebx\n\t"\
     "movw %%ax,%%ds \n\t"\
@@ -124,7 +81,7 @@
     );\
     }
 #define LEAVE_DS(seg,saver) ({\
-    if(seg!=SEG_CURRENT){\
+    if(seg!=Util::SEG_CURRENT){\
     __asm__ __volatile__(\
         "mov %%ax,%%ds \n\t"\
         :\
@@ -139,7 +96,7 @@
     :"=a"(saver)\
     :\
     :);\
-    if(seg==SEG_CURRENT){\
+    if(seg==Util::SEG_CURRENT){\
         __asm__(\
         "push %ds \n\t"\
         "pop %es \n\t"\

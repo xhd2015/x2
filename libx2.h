@@ -15,6 +15,7 @@ public:
     //OFF用 &
     const static int MODE_COMMON,MODE_FL_ON,MODE_FL_OFF,MODE_BG_RED,MODE_BG_GREEN,MODE_BG_BLUE,MODE_BG_WHITE,MODE_BG_RG,MODE_BG_RB,MODE_BG_BG,MODE_BG_BLACK,MODE_FG_RED,MODE_FG_GREEN,MODE_FG_BLUE,MODE_FG_WHITE,MODE_FG_RG,MODE_FG_RB,MODE_FG_BG,MODE_FG_BLACK;
     const static int SCREEN_X,SCREEN_Y;
+    const static int SEG_CURRENT;
     static int videoSelector;
     static void printStr(const char* str_addr,int mode=MODE_COMMON);
     static void printChar(char ch,int mode=MODE_COMMON);//0x7:White_Black_NoFlash
@@ -27,6 +28,10 @@ public:
     static void setw(int seg,int off,int halfWord);
     static void setl(int seg,int off,int word);
     static void clr();
+    /**
+    *使0x92端口的位0从0变化成1从而重启计算机
+    */
+    AS_MACRO static void reboot();
     void test();
     /**
      * copy by byte
@@ -37,8 +42,7 @@ public:
 #ifdef CODE32
 public:
     
-    static short makeSel(int index,int dpl=0b00,int from=0);
-    static void ltr(int sel);
+
     AS_MACRO static void cli();
     AS_MACRO static void sti();
     AS_MACRO static void enterDs(int seg,int& temp);
@@ -46,16 +50,43 @@ public:
     AS_MACRO static void enterEs(int seg,int& temp);
     AS_MACRO static void leaveEs(int temp);
     AS_MACRO static void jmpDie();
+    AS_MACRO static void outb(int port,int data);
+    AS_MACRO static int inb(int port);
+    AS_MACRO static void ltr(int sel);
+    static void lidt(short len,int address);
+    static void lgdt(short len,int address);
+    
+    //=============DEPRECATED===========
+    DEPRECATED AS_MACRO static void pusha();//这些宏通常用于中断处理，但是由于在堆栈框架之内的任何栈操作都是错误的，因此将它们标记为过时的
+    DEPRECATED AS_MACRO static void popa();
+    
+    
+    static short makeSel(int index,int dpl=0b00,int from=0);
+    
     static void changeCPL(int eip,int cs,int eflags,int esp,int ss);
     static int getEflags();
     static char getCPL();
     static char getDPL(int sel);
-    static void outb(int port,int byte);
+    
+    //如果某些功能暂时不能由某个类实现，就在这里实现它们。
+    
+    /**
+    *将数字转换成10进制/16进制的字符串
+    *如果空间不足以存储，就返回0
+    *否则返回实际用的空间
+    */
+    static int digitToStr(char* save,unsigned int space,int n);
+    static int digitToHex(char* save,unsigned int space,unsigned int n);
+    static int strcmp(const char* a,const char *b);
+    static int strlen(const char *a);
+    static int strcopy(const char *src,char *dst,int len);
+    
+    
     
     //========与调用相关的宏
     /**
     *获取一个返回class类型的成员函数的返回对象的参数
-    *如果不明确返回所声明的类型，g++是允许编译通过的。（即什么都不返回）
+    *如果不明确返回所声明的类型，g++是允许编译通过的。但是这样做可能是错误的（即什么都不返回）
     */
     AS_MACRO static void initTarget(void* target);
 
@@ -125,7 +156,7 @@ class Printer{
 public:
     const static int SCREEN_MAX_X,SCREEN_MAX_Y;
 public:
-    Printer(int x0=0,int y0=0,int rows=Printer::SCREEN_MAX_X,int cols=Printer::SCREEN_MAX_Y,int mode=Util::MODE_COMMON);
+    Printer(unsigned int x0=0,unsigned int y0=0,unsigned int rows=Printer::SCREEN_MAX_X,unsigned int cols=Printer::SCREEN_MAX_Y,int mode=Util::MODE_COMMON);
     ~Printer();
     
     void putc(int chr);
@@ -135,10 +166,14 @@ public:
     void move(int n);
     void setMode(int mode);
     void clr();
-    int getPos();
+    AS_MACRO int getX();
+    AS_MACRO int getY();
     
 protected:
-    int x0,y0,cols,rows;
+    int getPos();
+    
+    
+    unsigned int rows,cols,x0,y0;
     int x,y;
     int mode;
     
@@ -157,10 +192,81 @@ private:
     */
     void __putc(int chr);
 };
+
+//===============class :String
+class String{
+public:
+    String(const char* str);
+    ~String();
+    
+    int size();
+    char get(int index);
+    void set(int index,int ch);
+    
+    static String valueOf(int n);
+protected:
+    char *str;
+    
+};
+//==============class :Queue
+template <typename T>
+class Queue{
+public:
+    Queue(T p[],unsigned int len);//掌管指针
+    ~Queue();
+    
+    T remove();
+    int add(T t);
+    AS_MACRO unsigned int size();
+    AS_MACRO int empty();
+    AS_MACRO int full();
+protected:
+    T *p;
+    unsigned int len;
+    unsigned int curLen;
+    int indexAdd,indexRemove;
+    
+    
+};
+
+
 #endif
 
 //================函数宏区：使用 __attribute__((always_inline))===============
+void Util::reboot()
+{
+    
+    __asm__ __volatile__(
+    "inb  $0x92,%%eax \n\t"
+    "andb $0xfe,%%eax \n\t"
+    "outb %%al,$0x92 \n\t"
+    "orb $0x1,%%eax \n\t"
+    "outb %%al,$0x92\n\t"
+    :
+    :
+    :"eax"
+    );
+}
+
 #ifdef CODE32
+int Printer::getX()
+{
+    return this->x;
+}
+
+int Printer::getY()
+{
+    return this->y;
+}
+void Util::ltr(int sel)
+{
+    __asm__ __volatile__(
+    "ltr %0 \n\t"
+    :
+    :"m"(sel)
+    :
+    );
+}
 void Util::cli()
 {
     __asm__("cli \n\t");
@@ -228,9 +334,109 @@ void Util::initTarget(void* target)
 {
     __asm__ __volatile__("":"=c"(target)::);
 }
+void Util::outb(int port,int data)
+{
+    __asm__(
+    "outb %%al,%%dx \n\t"
+    :
+    :"d"(port),"a"(data)
+    :
+    );
+}
+int Util::inb(int port)
+{
+    int temp;
+    __asm__(
+    "inb %%dx,%%al \n\t"
+    :"=a"(temp)
+    :"d"(port)
+    :
+    );
+    return temp;
+}
+void Util::pusha()
+{
+    __asm__("pusha \n\t");
+}
+void Util::popa()
+{
+    __asm__("popa \n\t");
+}
+
+//=======class : Queue 宏
+template <typename T>
+int Queue<T>::empty()
+{
+    return curLen==0;
+}
+template <typename T>
+int Queue<T>::full()
+{
+    return curLen==len;
+}
+template <typename T>
+unsigned int Queue<T>::size()
+{
+    return curLen;
+}
 #endif
 
-
 //============================================================================
+
+//================================(非宏)模板区域==================
+#ifdef CODE32
+//============class : Queue<T>
+template<typename T>
+Queue<T>::Queue(T p[],unsigned int len):p(p),len(len),curLen(0),indexRemove(0),indexAdd(0)
+{
+    
+}
+template<typename T>
+Queue<T>::~Queue()
+{
+    
+}
+// i--remove
+//j--add
+//len = 4
+//  j=0 OK
+//  j=1 OK
+//  j=2 OK
+//  j=3 OK
+//  j=4--j=0 but j=0 full
+template<typename T>
+T Queue<T>::remove()
+{
+    T rt;
+    if(this->empty())
+    {
+        return 0;
+    }else{
+        rt = p[indexRemove];
+        indexRemove++;
+        curLen--;
+        if(indexRemove==(int)len)indexRemove=0;
+    }
+    return rt;
+}
+template <typename T>
+int Queue<T>::add(T t)
+{
+    if(this->full())
+    {
+        return 0;
+    }else{
+        this->p[indexAdd]=t;
+        indexAdd++;
+        curLen++;
+        if(indexAdd == (int)len)indexAdd=0;
+    }
+    return 1;
+    
+}
+
+
+#endif
+//======================================================================
 
 #endif

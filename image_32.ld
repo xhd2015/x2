@@ -11,10 +11,8 @@ SECTIONS {
 
 	}
 	*/ /*This is discarded by objcopy even said -j .stack*/
-	.stack 0 : {
-		protected_main_32.o(.stack)
-	}
-	.text : { 
+	.text 512*14: { 
+		 /*PROVIDE( _CODE_START = ABSOLUTE(.) );*/
 		*(.text)
 	}
 	.data : {

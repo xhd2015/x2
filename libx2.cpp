@@ -31,6 +31,7 @@ const int Util::MODE_FL_ON=0x80,
         Util::MODE_FG_BLACK=0b0000000,
         Util::MODE_COMMON=Util::MODE_FL_OFF & Util::MODE_BG_BLACK | Util::MODE_FG_WHITE;
 const int Util::SCREEN_X=25,Util::SCREEN_Y=80;
+const int Util::SEG_CURRENT=0x10000;
 
 //const int Util::SEG_CURRENT =    0x10000;//运行期常数，有时我需要一个编译期常数,那就在g++的命令行中定义之-D
 int Util::videoSelector=
@@ -202,12 +203,6 @@ void Util::setCursor(int x,int y)
 }
 //======================仅32位=============
 #ifdef CODE32
-void Util::ltr(int sel)
-{
-    __asm__(
-    "ltr 4+4*1(%ebp) \n\t"
-    );
-}
 short Util::makeSel(int index,int dpl=0b00,int from=0)
 {
     return (short)(
@@ -215,6 +210,22 @@ short Util::makeSel(int index,int dpl=0b00,int from=0)
         ((from & 0x1) << 2) | 
         (dpl & 0b11)
         );
+}
+void Util::lidt(short len,int address)
+{
+        __asm__(
+        "movw 4+4*1(%ebp),%ax \n\t"
+        "movw %ax,4+4*1+2(%ebp) \n\t"
+        "lidt 4+4*1+2(%ebp) \n\t"
+    );
+}
+void Util::lgdt(short len,int address)
+{
+        __asm__(
+        "movw 4+4*1(%ebp),%ax \n\t"
+        "movw %ax,4+4*1+2(%ebp) \n\t"
+        "lgdt 4+4*1+2(%ebp) \n\t"
+    );
 }
 char Util::getCPL()
 {
@@ -244,16 +255,115 @@ int Util::getEflags()
      "popl %eax \n\t"
     );
 }
-void Util::outb(int port,int byte)
+int Util::digitToStr(char* save,unsigned int space,int n)
 {
-    __asm__ __volatile__(
-    "out %%al,%%dx \n\t"
-    :
-    :"a"(byte),"d"(port)
-    :
-    );
+    int sign=1;
+    unsigned int index=0;
+    if(index==space)return 0;
+    save[index]=0;//结束字符串
+    index++;
+    
+    if(n<0)
+    {
+       n= -n;
+       sign = -1;
+    }
+    if(n==0)
+    {
+        if(index==space)return 0;
+        save[index]='0';
+        index++;
+    }else{
+        while(n>0)
+        {
+            if(index==space)return 0;
+            save[index]=n%10+'0';
+            n/=10;
+            index++;
+        }
+    }
+    if(sign==-1)
+    {
+        if(index==space)return 0;
+        save[index]='-';
+        index++;
+    }
+    char temp;
+    unsigned int i=0,j=index-1;
+    while(i<j)
+    {
+        temp=save[i];
+        save[i]=save[j];
+        save[j]=temp;
+        i++;
+        j--;
+    }
+    return index;
 }
-
+int Util::digitToHex(char* save,unsigned int space,unsigned int n)
+{
+    unsigned int index=0;
+    if(index==space)return 0;
+    save[index]=0;//结束字符串
+    index++;
+    if(n==0)
+    {
+        if(index==space)return 0;
+        save[index]='0';
+        index++;
+    }else{
+        while(n>0)
+        {
+            if(index==space)return 0;
+            int temp=n%16;
+            if(temp<10)
+            {
+                save[index]=temp+'0';
+            }else{
+                save[index]=temp-10+'a';
+            }
+            n/=16;
+            index++;
+        }
+        
+    }
+    char temp;
+    int i=0,j=index-1;
+    while(i<j)
+    {
+        temp=save[i];
+        save[i]=save[j];
+        save[j]=temp;
+        i++;
+        j--;
+    }
+    return index;
+    
+}
+int Util::strcmp(const char* a,const char *b)
+{
+   int i=0;
+   while( *(a+i) && *(b+i) && *(a+i)==*(b+i))i++;
+   return *(a+i) - *(b+i);
+}
+int Util::strlen(const char *a)
+{
+    int i=0;
+    while(*(a+i))i++;
+    return i;
+}
+int Util::strcopy(const char *src,char *dst,int len)
+{
+    int i=0;
+    while(i!=len - 1 && *(src+i))
+    {
+        *(dst+i)=*(src+i);
+        i++;
+    }
+    *(dst+i)=0;
+    return i;
+}
+//=================class : SimpleCharRotator
 const char SimpleCharRotator::rotateShapes[12]={'_','\b',0,'\\','\b',0,'|','\b',0,'/','\b',0};
 SimpleCharRotator::SimpleCharRotator(int x,int y,int attr,int direction):X(x),Y(y),Attr(attr),Status(0),Direction(direction)
 {
@@ -279,7 +389,7 @@ void SimpleCharRotator::run()
         Util::setCursor(this->X,this->Y);
         //调用0x24中断打印字符
         Util::insertMark(0x5561);
-        CALL_INT_3(0x24,c,SEG_CURRENT,b,&SimpleCharRotator::rotateShapes[this->Status],d,this->Attr);
+        CALL_INT_3(0x24,c,Util::SEG_CURRENT,b,&SimpleCharRotator::rotateShapes[this->Status],d,this->Attr);
         this->Status = (this->Status*this->Direction + 3) % (sizeof(SimpleCharRotator::rotateShapes)/sizeof(char));
     }
 }
@@ -287,12 +397,12 @@ void SimpleCharRotator::run()
 //=================class:Printer
 const int Printer::SCREEN_MAX_X=25,
         Printer::SCREEN_MAX_Y=80; //起始const static 也算是编译期常数，
-Printer::Printer(int x0,int y0,int rows,int cols,int mode):
-x0(x0>SCREEN_MAX_X?SCREEN_MAX_X-1:x0),
-y0(y0>SCREEN_MAX_Y?SCREEN_MAX_Y-1:y0),
-x(this->x0),y(this->y0),
-rows(rows>SCREEN_MAX_X?SCREEN_MAX_X:rows),
-cols(cols>SCREEN_MAX_Y?SCREEN_MAX_Y:cols),
+Printer::Printer(unsigned int x0,unsigned int y0,unsigned int rows,unsigned int cols,int mode):
+rows(rows>Printer::SCREEN_MAX_X?Printer::SCREEN_MAX_X:rows),
+cols(cols>Printer::SCREEN_MAX_Y?Printer::SCREEN_MAX_Y:cols),
+x0(x0+rows>=Printer::SCREEN_MAX_X?0:x0),
+y0(y0+cols>=Printer::SCREEN_MAX_Y?0:y0),
+x(0),y(0),
 mode(mode)
 {
      
@@ -311,7 +421,7 @@ void Printer::move(int n)
         this->x--;
         if(this->x == -1)
         {
-            this->x=this->rows;
+            this->x=this->rows - 1;
         }
     }
     while(this->y >= this->cols)
@@ -320,7 +430,7 @@ void Printer::move(int n)
         this->x++;
         if(this->x==this->rows)
         {
-            this->x = this->rows - 1 ;
+            this->x = 0 ;
         }
     }
     
@@ -444,6 +554,34 @@ void Printer::clr()
     }
     this->setPos(0,0);
 }
+//==========class : String
+String::String(const char* str)
+{
+    
+}
+String::~String()
+{
+    
+}
+
+int String::size()
+{
+    
+}
+char String::get(int index)
+{
+    
+}
+void String::set(int index,int ch)
+{
+    
+}
+
+String String::valueOf(int n)
+{
+    
+}
+
 
 #endif  //CODE32
 #ifdef CODE16

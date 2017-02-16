@@ -33,7 +33,7 @@
 00000000000i[      ]   SB16 support: yes
 00000000000i[      ]   USB support: yes
 00000000000i[      ]   VGA extension support: vbe cirrus voodoo
-00000000000i[MEM0  ] allocated memory at 04134020. after alignment, vector=04135000
+00000000000i[MEM0  ] allocated memory at 04B6D020. after alignment, vector=04B6E000
 00000000000i[MEM0  ] 32.00MB
 00000000000i[MEM0  ] mem block size = 0x00100000, blocks=32
 00000000000i[MEM0  ] rom at 0xfffe0000/131072 ('C:\Program Files (x86)\Bochs-2.6.8\BIOS-bochs-latest')
@@ -46,7 +46,7 @@
 00000000000i[DEV   ] PIIX3 PCI-to-ISA bridge present at device 1, function 0
 00000000000i[PLUGIN] init_dev of 'cmos' plugin device by virtual method
 00000000000i[CMOS  ] Using local time for initial clock
-00000000000i[CMOS  ] Setting initial clock to: Wed Feb 15 03:43:44 2017 (time0=1487101424)
+00000000000i[CMOS  ] Setting initial clock to: Thu Feb 16 22:43:06 2017 (time0=1487256186)
 00000000000i[PLUGIN] init_dev of 'dma' plugin device by virtual method
 00000000000i[DMA   ] channel 4 used by cascade
 00000000000i[PLUGIN] init_dev of 'pic' plugin device by virtual method
@@ -150,323 +150,357 @@
 00000000000i[PLUGIN] reset of 'usb_uhci' plugin device by virtual method
 00000000000i[      ] set SIGINT handler to bx_debug_ctrlc_handler
 00000004661i[BIOS  ] $Revision: 12579 $ $Date: 2014-12-26 11:31:39 +0100 (Fr, 26. Dez 2014) $
-00000322571i[KBD   ] reset-disable command received
-00000330812i[BIOS  ] Starting rombios32
-00000331250i[BIOS  ] Shutdown flag 0
-00000331833i[BIOS  ] ram_size=0x02000000
-00000332254i[BIOS  ] ram_end=32MB
-00000343934i[BIOS  ] Found 1 cpu(s)
-00000358138i[BIOS  ] bios_table_addr: 0x000fa498 end=0x000fcc00
-00000685933i[PCI   ] i440FX PMC write to PAM register 59 (TLB Flush)
-00000998303i[WINGUI] dimension update x=720 y=400 fontheight=16 fontwidth=9 bpp=8
-00001013862i[P2ISA ] PCI IRQ routing: PIRQA# set to 0x0b
-00001013881i[P2ISA ] PCI IRQ routing: PIRQB# set to 0x09
-00001013900i[P2ISA ] PCI IRQ routing: PIRQC# set to 0x0b
-00001013919i[P2ISA ] PCI IRQ routing: PIRQD# set to 0x09
-00001013929i[P2ISA ] write: ELCR2 = 0x0a
-00001014699i[BIOS  ] PIIX3/PIIX4 init: elcr=00 0a
-00001022422i[BIOS  ] PCI: bus=0 devfn=0x00: vendor_id=0x8086 device_id=0x1237 class=0x0600
-00001024701i[BIOS  ] PCI: bus=0 devfn=0x08: vendor_id=0x8086 device_id=0x7000 class=0x0601
-00001026819i[BIOS  ] PCI: bus=0 devfn=0x09: vendor_id=0x8086 device_id=0x7010 class=0x0101
-00001027044i[PIDE  ] new BM-DMA address: 0xc000
-00001027660i[BIOS  ] region 4: 0x0000c000
-00001029671i[BIOS  ] PCI: bus=0 devfn=0x0a: vendor_id=0x8086 device_id=0x7020 class=0x0c03
-00001029871i[UHCI  ] new base address: 0xc020
-00001030487i[BIOS  ] region 4: 0x0000c020
-00001030612i[UHCI  ] new irq line = 9
-00001032507i[BIOS  ] PCI: bus=0 devfn=0x0b: vendor_id=0x8086 device_id=0x7113 class=0x0680
-00001032739i[ACPI  ] new irq line = 11
-00001032751i[ACPI  ] new irq line = 9
-00001032776i[ACPI  ] new PM base address: 0xb000
-00001032790i[ACPI  ] new SM base address: 0xb100
-00001032818i[PCI   ] setting SMRAM control register to 0x4a
-00001196911i[CPU0  ] Enter to System Management Mode
-00001196911i[CPU0  ] enter_system_management_mode: temporary disable VMX while in SMM mode
-00001196921i[CPU0  ] RSM: Resuming from System Management Mode
-00001360942i[PCI   ] setting SMRAM control register to 0x0a
-00001375849i[BIOS  ] MP table addr=0x000fa570 MPC table addr=0x000fa4a0 size=0xc8
-00001377671i[BIOS  ] SMBIOS table addr=0x000fa580
-00001379852i[BIOS  ] ACPI tables: RSDP addr=0x000fa6a0 ACPI DATA addr=0x01ff0000 size=0xf72
-00001383064i[BIOS  ] Firmware waking vector 0x1ff00cc
-00001384859i[PCI   ] i440FX PMC write to PAM register 59 (TLB Flush)
-00001385582i[BIOS  ] bios_table_cur_addr: 0x000fa6c4
-00001513199i[VBIOS ] VGABios $Id: vgabios.c,v 1.76 2013/02/10 08:07:03 vruppert Exp $
-00001513270i[BXVGA ] VBE known Display Interface b0c0
-00001513302i[BXVGA ] VBE known Display Interface b0c5
-00001516227i[VBIOS ] VBE Bios $Id: vbe.c,v 1.65 2014/07/08 18:02:25 vruppert Exp $
-00017005816i[BIOS  ] Booting from 0000:7c00
-00025331149e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00025457359e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00025587649e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00025777174e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00025851784e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00026047759e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00026156344e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00026398414e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00026466469e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00026629384e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00026729524e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00026956564e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00027083359e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00027217489e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00027276304e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00027429769e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00027523549e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00027720139e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00027782554e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00027926074e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00028016314e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00028229194e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00028337644e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00028413034e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00028456699e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00028586164e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00028666234e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00028811944e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00028868944e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00029002549e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00029088004e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00029287474e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00029362999e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00029464264e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00029534479e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00029703139e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00029802409e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00029965954e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00030041899e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00030225454e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00030335989e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00030582949e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00030645679e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00030773689e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00030852124e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00031031134e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00031131424e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00031247929e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00031295614e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00031435879e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00031522534e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00031699534e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00031762219e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00031907164e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00031996729e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00032206699e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00032318929e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00032453104e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00032533279e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00032721904e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00032832199e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00033022279e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00033097369e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00033272539e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00033377779e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00033611974e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00033692959e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00033830974e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00033916894e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00034122664e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00034236064e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00034406719e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00034478794e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00034660579e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00034766089e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00035005999e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00035076994e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00035230729e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00035323879e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00035541184e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00035666524e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00035809774e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00035876809e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00036041374e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00036143539e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00036346594e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00036411454e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00036579664e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00036683074e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00036933514e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00037051864e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00037205329e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00037297744e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00037516114e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00037636474e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00037819909e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00037864519e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00037984264e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00038063914e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00038251459e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00038330629e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00038464009e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00038543974e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00038739019e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00038854879e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00039033649e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00039110179e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00039295309e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00039405019e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00039644929e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00039708559e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00039843394e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00039927949e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00040137769e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00040254049e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00040399714e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00040471789e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00040672519e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00040787029e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00041014234e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00041089099e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00041275894e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00041386009e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00041639734e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00041765044e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00041924719e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00042020389e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00042248089e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00042381034e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00042612799e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00042704464e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00042922504e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00043052494e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00043337629e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00043437934e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00043606339e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00043709899e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00043948174e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00044076484e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00044211379e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00044251429e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00044365264e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00044443159e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00044619544e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00044674699e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00044806819e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00044892634e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00045095164e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00045214219e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00045357559e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00045432784e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00045614884e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00045722449e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00045940894e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00046003939e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00046151794e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00046246744e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00046465564e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00046574044e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00046702084e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00046781419e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00046973359e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00047084899e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00047277184e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00047347879e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00047518159e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00047621299e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00047852869e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00047939149e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00048056584e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00048130714e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00048316669e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00048425719e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00048584074e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00048657529e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00048837289e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00048944089e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00049179829e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00049246594e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00049398649e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00049492399e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00049710739e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00049832539e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00049945264e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00049992619e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00050143849e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00050232589e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00050416654e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00050476759e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00050615869e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00050703259e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00050908249e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00051012694e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00051149254e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00051231799e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00051426589e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00051541039e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00051733369e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00051806014e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00051982054e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00052087309e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00052329349e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00052421794e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00052587859e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00052690069e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00052922179e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00053049724e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00053226499e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00053315974e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00053522959e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00053637829e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00053882314e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00053950624e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00054113224e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00054209239e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00054429949e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00054557419e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00054698779e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00054772039e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00054947494e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00055052989e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00055261579e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00055309984e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00055427404e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00055503214e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00055693279e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00055786219e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00055861129e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00055898659e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00056033479e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00056114974e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00056239789e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00056272834e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00056357449e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00056414194e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00056569474e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00056627944e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00056721889e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00056785384e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00056937394e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00057032704e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00057175294e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00057231919e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00057387169e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00057479329e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00057695959e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00057758059e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00057904399e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00057992824e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00058210234e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00058330294e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00058461814e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00058525579e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00058693309e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00058793899e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00058980469e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00059034214e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00059162644e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00059245954e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00059445889e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00059555509e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00059709739e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00059804989e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00060024589e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00060155704e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00060350044e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00060401839e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00060538159e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00060630289e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00060847789e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00060923719e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00061045324e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00061117594e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00061309534e[PIT81 ] Count of 1 is invalid in pit mode 3.
-00061425394e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00000345051i[KBD   ] reset-disable command received
+00000353292i[BIOS  ] Starting rombios32
+00000353730i[BIOS  ] Shutdown flag 0
+00000354313i[BIOS  ] ram_size=0x02000000
+00000354734i[BIOS  ] ram_end=32MB
+00000366404i[BIOS  ] Found 1 cpu(s)
+00000380608i[BIOS  ] bios_table_addr: 0x000fa498 end=0x000fcc00
+00000708403i[PCI   ] i440FX PMC write to PAM register 59 (TLB Flush)
+00000992648i[WINGUI] dimension update x=720 y=400 fontheight=16 fontwidth=9 bpp=8
+00001036332i[P2ISA ] PCI IRQ routing: PIRQA# set to 0x0b
+00001036351i[P2ISA ] PCI IRQ routing: PIRQB# set to 0x09
+00001036370i[P2ISA ] PCI IRQ routing: PIRQC# set to 0x0b
+00001036389i[P2ISA ] PCI IRQ routing: PIRQD# set to 0x09
+00001036399i[P2ISA ] write: ELCR2 = 0x0a
+00001037169i[BIOS  ] PIIX3/PIIX4 init: elcr=00 0a
+00001044892i[BIOS  ] PCI: bus=0 devfn=0x00: vendor_id=0x8086 device_id=0x1237 class=0x0600
+00001047171i[BIOS  ] PCI: bus=0 devfn=0x08: vendor_id=0x8086 device_id=0x7000 class=0x0601
+00001049289i[BIOS  ] PCI: bus=0 devfn=0x09: vendor_id=0x8086 device_id=0x7010 class=0x0101
+00001049514i[PIDE  ] new BM-DMA address: 0xc000
+00001050130i[BIOS  ] region 4: 0x0000c000
+00001052141i[BIOS  ] PCI: bus=0 devfn=0x0a: vendor_id=0x8086 device_id=0x7020 class=0x0c03
+00001052341i[UHCI  ] new base address: 0xc020
+00001052957i[BIOS  ] region 4: 0x0000c020
+00001053082i[UHCI  ] new irq line = 9
+00001054977i[BIOS  ] PCI: bus=0 devfn=0x0b: vendor_id=0x8086 device_id=0x7113 class=0x0680
+00001055209i[ACPI  ] new irq line = 11
+00001055221i[ACPI  ] new irq line = 9
+00001055246i[ACPI  ] new PM base address: 0xb000
+00001055260i[ACPI  ] new SM base address: 0xb100
+00001055288i[PCI   ] setting SMRAM control register to 0x4a
+00001219381i[CPU0  ] Enter to System Management Mode
+00001219381i[CPU0  ] enter_system_management_mode: temporary disable VMX while in SMM mode
+00001219391i[CPU0  ] RSM: Resuming from System Management Mode
+00001383412i[PCI   ] setting SMRAM control register to 0x0a
+00001398319i[BIOS  ] MP table addr=0x000fa570 MPC table addr=0x000fa4a0 size=0xc8
+00001400141i[BIOS  ] SMBIOS table addr=0x000fa580
+00001402322i[BIOS  ] ACPI tables: RSDP addr=0x000fa6a0 ACPI DATA addr=0x01ff0000 size=0xf72
+00001405534i[BIOS  ] Firmware waking vector 0x1ff00cc
+00001407329i[PCI   ] i440FX PMC write to PAM register 59 (TLB Flush)
+00001408052i[BIOS  ] bios_table_cur_addr: 0x000fa6c4
+00001535669i[VBIOS ] VGABios $Id: vgabios.c,v 1.76 2013/02/10 08:07:03 vruppert Exp $
+00001535740i[BXVGA ] VBE known Display Interface b0c0
+00001535772i[BXVGA ] VBE known Display Interface b0c5
+00001538697i[VBIOS ] VBE Bios $Id: vbe.c,v 1.65 2014/07/08 18:02:25 vruppert Exp $
+00015439816i[BIOS  ] Booting from 0000:7c00
+00024670868i[FLOPPY] controller reset in software
+00024811005e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00024838800e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00024866610e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00024922095e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00024949905e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00025049895e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00025093155e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00025199670e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00025255725e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00025416045e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00025524150e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00025670790e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00025748580e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00025958295e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00026096790e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00026299185e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00026343210e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00026435580e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00026513370e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00026691825e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00026793090e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00026932080e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00027032190e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00027263490e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00027382935e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00027624120e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00027726525e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00027971940e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00028121145e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00028482240e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00028609365e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00028851720e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00028995180e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00029351580e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00029552910e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00029765925e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00029839020e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00030066060e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00030206100e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00030527055e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00030604275e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00030779850e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00030897585e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00031198155e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00031382430e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00031551495e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00031646055e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00031902450e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00032059770e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00032386230e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00032510010e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00032816445e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00032999760e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00033421470e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00033612120e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00033900945e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00034077435e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00034494510e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00034724325e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00035096160e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00035258610e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00035625495e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00035837085e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00036299385e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00036465000e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00036760695e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00036937350e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00037343910e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00037566930e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00037834125e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00037944780e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00038228220e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00038403570e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00038778690e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00038851335e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00039008685e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00039127785e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00039422400e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00039597870e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00039807135e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00039952125e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00040193835e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00040294995e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00040540275e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00040642410e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00040873395e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00041015730e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00041359815e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00041535315e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00041752815e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00041889660e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00042227265e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00042428805e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00042755010e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00042897390e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00043233600e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00043422915e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00043852275e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00043995870e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00044305740e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00044493765e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00044919345e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00045146925e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00045455520e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00045612600e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00045991365e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00046203045e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00046634055e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00046723620e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00046941315e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00047082135e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00047420730e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00047626905e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00047838000e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00047964315e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00048262515e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00048452790e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00048791970e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00048885315e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00049120200e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00049269240e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00049601430e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00049765680e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00050022315e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00050177490e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00050555955e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00050776710e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00051117360e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00051263610e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00051564780e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00051724170e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00052092075e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00052221420e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00052488045e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00052647315e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00053019780e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00053242080e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00053570835e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00053728545e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00054099870e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00054317070e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00054764550e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00054898065e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00055218000e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00055404720e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00055837515e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00056074980e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00056306505e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00056441910e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00056782890e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00056984715e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00057349290e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00057492630e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00057833055e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00058014285e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00058433880e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00058609245e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00058822545e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00058957095e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00059292930e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00059491815e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00059806455e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00059926470e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00060237435e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00060422880e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00060849210e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00060993975e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00061286460e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00061462935e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00061883970e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00062111535e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00062414700e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00062573280e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00062945295e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00063158145e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00063557520e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00063697515e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00064034115e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00064225320e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00064641660e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00064871250e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00065151540e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00065321415e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00065718585e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00065920035e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00066266895e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00066404775e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00066718980e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00066903945e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00067318980e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00067485240e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00067754070e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00067919340e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00068307720e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00068522145e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00068870040e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00069006195e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00069360780e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00069562680e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00070011270e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00070124340e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00070321485e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00070447815e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00070772760e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00070964775e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00071246910e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00071390250e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00071729685e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00071938740e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00072341010e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00072440175e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00072671100e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00072804525e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00073134975e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00073322250e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00073559430e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00073709085e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00074076015e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00074285115e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00074655390e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00074792565e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00075113955e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00075294210e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00075693930e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00075867375e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00076084515e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00076218855e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00076555905e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00076759365e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00077087040e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00077230080e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00077573595e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00077775060e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00078224940e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00078366705e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00078662220e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00078842190e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00079260300e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00079488450e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00079794810e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00079949160e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00080339085e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00080549955e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00080957670e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00081081915e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00081333615e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00081493200e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00081865755e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00082073640e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00082276710e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00082404600e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00082704180e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00082890105e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00083201370e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00083325120e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00083616255e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00083784795e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00084193005e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00084367800e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00084597885e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00084757380e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00085129155e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00085338270e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00085605660e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00085688370e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00085905615e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00086051340e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00086386890e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00086498445e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00086764155e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00086920320e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00087297075e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00087514800e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00087715695e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00087790170e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00088014510e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00088165890e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00088482405e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00088589265e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00088855590e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00089017245e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00089412195e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00089620455e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00089758065e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00089826930e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00090070830e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00090210330e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00090493650e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00090580845e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00090796215e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00090937005e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00091276125e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00091437345e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00091705380e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00091866840e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00092250030e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00092467365e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00092810535e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00092961810e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00093326790e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00093540255e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00094001100e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00094109925e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00094328070e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00094462305e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00094816695e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00095021505e[PIT81 ] Count of 1 is invalid in pit mode 3.
+00095256375e[PIT81 ] Count of 1 is invalid in pit mode 3.

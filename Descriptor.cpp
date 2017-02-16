@@ -218,10 +218,10 @@ void SelectorDescriptor::init(int sel,int offset,int type,int dpl,int p,int segS
 }
 void SelectorDescriptor::writeToMemory(int seg,int off)
 {
-    Util::memcopy(SEG_CURRENT,this->I0,seg,off,this->I3  - this->I0 + 2);
+    Util::memcopy(Util::SEG_CURRENT,this->I0,seg,off,this->I3  - this->I0 + 2);
 }
 void SelectorDescriptor::fromMemory(SelectorDescriptor &self,int seg,int off)
 {
-    Util::memcopy(seg,off,SEG_CURRENT,self.I0,self.I3-self.I0+2);
+    Util::memcopy(seg,off,Util::SEG_CURRENT,self.I0,self.I3-self.I0+2);
 }
 #endif

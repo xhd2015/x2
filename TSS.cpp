@@ -1,6 +1,10 @@
+#ifdef CODE32
+__asm__(".code32 \n\t");
+
 #include "TSS.h"
 #include "libx2.h"
 #include "def.h"
+#include "PMLoader.h"
 TSS::TSS():IOADDR((char*)((&__IOBASEADDR)+2)),TRAP( (char*)(&__IOBASEADDR))
 {
 
@@ -15,7 +19,7 @@ TSS::~TSS()
 
 void TSS::writeToMemory(int seg,int off)
 {   
-    Util::memcopy(SEG_CURRENT,this->I0,seg,off,TSS_MIN_SIZE);
+    Util::memcopy(Util::SEG_CURRENT,this->I0,seg,off,PMLoader::TSS_MIN_SIZE);
 }
 void TSS::ensureReservedZero()
 {
@@ -32,6 +36,8 @@ void TSS::ensureReservedZero()
 }
 void TSS::fromMemory(TSS &self,int seg,int off)
 {
-    Util::memcopy(seg,off,SEG_CURRENT,self.I0,TSS_MIN_SIZE);
+    Util::memcopy(seg,off,Util::SEG_CURRENT,self.I0,PMLoader::TSS_MIN_SIZE);
     self.ensureReservedZero();//保证所有的reserved都为0
 }
+
+#endif //CODE32

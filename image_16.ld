@@ -25,7 +25,7 @@ SECTIONS {
 		main_16.o( .last_section )
 	}
 	/DISCARD/ : {
-		*( ".rdata$zzz" )
+		*( ".rdata$zzz" ) *(.free)
 	}
 
 }

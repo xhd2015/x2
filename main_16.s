@@ -3,7 +3,9 @@
 	.text 
 	.code16gcc 
 	STARTSEG = 0x7c0 
-	STACKSIZE = 512*2
+	STACKSIZE = 512*2 
+	TEMP_SEG = 0xa00 
+	
 	ljmp $STARTSEG,$HERE 
 	HERE: 
 	cli 
@@ -14,9 +16,9 @@
 	mov $STACKSIZE,%sp 
 	#mov %ax,%sp 
 	call _readLaterSectors
-	call __Z8theEntryv 
-	DIE:
-	jmp DIE 
+	pushw $TEMP_SEG 
+	pushw $__Z8theEntryv 
+	ljmpw *(%esp) 
 	
 /NO_APP
 	.text
@@ -26,10 +28,10 @@ _readLaterSectors:
 	pushl	%ebp
 	movl	%esp, %ebp
 /APP
- # 43 "main.cpp" 1
-	READLEN =  16-2
+ # 48 "main.cpp" 1
+	READLEN =  16 -2  
 	push %es
-	mov $STARTSEG,%ax 
+	movw $TEMP_SEG,%ax 
 	mov %ax,%es
 	mov $STACKSIZE,%bx
 	xor %dx,%dx 
@@ -58,30 +60,54 @@ LC3:
 __Z8theEntryv:
 	pushl	%ebp
 	movl	%esp, %ebp
-	subl	$120, %esp
+	pushl	%ebx
+	subl	$100, %esp
+/APP
+ # 58 "main.cpp" 1
+	movl $TEMP_SEG,%eax 
+	mov %eax,%ds
+	mov %eax,%es 
+	mov %eax,%ss 
+	
+ # 0 "" 2
+/NO_APP
+	movl	__ZN8PMLoader7SECSIZEE, %edx
+	movl	__ZN8PMLoader8TEMP_SEGE, %eax
+	movl	%edx, 16(%esp)
+	movl	$0, 12(%esp)
+	movl	%eax, 8(%esp)
+	movl	$0, 4(%esp)
+	movl	$1984, (%esp)
+	call	__ZN4Util7memcopyEiiiii
 	movl	__ZN4Util11MODE_COMMONE, %eax
 	movl	%eax, 4(%esp)
 	movl	$LC0, (%esp)
 	call	__ZN4Util8printStrEPKci
-	leal	-9(%ebp), %eax
+	leal	-13(%ebp), %eax
 	movl	%eax, %ecx
 	call	__ZN4UtilC1Ev
-	leal	-9(%ebp), %eax
+	leal	-13(%ebp), %eax
 	movl	%eax, %ecx
 	call	__ZN4Util4testEv
+	movl	__ZN8PMLoader8TEMP_SEGE, %eax
+	sall	$4, %eax
+	movl	%eax, -12(%ebp)
+	movl	__ZN8PMLoader8TEMP_SEGE, %edx
+	movl	__ZN8PMLoader8TEMP_SEGE, %eax
 	movl	$512, 16(%esp)
 	movl	$0, 12(%esp)
-	movl	$1984, 8(%esp)
+	movl	%edx, 8(%esp)
 	movl	$512, 4(%esp)
-	movl	$1984, (%esp)
+	movl	%eax, (%esp)
 	call	__ZN4Util7memcopyEiiiii
 	movl	$1365, (%esp)
 	call	__ZN4Util10insertMarkEi
+	movl	__ZN8PMLoader8TEMP_SEGE, %eax
 	movl	$1, 16(%esp)
 	movl	$0, 12(%esp)
 	movl	$0, 8(%esp)
 	movl	$0, 4(%esp)
-	movl	$1984, (%esp)
+	movl	%eax, (%esp)
 	call	__ZN4Util11readSectorsEiiiii
 	testl	%eax, %eax
 	setne	%al
@@ -93,22 +119,23 @@ __Z8theEntryv:
 	call	__ZN4Util8printStrEPKci
 L3:
 	movl	__ZN17SegmentDescriptor5DPL_0E, %eax
-	movsbl	%al, %ecx
+	movsbl	%al, %ebx
 	movl	__ZN17SegmentDescriptor11TYPE_U_DATAE, %eax
-	movsbl	%al, %edx
-	leal	-24(%ebp), %eax
+	movsbl	%al, %ecx
+	movl	-12(%ebp), %edx
+	leal	-28(%ebp), %eax
 	movl	$1, 24(%esp)
 	movl	$1, 20(%esp)
 	movl	$1, 16(%esp)
-	movl	%ecx, 12(%esp)
-	movl	%edx, 8(%esp)
+	movl	%ebx, 12(%esp)
+	movl	%ecx, 8(%esp)
 	movl	$1024, 4(%esp)
-	movl	$31744, (%esp)
+	movl	%edx, (%esp)
 	movl	%eax, %ecx
 	call	__ZN17SegmentDescriptorC1EPciccccc
 	subl	$28, %esp
-	leal	-24(%ebp), %eax
-	leal	-32(%ebp), %edx
+	leal	-28(%ebp), %eax
+	leal	-36(%ebp), %edx
 	movl	%edx, 4(%esp)
 	movl	$65536, (%esp)
 	movl	%eax, %ecx
@@ -118,7 +145,7 @@ L3:
 	movsbl	%al, %ecx
 	movl	__ZN17SegmentDescriptor11TYPE_U_DATAE, %eax
 	movsbl	%al, %edx
-	leal	-47(%ebp), %eax
+	leal	-51(%ebp), %eax
 	movl	$1, 24(%esp)
 	movl	$1, 20(%esp)
 	movl	$1, 16(%esp)
@@ -129,21 +156,21 @@ L3:
 	movl	%eax, %ecx
 	call	__ZN17SegmentDescriptorC1EPciccccc
 	subl	$28, %esp
-	leal	-32(%ebp), %eax
+	leal	-36(%ebp), %eax
 	movl	%eax, 8(%esp)
 	movl	$65536, 4(%esp)
-	leal	-47(%ebp), %eax
+	leal	-51(%ebp), %eax
 	movl	%eax, (%esp)
 	call	__ZN17SegmentDescriptor10fromMemoryEPS_iPc
-	leal	-47(%ebp), %eax
-	leal	-55(%ebp), %edx
+	leal	-51(%ebp), %eax
+	leal	-59(%ebp), %edx
 	movl	%edx, 4(%esp)
 	movl	$65536, (%esp)
 	movl	%eax, %ecx
 	call	__ZN17SegmentDescriptor13writeToMemoryEiPc
 	subl	$8, %esp
-	leal	-24(%ebp), %eax
-	leal	-47(%ebp), %edx
+	leal	-28(%ebp), %eax
+	leal	-51(%ebp), %edx
 	movl	%edx, (%esp)
 	movl	%eax, %ecx
 	call	__ZN17SegmentDescriptor6equalsERS_
@@ -161,39 +188,18 @@ L4:
 	movl	%eax, 4(%esp)
 	movl	$LC3, (%esp)
 	call	__ZN4Util8printStrEPKci
-	leal	-75(%ebp), %eax
-	movl	$0, 16(%esp)
-	movl	$0, 12(%esp)
-	movl	$34, 8(%esp)
-	movl	$16, 4(%esp)
-	movl	$0, (%esp)
-	movl	%eax, %ecx
-	call	__ZN8PMLoaderC1Eiiiii
-	subl	$20, %esp
-	leal	-75(%ebp), %eax
-	movl	$2048, 24(%esp)
-	movl	$1048575, 20(%esp)
-	movl	$0, 16(%esp)
-	movl	$800, 12(%esp)
-	movl	$40336, 8(%esp)
-	movl	$400, 4(%esp)
-	movl	$39936, (%esp)
-	movl	%eax, %ecx
-	call	__ZN8PMLoader11mainProcessEisisiii
-	subl	$28, %esp
-	leal	-75(%ebp), %eax
-	movl	%eax, %ecx
-	call	__ZN8PMLoaderD1Ev
-	leal	-47(%ebp), %eax
+	call	__ZN8PMLoader11mainProcessEv
+	leal	-51(%ebp), %eax
 	movl	%eax, %ecx
 	call	__ZN17SegmentDescriptorD1Ev
-	leal	-24(%ebp), %eax
+	leal	-28(%ebp), %eax
 	movl	%eax, %ecx
 	call	__ZN17SegmentDescriptorD1Ev
-	leal	-9(%ebp), %eax
+	leal	-13(%ebp), %eax
 	movl	%eax, %ecx
 	call	__ZN4UtilD1Ev
 	nop
+	movl	-4(%ebp), %ebx
 	leave
 	ret
 /APP
@@ -202,18 +208,16 @@ L4:
 	.word 0xaa55 
 	
 	.ident	"GCC: (GNU) 5.4.0"
+	.def	__ZN4Util7memcopyEiiiii;	.scl	2;	.type	32;	.endef
 	.def	__ZN4Util8printStrEPKci;	.scl	2;	.type	32;	.endef
 	.def	__ZN4UtilC1Ev;	.scl	2;	.type	32;	.endef
 	.def	__ZN4Util4testEv;	.scl	2;	.type	32;	.endef
-	.def	__ZN4Util7memcopyEiiiii;	.scl	2;	.type	32;	.endef
 	.def	__ZN4Util10insertMarkEi;	.scl	2;	.type	32;	.endef
 	.def	__ZN4Util11readSectorsEiiiii;	.scl	2;	.type	32;	.endef
 	.def	__ZN17SegmentDescriptorC1EPciccccc;	.scl	2;	.type	32;	.endef
 	.def	__ZN17SegmentDescriptor13writeToMemoryEiPc;	.scl	2;	.type	32;	.endef
 	.def	__ZN17SegmentDescriptor10fromMemoryEPS_iPc;	.scl	2;	.type	32;	.endef
 	.def	__ZN17SegmentDescriptor6equalsERS_;	.scl	2;	.type	32;	.endef
-	.def	__ZN8PMLoaderC1Eiiiii;	.scl	2;	.type	32;	.endef
-	.def	__ZN8PMLoader11mainProcessEisisiii;	.scl	2;	.type	32;	.endef
-	.def	__ZN8PMLoaderD1Ev;	.scl	2;	.type	32;	.endef
+	.def	__ZN8PMLoader11mainProcessEv;	.scl	2;	.type	32;	.endef
 	.def	__ZN17SegmentDescriptorD1Ev;	.scl	2;	.type	32;	.endef
 	.def	__ZN4UtilD1Ev;	.scl	2;	.type	32;	.endef

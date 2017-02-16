@@ -97,6 +97,10 @@ __ZN4Util8SCREEN_XE:
 	.align 4
 __ZN4Util8SCREEN_YE:
 	.long	80
+	.globl	__ZN4Util11SEG_CURRENTE
+	.align 4
+__ZN4Util11SEG_CURRENTE:
+	.long	65536
 	.globl	__ZN4Util13videoSelectorE
 	.data
 	.align 4
@@ -241,7 +245,7 @@ L14:
 	movl	-12(%ebp), %ebx
 	movl	12(%ebp), %ecx
 /APP
- # 100 "libx2.cpp" 1
+ # 101 "libx2.cpp" 1
 	push %es
 	mov %dx,%es
 	movb %al,%es:(%bx) 
@@ -296,7 +300,7 @@ __ZN4Util10insertMarkEi:
 	pushl	%ebp
 	movl	%esp, %ebp
 /APP
- # 115 "libx2.cpp" 1
+ # 116 "libx2.cpp" 1
 	nop 
 	
  # 0 "" 2
@@ -316,7 +320,7 @@ __ZN4Util3getEii:
 	je	L19
 	movl	8(%ebp), %eax
 /APP
- # 119 "libx2.cpp" 1
+ # 120 "libx2.cpp" 1
 	mov %ds,%ebx
 	movw %ax,%ds 
 	
@@ -329,7 +333,7 @@ L19:
 	movl	8(%ebp), %eax
 	movl	%edx, %ebx
 /APP
- # 126 "libx2.cpp" 1
+ # 127 "libx2.cpp" 1
 	movl %ds:(%ebx),%eax 
 	
  # 0 "" 2
@@ -339,7 +343,7 @@ L19:
 	je	L20
 	movl	-8(%ebp), %eax
 /APP
- # 127 "libx2.cpp" 1
+ # 128 "libx2.cpp" 1
 	mov %ax,%ds 
 	
  # 0 "" 2
@@ -362,7 +366,7 @@ __ZN4Util4setbEiii:
 	je	L23
 	movl	8(%ebp), %eax
 /APP
- # 132 "libx2.cpp" 1
+ # 133 "libx2.cpp" 1
 	mov %ds,%ebx
 	movw %ax,%ds 
 	
@@ -372,7 +376,7 @@ __ZN4Util4setbEiii:
 	movl	%eax, -8(%ebp)
 L23:
 /APP
- # 140 "libx2.cpp" 1
+ # 141 "libx2.cpp" 1
 	movl 4+4*2(%ebp),%ebx 
 	movb 4+4*3(%ebp),%al 
 	movb %al,%ds:(%ebx) 
@@ -383,7 +387,7 @@ L23:
 	je	L25
 	movl	-8(%ebp), %eax
 /APP
- # 141 "libx2.cpp" 1
+ # 142 "libx2.cpp" 1
 	mov %ax,%ds 
 	
  # 0 "" 2
@@ -406,7 +410,7 @@ __ZN4Util4setwEiii:
 	je	L27
 	movl	8(%ebp), %eax
 /APP
- # 145 "libx2.cpp" 1
+ # 146 "libx2.cpp" 1
 	mov %ds,%ebx
 	movw %ax,%ds 
 	
@@ -416,7 +420,7 @@ __ZN4Util4setwEiii:
 	movl	%eax, -8(%ebp)
 L27:
 /APP
- # 153 "libx2.cpp" 1
+ # 154 "libx2.cpp" 1
 	movl 4+4*2(%ebp),%ebx 
 	movw 4+4*3(%ebp),%ax 
 	movw %ax,%ds:(%ebx) 
@@ -427,7 +431,7 @@ L27:
 	je	L29
 	movl	-8(%ebp), %eax
 /APP
- # 154 "libx2.cpp" 1
+ # 155 "libx2.cpp" 1
 	mov %ax,%ds 
 	
  # 0 "" 2
@@ -450,7 +454,7 @@ __ZN4Util4setlEiii:
 	je	L31
 	movl	8(%ebp), %eax
 /APP
- # 158 "libx2.cpp" 1
+ # 159 "libx2.cpp" 1
 	mov %ds,%ebx
 	movw %ax,%ds 
 	
@@ -460,7 +464,7 @@ __ZN4Util4setlEiii:
 	movl	%eax, -8(%ebp)
 L31:
 /APP
- # 166 "libx2.cpp" 1
+ # 167 "libx2.cpp" 1
 	movl 4+4*2(%ebp),%ebx 
 	mov 4+4*3(%ebp),%eax 
 	mov %eax,%ds:(%ebx) 
@@ -471,7 +475,7 @@ L31:
 	je	L33
 	movl	-8(%ebp), %eax
 /APP
- # 167 "libx2.cpp" 1
+ # 168 "libx2.cpp" 1
 	mov %ax,%ds 
 	
  # 0 "" 2
@@ -491,7 +495,7 @@ __ZN4Util7memcopyEiiiii:
 	pushl	%ebx
 	subl	$16, %esp
 /APP
- # 172 "libx2.cpp" 1
+ # 173 "libx2.cpp" 1
 	mov %es,%ax 
 	
  # 0 "" 2
@@ -500,7 +504,7 @@ __ZN4Util7memcopyEiiiii:
 	cmpl	$65536, 16(%ebp)
 	jne	L35
 /APP
- # 172 "libx2.cpp" 1
+ # 173 "libx2.cpp" 1
 	push %ds 
 	pop %es 
 	
@@ -510,7 +514,7 @@ __ZN4Util7memcopyEiiiii:
 L35:
 	movl	16(%ebp), %eax
 /APP
- # 172 "libx2.cpp" 1
+ # 173 "libx2.cpp" 1
 	movw %ax,%es 
 	
  # 0 "" 2
@@ -520,7 +524,7 @@ L36:
 	je	L37
 	movl	8(%ebp), %eax
 /APP
- # 173 "libx2.cpp" 1
+ # 174 "libx2.cpp" 1
 	mov %ds,%ebx
 	movw %ax,%ds 
 	
@@ -530,7 +534,7 @@ L36:
 	movl	%eax, -8(%ebp)
 L37:
 /APP
- # 185 "libx2.cpp" 1
+ # 186 "libx2.cpp" 1
 	push %esi 
 	push %edi 
 	mov 4+4*2(%ebp),%esi 
@@ -547,7 +551,7 @@ L37:
 	je	L38
 	movl	-8(%ebp), %eax
 /APP
- # 187 "libx2.cpp" 1
+ # 188 "libx2.cpp" 1
 	mov %ax,%ds 
 	
  # 0 "" 2
@@ -555,7 +559,7 @@ L37:
 L38:
 	movl	-12(%ebp), %eax
 /APP
- # 188 "libx2.cpp" 1
+ # 189 "libx2.cpp" 1
 	mov %ax,%es 
 	
  # 0 "" 2
@@ -639,21 +643,6 @@ __ZN4Util9setCursorEii:
 	popl	%ebp
 	ret
 	.align 2
-	.globl	__ZN4Util3ltrEi
-	.def	__ZN4Util3ltrEi;	.scl	2;	.type	32;	.endef
-__ZN4Util3ltrEi:
-	pushl	%ebp
-	movl	%esp, %ebp
-/APP
- # 209 "libx2.cpp" 1
-	ltr 4+4*1(%ebp) 
-	
- # 0 "" 2
-/NO_APP
-	nop
-	popl	%ebp
-	ret
-	.align 2
 	.globl	__ZN4Util7makeSelEiii
 	.def	__ZN4Util7makeSelEiii;	.scl	2;	.type	32;	.endef
 __ZN4Util7makeSelEiii:
@@ -672,13 +661,53 @@ __ZN4Util7makeSelEiii:
 	popl	%ebp
 	ret
 	.align 2
+	.globl	__ZN4Util4lidtEsi
+	.def	__ZN4Util4lidtEsi;	.scl	2;	.type	32;	.endef
+__ZN4Util4lidtEsi:
+	pushl	%ebp
+	movl	%esp, %ebp
+	subl	$4, %esp
+	movl	8(%ebp), %eax
+	movw	%ax, -4(%ebp)
+/APP
+ # 220 "libx2.cpp" 1
+	movw 4+4*1(%ebp),%ax 
+	movw %ax,4+4*1+2(%ebp) 
+	lidt 4+4*1+2(%ebp) 
+	
+ # 0 "" 2
+/NO_APP
+	nop
+	leave
+	ret
+	.align 2
+	.globl	__ZN4Util4lgdtEsi
+	.def	__ZN4Util4lgdtEsi;	.scl	2;	.type	32;	.endef
+__ZN4Util4lgdtEsi:
+	pushl	%ebp
+	movl	%esp, %ebp
+	subl	$4, %esp
+	movl	8(%ebp), %eax
+	movw	%ax, -4(%ebp)
+/APP
+ # 228 "libx2.cpp" 1
+	movw 4+4*1(%ebp),%ax 
+	movw %ax,4+4*1+2(%ebp) 
+	lgdt 4+4*1+2(%ebp) 
+	
+ # 0 "" 2
+/NO_APP
+	nop
+	leave
+	ret
+	.align 2
 	.globl	__ZN4Util6getCPLEv
 	.def	__ZN4Util6getCPLEv;	.scl	2;	.type	32;	.endef
 __ZN4Util6getCPLEv:
 	pushl	%ebp
 	movl	%esp, %ebp
 /APP
- # 224 "libx2.cpp" 1
+ # 235 "libx2.cpp" 1
 	mov %cs,%ax 
 	and $0b11,%al 
 	
@@ -694,7 +723,7 @@ __ZN4Util6getDPLEi:
 	pushl	%ebp
 	movl	%esp, %ebp
 /APP
- # 231 "libx2.cpp" 1
+ # 242 "libx2.cpp" 1
 	movw 4+4*1(%ebp),%ax 
 	and $0b11,%al 
 	
@@ -710,7 +739,7 @@ __ZN4Util9changeCPLEiiiii:
 	pushl	%ebp
 	movl	%esp, %ebp
 /APP
- # 238 "libx2.cpp" 1
+ # 249 "libx2.cpp" 1
 	add $4*2,%esp 
 	iret 
 	
@@ -726,7 +755,7 @@ __ZN4Util9getEflagsEv:
 	pushl	%ebp
 	movl	%esp, %ebp
 /APP
- # 245 "libx2.cpp" 1
+ # 256 "libx2.cpp" 1
 	pushfl 
 	popl %eax 
 	
@@ -736,21 +765,344 @@ __ZN4Util9getEflagsEv:
 	popl	%ebp
 	ret
 	.align 2
-	.globl	__ZN4Util4outbEii
-	.def	__ZN4Util4outbEii;	.scl	2;	.type	32;	.endef
-__ZN4Util4outbEii:
+	.globl	__ZN4Util10digitToStrEPcji
+	.def	__ZN4Util10digitToStrEPcji;	.scl	2;	.type	32;	.endef
+__ZN4Util10digitToStrEPcji:
 	pushl	%ebp
 	movl	%esp, %ebp
-	movl	12(%ebp), %eax
+	pushl	%ebx
+	subl	$32, %esp
+	movl	$1, -8(%ebp)
+	movl	$0, -12(%ebp)
+	movl	-12(%ebp), %eax
+	cmpl	12(%ebp), %eax
+	jne	L54
+	movl	$0, %eax
+	jmp	L55
+L54:
 	movl	8(%ebp), %edx
-/APP
- # 254 "libx2.cpp" 1
-	out %al,%dx 
-	
- # 0 "" 2
-/NO_APP
-	nop
+	movl	-12(%ebp), %eax
+	addl	%edx, %eax
+	movb	$0, (%eax)
+	addl	$1, -12(%ebp)
+	cmpl	$0, 16(%ebp)
+	jns	L56
+	negl	16(%ebp)
+	movl	$-1, -8(%ebp)
+L56:
+	cmpl	$0, 16(%ebp)
+	jne	L57
+	movl	-12(%ebp), %eax
+	cmpl	12(%ebp), %eax
+	jne	L58
+	movl	$0, %eax
+	jmp	L55
+L58:
+	movl	8(%ebp), %edx
+	movl	-12(%ebp), %eax
+	addl	%edx, %eax
+	movb	$48, (%eax)
+	addl	$1, -12(%ebp)
+	jmp	L59
+L57:
+	cmpl	$0, 16(%ebp)
+	jle	L59
+	movl	-12(%ebp), %eax
+	cmpl	12(%ebp), %eax
+	jne	L60
+	movl	$0, %eax
+	jmp	L55
+L60:
+	movl	8(%ebp), %edx
+	movl	-12(%ebp), %eax
+	leal	(%edx,%eax), %ebx
+	movl	16(%ebp), %ecx
+	movl	$1717986919, %edx
+	movl	%ecx, %eax
+	imull	%edx
+	sarl	$2, %edx
+	movl	%ecx, %eax
+	sarl	$31, %eax
+	subl	%eax, %edx
+	movl	%edx, %eax
+	sall	$2, %eax
+	addl	%edx, %eax
+	addl	%eax, %eax
+	subl	%eax, %ecx
+	movl	%ecx, %edx
+	movl	%edx, %eax
+	addl	$48, %eax
+	movb	%al, (%ebx)
+	movl	16(%ebp), %ecx
+	movl	$1717986919, %edx
+	movl	%ecx, %eax
+	imull	%edx
+	sarl	$2, %edx
+	movl	%ecx, %eax
+	sarl	$31, %eax
+	subl	%eax, %edx
+	movl	%edx, %eax
+	movl	%eax, 16(%ebp)
+	addl	$1, -12(%ebp)
+	jmp	L57
+L59:
+	cmpl	$-1, -8(%ebp)
+	jne	L61
+	movl	-12(%ebp), %eax
+	cmpl	12(%ebp), %eax
+	jne	L62
+	movl	$0, %eax
+	jmp	L55
+L62:
+	movl	8(%ebp), %edx
+	movl	-12(%ebp), %eax
+	addl	%edx, %eax
+	movb	$45, (%eax)
+	addl	$1, -12(%ebp)
+L61:
+	movl	$0, -16(%ebp)
+	movl	-12(%ebp), %eax
+	subl	$1, %eax
+	movl	%eax, -20(%ebp)
+L64:
+	movl	-16(%ebp), %eax
+	cmpl	-20(%ebp), %eax
+	jnb	L63
+	movl	8(%ebp), %edx
+	movl	-16(%ebp), %eax
+	addl	%edx, %eax
+	movzbl	(%eax), %eax
+	movb	%al, -21(%ebp)
+	movl	8(%ebp), %edx
+	movl	-16(%ebp), %eax
+	addl	%eax, %edx
+	movl	8(%ebp), %ecx
+	movl	-20(%ebp), %eax
+	addl	%ecx, %eax
+	movzbl	(%eax), %eax
+	movb	%al, (%edx)
+	movl	8(%ebp), %edx
+	movl	-20(%ebp), %eax
+	addl	%eax, %edx
+	movzbl	-21(%ebp), %eax
+	movb	%al, (%edx)
+	addl	$1, -16(%ebp)
+	subl	$1, -20(%ebp)
+	jmp	L64
+L63:
+	movl	-12(%ebp), %eax
+L55:
+	addl	$32, %esp
+	popl	%ebx
 	popl	%ebp
+	ret
+	.align 2
+	.globl	__ZN4Util10digitToHexEPcjj
+	.def	__ZN4Util10digitToHexEPcjj;	.scl	2;	.type	32;	.endef
+__ZN4Util10digitToHexEPcjj:
+	pushl	%ebp
+	movl	%esp, %ebp
+	subl	$32, %esp
+	movl	$0, -4(%ebp)
+	movl	-4(%ebp), %eax
+	cmpl	12(%ebp), %eax
+	jne	L66
+	movl	$0, %eax
+	jmp	L67
+L66:
+	movl	8(%ebp), %edx
+	movl	-4(%ebp), %eax
+	addl	%edx, %eax
+	movb	$0, (%eax)
+	addl	$1, -4(%ebp)
+	cmpl	$0, 16(%ebp)
+	jne	L68
+	movl	-4(%ebp), %eax
+	cmpl	12(%ebp), %eax
+	jne	L69
+	movl	$0, %eax
+	jmp	L67
+L69:
+	movl	8(%ebp), %edx
+	movl	-4(%ebp), %eax
+	addl	%edx, %eax
+	movb	$48, (%eax)
+	addl	$1, -4(%ebp)
+	jmp	L70
+L68:
+	cmpl	$0, 16(%ebp)
+	je	L70
+	movl	-4(%ebp), %eax
+	cmpl	12(%ebp), %eax
+	jne	L71
+	movl	$0, %eax
+	jmp	L67
+L71:
+	movl	16(%ebp), %eax
+	andl	$15, %eax
+	movl	%eax, -16(%ebp)
+	cmpl	$9, -16(%ebp)
+	jg	L72
+	movl	8(%ebp), %edx
+	movl	-4(%ebp), %eax
+	addl	%edx, %eax
+	movl	-16(%ebp), %edx
+	addl	$48, %edx
+	movb	%dl, (%eax)
+	jmp	L73
+L72:
+	movl	8(%ebp), %edx
+	movl	-4(%ebp), %eax
+	addl	%edx, %eax
+	movl	-16(%ebp), %edx
+	addl	$87, %edx
+	movb	%dl, (%eax)
+L73:
+	movl	16(%ebp), %eax
+	shrl	$4, %eax
+	movl	%eax, 16(%ebp)
+	addl	$1, -4(%ebp)
+	jmp	L68
+L70:
+	movl	$0, -8(%ebp)
+	movl	-4(%ebp), %eax
+	subl	$1, %eax
+	movl	%eax, -12(%ebp)
+L75:
+	movl	-8(%ebp), %eax
+	cmpl	-12(%ebp), %eax
+	jge	L74
+	movl	-8(%ebp), %edx
+	movl	8(%ebp), %eax
+	addl	%edx, %eax
+	movzbl	(%eax), %eax
+	movb	%al, -17(%ebp)
+	movl	-8(%ebp), %edx
+	movl	8(%ebp), %eax
+	addl	%eax, %edx
+	movl	-12(%ebp), %ecx
+	movl	8(%ebp), %eax
+	addl	%ecx, %eax
+	movzbl	(%eax), %eax
+	movb	%al, (%edx)
+	movl	-12(%ebp), %edx
+	movl	8(%ebp), %eax
+	addl	%eax, %edx
+	movzbl	-17(%ebp), %eax
+	movb	%al, (%edx)
+	addl	$1, -8(%ebp)
+	subl	$1, -12(%ebp)
+	jmp	L75
+L74:
+	movl	-4(%ebp), %eax
+L67:
+	leave
+	ret
+	.align 2
+	.globl	__ZN4Util6strcmpEPKcS1_
+	.def	__ZN4Util6strcmpEPKcS1_;	.scl	2;	.type	32;	.endef
+__ZN4Util6strcmpEPKcS1_:
+	pushl	%ebp
+	movl	%esp, %ebp
+	subl	$16, %esp
+	movl	$0, -4(%ebp)
+L78:
+	movl	-4(%ebp), %edx
+	movl	8(%ebp), %eax
+	addl	%edx, %eax
+	movzbl	(%eax), %eax
+	testb	%al, %al
+	je	L77
+	movl	-4(%ebp), %edx
+	movl	12(%ebp), %eax
+	addl	%edx, %eax
+	movzbl	(%eax), %eax
+	testb	%al, %al
+	je	L77
+	movl	-4(%ebp), %edx
+	movl	8(%ebp), %eax
+	addl	%edx, %eax
+	movzbl	(%eax), %edx
+	movl	-4(%ebp), %ecx
+	movl	12(%ebp), %eax
+	addl	%ecx, %eax
+	movzbl	(%eax), %eax
+	cmpb	%al, %dl
+	jne	L77
+	addl	$1, -4(%ebp)
+	jmp	L78
+L77:
+	movl	-4(%ebp), %edx
+	movl	8(%ebp), %eax
+	addl	%edx, %eax
+	movzbl	(%eax), %eax
+	movsbl	%al, %edx
+	movl	-4(%ebp), %ecx
+	movl	12(%ebp), %eax
+	addl	%ecx, %eax
+	movzbl	(%eax), %eax
+	movsbl	%al, %eax
+	subl	%eax, %edx
+	movl	%edx, %eax
+	leave
+	ret
+	.align 2
+	.globl	__ZN4Util6strlenEPKc
+	.def	__ZN4Util6strlenEPKc;	.scl	2;	.type	32;	.endef
+__ZN4Util6strlenEPKc:
+	pushl	%ebp
+	movl	%esp, %ebp
+	subl	$16, %esp
+	movl	$0, -4(%ebp)
+L82:
+	movl	-4(%ebp), %edx
+	movl	8(%ebp), %eax
+	addl	%edx, %eax
+	movzbl	(%eax), %eax
+	testb	%al, %al
+	je	L81
+	addl	$1, -4(%ebp)
+	jmp	L82
+L81:
+	movl	-4(%ebp), %eax
+	leave
+	ret
+	.align 2
+	.globl	__ZN4Util7strcopyEPKcPci
+	.def	__ZN4Util7strcopyEPKcPci;	.scl	2;	.type	32;	.endef
+__ZN4Util7strcopyEPKcPci:
+	pushl	%ebp
+	movl	%esp, %ebp
+	subl	$16, %esp
+	movl	$0, -4(%ebp)
+L86:
+	movl	16(%ebp), %eax
+	subl	$1, %eax
+	cmpl	-4(%ebp), %eax
+	je	L85
+	movl	-4(%ebp), %edx
+	movl	8(%ebp), %eax
+	addl	%edx, %eax
+	movzbl	(%eax), %eax
+	testb	%al, %al
+	je	L85
+	movl	-4(%ebp), %edx
+	movl	12(%ebp), %eax
+	addl	%eax, %edx
+	movl	-4(%ebp), %ecx
+	movl	8(%ebp), %eax
+	addl	%ecx, %eax
+	movzbl	(%eax), %eax
+	movb	%al, (%edx)
+	addl	$1, -4(%ebp)
+	jmp	L86
+L85:
+	movl	-4(%ebp), %edx
+	movl	12(%ebp), %eax
+	addl	%edx, %eax
+	movb	$0, (%eax)
+	movl	-4(%ebp), %eax
+	leave
 	ret
 	.globl	__ZN17SimpleCharRotator12rotateShapesE
 	.section .rdata,"dr"
@@ -851,7 +1203,7 @@ __ZN17SimpleCharRotator3runEv:
 	pushl	%ebx
 	subl	$12, %esp
 	movl	%ecx, -8(%ebp)
-L58:
+L93:
 	movl	-8(%ebp), %eax
 	movl	4(%eax), %edx
 	movl	-8(%ebp), %eax
@@ -869,7 +1221,7 @@ L58:
 	movl	$65536, %ecx
 	movl	%eax, %edx
 /APP
- # 282 "libx2.cpp" 1
+ # 392 "libx2.cpp" 1
 	int $0x24
 	
  # 0 "" 2
@@ -887,7 +1239,7 @@ L58:
 	movl	%eax, %edx
 	movl	-8(%ebp), %eax
 	movl	%edx, 12(%eax)
-	jmp	L58
+	jmp	L93
 	.globl	__ZN7Printer12SCREEN_MAX_XE
 	.section .rdata,"dr"
 	.align 4
@@ -899,68 +1251,62 @@ __ZN7Printer12SCREEN_MAX_YE:
 	.long	80
 	.text
 	.align 2
-	.globl	__ZN7PrinterC2Eiiiii
-	.def	__ZN7PrinterC2Eiiiii;	.scl	2;	.type	32;	.endef
-__ZN7PrinterC2Eiiiii:
+	.globl	__ZN7PrinterC2Ejjjji
+	.def	__ZN7PrinterC2Ejjjji;	.scl	2;	.type	32;	.endef
+__ZN7PrinterC2Ejjjji:
 	pushl	%ebp
 	movl	%esp, %ebp
 	subl	$4, %esp
 	movl	%ecx, -4(%ebp)
-	cmpl	$25, 8(%ebp)
-	jg	L60
-	movl	8(%ebp), %eax
-	jmp	L61
-L60:
-	movl	$24, %eax
-L61:
-	movl	-4(%ebp), %edx
-	movl	%eax, (%edx)
-	cmpl	$80, 12(%ebp)
-	jg	L62
-	movl	12(%ebp), %eax
-	jmp	L63
-L62:
-	movl	$79, %eax
-L63:
-	movl	-4(%ebp), %edx
-	movl	%eax, 4(%edx)
-	movl	20(%ebp), %eax
-	cmpl	$80, %eax
-	jg	L64
-	movl	20(%ebp), %eax
-	jmp	L65
-L64:
+	movl	$25, %eax
+	cmpl	$25, 16(%ebp)
+	cmovbe	16(%ebp), %eax
+	movl	%eax, %edx
+	movl	-4(%ebp), %eax
+	movl	%edx, (%eax)
 	movl	$80, %eax
-L65:
+	cmpl	$80, 20(%ebp)
+	cmovbe	20(%ebp), %eax
+	movl	%eax, %edx
+	movl	-4(%ebp), %eax
+	movl	%edx, 4(%eax)
+	movl	8(%ebp), %edx
+	movl	16(%ebp), %eax
+	addl	%edx, %eax
+	cmpl	$24, %eax
+	ja	L95
+	movl	8(%ebp), %eax
+	jmp	L96
+L95:
+	movl	$0, %eax
+L96:
 	movl	-4(%ebp), %edx
 	movl	%eax, 8(%edx)
-	movl	16(%ebp), %eax
-	cmpl	$25, %eax
-	jg	L66
-	movl	16(%ebp), %eax
-	jmp	L67
-L66:
-	movl	$25, %eax
-L67:
+	movl	12(%ebp), %edx
+	movl	20(%ebp), %eax
+	addl	%edx, %eax
+	cmpl	$79, %eax
+	ja	L97
+	movl	12(%ebp), %eax
+	jmp	L98
+L97:
+	movl	$0, %eax
+L98:
 	movl	-4(%ebp), %edx
 	movl	%eax, 12(%edx)
 	movl	-4(%ebp), %eax
-	movl	(%eax), %edx
+	movl	$0, 16(%eax)
 	movl	-4(%ebp), %eax
-	movl	%edx, 16(%eax)
-	movl	-4(%ebp), %eax
-	movl	4(%eax), %edx
-	movl	-4(%ebp), %eax
-	movl	%edx, 20(%eax)
+	movl	$0, 20(%eax)
 	movl	-4(%ebp), %eax
 	movl	24(%ebp), %edx
 	movl	%edx, 24(%eax)
 	nop
 	leave
 	ret	$20
-	.globl	__ZN7PrinterC1Eiiiii
-	.def	__ZN7PrinterC1Eiiiii;	.scl	2;	.type	32;	.endef
-	.set	__ZN7PrinterC1Eiiiii,__ZN7PrinterC2Eiiiii
+	.globl	__ZN7PrinterC1Ejjjji
+	.def	__ZN7PrinterC1Ejjjji;	.scl	2;	.type	32;	.endef
+	.set	__ZN7PrinterC1Ejjjji,__ZN7PrinterC2Ejjjji
 	.align 2
 	.globl	__ZN7PrinterD2Ev
 	.def	__ZN7PrinterD2Ev;	.scl	2;	.type	32;	.endef
@@ -989,16 +1335,18 @@ __ZN7Printer4moveEi:
 	addl	%eax, %edx
 	movl	-4(%ebp), %eax
 	movl	%edx, 20(%eax)
-L72:
+L103:
 	movl	-4(%ebp), %eax
 	movl	20(%eax), %eax
 	testl	%eax, %eax
-	jns	L70
+	jns	L101
 	movl	-4(%ebp), %eax
-	movl	20(%eax), %edx
+	movl	20(%eax), %eax
+	movl	%eax, %edx
 	movl	-4(%ebp), %eax
-	movl	8(%eax), %eax
-	addl	%eax, %edx
+	movl	4(%eax), %eax
+	addl	%edx, %eax
+	movl	%eax, %edx
 	movl	-4(%ebp), %eax
 	movl	%edx, 20(%eax)
 	movl	-4(%ebp), %eax
@@ -1009,24 +1357,30 @@ L72:
 	movl	-4(%ebp), %eax
 	movl	16(%eax), %eax
 	cmpl	$-1, %eax
-	jne	L72
+	jne	L103
 	movl	-4(%ebp), %eax
-	movl	12(%eax), %edx
+	movl	(%eax), %eax
+	subl	$1, %eax
+	movl	%eax, %edx
 	movl	-4(%ebp), %eax
 	movl	%edx, 16(%eax)
-	jmp	L72
-L70:
+	jmp	L103
+L101:
 	movl	-4(%ebp), %eax
-	movl	20(%eax), %edx
+	movl	20(%eax), %eax
+	movl	%eax, %edx
 	movl	-4(%ebp), %eax
-	movl	8(%eax), %eax
+	movl	4(%eax), %eax
 	cmpl	%eax, %edx
-	jl	L75
+	jb	L106
 	movl	-4(%ebp), %eax
-	movl	20(%eax), %edx
+	movl	20(%eax), %eax
+	movl	%eax, %edx
 	movl	-4(%ebp), %eax
-	movl	8(%eax), %eax
+	movl	4(%eax), %eax
 	subl	%eax, %edx
+	movl	%edx, %eax
+	movl	%eax, %edx
 	movl	-4(%ebp), %eax
 	movl	%edx, 20(%eax)
 	movl	-4(%ebp), %eax
@@ -1035,18 +1389,16 @@ L70:
 	movl	-4(%ebp), %eax
 	movl	%edx, 16(%eax)
 	movl	-4(%ebp), %eax
-	movl	16(%eax), %edx
+	movl	16(%eax), %eax
+	movl	%eax, %edx
 	movl	-4(%ebp), %eax
-	movl	12(%eax), %eax
+	movl	(%eax), %eax
 	cmpl	%eax, %edx
-	jne	L70
+	jne	L101
 	movl	-4(%ebp), %eax
-	movl	12(%eax), %eax
-	leal	-1(%eax), %edx
-	movl	-4(%ebp), %eax
-	movl	%edx, 16(%eax)
-	jmp	L70
-L75:
+	movl	$0, 16(%eax)
+	jmp	L101
+L106:
 	nop
 	leave
 	ret	$4
@@ -1061,31 +1413,32 @@ __ZN7Printer4putcEi:
 	movl	__ZN4Util13videoSelectorE, %eax
 	movl	%eax, -16(%ebp)
 /APP
- # 193 "libx2.h" 1
+ # 299 "libx2.h" 1
 	mov %es,%ax
 	
  # 0 "" 2
 /NO_APP
 	movl	%eax, -20(%ebp)
-	cmpl	$65536, -16(%ebp)
-	jne	L77
+	movl	$65536, %eax
+	cmpl	%eax, -16(%ebp)
+	jne	L108
 /APP
- # 202 "libx2.h" 1
+ # 308 "libx2.h" 1
 	mov %ds,%ax 
 	mov %ax,%es 
 	
  # 0 "" 2
 /NO_APP
-	jmp	L78
-L77:
+	jmp	L109
+L108:
 	movl	-16(%ebp), %eax
 /APP
- # 209 "libx2.h" 1
+ # 315 "libx2.h" 1
 	mov %ax,%es 
 	
  # 0 "" 2
 /NO_APP
-L78:
+L109:
 	movl	-28(%ebp), %eax
 	movl	8(%ebp), %edx
 	movl	%edx, (%esp)
@@ -1093,9 +1446,9 @@ L78:
 	call	__ZN7Printer20specailCharProcessorEi
 	subl	$4, %esp
 	testl	%eax, %eax
-	je	L80
-	jmp	L81
-L80:
+	je	L111
+	jmp	L112
+L111:
 	movl	-28(%ebp), %eax
 	movl	8(%ebp), %edx
 	movl	%edx, (%esp)
@@ -1108,12 +1461,12 @@ L80:
 	call	__ZN7Printer4moveEi
 	subl	$4, %esp
 	nop
-L81:
+L112:
 	movl	-20(%ebp), %eax
 	movl	%eax, -12(%ebp)
 	movl	-12(%ebp), %eax
 /APP
- # 214 "libx2.h" 1
+ # 320 "libx2.h" 1
 	mov %ax,%es 
 	
  # 0 "" 2
@@ -1134,31 +1487,32 @@ __ZN7Printer5putszEPc:
 	movl	__ZN4Util13videoSelectorE, %eax
 	movl	%eax, -24(%ebp)
 /APP
- # 193 "libx2.h" 1
+ # 299 "libx2.h" 1
 	mov %es,%ax
 	
  # 0 "" 2
 /NO_APP
 	movl	%eax, -28(%ebp)
-	cmpl	$65536, -24(%ebp)
-	jne	L83
+	movl	$65536, %eax
+	cmpl	%eax, -24(%ebp)
+	jne	L114
 /APP
- # 202 "libx2.h" 1
+ # 308 "libx2.h" 1
 	mov %ds,%ax 
 	mov %ax,%es 
 	
  # 0 "" 2
 /NO_APP
-	jmp	L84
-L83:
+	jmp	L115
+L114:
 	movl	-24(%ebp), %eax
 /APP
- # 209 "libx2.h" 1
+ # 315 "libx2.h" 1
 	mov %ax,%es 
 	
  # 0 "" 2
 /NO_APP
-L84:
+L115:
 	movl	-12(%ebp), %eax
 	movzbl	(%eax), %eax
 	movsbl	%al, %edx
@@ -1171,9 +1525,9 @@ L84:
 	cmpl	$-1, -20(%ebp)
 	setne	%al
 	testb	%al, %al
-	je	L85
+	je	L116
 	cmpl	$0, -20(%ebp)
-	jne	L86
+	jne	L117
 	movl	-12(%ebp), %eax
 	movzbl	(%eax), %eax
 	movsbl	%al, %edx
@@ -1187,15 +1541,15 @@ L84:
 	movl	%eax, %ecx
 	call	__ZN7Printer4moveEi
 	subl	$4, %esp
-L86:
+L117:
 	addl	$1, -12(%ebp)
-	jmp	L84
-L85:
+	jmp	L115
+L116:
 	movl	-28(%ebp), %eax
 	movl	%eax, -16(%ebp)
 	movl	-16(%ebp), %eax
 /APP
- # 214 "libx2.h" 1
+ # 320 "libx2.h" 1
 	mov %ax,%es 
 	
  # 0 "" 2
@@ -1216,33 +1570,34 @@ __ZN7Printer5putsnEPci:
 	movl	__ZN4Util13videoSelectorE, %eax
 	movl	%eax, -28(%ebp)
 /APP
- # 193 "libx2.h" 1
+ # 299 "libx2.h" 1
 	mov %es,%ax
 	
  # 0 "" 2
 /NO_APP
 	movl	%eax, -32(%ebp)
-	cmpl	$65536, -28(%ebp)
-	jne	L88
+	movl	$65536, %eax
+	cmpl	%eax, -28(%ebp)
+	jne	L119
 /APP
- # 202 "libx2.h" 1
+ # 308 "libx2.h" 1
 	mov %ds,%ax 
 	mov %ax,%es 
 	
  # 0 "" 2
 /NO_APP
-	jmp	L89
-L88:
+	jmp	L120
+L119:
 	movl	-28(%ebp), %eax
 /APP
- # 209 "libx2.h" 1
+ # 315 "libx2.h" 1
 	mov %ax,%es 
 	
  # 0 "" 2
 /NO_APP
-L89:
+L120:
 	movl	$0, -16(%ebp)
-L94:
+L125:
 	movl	-12(%ebp), %eax
 	movzbl	(%eax), %eax
 	movsbl	%al, %edx
@@ -1253,19 +1608,19 @@ L94:
 	subl	$4, %esp
 	movl	%eax, -24(%ebp)
 	cmpl	$-1, -24(%ebp)
-	je	L90
+	je	L121
 	movl	-16(%ebp), %eax
 	cmpl	12(%ebp), %eax
-	je	L90
+	je	L121
 	movl	$1, %eax
-	jmp	L91
-L90:
+	jmp	L122
+L121:
 	movl	$0, %eax
-L91:
+L122:
 	testb	%al, %al
-	je	L92
+	je	L123
 	cmpl	$0, -24(%ebp)
-	jne	L93
+	jne	L124
 	movl	-12(%ebp), %eax
 	movzbl	(%eax), %eax
 	movsbl	%al, %edx
@@ -1279,16 +1634,16 @@ L91:
 	movl	%eax, %ecx
 	call	__ZN7Printer4moveEi
 	subl	$4, %esp
-L93:
+L124:
 	addl	$1, -12(%ebp)
 	addl	$1, -16(%ebp)
-	jmp	L94
-L92:
+	jmp	L125
+L123:
 	movl	-32(%ebp), %eax
 	movl	%eax, -20(%ebp)
 	movl	-20(%ebp), %eax
 /APP
- # 214 "libx2.h" 1
+ # 320 "libx2.h" 1
 	mov %ax,%es 
 	
  # 0 "" 2
@@ -1304,18 +1659,22 @@ __ZN7Printer6setPosEii:
 	movl	%esp, %ebp
 	subl	$4, %esp
 	movl	%ecx, -4(%ebp)
-	movl	-4(%ebp), %eax
-	movl	12(%eax), %ecx
 	movl	8(%ebp), %eax
-	cltd
-	idivl	%ecx
+	movl	-4(%ebp), %edx
+	movl	(%edx), %ecx
+	movl	$0, %edx
+	divl	%ecx
+	movl	%edx, %eax
+	movl	%eax, %edx
 	movl	-4(%ebp), %eax
 	movl	%edx, 16(%eax)
-	movl	-4(%ebp), %eax
-	movl	8(%eax), %ecx
 	movl	12(%ebp), %eax
-	cltd
-	idivl	%ecx
+	movl	-4(%ebp), %edx
+	movl	4(%edx), %ecx
+	movl	$0, %edx
+	divl	%ecx
+	movl	%edx, %eax
+	movl	%eax, %edx
 	movl	-4(%ebp), %eax
 	movl	%edx, 20(%eax)
 	nop
@@ -1345,69 +1704,72 @@ __ZN7Printer20specailCharProcessorEi:
 	movl	%ecx, -20(%ebp)
 	movl	$1, -4(%ebp)
 	cmpl	$13, 8(%ebp)
-	ja	L98
+	ja	L129
 	movl	8(%ebp), %eax
 	sall	$2, %eax
-	addl	$L100, %eax
+	addl	$L131, %eax
 	movl	(%eax), %eax
 	jmp	*%eax
 	.section .rdata,"dr"
 	.align 4
-L100:
-	.long	L99
-	.long	L98
-	.long	L98
-	.long	L98
-	.long	L98
-	.long	L98
-	.long	L98
-	.long	L98
-	.long	L101
-	.long	L102
-	.long	L103
-	.long	L98
-	.long	L98
-	.long	L104
+L131:
+	.long	L130
+	.long	L129
+	.long	L129
+	.long	L129
+	.long	L129
+	.long	L129
+	.long	L129
+	.long	L129
+	.long	L132
+	.long	L133
+	.long	L134
+	.long	L129
+	.long	L129
+	.long	L135
 	.text
-L103:
+L134:
 	movl	-20(%ebp), %eax
 	movl	16(%eax), %eax
-	leal	1(%eax), %edx
+	addl	$1, %eax
+	movl	%eax, %edx
 	movl	-20(%ebp), %eax
-	movl	12(%eax), %ecx
+	movl	(%eax), %ecx
 	movl	%edx, %eax
-	cltd
-	idivl	%ecx
+	movl	$0, %edx
+	divl	%ecx
+	movl	%edx, %eax
+	movl	%eax, %edx
 	movl	-20(%ebp), %eax
 	movl	%edx, 16(%eax)
 	movl	-20(%ebp), %eax
 	movl	$0, 20(%eax)
-	jmp	L105
-L104:
+	jmp	L136
+L135:
 	movl	-20(%ebp), %eax
 	movl	$0, 20(%eax)
-	jmp	L105
-L101:
+	jmp	L136
+L132:
 	movl	-20(%ebp), %eax
 	movl	$-1, (%esp)
 	movl	%eax, %ecx
 	call	__ZN7Printer4moveEi
 	subl	$4, %esp
-	jmp	L105
-L102:
+	jmp	L136
+L133:
 	movl	-20(%ebp), %eax
 	movl	$4, (%esp)
 	movl	%eax, %ecx
 	call	__ZN7Printer4moveEi
 	subl	$4, %esp
-	jmp	L105
-L99:
+	jmp	L136
+L130:
 	movl	$-1, -4(%ebp)
-	jmp	L105
-L98:
+	jmp	L136
+L129:
 	movl	$0, -4(%ebp)
 	nop
-L105:
+L136:
 	movl	-4(%ebp), %eax
 	leave
 	ret	$4
@@ -1420,7 +1782,7 @@ __ZN7Printer6getPosEv:
 	subl	$4, %esp
 	movl	%ecx, -4(%ebp)
 	movl	-4(%ebp), %eax
-	movl	(%eax), %edx
+	movl	8(%eax), %edx
 	movl	-4(%ebp), %eax
 	movl	16(%eax), %eax
 	addl	%eax, %edx
@@ -1430,7 +1792,7 @@ __ZN7Printer6getPosEv:
 	sall	$4, %eax
 	movl	%eax, %ecx
 	movl	-4(%ebp), %eax
-	movl	4(%eax), %edx
+	movl	12(%eax), %edx
 	movl	-4(%ebp), %eax
 	movl	20(%eax), %eax
 	addl	%edx, %eax
@@ -1456,7 +1818,7 @@ __ZN7Printer6__putcEi:
 	movl	8(%ebp), %eax
 	movl	%ecx, %edi
 /APP
- # 433 "libx2.cpp" 1
+ # 543 "libx2.cpp" 1
 	mov %al,%es:(%edi) 
 	mov %dl,%es:1(%edi) 
 	
@@ -1482,28 +1844,30 @@ __ZN7Printer3clrEv:
 	call	__ZN7Printer6setPosEii
 	subl	$8, %esp
 	movl	$0, -12(%ebp)
-L114:
+L145:
 	movl	-28(%ebp), %eax
-	movl	12(%eax), %eax
-	cmpl	-12(%ebp), %eax
-	je	L111
+	movl	(%eax), %edx
+	movl	-12(%ebp), %eax
+	cmpl	%eax, %edx
+	je	L142
 	movl	$0, -16(%ebp)
-L113:
+L144:
 	movl	-28(%ebp), %eax
-	movl	8(%eax), %eax
-	cmpl	-16(%ebp), %eax
-	je	L112
+	movl	4(%eax), %edx
+	movl	-16(%ebp), %eax
+	cmpl	%eax, %edx
+	je	L143
 	movl	-28(%ebp), %eax
 	movl	$32, (%esp)
 	movl	%eax, %ecx
 	call	__ZN7Printer4putcEi
 	subl	$4, %esp
 	addl	$1, -16(%ebp)
-	jmp	L113
-L112:
+	jmp	L144
+L143:
 	addl	$1, -12(%ebp)
-	jmp	L114
-L111:
+	jmp	L145
+L142:
 	movl	-28(%ebp), %eax
 	movl	$0, 4(%esp)
 	movl	$0, (%esp)
@@ -1512,5 +1876,76 @@ L111:
 	subl	$8, %esp
 	nop
 	leave
+	ret
+	.align 2
+	.globl	__ZN6StringC2EPKc
+	.def	__ZN6StringC2EPKc;	.scl	2;	.type	32;	.endef
+__ZN6StringC2EPKc:
+	pushl	%ebp
+	movl	%esp, %ebp
+	subl	$4, %esp
+	movl	%ecx, -4(%ebp)
+	nop
+	leave
+	ret	$4
+	.globl	__ZN6StringC1EPKc
+	.def	__ZN6StringC1EPKc;	.scl	2;	.type	32;	.endef
+	.set	__ZN6StringC1EPKc,__ZN6StringC2EPKc
+	.align 2
+	.globl	__ZN6StringD2Ev
+	.def	__ZN6StringD2Ev;	.scl	2;	.type	32;	.endef
+__ZN6StringD2Ev:
+	pushl	%ebp
+	movl	%esp, %ebp
+	subl	$4, %esp
+	movl	%ecx, -4(%ebp)
+	nop
+	leave
+	ret
+	.globl	__ZN6StringD1Ev
+	.def	__ZN6StringD1Ev;	.scl	2;	.type	32;	.endef
+	.set	__ZN6StringD1Ev,__ZN6StringD2Ev
+	.align 2
+	.globl	__ZN6String4sizeEv
+	.def	__ZN6String4sizeEv;	.scl	2;	.type	32;	.endef
+__ZN6String4sizeEv:
+	pushl	%ebp
+	movl	%esp, %ebp
+	subl	$4, %esp
+	movl	%ecx, -4(%ebp)
+	nop
+	leave
+	ret
+	.align 2
+	.globl	__ZN6String3getEi
+	.def	__ZN6String3getEi;	.scl	2;	.type	32;	.endef
+__ZN6String3getEi:
+	pushl	%ebp
+	movl	%esp, %ebp
+	subl	$4, %esp
+	movl	%ecx, -4(%ebp)
+	nop
+	leave
+	ret	$4
+	.align 2
+	.globl	__ZN6String3setEii
+	.def	__ZN6String3setEii;	.scl	2;	.type	32;	.endef
+__ZN6String3setEii:
+	pushl	%ebp
+	movl	%esp, %ebp
+	subl	$4, %esp
+	movl	%ecx, -4(%ebp)
+	nop
+	leave
+	ret	$8
+	.align 2
+	.globl	__ZN6String7valueOfEi
+	.def	__ZN6String7valueOfEi;	.scl	2;	.type	32;	.endef
+__ZN6String7valueOfEi:
+	pushl	%ebp
+	movl	%esp, %ebp
+	nop
+	movl	8(%ebp), %eax
+	popl	%ebp
 	ret
 	.ident	"GCC: (GNU) 5.4.0"
