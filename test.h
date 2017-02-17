@@ -1,6 +1,7 @@
 
-#ifndef __test_h__
-#define __test_h__
+#ifndef test_h__
+#define test_h__
+#include "libx2.h"
 
 class Test{
 public:
@@ -10,9 +11,11 @@ public:
     
     
     void testQueue();
+    void testList();
     void run();
     
-
+protected:
+    Printer dbg;
     
     
 };

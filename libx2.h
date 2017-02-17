@@ -166,8 +166,17 @@ public:
     void move(int n);
     void setMode(int mode);
     void clr();
+    /**
+    *direction=-1 即向前
+    */
+    INCOMPLETE int isInside(int x,int y);
+    
     AS_MACRO int getX();
     AS_MACRO int getY();
+    
+    //相对于申请屏幕的偏移和大小
+    // can't be outside the screen
+    INCOMPLETE Printer  getSubPrinter(unsigned int x0,unsigned int y0,unsigned int rows,unsigned int cols,int mode);
     
 protected:
     int getPos();
@@ -176,6 +185,13 @@ protected:
     unsigned int rows,cols,x0,y0;
     int x,y;
     int mode;
+    
+    
+    Printer *father;
+    Printer *sons[5]; //need to check if a position is possessed by this printer or its sons.
+                        //currently the biggest size is 5
+                        //注意排序
+    unsigned int sonSize;
     
 private:
     /**
@@ -225,10 +241,7 @@ protected:
     unsigned int len;
     unsigned int curLen;
     int indexAdd,indexRemove;
-    
-    
 };
-
 
 #endif
 
@@ -383,60 +396,5 @@ unsigned int Queue<T>::size()
 
 //============================================================================
 
-//================================(非宏)模板区域==================
-#ifdef CODE32
-//============class : Queue<T>
-template<typename T>
-Queue<T>::Queue(T p[],unsigned int len):p(p),len(len),curLen(0),indexRemove(0),indexAdd(0)
-{
-    
-}
-template<typename T>
-Queue<T>::~Queue()
-{
-    
-}
-// i--remove
-//j--add
-//len = 4
-//  j=0 OK
-//  j=1 OK
-//  j=2 OK
-//  j=3 OK
-//  j=4--j=0 but j=0 full
-template<typename T>
-T Queue<T>::remove()
-{
-    T rt;
-    if(this->empty())
-    {
-        return 0;
-    }else{
-        rt = p[indexRemove];
-        indexRemove++;
-        curLen--;
-        if(indexRemove==(int)len)indexRemove=0;
-    }
-    return rt;
-}
-template <typename T>
-int Queue<T>::add(T t)
-{
-    if(this->full())
-    {
-        return 0;
-    }else{
-        this->p[indexAdd]=t;
-        indexAdd++;
-        curLen++;
-        if(indexAdd == (int)len)indexAdd=0;
-    }
-    return 1;
-    
-}
-
-
-#endif
-//======================================================================
 
 #endif

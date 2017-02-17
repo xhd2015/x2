@@ -245,7 +245,7 @@ L14:
 	movl	-12(%ebp), %ebx
 	movl	12(%ebp), %ecx
 /APP
- # 101 "libx2.cpp" 1
+ # 105 "libx2.cpp" 1
 	push %es
 	mov %dx,%es
 	movb %al,%es:(%bx) 
@@ -300,7 +300,7 @@ __ZN4Util10insertMarkEi:
 	pushl	%ebp
 	movl	%esp, %ebp
 /APP
- # 116 "libx2.cpp" 1
+ # 120 "libx2.cpp" 1
 	nop 
 	
  # 0 "" 2
@@ -320,7 +320,7 @@ __ZN4Util3getEii:
 	je	L19
 	movl	8(%ebp), %eax
 /APP
- # 120 "libx2.cpp" 1
+ # 124 "libx2.cpp" 1
 	mov %ds,%ebx
 	movw %ax,%ds 
 	
@@ -333,7 +333,7 @@ L19:
 	movl	8(%ebp), %eax
 	movl	%edx, %ebx
 /APP
- # 127 "libx2.cpp" 1
+ # 131 "libx2.cpp" 1
 	movl %ds:(%ebx),%eax 
 	
  # 0 "" 2
@@ -343,7 +343,7 @@ L19:
 	je	L20
 	movl	-8(%ebp), %eax
 /APP
- # 128 "libx2.cpp" 1
+ # 132 "libx2.cpp" 1
 	mov %ax,%ds 
 	
  # 0 "" 2
@@ -366,7 +366,7 @@ __ZN4Util4setbEiii:
 	je	L23
 	movl	8(%ebp), %eax
 /APP
- # 133 "libx2.cpp" 1
+ # 137 "libx2.cpp" 1
 	mov %ds,%ebx
 	movw %ax,%ds 
 	
@@ -376,7 +376,7 @@ __ZN4Util4setbEiii:
 	movl	%eax, -8(%ebp)
 L23:
 /APP
- # 141 "libx2.cpp" 1
+ # 145 "libx2.cpp" 1
 	movl 4+4*2(%ebp),%ebx 
 	movb 4+4*3(%ebp),%al 
 	movb %al,%ds:(%ebx) 
@@ -387,7 +387,7 @@ L23:
 	je	L25
 	movl	-8(%ebp), %eax
 /APP
- # 142 "libx2.cpp" 1
+ # 146 "libx2.cpp" 1
 	mov %ax,%ds 
 	
  # 0 "" 2
@@ -410,7 +410,7 @@ __ZN4Util4setwEiii:
 	je	L27
 	movl	8(%ebp), %eax
 /APP
- # 146 "libx2.cpp" 1
+ # 150 "libx2.cpp" 1
 	mov %ds,%ebx
 	movw %ax,%ds 
 	
@@ -420,7 +420,7 @@ __ZN4Util4setwEiii:
 	movl	%eax, -8(%ebp)
 L27:
 /APP
- # 154 "libx2.cpp" 1
+ # 158 "libx2.cpp" 1
 	movl 4+4*2(%ebp),%ebx 
 	movw 4+4*3(%ebp),%ax 
 	movw %ax,%ds:(%ebx) 
@@ -431,7 +431,7 @@ L27:
 	je	L29
 	movl	-8(%ebp), %eax
 /APP
- # 155 "libx2.cpp" 1
+ # 159 "libx2.cpp" 1
 	mov %ax,%ds 
 	
  # 0 "" 2
@@ -454,7 +454,7 @@ __ZN4Util4setlEiii:
 	je	L31
 	movl	8(%ebp), %eax
 /APP
- # 159 "libx2.cpp" 1
+ # 163 "libx2.cpp" 1
 	mov %ds,%ebx
 	movw %ax,%ds 
 	
@@ -464,7 +464,7 @@ __ZN4Util4setlEiii:
 	movl	%eax, -8(%ebp)
 L31:
 /APP
- # 167 "libx2.cpp" 1
+ # 171 "libx2.cpp" 1
 	movl 4+4*2(%ebp),%ebx 
 	mov 4+4*3(%ebp),%eax 
 	mov %eax,%ds:(%ebx) 
@@ -475,7 +475,7 @@ L31:
 	je	L33
 	movl	-8(%ebp), %eax
 /APP
- # 168 "libx2.cpp" 1
+ # 172 "libx2.cpp" 1
 	mov %ax,%ds 
 	
  # 0 "" 2
@@ -495,7 +495,7 @@ __ZN4Util7memcopyEiiiii:
 	pushl	%ebx
 	subl	$16, %esp
 /APP
- # 173 "libx2.cpp" 1
+ # 177 "libx2.cpp" 1
 	mov %es,%ax 
 	
  # 0 "" 2
@@ -504,7 +504,7 @@ __ZN4Util7memcopyEiiiii:
 	cmpl	$65536, 16(%ebp)
 	jne	L35
 /APP
- # 173 "libx2.cpp" 1
+ # 177 "libx2.cpp" 1
 	push %ds 
 	pop %es 
 	
@@ -514,7 +514,7 @@ __ZN4Util7memcopyEiiiii:
 L35:
 	movl	16(%ebp), %eax
 /APP
- # 173 "libx2.cpp" 1
+ # 177 "libx2.cpp" 1
 	movw %ax,%es 
 	
  # 0 "" 2
@@ -524,7 +524,7 @@ L36:
 	je	L37
 	movl	8(%ebp), %eax
 /APP
- # 174 "libx2.cpp" 1
+ # 178 "libx2.cpp" 1
 	mov %ds,%ebx
 	movw %ax,%ds 
 	
@@ -534,7 +534,7 @@ L36:
 	movl	%eax, -8(%ebp)
 L37:
 /APP
- # 186 "libx2.cpp" 1
+ # 190 "libx2.cpp" 1
 	push %esi 
 	push %edi 
 	mov 4+4*2(%ebp),%esi 
@@ -551,7 +551,7 @@ L37:
 	je	L38
 	movl	-8(%ebp), %eax
 /APP
- # 188 "libx2.cpp" 1
+ # 192 "libx2.cpp" 1
 	mov %ax,%ds 
 	
  # 0 "" 2
@@ -559,7 +559,7 @@ L37:
 L38:
 	movl	-12(%ebp), %eax
 /APP
- # 189 "libx2.cpp" 1
+ # 193 "libx2.cpp" 1
 	mov %ax,%es 
 	
  # 0 "" 2
@@ -650,7 +650,7 @@ __ZN4Util14readSectorsCHSEiiiiiii:
 	movl	%esp, %ebp
 	subl	$16, %esp
 /APP
- # 615 "libx2.cpp" 1
+ # 685 "libx2.cpp" 1
 	push %es
 	mov 4+4*1(%ebp),%eax 
 	movw %ax,%es

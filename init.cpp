@@ -14,8 +14,25 @@ public:
 
 };
 
+class T2{
+public:
+	
+	T2():t(T(1))
+	{
+		a=0;
+		t.y=0;	
+	}
+	~T2(){}
+	T t;
+	int a;
+
+};
+
 void test()
 {
+	T2 t2;
+	t2.a=0;
+	__asm__("#t2end \n\t");
 	T a(0);
 	int t;
 	__asm__("":"=a"(t));

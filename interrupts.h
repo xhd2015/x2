@@ -1,5 +1,7 @@
-#ifndef __interrupts__
-#define __interrupts__
+#ifndef __interrupts_h__
+#define __interrupts_h_
+
+#include "def.h"
 
 extern int *intAddresses;
 extern int intLen;
@@ -48,5 +50,24 @@ extern "C" {
 }
 extern int int0x20,int0x21;
 
+class InterruptsManager{
+public:
+    typedef void (*GENERAL_FUNC)();
+public:
+    InterruptsManager();
+    ~InterruptsManager();
+    
+    GENERAL_FUNC getIntAddr(unsigned int i);
+    void setIntAddr(unsigned int i);
+    
+    static void callInt(unsigned int i);
+    
+protected:
+    static GENERAL_FUNC intAddresses[];
+    static unsigned int intLen;
+    
+    static GENERAL_FUNC defaultHandler;
+    
+};
 
 #endif

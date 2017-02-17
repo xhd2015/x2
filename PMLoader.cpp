@@ -86,8 +86,14 @@ void PMLoader::adjustProtectedCode()
 {
     if(PMLoader::CODE_SEG*16+PMLoader::CODE_START < PMLoader::SAFE_SEG*16) //maybe wrong
     {
+        if(PMLoader::SAFE_SEG*16 + PMLoader::PROTECTED_SECNUMS*PMLoader::SECSIZE >= PMLoader::TEMP_SEG*16)//this will overlap the current code,you should stop this behavior and go back to trim the size of your code
+        {
+            __asm__("#Please go back to reduce the size of your code \n\t");
+        }else{
           Util::readSectors(PMLoader::SAFE_SEG,0,PMLoader::DRIVER,PMLoader::REAL_SECNUMS,PMLoader::PROTECTED_SECNUMS);
           Util::memcopy(PMLoader::SAFE_SEG,0,PMLoader::CODE_SEG,PMLoader::CODE_START,PMLoader::PROTECTED_SECNUMS * PMLoader::SECSIZE);
+        }
+
     }else{
         Util::readSectors(PMLoader::CODE_SEG,PMLoader::CODE_START,PMLoader::DRIVER,PMLoader::REAL_SECNUMS,PMLoader::PROTECTED_SECNUMS);
     }

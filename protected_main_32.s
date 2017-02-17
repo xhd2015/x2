@@ -36,10 +36,10 @@ _protectedEntryHolder:
 	pushl	%ebp
 	movl	%esp, %ebp
 	pushl	%ebx
-	subl	$388, %esp
+	subl	$468, %esp
 	call	__ZN4Util3clrEv
 	movl	__ZN4Util11MODE_COMMONE, %edx
-	leal	-40(%ebp), %eax
+	leal	-68(%ebp), %eax
 	movl	%edx, 16(%esp)
 	movl	$20, 12(%esp)
 	movl	$6, 8(%esp)
@@ -48,47 +48,47 @@ _protectedEntryHolder:
 	movl	%eax, %ecx
 	call	__ZN7PrinterC1Ejjjji
 	subl	$20, %esp
-	leal	-40(%ebp), %eax
+	leal	-68(%ebp), %eax
 	movl	%eax, %ecx
 	call	__ZN7Printer3clrEv
-	leal	-40(%ebp), %eax
+	leal	-68(%ebp), %eax
 	movl	$LC0, (%esp)
 	movl	%eax, %ecx
 	call	__ZN7Printer5putszEPc
 	subl	$4, %esp
-	leal	-40(%ebp), %eax
+	leal	-68(%ebp), %eax
 	movl	$LC1, (%esp)
 	movl	%eax, %ecx
 	call	__ZN7Printer5putszEPc
 	subl	$4, %esp
-	leal	-41(%ebp), %eax
+	leal	-124(%ebp), %eax
 	movl	%eax, %ecx
 	call	__ZN4TestC1Ev
-	leal	-41(%ebp), %eax
+	leal	-124(%ebp), %eax
 	movl	%eax, %ecx
 	call	__ZN4Test3runEv
-	leal	-153(%ebp), %eax
+	leal	-236(%ebp), %eax
 	movl	%eax, %ecx
 	call	__ZN3TSSC1Ev
-	leal	-153(%ebp), %eax
+	leal	-236(%ebp), %eax
 	leal	8(%eax), %ebx
 	movl	$0, 8(%esp)
 	movl	$0, 4(%esp)
 	movl	$4, (%esp)
 	call	__ZN4Util7makeSelEiii
 	movw	%ax, (%ebx)
-	leal	-153(%ebp), %eax
+	leal	-236(%ebp), %eax
 	addl	$4, %eax
 	movl	$1532, (%eax)
 	movl	__ZN8PMLoader14TSS_AREA_STARTE, %ecx
 	movl	__ZN4Util11SEG_CURRENTE, %edx
-	leal	-153(%ebp), %eax
+	leal	-236(%ebp), %eax
 	movl	%ecx, 4(%esp)
 	movl	%edx, (%esp)
 	movl	%eax, %ecx
 	call	__ZN3TSS13writeToMemoryEii
 	subl	$8, %esp
-	leal	-40(%ebp), %eax
+	leal	-68(%ebp), %eax
 	movl	$LC2, (%esp)
 	movl	%eax, %ecx
 	call	__ZN7Printer5putszEPc
@@ -99,7 +99,7 @@ _protectedEntryHolder:
 	leal	-1(%eax), %ecx
 	movl	__ZN8PMLoader14TSS_AREA_STARTE, %eax
 	movl	%eax, %ebx
-	leal	-168(%ebp), %eax
+	leal	-251(%ebp), %eax
 	movl	$1, 24(%esp)
 	movl	$0, 20(%esp)
 	movl	$0, 16(%esp)
@@ -114,7 +114,7 @@ _protectedEntryHolder:
 	addl	$40, %eax
 	movl	%eax, %ecx
 	movl	__ZN4Util11SEG_CURRENTE, %edx
-	leal	-168(%ebp), %eax
+	leal	-251(%ebp), %eax
 	movl	%ecx, 4(%esp)
 	movl	%edx, (%esp)
 	movl	%eax, %ecx
@@ -125,25 +125,25 @@ _protectedEntryHolder:
 	movl	$5, (%esp)
 	call	__ZN4Util7makeSelEiii
 	cwtl
-	movl	%eax, -360(%ebp)
+	movl	%eax, -440(%ebp)
 /APP
- # 268 "libx2.h" 1
-	ltr -360(%ebp) 
+ # 281 "libx2.h" 1
+	ltr -440(%ebp) 
 	
  # 0 "" 2
 /NO_APP
-	leal	-40(%ebp), %eax
+	leal	-68(%ebp), %eax
 	movl	$LC3, (%esp)
 	movl	%eax, %ecx
 	call	__ZN7Printer5putszEPc
 	subl	$4, %esp
-	leal	-179(%ebp), %eax
+	leal	-262(%ebp), %eax
 	movl	%eax, %ecx
 	call	__ZN18SelectorDescriptorC1Ev
 	movl	__ZN17SegmentDescriptor5DPL_3E, %ecx
 	movl	__ZN18SelectorDescriptor8TYPE_INTE, %edx
 	movl	$_intDefault, %ebx
-	leal	-179(%ebp), %eax
+	leal	-262(%ebp), %eax
 	movl	$1, 20(%esp)
 	movl	$1, 16(%esp)
 	movl	%ecx, 12(%esp)
@@ -165,7 +165,7 @@ L3:
 	sall	$2, %edx
 	addl	%edx, %eax
 	movl	(%eax), %edx
-	leal	-179(%ebp), %eax
+	leal	-262(%ebp), %eax
 	movl	$1, 20(%esp)
 	movl	$1, 16(%esp)
 	movl	%ebx, 12(%esp)
@@ -180,7 +180,7 @@ L3:
 	movl	__ZN8PMLoader9IDT_STARTE, %eax
 	leal	(%edx,%eax), %ecx
 	movl	__ZN4Util11SEG_CURRENTE, %edx
-	leal	-179(%ebp), %eax
+	leal	-262(%ebp), %eax
 	movl	%ecx, 4(%esp)
 	movl	%edx, (%esp)
 	movl	%eax, %ecx
@@ -192,7 +192,7 @@ L2:
 	movl	__ZN17SegmentDescriptor5DPL_3E, %ecx
 	movl	__ZN18SelectorDescriptor8TYPE_INTE, %edx
 	movl	$_int0x20, %ebx
-	leal	-179(%ebp), %eax
+	leal	-262(%ebp), %eax
 	movl	$1, 20(%esp)
 	movl	$1, 16(%esp)
 	movl	%ecx, 12(%esp)
@@ -205,7 +205,7 @@ L2:
 	movl	__ZN8PMLoader9IDT_STARTE, %eax
 	leal	256(%eax), %ecx
 	movl	__ZN4Util11SEG_CURRENTE, %edx
-	leal	-179(%ebp), %eax
+	leal	-262(%ebp), %eax
 	movl	%ecx, 4(%esp)
 	movl	%edx, (%esp)
 	movl	%eax, %ecx
@@ -214,7 +214,7 @@ L2:
 	movl	__ZN17SegmentDescriptor5DPL_3E, %ecx
 	movl	__ZN18SelectorDescriptor8TYPE_INTE, %edx
 	movl	$_int0x21, %ebx
-	leal	-179(%ebp), %eax
+	leal	-262(%ebp), %eax
 	movl	$1, 20(%esp)
 	movl	$1, 16(%esp)
 	movl	%ecx, 12(%esp)
@@ -227,7 +227,7 @@ L2:
 	movl	__ZN8PMLoader9IDT_STARTE, %eax
 	leal	264(%eax), %ecx
 	movl	__ZN4Util11SEG_CURRENTE, %edx
-	leal	-179(%ebp), %eax
+	leal	-262(%ebp), %eax
 	movl	%ecx, 4(%esp)
 	movl	%edx, (%esp)
 	movl	%eax, %ecx
@@ -240,15 +240,15 @@ L2:
 	movl	$LC4, %ebx
 	movl	%eax, %ecx
 /APP
- # 73 "protected_main.cpp" 1
+ # 77 "protected_main.cpp" 1
 	int $0x24
 	
  # 0 "" 2
 /NO_APP
-	leal	-180(%ebp), %eax
+	leal	-263(%ebp), %eax
 	movl	%eax, %ecx
 	call	__ZN8IO_8259AC1Ev
-	leal	-180(%ebp), %eax
+	leal	-263(%ebp), %eax
 	movl	$1, 12(%esp)
 	movl	$0, 8(%esp)
 	movl	$0, 4(%esp)
@@ -256,7 +256,7 @@ L2:
 	movl	%eax, %ecx
 	call	__ZN8IO_8259A8sendICW1Eiiii
 	subl	$16, %esp
-	leal	-180(%ebp), %eax
+	leal	-263(%ebp), %eax
 	movl	$1, 12(%esp)
 	movl	$0, 8(%esp)
 	movl	$0, 4(%esp)
@@ -264,31 +264,31 @@ L2:
 	movl	%eax, %ecx
 	call	__ZN8IO_8259A8sendICW1Eiiii
 	subl	$16, %esp
-	leal	-180(%ebp), %eax
+	leal	-263(%ebp), %eax
 	movl	$32, 4(%esp)
 	movl	$0, (%esp)
 	movl	%eax, %ecx
 	call	__ZN8IO_8259A8sendICW2Eii
 	subl	$8, %esp
-	leal	-180(%ebp), %eax
+	leal	-263(%ebp), %eax
 	movl	$40, 4(%esp)
 	movl	$1, (%esp)
 	movl	%eax, %ecx
 	call	__ZN8IO_8259A8sendICW2Eii
 	subl	$8, %esp
-	leal	-180(%ebp), %eax
+	leal	-263(%ebp), %eax
 	movl	$4, 4(%esp)
 	movl	$0, (%esp)
 	movl	%eax, %ecx
 	call	__ZN8IO_8259A8sendICW3Eii
 	subl	$8, %esp
-	leal	-180(%ebp), %eax
+	leal	-263(%ebp), %eax
 	movl	$2, 4(%esp)
 	movl	$1, (%esp)
 	movl	%eax, %ecx
 	call	__ZN8IO_8259A8sendICW3Eii
 	subl	$8, %esp
-	leal	-180(%ebp), %eax
+	leal	-263(%ebp), %eax
 	movl	$1, 16(%esp)
 	movl	$0, 12(%esp)
 	movl	$0, 8(%esp)
@@ -297,7 +297,7 @@ L2:
 	movl	%eax, %ecx
 	call	__ZN8IO_8259A8sendICW4Eiiiii
 	subl	$20, %esp
-	leal	-180(%ebp), %eax
+	leal	-263(%ebp), %eax
 	movl	$1, 16(%esp)
 	movl	$0, 12(%esp)
 	movl	$0, 8(%esp)
@@ -306,22 +306,22 @@ L2:
 	movl	%eax, %ecx
 	call	__ZN8IO_8259A8sendICW4Eiiiii
 	subl	$20, %esp
-	leal	-180(%ebp), %eax
+	leal	-263(%ebp), %eax
 	movl	$252, 4(%esp)
 	movl	$0, (%esp)
 	movl	%eax, %ecx
 	call	__ZN8IO_8259A8sendOCW1Eii
 	subl	$8, %esp
-	leal	-180(%ebp), %eax
+	leal	-263(%ebp), %eax
 	movl	$255, 4(%esp)
 	movl	$1, (%esp)
 	movl	%eax, %ecx
 	call	__ZN8IO_8259A8sendOCW1Eii
 	subl	$8, %esp
-	leal	-181(%ebp), %eax
+	leal	-264(%ebp), %eax
 	movl	%eax, %ecx
 	call	__ZN7IO_8253C1Ev
-	leal	-181(%ebp), %eax
+	leal	-264(%ebp), %eax
 	movl	$1, 4(%esp)
 	movl	$0, (%esp)
 	movl	%eax, %ecx
@@ -329,7 +329,7 @@ L2:
 	subl	$8, %esp
 	movl	__ZN17SegmentDescriptor22TYPE_U_CODE_CONFORMINGE, %eax
 	movsbl	%al, %edx
-	leal	-196(%ebp), %eax
+	leal	-279(%ebp), %eax
 	movl	$1, 24(%esp)
 	movl	$1, 20(%esp)
 	movl	$1, 16(%esp)
@@ -342,7 +342,7 @@ L2:
 	subl	$28, %esp
 	movl	__ZN17SegmentDescriptor11TYPE_U_DATAE, %eax
 	movsbl	%al, %edx
-	leal	-211(%ebp), %eax
+	leal	-294(%ebp), %eax
 	movl	$1, 24(%esp)
 	movl	$1, 20(%esp)
 	movl	$1, 16(%esp)
@@ -355,7 +355,7 @@ L2:
 	subl	$28, %esp
 	movl	__ZN17SegmentDescriptor12TYPE_U_STACKE, %eax
 	movsbl	%al, %edx
-	leal	-226(%ebp), %eax
+	leal	-309(%ebp), %eax
 	movl	$1, 24(%esp)
 	movl	$1, 20(%esp)
 	movl	$1, 16(%esp)
@@ -370,7 +370,7 @@ L2:
 	addl	$48, %eax
 	movl	%eax, %ecx
 	movl	__ZN4Util11SEG_CURRENTE, %edx
-	leal	-196(%ebp), %eax
+	leal	-279(%ebp), %eax
 	movl	%ecx, 4(%esp)
 	movl	%edx, (%esp)
 	movl	%eax, %ecx
@@ -380,7 +380,7 @@ L2:
 	addl	$56, %eax
 	movl	%eax, %ecx
 	movl	__ZN4Util11SEG_CURRENTE, %edx
-	leal	-211(%ebp), %eax
+	leal	-294(%ebp), %eax
 	movl	%ecx, 4(%esp)
 	movl	%edx, (%esp)
 	movl	%eax, %ecx
@@ -390,57 +390,57 @@ L2:
 	addl	$64, %eax
 	movl	%eax, %ecx
 	movl	__ZN4Util11SEG_CURRENTE, %edx
-	leal	-226(%ebp), %eax
+	leal	-309(%ebp), %eax
 	movl	%ecx, 4(%esp)
 	movl	%edx, (%esp)
 	movl	%eax, %ecx
 	call	__ZN17SegmentDescriptor13writeToMemoryEiPc
 	subl	$8, %esp
-	leal	-338(%ebp), %eax
+	leal	-421(%ebp), %eax
 	movl	%eax, %ecx
 	call	__ZN3TSSC1Ev
-	leal	-338(%ebp), %eax
+	leal	-421(%ebp), %eax
 	leal	76(%eax), %ebx
 	movl	$0, 8(%esp)
 	movl	$3, 4(%esp)
 	movl	$6, (%esp)
 	call	__ZN4Util7makeSelEiii
 	movw	%ax, (%ebx)
-	leal	-338(%ebp), %eax
+	leal	-421(%ebp), %eax
 	addl	$32, %eax
 	movl	$_forTss1, %edx
 	movl	%edx, (%eax)
-	leal	-338(%ebp), %eax
+	leal	-421(%ebp), %eax
 	leal	80(%eax), %ebx
 	movl	$0, 8(%esp)
 	movl	$3, 4(%esp)
 	movl	$8, (%esp)
 	call	__ZN4Util7makeSelEiii
 	movw	%ax, (%ebx)
-	leal	-338(%ebp), %eax
+	leal	-421(%ebp), %eax
 	addl	$56, %eax
 	movl	$1020, (%eax)
-	leal	-338(%ebp), %eax
+	leal	-421(%ebp), %eax
 	leal	8(%eax), %ebx
 	movl	$0, 8(%esp)
 	movl	$0, 4(%esp)
 	movl	$4, (%esp)
 	call	__ZN4Util7makeSelEiii
 	movw	%ax, (%ebx)
-	leal	-338(%ebp), %eax
+	leal	-421(%ebp), %eax
 	addl	$4, %eax
 	movl	$508, (%eax)
-	leal	-338(%ebp), %eax
+	leal	-421(%ebp), %eax
 	addl	$36, %eax
 	movl	$514, (%eax)
-	leal	-338(%ebp), %eax
+	leal	-421(%ebp), %eax
 	addl	$84, %eax
 	movw	$59, (%eax)
 	movl	__ZN8PMLoader14TSS_AREA_STARTE, %edx
 	movl	__ZN8PMLoader12TSS_MIN_SIZEE, %eax
 	leal	(%edx,%eax), %ecx
 	movl	__ZN4Util11SEG_CURRENTE, %edx
-	leal	-338(%ebp), %eax
+	leal	-421(%ebp), %eax
 	movl	%ecx, 4(%esp)
 	movl	%edx, (%esp)
 	movl	%eax, %ecx
@@ -454,7 +454,7 @@ L2:
 	movl	__ZN8PMLoader12TSS_MIN_SIZEE, %eax
 	addl	%ebx, %eax
 	movl	%eax, %ebx
-	leal	-353(%ebp), %eax
+	leal	-436(%ebp), %eax
 	movl	$1, 24(%esp)
 	movl	$0, 20(%esp)
 	movl	$0, 16(%esp)
@@ -469,19 +469,19 @@ L2:
 	addl	$72, %eax
 	movl	%eax, %ecx
 	movl	__ZN4Util11SEG_CURRENTE, %edx
-	leal	-353(%ebp), %eax
+	leal	-436(%ebp), %eax
 	movl	%ecx, 4(%esp)
 	movl	%edx, (%esp)
 	movl	%eax, %ecx
 	call	__ZN17SegmentDescriptor13writeToMemoryEiPc
 	subl	$8, %esp
 /APP
- # 276 "libx2.h" 1
+ # 289 "libx2.h" 1
 	sti 
 	
  # 0 "" 2
 /NO_APP
-	leal	-40(%ebp), %eax
+	leal	-68(%ebp), %eax
 	movl	$LC5, (%esp)
 	movl	%eax, %ecx
 	call	__ZN7Printer5putszEPc
@@ -494,40 +494,40 @@ L2:
 	movl	$51, 4(%esp)
 	movl	%edx, (%esp)
 	call	__ZN4Util9changeCPLEiiiii
-	leal	-353(%ebp), %eax
+	leal	-436(%ebp), %eax
 	movl	%eax, %ecx
 	call	__ZN17SegmentDescriptorD1Ev
-	leal	-338(%ebp), %eax
+	leal	-421(%ebp), %eax
 	movl	%eax, %ecx
 	call	__ZN3TSSD1Ev
-	leal	-226(%ebp), %eax
+	leal	-309(%ebp), %eax
 	movl	%eax, %ecx
 	call	__ZN17SegmentDescriptorD1Ev
-	leal	-211(%ebp), %eax
+	leal	-294(%ebp), %eax
 	movl	%eax, %ecx
 	call	__ZN17SegmentDescriptorD1Ev
-	leal	-196(%ebp), %eax
+	leal	-279(%ebp), %eax
 	movl	%eax, %ecx
 	call	__ZN17SegmentDescriptorD1Ev
-	leal	-181(%ebp), %eax
+	leal	-264(%ebp), %eax
 	movl	%eax, %ecx
 	call	__ZN7IO_8253D1Ev
-	leal	-180(%ebp), %eax
+	leal	-263(%ebp), %eax
 	movl	%eax, %ecx
 	call	__ZN8IO_8259AD1Ev
-	leal	-179(%ebp), %eax
+	leal	-262(%ebp), %eax
 	movl	%eax, %ecx
 	call	__ZN18SelectorDescriptorD1Ev
-	leal	-168(%ebp), %eax
+	leal	-251(%ebp), %eax
 	movl	%eax, %ecx
 	call	__ZN17SegmentDescriptorD1Ev
-	leal	-153(%ebp), %eax
+	leal	-236(%ebp), %eax
 	movl	%eax, %ecx
 	call	__ZN3TSSD1Ev
-	leal	-41(%ebp), %eax
+	leal	-124(%ebp), %eax
 	movl	%eax, %ecx
 	call	__ZN4TestD1Ev
-	leal	-40(%ebp), %eax
+	leal	-68(%ebp), %eax
 	movl	%eax, %ecx
 	call	__ZN7PrinterD1Ev
 	nop
@@ -546,7 +546,7 @@ _afterCPL3:
 	pushl	%ebx
 	subl	$52, %esp
 /APP
- # 131 "protected_main.cpp" 1
+ # 135 "protected_main.cpp" 1
 	pushw $0x3b 
 	popw %ds 
 	
@@ -557,7 +557,7 @@ _afterCPL3:
 	movl	$LC6, %ebx
 	movl	%eax, %ecx
 /APP
- # 132 "protected_main.cpp" 1
+ # 136 "protected_main.cpp" 1
 	int $0x24
 	
  # 0 "" 2
@@ -611,9 +611,6 @@ _forTss1:
 	nop
 	leave
 	ret
-/APP
-	.section .free 
-	. = . + 512*
 	.ident	"GCC: (GNU) 5.4.0"
 	.def	__ZN4Util3clrEv;	.scl	2;	.type	32;	.endef
 	.def	__ZN7PrinterC1Ejjjji;	.scl	2;	.type	32;	.endef

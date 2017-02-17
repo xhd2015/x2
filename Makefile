@@ -2,7 +2,7 @@
 # args="0 0 0 0 1 2 3"
 dir = /home/Fulton Shaw/x2-devel
 f16 = main libx2 PMLoader Descriptor
-f32 = protected_main libx2 PMLoader Descriptor TSS interrupts IOProgramer Memory test
+f32 = protected_main libx2 PMLoader Descriptor TSS interrupts IOProgramer Memory test SimpleMemoryManager List
 
 fall = main libx2 PMLoader Descriptor protected_main TSS interrupts IOProgramer
 
@@ -18,11 +18,9 @@ f32o := $(patsubst %,%_32.o,$(f32))
 ld16 := image_16.ld
 ld32 := image_32.ld
 
-imageMacros := DRIVER SECSTART SECNUM CODESEG CODEOFF
-imageSyms := JMPSEG JMPOFF
-CCFLAGS :=  -fpack-struct=1 -fpermissive -fno-exceptions  -nostdinc -nostdinc++ -nostdlib -Winline
+CCFLAGS :=  -fpack-struct=1 -fpermissive -fno-exceptions  -nostdinc -nostdinc++ -nostdlib -Winline --no-warnings
 LDFLAGS :=    --print-gc-sections --no-gc-sections  
-UNUSED_CCFLAGS := -fkeep-inline-functions --no-warnings
+UNUSED_CCFLAGS := -fkeep-inline-functions 
 CCMACROS16 := -D CODE16
 CCMACROS32 := -D CODE32
 RMFILES := $(f16o) $(f32o) $(f16s) $(f32s) main_32.img main_32.bimg main_16.img main_16.bimg main.bimg
@@ -30,6 +28,8 @@ RMFILES := $(f16o) $(f32o) $(f16s) $(f32s) main_32.img main_32.bimg main_16.img 
 #===Deprecated=====
 #	CCMACROS16 != a=($(imageMacros));b=($(wordlist 1,$(argsLenMiddle1),$(imageValues)));for i in $$(seq 0 $(argsLenMiddle3));do echo -D $${a[$$i]}=$${b[$$i]};done
 #	ASSYMS !=  a=($(imageSyms));b=($(wordlist $(argsLenMiddle2),$(argsLen),$(imageValues)));for i in $$(seq 0 $(argsLenMiddle4));do echo --defsym $${a[$$i]}=$${b[$$i]};done
+# imageMacros := DRIVER SECSTART SECNUM CODESEG CODEOFF
+# imageSyms := JMPSEG JMPOFF
 #==================================================================================
 .PHONY : dump16 dump clean default nothing help debug start
 .ONESHELL:

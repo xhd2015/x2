@@ -2,6 +2,9 @@
 #ifndef __DEF__
 #define __DEF__
 
+//====数据宏
+#define NULL ((void*)0)
+
 //====字符串宏
 #define __STR(x) #x
 #define STR(x) __STR(x)
@@ -11,6 +14,9 @@
 //否则这样做会增加代码长度
 #define AS_MACRO inline __attribute__((always_inline))
 #define DEPRECATED __attribute__((deprecated))
+
+//定义如果一个功能还没有完全实现，就不要使用
+#define INCOMPLETE __attribute__((deprecated))
 
 //==进入死循环
 #define JMP_DIE() __asm__("jmp . \n\t")

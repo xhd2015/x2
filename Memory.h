@@ -2,6 +2,9 @@
 #define __MemoryManager__
 /**
 *类的实现：
+*   大量使用链表这种结构
+*   也使用树这种结构
+*       资源的分配很适合使用树来描述
 *       
 */
 class MemoryManager{

@@ -276,7 +276,7 @@ __ZN7IO_825311setTimeMillEij:
 	movl	-16(%ebp), %edx
 	movl	-28(%ebp), %eax
 /APP
- # 344 "libx2.h" 1
+ # 357 "libx2.h" 1
 	outb %al,%dx 
 	
  # 0 "" 2
@@ -291,7 +291,7 @@ __ZN7IO_825311setTimeMillEij:
 	movl	-20(%ebp), %edx
 	movl	-24(%ebp), %eax
 /APP
- # 344 "libx2.h" 1
+ # 357 "libx2.h" 1
 	outb %al,%dx 
 	
  # 0 "" 2
@@ -334,7 +334,7 @@ L13:
 	movl	-16(%ebp), %edx
 	movl	-28(%ebp), %eax
 /APP
- # 344 "libx2.h" 1
+ # 357 "libx2.h" 1
 	outb %al,%dx 
 	
  # 0 "" 2
@@ -349,7 +349,7 @@ L13:
 	movl	-20(%ebp), %edx
 	movl	-24(%ebp), %eax
 /APP
- # 344 "libx2.h" 1
+ # 357 "libx2.h" 1
 	outb %al,%dx 
 	
  # 0 "" 2
@@ -385,7 +385,7 @@ __ZN7IO_825315sendControlByteEiiii:
 	movl	-4(%ebp), %edx
 	movl	-8(%ebp), %eax
 /APP
- # 344 "libx2.h" 1
+ # 357 "libx2.h" 1
 	outb %al,%dx 
 	
  # 0 "" 2
@@ -738,7 +738,7 @@ L21:
 	movl	-8(%ebp), %eax
 	movl	%eax, %edx
 /APP
- # 354 "libx2.h" 1
+ # 367 "libx2.h" 1
 	inb %dx,%al 
 	
  # 0 "" 2

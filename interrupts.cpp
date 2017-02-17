@@ -662,4 +662,30 @@ void intDefault()
 
 //========================================================
 
+//====================class : InterruptsManager
+InterruptsManager::GENERAL_FUNC InterruptsManager::intAddresses[]={
+    
+};
+unsigned int InterruptsManager::intLen = sizeof(intAddresses)/sizeof(InterruptsManager::GENERAL_FUNC);
+InterruptsManager::InterruptsManager()
+{
+    
+}
+
+InterruptsManager::~InterruptsManager()
+{
+    
+}
+
+InterruptsManager::GENERAL_FUNC InterruptsManager::getIntAddr(unsigned int i)
+{
+    
+}
+void InterruptsManager::setIntAddr(unsigned int i)
+{
+    
+}
+
+//====================end class:InterruptsManager
+
 #endif

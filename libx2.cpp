@@ -7,7 +7,11 @@
 
 #include "libx2.h"
 #include "def.h"
-
+//==============模板实例化
+//===在此声明实例化
+#ifdef CODE32
+template class Queue<unsigned char>;
+#endif
 
 int Util::x=0;
 int Util::y=0;
@@ -400,8 +404,8 @@ const int Printer::SCREEN_MAX_X=25,
 Printer::Printer(unsigned int x0,unsigned int y0,unsigned int rows,unsigned int cols,int mode):
 rows(rows>Printer::SCREEN_MAX_X?Printer::SCREEN_MAX_X:rows),
 cols(cols>Printer::SCREEN_MAX_Y?Printer::SCREEN_MAX_Y:cols),
-x0(x0+rows>=Printer::SCREEN_MAX_X?0:x0),
-y0(y0+cols>=Printer::SCREEN_MAX_Y?0:y0),
+x0(x0+this->rows>=Printer::SCREEN_MAX_X?0:x0),
+y0(y0+this->cols>=Printer::SCREEN_MAX_Y?0:y0),
 x(0),y(0),
 mode(mode)
 {
@@ -554,6 +558,22 @@ void Printer::clr()
     }
     this->setPos(0,0);
 }
+Printer  Printer::getSubPrinter(unsigned int x0,unsigned int y0,unsigned int rows,unsigned int cols,int mode)
+{
+    Printer* target;
+    Util::initTarget(target);
+    target->rows = rows > this->rows?this->rows:rows;
+    target->cols = cols > this->cols? this->cols: cols;
+    target->x0   = this->x0 + ((x0+target->rows) >  this->rows?0:x0);
+    target->y0   = this->y0 + ((y0+target->cols) > this->cols?0:y0);
+    target->x = 0;
+    target->y = 0;
+    target->mode = mode;
+    target->father = this;
+    target->sonSize = 0;
+    
+    //no return target, avoid copying on return
+}
 //==========class : String
 String::String(const char* str)
 {
@@ -582,7 +602,57 @@ String String::valueOf(int n)
     
 }
 
+//============class : Queue<T>
+template<typename T>
+Queue<T>::Queue(T p[],unsigned int len):p(p),len(len),curLen(0),indexRemove(0),indexAdd(0)
+{
+    
+}
+template<typename T>
+Queue<T>::~Queue()
+{
+    
+}
+// i--remove
+//j--add
+//len = 4
+//  j=0 OK
+//  j=1 OK
+//  j=2 OK
+//  j=3 OK
+//  j=4--j=0 but j=0 full
+template<typename T>
+T Queue<T>::remove()
+{
+    T rt;
+    if(this->empty())
+    {
+        return 0;
+    }else{
+        rt = p[indexRemove];
+        indexRemove++;
+        curLen--;
+        if(indexRemove==(int)len)indexRemove=0;
+    }
+    return rt;
+}
+template <typename T>
+int Queue<T>::add(T t)
+{
+    if(this->full())
+    {
+        return 0;
+    }else{
+        this->p[indexAdd]=t;
+        indexAdd++;
+        curLen++;
+        if(indexAdd == (int)len)indexAdd=0;
+    }
+    return 1;
+    
+}
 
+//======================================================================
 #endif  //CODE32
 #ifdef CODE16
 //======================仅16位===========

@@ -37,14 +37,63 @@ __ZN1TD1Ev:
 	nop
 	leave
 	ret
+	.section	.text$_ZN2T2C1Ev,"x"
+	.linkonce discard
+	.align 2
+	.globl	__ZN2T2C1Ev
+	.def	__ZN2T2C1Ev;	.scl	2;	.type	32;	.endef
+__ZN2T2C1Ev:
+	pushl	%ebp
+	movl	%esp, %ebp
+	subl	$40, %esp
+	movl	%ecx, -12(%ebp)
+	movl	-12(%ebp), %eax
+	movl	$0, 4(%esp)
+	movl	$1, (%esp)
+	movl	%eax, %ecx
+	call	__ZN1TC1Eii
+	subl	$8, %esp
+	movl	-12(%ebp), %eax
+	movl	$0, 8(%eax)
+	movl	-12(%ebp), %eax
+	movl	$0, (%eax)
+	nop
+	leave
+	ret
+	.section	.text$_ZN2T2D1Ev,"x"
+	.linkonce discard
+	.align 2
+	.globl	__ZN2T2D1Ev
+	.def	__ZN2T2D1Ev;	.scl	2;	.type	32;	.endef
+__ZN2T2D1Ev:
+	pushl	%ebp
+	movl	%esp, %ebp
+	subl	$24, %esp
+	movl	%ecx, -12(%ebp)
+	movl	-12(%ebp), %eax
+	movl	%eax, %ecx
+	call	__ZN1TD1Ev
+	nop
+	leave
+	ret
 	.text
 	.globl	__Z4testv
 	.def	__Z4testv;	.scl	2;	.type	32;	.endef
 __Z4testv:
 	pushl	%ebp
 	movl	%esp, %ebp
-	subl	$40, %esp
-	leal	-20(%ebp), %eax
+	subl	$56, %esp
+	leal	-24(%ebp), %eax
+	movl	%eax, %ecx
+	call	__ZN2T2C1Ev
+	movl	$0, -16(%ebp)
+/APP
+ # 35 "init.cpp" 1
+	#t2end 
+	
+ # 0 "" 2
+/NO_APP
+	leal	-32(%ebp), %eax
 	movl	$0, 4(%esp)
 	movl	$0, (%esp)
 	movl	%eax, %ecx
@@ -63,9 +112,12 @@ __Z4testv:
 	movl	%eax, -12(%ebp)
 	movl	__ZN8PMLoader12rEAL_SECNUMSE, %eax
 	movl	%eax, -12(%ebp)
-	leal	-20(%ebp), %eax
+	leal	-32(%ebp), %eax
 	movl	%eax, %ecx
 	call	__ZN1TD1Ev
+	leal	-24(%ebp), %eax
+	movl	%eax, %ecx
+	call	__ZN2T2D1Ev
 	nop
 	leave
 	ret

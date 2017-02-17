@@ -2044,12 +2044,12 @@ LC32:
 __Z8_int0x21v:
 	pushl	%ebp
 	movl	%esp, %ebp
-	subl	$136, %esp
+	subl	$168, %esp
 	leal	-64(%ebp), %eax
 	movl	%eax, %ecx
 	call	__ZN8KeyboardC1Ev
 	movl	__ZN4Util11MODE_COMMONE, %edx
-	leal	-92(%ebp), %eax
+	leal	-120(%ebp), %eax
 	movl	%edx, 16(%esp)
 	movl	$80, 12(%esp)
 	movl	$8, 8(%esp)
@@ -2060,7 +2060,7 @@ __Z8_int0x21v:
 	subl	$20, %esp
 	movl	__ZZ8_int0x21vE5lasty, %ecx
 	movl	__ZZ8_int0x21vE5lastx, %edx
-	leal	-92(%ebp), %eax
+	leal	-120(%ebp), %eax
 	movl	%ecx, 4(%esp)
 	movl	%edx, (%esp)
 	movl	%eax, %ecx
@@ -2071,7 +2071,7 @@ __Z8_int0x21v:
 	movl	-16(%ebp), %eax
 	movl	%eax, %edx
 /APP
- # 354 "libx2.h" 1
+ # 367 "libx2.h" 1
 	inb %dx,%al 
 	
  # 0 "" 2
@@ -2087,12 +2087,12 @@ __Z8_int0x21v:
 	movzbl	-9(%ebp), %eax
 	testb	%al, %al
 	js	L103
-	leal	-92(%ebp), %eax
+	leal	-120(%ebp), %eax
 	movl	$__ZZ8_int0x21vE4save, (%esp)
 	movl	%eax, %ecx
 	call	__ZN7Printer5putszEPc
 	subl	$4, %esp
-	leal	-92(%ebp), %eax
+	leal	-120(%ebp), %eax
 	movl	$LC31, (%esp)
 	movl	%eax, %ecx
 	call	__ZN7Printer5putszEPc
@@ -2104,12 +2104,12 @@ __Z8_int0x21v:
 	call	__ZN8Keyboard12getAsciiCharEh
 	subl	$4, %esp
 	movl	%eax, %edx
-	leal	-92(%ebp), %eax
+	leal	-120(%ebp), %eax
 	movl	%edx, (%esp)
 	movl	%eax, %ecx
 	call	__ZN7Printer5putszEPc
 	subl	$4, %esp
-	leal	-92(%ebp), %eax
+	leal	-120(%ebp), %eax
 	movl	$LC32, (%esp)
 	movl	%eax, %ecx
 	call	__ZN7Printer5putszEPc
@@ -2121,27 +2121,27 @@ L103:
 	movl	$10, 4(%esp)
 	movl	$__ZZ8_int0x21vE4save, (%esp)
 	call	__ZN4Util10digitToHexEPcjj
-	leal	-92(%ebp), %eax
+	leal	-120(%ebp), %eax
 	movl	$__ZZ8_int0x21vE4save, (%esp)
 	movl	%eax, %ecx
 	call	__ZN7Printer5putszEPc
 	subl	$4, %esp
-	leal	-92(%ebp), %eax
+	leal	-120(%ebp), %eax
 	movl	$LC32, (%esp)
 	movl	%eax, %ecx
 	call	__ZN7Printer5putszEPc
 	subl	$4, %esp
 L104:
-	movl	-76(%ebp), %eax
+	movl	-104(%ebp), %eax
 	movl	%eax, __ZZ8_int0x21vE5lastx
-	movl	-72(%ebp), %eax
+	movl	-100(%ebp), %eax
 	movl	%eax, __ZZ8_int0x21vE5lasty
 	movl	__ZN8Keyboard8PORT_PPIE, %eax
 	movl	%eax, -44(%ebp)
 	movl	-44(%ebp), %eax
 	movl	%eax, %edx
 /APP
- # 354 "libx2.h" 1
+ # 367 "libx2.h" 1
 	inb %dx,%al 
 	
  # 0 "" 2
@@ -2158,7 +2158,7 @@ L104:
 	movl	-56(%ebp), %edx
 	movl	-60(%ebp), %eax
 /APP
- # 344 "libx2.h" 1
+ # 357 "libx2.h" 1
 	outb %al,%dx 
 	
  # 0 "" 2
@@ -2168,7 +2168,7 @@ L104:
 	movl	-24(%ebp), %eax
 	movl	%eax, %edx
 /APP
- # 354 "libx2.h" 1
+ # 367 "libx2.h" 1
 	inb %dx,%al 
 	
  # 0 "" 2
@@ -2185,15 +2185,15 @@ L104:
 	movl	-36(%ebp), %edx
 	movl	-40(%ebp), %eax
 /APP
- # 344 "libx2.h" 1
+ # 357 "libx2.h" 1
 	outb %al,%dx 
 	
  # 0 "" 2
 /NO_APP
-	leal	-93(%ebp), %eax
+	leal	-121(%ebp), %eax
 	movl	%eax, %ecx
 	call	__ZN8IO_8259AC1Ev
-	leal	-93(%ebp), %eax
+	leal	-121(%ebp), %eax
 	movl	$32, 4(%esp)
 	movl	$0, (%esp)
 	movl	%eax, %ecx
@@ -2207,10 +2207,10 @@ L104:
 	
  # 0 "" 2
 /NO_APP
-	leal	-93(%ebp), %eax
+	leal	-121(%ebp), %eax
 	movl	%eax, %ecx
 	call	__ZN8IO_8259AD1Ev
-	leal	-92(%ebp), %eax
+	leal	-120(%ebp), %eax
 	movl	%eax, %ecx
 	call	__ZN7PrinterD1Ev
 	leal	-64(%ebp), %eax
@@ -2239,7 +2239,7 @@ _int0x24:
 	je	L110
 	movl	-24(%ebp), %eax
 /APP
- # 287 "libx2.h" 1
+ # 300 "libx2.h" 1
 	mov %ds,%bx 
 	mov %ax,%ds 
 	
@@ -2262,14 +2262,14 @@ L110:
 	je	L111
 	movl	-32(%ebp), %eax
 /APP
- # 294 "libx2.h" 1
+ # 307 "libx2.h" 1
 	mov %ax,%ds 
 	
  # 0 "" 2
 /NO_APP
 L111:
 /APP
- # 331 "libx2.h" 1
+ # 344 "libx2.h" 1
 	leave 
 	iret 
 	
@@ -2333,7 +2333,7 @@ _intDefault:
 	je	L114
 	movl	-16(%ebp), %eax
 /APP
- # 287 "libx2.h" 1
+ # 300 "libx2.h" 1
 	mov %ds,%bx 
 	mov %ax,%ds 
 	
@@ -2355,7 +2355,7 @@ L114:
 	je	L115
 	movl	-24(%ebp), %eax
 /APP
- # 294 "libx2.h" 1
+ # 307 "libx2.h" 1
 	mov %ax,%ds 
 	
  # 0 "" 2
@@ -2364,7 +2364,7 @@ L115:
 	movl	$354185, (%esp)
 	call	__ZN4Util10insertMarkEi
 /APP
- # 331 "libx2.h" 1
+ # 344 "libx2.h" 1
 	leave 
 	iret 
 	
@@ -2375,6 +2375,66 @@ L115:
 	popl	%ebx
 	popl	%ebp
 	ret
+	.globl	__ZN17InterruptsManager12intAddressesE
+	.bss
+	.align 4
+__ZN17InterruptsManager12intAddressesE:
+	.space 1
+	.globl	__ZN17InterruptsManager6intLenE
+	.align 4
+__ZN17InterruptsManager6intLenE:
+	.space 4
+	.text
+	.align 2
+	.globl	__ZN17InterruptsManagerC2Ev
+	.def	__ZN17InterruptsManagerC2Ev;	.scl	2;	.type	32;	.endef
+__ZN17InterruptsManagerC2Ev:
+	pushl	%ebp
+	movl	%esp, %ebp
+	subl	$4, %esp
+	movl	%ecx, -4(%ebp)
+	nop
+	leave
+	ret
+	.globl	__ZN17InterruptsManagerC1Ev
+	.def	__ZN17InterruptsManagerC1Ev;	.scl	2;	.type	32;	.endef
+	.set	__ZN17InterruptsManagerC1Ev,__ZN17InterruptsManagerC2Ev
+	.align 2
+	.globl	__ZN17InterruptsManagerD2Ev
+	.def	__ZN17InterruptsManagerD2Ev;	.scl	2;	.type	32;	.endef
+__ZN17InterruptsManagerD2Ev:
+	pushl	%ebp
+	movl	%esp, %ebp
+	subl	$4, %esp
+	movl	%ecx, -4(%ebp)
+	nop
+	leave
+	ret
+	.globl	__ZN17InterruptsManagerD1Ev
+	.def	__ZN17InterruptsManagerD1Ev;	.scl	2;	.type	32;	.endef
+	.set	__ZN17InterruptsManagerD1Ev,__ZN17InterruptsManagerD2Ev
+	.align 2
+	.globl	__ZN17InterruptsManager10getIntAddrEj
+	.def	__ZN17InterruptsManager10getIntAddrEj;	.scl	2;	.type	32;	.endef
+__ZN17InterruptsManager10getIntAddrEj:
+	pushl	%ebp
+	movl	%esp, %ebp
+	subl	$4, %esp
+	movl	%ecx, -4(%ebp)
+	nop
+	leave
+	ret	$4
+	.align 2
+	.globl	__ZN17InterruptsManager10setIntAddrEj
+	.def	__ZN17InterruptsManager10setIntAddrEj;	.scl	2;	.type	32;	.endef
+__ZN17InterruptsManager10setIntAddrEj:
+	pushl	%ebp
+	movl	%esp, %ebp
+	subl	$4, %esp
+	movl	%ecx, -4(%ebp)
+	nop
+	leave
+	ret	$4
 .lcomm __ZZ8_int0x21vE5lasty,4,4
 .lcomm __ZZ8_int0x21vE5lastx,4,4
 .lcomm __ZZ8_int0x21vE4save,10,4
