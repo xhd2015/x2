@@ -1,0 +1,10 @@
+./test_*.{cpp,s,o}
+./test
+./exports
+./gen
+! ./gen/main_{16,32}.img
+! ./Makefile
+! ./PMLoader.cpp
+! ./main.bimg
+
+

@@ -3,6 +3,13 @@
 #ifndef Functools_h
 #define Functools_h
 
+class Func{
+public:
+    
+    
+    
+};
+
 class Functools{
 public:
     Functools();

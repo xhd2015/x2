@@ -4,6 +4,18 @@
 
 //====数据宏
 #define NULL ((void*)0)
+#define true 1
+#define false 0
+//=====用于开发标记
+#define DEVEL_UNTESTED(who) /*0*/
+#define DEVEL_UNCOMPLETED(who_made_this) /*1*/
+#define DEVEL_COMPLETED(who) /*2*/
+#define DEVEL_TESTET(who) /*3*/
+#define DEVEL_WAITTO(x) /*wait to date x*/
+#define DEVEL_LAST(who,date) /*last modified*/
+#define DEVEL_AUTHOR(author...)    /*who is the author*/
+#define DEVEL_DEP(deps...)          /*depend on what?*/
+
 
 //====字符串宏
 #define __STR(x) #x
@@ -14,6 +26,7 @@
 //否则这样做会增加代码长度
 #define AS_MACRO inline __attribute__((always_inline))
 #define DEPRECATED __attribute__((deprecated))
+#define NORETURN __attribute__((noreturn))
 
 //定义如果一个功能还没有完全实现，就不要使用
 #define INCOMPLETE __attribute__((deprecated))

@@ -10,7 +10,7 @@
 //==============模板实例化
 //===在此声明实例化
 #ifdef CODE32
-template class Queue<unsigned char>;
+    template class Queue<unsigned char>;
 #endif
 
 int Util::x=0;
@@ -561,7 +561,7 @@ void Printer::clr()
 Printer  Printer::getSubPrinter(unsigned int x0,unsigned int y0,unsigned int rows,unsigned int cols,int mode)
 {
     Printer* target;
-    Util::initTarget(target);
+    Util::initTarget(&target);
     target->rows = rows > this->rows?this->rows:rows;
     target->cols = cols > this->cols? this->cols: cols;
     target->x0   = this->x0 + ((x0+target->rows) >  this->rows?0:x0);

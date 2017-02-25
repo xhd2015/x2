@@ -11,7 +11,7 @@ public:
     ~Util();
     //*****兼容：16位，32位*******
     static int x,y;
-    //ON用 | 
+    //ON用 |
     //OFF用 &
     const static int MODE_COMMON,MODE_FL_ON,MODE_FL_OFF,MODE_BG_RED,MODE_BG_GREEN,MODE_BG_BLUE,MODE_BG_WHITE,MODE_BG_RG,MODE_BG_RB,MODE_BG_BG,MODE_BG_BLACK,MODE_FG_RED,MODE_FG_GREEN,MODE_FG_BLUE,MODE_FG_WHITE,MODE_FG_RG,MODE_FG_RB,MODE_FG_BG,MODE_FG_BLACK;
     const static int SCREEN_X,SCREEN_Y;
@@ -87,8 +87,9 @@ public:
     /**
     *获取一个返回class类型的成员函数的返回对象的参数
     *如果不明确返回所声明的类型，g++是允许编译通过的。但是这样做可能是错误的（即什么都不返回）
+    * DO NOT USE IT
     */
-    AS_MACRO static void initTarget(void* target);
+    DEPRECATED AS_MACRO static void initTarget(void** target);
 
     AS_MACRO static void intReturn();
 #endif
@@ -101,7 +102,7 @@ public:
      *else return 1
      * 使用逻辑扇区编址
      *      扇区： 6位
-     *      head:  8位 
+     *      head:  8位
      *      cylinder: 10位
      *  共24位
      *      LBA=((C*HPC)+H)*SPT+S-1
@@ -109,7 +110,7 @@ public:
      *          HPC = 2
      *          SPT = 18
      *          BPS = 512 (Byte per Sector)
-     *      65扇区  
+     *      65扇区
      *      64扇区    0b1000000   0,1,1
      *      62扇区    0b0111110   0,0,63
      *      0扇区     0b0000000   0,0,1
@@ -343,10 +344,17 @@ void Util::intReturn()
     "iret \n\t"
     );
 }
-void Util::initTarget(void* target)
+/**this originally works
+void Util::initTarget(void *&target)
 {
     __asm__ __volatile__("":"=c"(target)::);
 }
+*/
+void Util::initTarget(void **target)
+{
+__asm__ __volatile__("":"=c"(*(char**)target)::);
+}
+
 void Util::outb(int port,int data)
 {
     __asm__(

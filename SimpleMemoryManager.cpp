@@ -1,9 +1,10 @@
 
 #include "List.h"
-
+#include "Memory.h"
 //====================模板实例化区域
 //===========模板声明区
 template class SimpleMemoryManager<ListNode<int> >;
+template class SimpleMemoryManager<TreeNode<MemoryDescriptor> >;
 
 //====================class :SimpleMemoryNode
 SimpleMemoryNode::SimpleMemoryNode(int NO):
@@ -28,7 +29,7 @@ lastIndex(0)
 {
     for(int i=0;i!=len;i++)
     {
-        data[i].free();
+       data[i].free();
     }
 }
 
@@ -66,6 +67,32 @@ void SimpleMemoryManager<T>::withdraw(T *t)
 {
     if(!t->isFree())
     {
-        t->free();
+        t->free(); //如果被标记为可用，就用lastIndex指向之
+        curSize--;
+        lastIndex = (unsigned int)(((int)t - (int)start)/sizeof(T));
+    }
+}
+
+template <class T>
+void SimpleMemoryManager<T>::freeNext(T *t)
+{
+    T *p=t;
+    while(p)
+    {
+        p->free();
+        p=p->getNext();
+        curSize--;
+    }
+}
+
+template <class T>
+void SimpleMemoryManager<T>::freePrevious(T *t)
+{
+    T *p=t;
+    while(p)
+    {
+        p->free();
+        p=p->getPrevious();
+        curSize--;
     }
 }

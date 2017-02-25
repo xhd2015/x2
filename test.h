@@ -2,6 +2,7 @@
 #ifndef test_h__
 #define test_h__
 #include "libx2.h"
+#include "Memory.h"
 
 class Test{
 public:
@@ -12,11 +13,19 @@ public:
     
     void testQueue();
     void testList();
+    void testMemory();
     void run();
+
+    static void dumpMemoryData(const MemoryDescriptor & data);
+    static void dumpMemoryData(const int& data);
     
+    static void dumpSMM( SimpleMemoryManager<TreeNode<MemoryDescriptor> > *smm);
+	static void dumpMM( MemoryManager &mm);
+
 protected:
     Printer dbg;
-    
+    char buf[10];
+
     
 };
 
