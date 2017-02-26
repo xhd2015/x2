@@ -100,7 +100,7 @@ void Test::testMemory()
     dbg.putsz("done allocFreeStart.\n");
     
     int *a=mm.mnew(sizeof(int)); 
-    // *a = 9;
+     *a = 9;
     Util::digitToStr(buf,sizeof(buf),a);//addr
     dbg.putsz(buf);dbg.putsz(":");
 
@@ -108,7 +108,7 @@ void Test::testMemory()
     dbg.putsz(buf);dbg.putsz("\n");
 
     int *b=mm.mnew(sizeof(int));
-    // *b=20;
+     *b=20;
     Util::digitToStr(buf,sizeof(buf),b);//addr
     dbg.putsz(buf);dbg.putsz(":");
     

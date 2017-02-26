@@ -1,8 +1,0 @@
-You may have noticed that the libg++ distribution is much smaller than it
-used to be.  This is intentional: as of 2.8.0, the supported parts of
-libg++ have been split off into the libstdc++ distribution instead.
-
-The remainder of libg++ is only an add-on, and is provided only for
-backward compatibility; new programs should avoid using the classes
-defined in libg++.  This package is considered obsolete and is no longer
-being developed.

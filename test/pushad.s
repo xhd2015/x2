@@ -1,2 +1,0 @@
-.code32
-pusha

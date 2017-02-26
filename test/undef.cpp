@@ -1,2 +1,0 @@
-#define X
-#undef X

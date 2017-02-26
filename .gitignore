@@ -1,10 +1,14 @@
-./test_*.{cpp,s,o}
-./test
-./exports
-./gen
-! ./gen/main_{16,32}.img
-! ./Makefile
-! ./PMLoader.cpp
-! ./main.bimg
+test_*.{cpp,s,o}
+test/
+exports/
 
-
+#a pattern like DIR/ will explicitly exclude everything even those starting with !
+#but a pattern like DIR/* will do that but keep !
+gen/*
+!gen/main_16.img
+!gen/main_32.img
+gcc-src/
+bochsout.txt
+.project
+.cproject
+*.swp
