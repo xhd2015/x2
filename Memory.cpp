@@ -45,7 +45,16 @@ void MemoryDescriptor::setStart(int start)
 {
     this->start=start;
 }
-
+int MemoryDescriptor::operator==(const MemoryDescriptor& b)
+{
+    return this->getStart()==b.getStart() &&
+            this->getLimit()==b.getLimit();
+    
+}
+int MemoryDescriptor::operator!=(const MemoryDescriptor& b)
+{
+    return ! this->operator==(b);
+}
 
 //============class : MemoryManager
 
@@ -112,6 +121,35 @@ TreeNode<MemoryDescriptor> * MemoryManager::allocOutNode(TreeNode<MemoryDescript
     }
     return newnode;
 }
+/**
+*
+* do not accept:
+*       exactNode==NULL
+*/
+void MemoryManager::withdrawNode(TreeNode<MemoryDescriptor> *exactNode)
+{
+    TreeNode<MemoryDescriptor> *prev=exactNode->getPrevious();
+    if(prev && prev->getData().isAllocable() && exactNode->getData().getStart() - prev->getData().getStart() == (int)prev->getData().getLimit() )
+    {
+        prev->getData().setLimit(prev->getData().getLimit() + exactNode->getData().getLimit() );
+        prev->removeNext();//移除冗余节点
+        smm->withdraw(exactNode);
+    }else{
+        prev=exactNode;
+        prev->getData().setAllocable(1);
+    }//OK,the previous node cheking is done
+
+    TreeNode<MemoryDescriptor> *nxt=prev->getNext();
+    if(nxt && nxt->getData().isAllocable() && nxt->getData().getStart() - prev->getData().getStart() == (int)prev->getData().getLimit() )
+    {
+        prev->getData().setLimit(prev->getData().getLimit() + nxt->getData().getLimit() );
+        prev->removeNext();
+        smm->withdraw(nxt);
+    }else{//do nothing
+
+    }
+
+}
 
 DEVEL_UNTESTED(Douglas_Fulton_Shaw)
 MemoryManager MemoryManager::allocFreeStart(int start, unsigned int len) {
@@ -145,8 +183,19 @@ void* MemoryManager::mnew(unsigned int size) {
     }
     return NULL;
 }
-
+/**
+*   Following:
+*       find the exact node of required arguments with {starting with p, limit is size,not allocable}
+*       if found,withdraw it to parent
+*
+*/
 void MemoryManager::mdelete(void* p, unsigned int size) {
+    TreeNode<MemoryDescriptor>* toDeleteNode=MemoryManager::locateForDelete(getHead(),(int)p,size,0);
+    if(toDeleteNode)//if found it
+    {
+        //Util::printStr("Found delete.   ");
+        withdrawNode(toDeleteNode);
+    }
 }
 
 void MemoryManager::free() {
@@ -203,16 +252,16 @@ int MemoryManager::isNullManager() {
 	return getHead()==NULL;
 }
 
-    void  MemoryManager::setNull()
-    {
-        setHead(NULL);
-    }
+void  MemoryManager::setNull()
+{
+    setHead(NULL);
+}
 
 //确保这条线段是位于两个分割点的缝隙之间，如果不是，返回NULL
 TreeNode<MemoryDescriptor>* MemoryManager::locateForInsertation(
-		TreeNode<MemoryDescriptor>* root, TreeNode<MemoryDescriptor>* son) {
-    if( root==NULL || son==NULL)return NULL;
-    TreeNode<MemoryDescriptor>* p=root;
+		TreeNode<MemoryDescriptor>* loc, TreeNode<MemoryDescriptor>* son) {
+    if( loc==NULL || son==NULL)return NULL;
+    TreeNode<MemoryDescriptor>* p=loc;
     int start=son->getData().getStart();
     unsigned int len=son->getData().getLimit();
     
@@ -238,6 +287,25 @@ TreeNode<MemoryDescriptor>* MemoryManager::locateForInsertation(
         }
     }
 	return NULL; //until the end,does not find such one
+}
+/**
+* find for its sons which is exactly the same with passed arguments.
+*/
+TreeNode<MemoryDescriptor>* MemoryManager::locateForDelete(TreeNode<MemoryDescriptor>* loc,int start,unsigned int len,int allocable)
+{
+    if(loc==NULL||len==0)return NULL;
+    TreeNode<MemoryDescriptor>* p=loc->getSon();
+    MemoryDescriptor temp(start,len,allocable);
+
+    while(p && p->getData().getStart() < start)
+            p=p->getNext();
+    if(p->getData().getStart() == start && p->getData().getLimit()==len && p->getData().isAllocable()==allocable)
+    {
+        return p;
+    }else{
+        return NULL;
+    }
+
 }
 
 

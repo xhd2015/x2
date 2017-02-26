@@ -9,7 +9,7 @@
 #include "Memory.h"
 
 Test::Test():
-dbg(Printer(5,20,15,30))
+dbg(Printer(5,40,15,30))
 {
     
     
@@ -117,6 +117,10 @@ void Test::testMemory()
     
     Test::dumpMM(mm);
 
+    mm.mdelete(a,sizeof(*a));
+    mm.mdelete(b,sizeof(*b));
+
+    Test::dumpMM(mm);
     dbg.putsz("\n");
 
     dbg.putsz("End .\n");

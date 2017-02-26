@@ -8,6 +8,12 @@ public:
     ~MemoryDescriptor();//done
     MemoryDescriptor* init(int start,unsigned int limit,int allocable=1);//done
 
+    /**
+    * 逻辑相等而非全等
+    */
+    int operator==(const MemoryDescriptor& b);//done
+    int operator!=(const MemoryDescriptor& b);//done
+
     int getStart();//done
     unsigned int getLimit();//done
 
@@ -58,7 +64,7 @@ public:
     
     //operator new and delete
     void* mnew(unsigned int size);//done
-    void mdelete(void* p,unsigned int size);//查找p开始的连续个大小，看是否能满足要求
+    void mdelete(void* p,unsigned int size);//查找p开始的连续个大小，看是否能满足要求,使用locateForDelete,withdrawNode协同完成，done
 
 
     void free();                                //全部撤销
@@ -70,7 +76,8 @@ public:
     //===support for List
     static TreeNode<MemoryDescriptor> *findFirstStart(TreeNode<MemoryDescriptor>* loc,int start,unsigned int len);//done
     static TreeNode<MemoryDescriptor> *findFirstLen(TreeNode<MemoryDescriptor>* loc,unsigned int len);//done
-    static TreeNode<MemoryDescriptor> *locateForInsertation(TreeNode<MemoryDescriptor>* root,TreeNode<MemoryDescriptor> *son);
+    static TreeNode<MemoryDescriptor> *locateForInsertation(TreeNode<MemoryDescriptor>* loc,TreeNode<MemoryDescriptor> *son);
+    static TreeNode<MemoryDescriptor> *locateForDelete(TreeNode<MemoryDescriptor>* loc,int start,unsigned int len,int allocable);//done
 
     /**
      * 1	success
@@ -80,10 +87,11 @@ public:
     static TreeNode<MemoryDescriptor> *nextAllocable(TreeNode<MemoryDescriptor> *node);
 
 
-    int isNullManager();
-    void setNull();
+    int isNullManager();//done
+    void setNull();//done
 protected:
     TreeNode<MemoryDescriptor> * allocOutNode(TreeNode<MemoryDescriptor> *avlNode,int start,unsigned int len);//done
+    void withdrawNode(TreeNode<MemoryDescriptor> *exactNode);//done
     
 protected:
     //SimpleMemoryManager<TreeNode<MemoryDescriptor> > *smm;  //the base class already has one
