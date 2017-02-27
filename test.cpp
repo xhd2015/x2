@@ -55,17 +55,22 @@ void Test::dumpMM( MemoryManager &mm)
 {
     char buf[10];
     Util::printStr("Head: ");
-    Test::dumpMemoryData(mm.getHead()->getData());
-    int n=0;
-    TreeNode<MemoryDescriptor> *p=mm.getHead()->getSon();
-    while(p)
+    if(mm.getHead())
     {
-        Util::digitToStr(buf,10,n++);
-        Util::printStr("NO_");
-        Util::printStr(buf);
-        Util::printStr(":");
-        Test::dumpMemoryData(p->getData());
-        p=p->getNext();
+        Test::dumpMemoryData(mm.getHead()->getData());
+        int n=0;
+        TreeNode<MemoryDescriptor> *p=mm.getHead()->getSon();
+        while(p)
+        {
+            Util::digitToStr(buf,10,n++);
+            Util::printStr("NO_");
+            Util::printStr(buf);
+            Util::printStr(":");
+            Test::dumpMemoryData(p->getData());
+            p=p->getNext();
+        }
+    }else{
+        Util::printStr("NULL \n");
     }
 
 }
@@ -86,16 +91,17 @@ void Test::testMemory()
 
     //==============
 
+    Test::dumpSMM(&smm);
     MemoryManager mm(&smm,0,0xfffff,0);//0~1MB,用于自身分配,模拟空间分配完毕的情况
-    // Test::dumpSMM(&smm);
+    Test::dumpSMM(&smm);
 
 
 //    dbg.putsz("done init.\n");
   // dumpMemoryData(mm.getHead()->getData());//OK
 
-    mm.allocFreeStart(0,PMLoader::CODE_START); //this is for preserved area
+    MemoryManager reserved=mm.allocFreeStart(0,PMLoader::CODE_START); //this is for preserved area
         dbg.putsz("done init 1.\n");
-    mm.allocFreeStart(PMLoader::CODE_START,PMLoader::CODE_LIMIT/100);//for code
+    MemoryManager code_area=mm.allocFreeStart(PMLoader::CODE_START,PMLoader::CODE_LIMIT/100);//for code
     //now it's free to use all the left area
     dbg.putsz("done allocFreeStart.\n");
     
@@ -121,6 +127,14 @@ void Test::testMemory()
     mm.mdelete(b,sizeof(*b));
 
     Test::dumpMM(mm);
+    reserved.withdrawToParent();
+    //Test::dumpMM(mm);
+    Test::dumpSMM(&smm);
+    code_area.withdrawToParent();
+    //last:
+    mm.withdrawToParent();//撤销顶级管理器
+    Test::dumpMM(mm);
+    Test::dumpSMM(&smm);
     dbg.putsz("\n");
 
     dbg.putsz("End .\n");

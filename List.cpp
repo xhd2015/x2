@@ -99,6 +99,26 @@ void    ListNode<T>::insertPrevious(ListNode<T>* previous)
         this->setPrevious(previous);
     }
 }
+template<class T>
+ListNode<T>*   ListNode<T>::getLast()
+{
+    ListNode<T>* p=this;
+    while(p->hasNext())
+    {
+        p=p->getNext();
+    }
+    return p;
+}
+template<class T>
+ListNode<T>*    ListNode<T>::getFirst()
+{
+    ListNode<T> *p=this;
+    while(p->hasPrevious())
+    {
+        p=p->getPrevious();
+    }
+    return p;
+}
 
 //===============class : LinkedList
 template<class T>

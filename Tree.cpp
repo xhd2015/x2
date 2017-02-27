@@ -39,8 +39,8 @@ template<class T>
    	return this;
    }
 template<class T>
-TreeNode<T>* TreeNode<T>::setFather(TreeNode<T>* son) {
-
+TreeNode<T>* TreeNode<T>::setFather(TreeNode<T>* father) {
+    this->father=father;
 }
 
 template<class T>
@@ -83,6 +83,22 @@ Tree<T>::~Tree() {
 }
 
 template<class T>
+void         Tree<T>::free(TreeNode<T> *root)
+{
+  if(root)
+  {
+     TreeNode<T>* p=root->getSon();//先把所有子类free
+    while(p)
+    {
+        this->free(p);
+        p = p->getNext();
+    }//OK,all the sons are free
+    smm->withdraw(root);
+  }
+
+
+}
+template<class T>
 TreeNode<T>* Tree<T>::getHead() {
 	return root->getSon();
 }
@@ -93,8 +109,3 @@ template<class T>
  	root->setSon(head);
  	return this;
  }
-
-template<class T>
-void Tree<T>::free() {
-}
-

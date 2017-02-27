@@ -66,9 +66,7 @@ public:
     void* mnew(unsigned int size);//done
     void mdelete(void* p,unsigned int size);//查找p开始的连续个大小，看是否能满足要求,使用locateForDelete,withdrawNode协同完成，done
 
-
-    void free();                                //全部撤销
-    int withDrawToParent();                    //回收到父级管理器,当其撤销的时候，必须将子类移动到父类的子类中
+    void withdrawToParent();                    //回收到父级管理器,当其撤销的时候，必须将子类移动到父类的子类中,done
 
     int getBase();
     int getFirstAVL();

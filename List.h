@@ -84,7 +84,9 @@ public:
     void    insertNext(ListNode<T>* next);
     void    insertPrevious(ListNode<T>* previous);
     AS_MACRO int  hasNext();
-    AS_MACRO int  hasPrevious();
+    AS_MACRO int  hasPrevious();//done
+    ListNode<T>*    getLast();//done
+    ListNode<T>*    getFirst();//done
     //指向构造函数的地址
     //用 new (void*p) 构造函数,俗称placement new
 protected:
@@ -139,13 +141,13 @@ public:
     ~TreeNode();
 
     TreeNode<T>* setSon(TreeNode<T>* son);//done
-    TreeNode<T>* setFather(TreeNode<T>* son);
+    TreeNode<T>* setFather(TreeNode<T>* father);//done
     TreeNode<T>* getSon(); //done
     TreeNode<T>* getDirectFather();//direct father,done
 
 
     
-    TreeNode<T>* getParent();//往previous一直遍历，直到是跟，然后返回跟的father
+    TreeNode<T>* getParent();//往previous一直遍历，直到是根，然后返回根的father,done
     
 protected:
     TreeNode<T> *son,*father;
@@ -158,10 +160,10 @@ public:
     Tree(SimpleMemoryManager<TreeNode<T> > *smm);
     ~Tree();
     
-    TreeNode<T> *getHead();
-    Tree<T>     *setHead(TreeNode<T> *head);  //返回其自身
-    void free();
-    
+    TreeNode<T> *getHead();//done
+    Tree<T>     *setHead(TreeNode<T> *head);  //返回其自身,done
+    void         free(TreeNode<T> *root);//将root自身和所有子节点都释放掉，== withdraw all nodes recursively  done
+
 protected:
     SimpleMemoryManager<TreeNode<T> > *smm;
     // 0

@@ -71,12 +71,29 @@ MemoryManager(smm)
 
 MemoryManager::~MemoryManager()
 {
-
+    //这里不进行真正的撤销，只是把管理器所使用的节点撤销
+    if(this->getHead())
+    {
+        this->getHead()->setFather(NULL);
+    }
+    smm->withdraw(this->root);
 }
 
-int MemoryManager::withDrawToParent()
+void MemoryManager::withdrawToParent()
 {
     //回收后进行两点之间的检查，如果能够合并就进行合并
+    TreeNode<MemoryDescriptor> *head=this->getHead();
+    if(head)
+    {
+        //顶级管理器和非顶级管理器操作相同
+        this->withdrawNode(head);
+        //但是如果是顶级管理器，father为NULL，所以需要将其从smm中撤销
+        if(!head->getParent())//顶级管理器
+        {
+            smm->withdraw(head);
+            this->setHead(NULL);
+        }
+    }
 }
 /**
 *   for nodes found available for allocation,here will spilt it out
@@ -93,7 +110,6 @@ TreeNode<MemoryDescriptor> * MemoryManager::allocOutNode(TreeNode<MemoryDescript
 {
 
     // Test::dumpMemoryData(avlNode->getData());
-    
     TreeNode<MemoryDescriptor> *newnode=NULL;
     if(avlNode)
     {
@@ -122,12 +138,24 @@ TreeNode<MemoryDescriptor> * MemoryManager::allocOutNode(TreeNode<MemoryDescript
     return newnode;
 }
 /**
-*
+*  BUG:
+*       may not properly combine the son nodes.@BUG1    --  but those nodes are allocable,meaning they should have no sons.
+*                                                            in another words, a node is consistence only when isAllocable()=(getSon()==NULL)
 * do not accept:
 *       exactNode==NULL
 */
 void MemoryManager::withdrawNode(TreeNode<MemoryDescriptor> *exactNode)
 {
+    //先释放其所有子节点
+    TreeNode<MemoryDescriptor> *p=exactNode->getSon();
+    while(p)
+    {
+        this->free(p);
+        p=p->getNext();
+    }
+    exactNode->setSon(NULL);//free完毕
+
+    //开始合并
     TreeNode<MemoryDescriptor> *prev=exactNode->getPrevious();
     if(prev && prev->getData().isAllocable() && exactNode->getData().getStart() - prev->getData().getStart() == (int)prev->getData().getLimit() )
     {
@@ -143,6 +171,20 @@ void MemoryManager::withdrawNode(TreeNode<MemoryDescriptor> *exactNode)
     if(nxt && nxt->getData().isAllocable() && nxt->getData().getStart() - prev->getData().getStart() == (int)prev->getData().getLimit() )
     {
         prev->getData().setLimit(prev->getData().getLimit() + nxt->getData().getLimit() );
+        // //将next的子节点移动到此处
+        // //BUG1:
+        // TreeNode<MemoryDescriptor> *prevson=prev->getSon(),nxtson=nxt->getSon();
+        // if(prevson)
+        // {
+        //     prevson->getLast()->insertNext(nxtson);
+        // }else{
+        //     prev->setSon(nxtson);
+        //     nxtson->setFather(prev);
+        // }
+        // if(prev->getSon())
+        // {
+
+        // }
         prev->removeNext();
         smm->withdraw(nxt);
     }else{//do nothing
@@ -185,7 +227,7 @@ void* MemoryManager::mnew(unsigned int size) {
 }
 /**
 *   Following:
-*       find the exact node of required arguments with {starting with p, limit is size,not allocable}
+*       find the exact node by required arguments with {starting with p, limit is size,not allocable}
 *       if found,withdraw it to parent
 *
 */
@@ -196,9 +238,6 @@ void MemoryManager::mdelete(void* p, unsigned int size) {
         //Util::printStr("Found delete.   ");
         withdrawNode(toDeleteNode);
     }
-}
-
-void MemoryManager::free() {
 }
 
 

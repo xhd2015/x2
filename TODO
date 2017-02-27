@@ -1,0 +1,6 @@
+[*] == done	[-] == deprecated	[]  == proposed		[+] == doing
+
+[+]	repair MemoryManager::withdrawNode()	--	the sons of that nodes shoud be withdrawed also.
+[]	printf() series functions
+[]	keyboard process functions
+
