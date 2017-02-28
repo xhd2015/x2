@@ -1,5 +1,9 @@
 [*] == done	[-] == deprecated	[]  == proposed		[+] == doing
 
+[+]	add a new branch,named "stdc",and laterly a new branch "stdc++".To embed a c & c++ runtime
+[+]	printf() number()... series
+[+]	building filesystems so that we start log messages to files
+[+]	process keyboard interrupt
 [+]	repair MemoryManager::withdrawNode()	--	the sons of that nodes shoud be withdrawed also.
 []	printf() series functions
 []	keyboard process functions
