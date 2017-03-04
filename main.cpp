@@ -8,10 +8,10 @@ __asm__(
 );
 extern int READSEG[];
 
-#include "libx2.h"
-#include "PMLoader.h"
-#include "Descriptor.h"
-#include "def.h"
+#include <libx2.h>
+#include <PMLoader.h>
+#include <Descriptor.h>
+#include <def.h>
 
 //开始引导
 __asm__(

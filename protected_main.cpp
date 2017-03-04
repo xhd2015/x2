@@ -4,14 +4,14 @@ __asm__(".code32 \n\t");
 
 
 
-#include "libx2.h"
-#include "Descriptor.h"
-#include "TSS.h"
-#include "interrupts.h"
-#include "def.h"
-#include "IOProgramer.h"
-#include "test.h"
-#include "PMLoader.h"
+#include <libx2.h>
+#include <Descriptor.h>
+#include <TSS.h>
+#include <interrupts.h>
+#include <def.h>
+#include <IOProgramer.h>
+#include <test.h>
+#include <PMLoader.h>
 
 extern "C" {
     void protectedEntryHolder();

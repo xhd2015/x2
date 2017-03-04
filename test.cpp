@@ -1,12 +1,12 @@
 
 #ifdef CODE32
 
-#include "def.h"
-#include "libx2.h"
-#include "test.h"
-#include "List.h"
-#include "PMLoader.h"       //使用常数
-#include "Memory.h"
+#include <def.h>
+#include <libx2.h>
+#include <test.h>
+#include <List.h>
+#include <PMLoader.h>       //使用常数
+#include <Memory.h>
 
 Test::Test():
 dbg(Printer(5,40,15,30))
@@ -217,7 +217,9 @@ void Test::run()
 {
     //testQueue();
     //testList();
+    dbg.putsz("Test hook started.\n");
     testMemory();
+    dbg.putsz("Test hook ended\n");
 }
 
 #endif

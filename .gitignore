@@ -1,8 +1,11 @@
 test_*.{cpp,s,o}
 test/
 exports/
-stdc++/*
-stdc/*
+#stdc++/*
+#stdc/*
+#for sources wanted to ignore
+ignore/*
+
 
 #a pattern like DIR/ will explicitly exclude everything even those starting with !
 #but a pattern like DIR/* will do that but keep !

@@ -1,5 +1,6 @@
 [*] == done	[-] == deprecated	[]  == proposed		[+] == doing
 
+[]	use bit-structs with #pragma pack... or -fpack-struct=1 to completely redefine the CPU related structs
 [+]	add a new branch,named "stdc",and laterly a new branch "stdc++".To embed a c & c++ runtime
 [+]	printf() number()... series
 [+]	building filesystems so that we start log messages to files

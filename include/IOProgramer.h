@@ -1,9 +1,9 @@
-#ifndef __IOProgramer__
-#define __IOProgramer__
+#ifndef IOProgramer_h__
+#define IOProgramer_h__
 
 
-#include "def.h"
-#include "libx2.h"
+#include <def.h>
+#include <libx2.h>
 
 #ifdef CODE32
 class IO_8259A{

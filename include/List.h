@@ -2,13 +2,13 @@
 #ifndef List_h__
 #define List_h__
 
-#include "def.h"
+#include <def.h>
 
 class SimpleMemoryNode{
 public:
     SimpleMemoryNode(int NO=-1);
     ~SimpleMemoryNode();
-
+ 
     AS_MACRO int getNO();
     AS_MACRO void setNO(int NO);
     AS_MACRO int isFree();

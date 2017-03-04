@@ -1,6 +1,6 @@
 
-#include "List.h"
-#include "Memory.h"
+#include <List.h>
+#include <Memory.h>
 //====================模板实例化区域
 //===========模板声明区
 template class SimpleMemoryManager<ListNode<int> >;
@@ -22,17 +22,29 @@ SimpleMemoryNode::~SimpleMemoryNode()
 
 //初始化列表的作用就是在生成代码时直接生成mov的形式
 template <class T>
-SimpleMemoryManager<T>::SimpleMemoryManager(int start,unsigned int limit):
+SimpleMemoryManager<T>::SimpleMemoryManager(int start,unsigned int limit,int doInit):
 start(start),limit(limit),
 data((T*)start),len((int)(limit/sizeof(T))),curSize(0),
 lastIndex(0)
 {
-    for(int i=0;i!=len;i++)
+    if(doInit)
     {
-       data[i].free();
+
+        for(int i=0;i!=len;i++)
+        {
+           data[i].free();
+        }
+           
     }
 }
 
+template <class T>
+SimpleMemoryManager<T>::SimpleMemoryManager():
+start(-1),limit(0),data(NULL),len(0),curSize(0),lastIndex(0)
+{
+
+
+}
 template <class T>
 SimpleMemoryManager<T>::~SimpleMemoryManager()
 {

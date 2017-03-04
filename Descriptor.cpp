@@ -5,8 +5,8 @@
 #endif
 
 
-#include "Descriptor.h"
-#include "libx2.h"
+#include <Descriptor.h>
+#include <libx2.h>
 
 //指针类型
 #define __MXp(type,pointer,andNum,shiftNum,direction) ((*((type*)this->pointer) & (andNum) ) direction (shiftNum))

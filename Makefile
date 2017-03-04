@@ -1,6 +1,8 @@
 
 dir = /home/Fulton Shaw/x2-devel
 GEN := gen
+EXPORTS := exports
+BACKUP := backups
 f16 = main libx2 PMLoader Descriptor
 f32 = protected_main libx2 PMLoader Descriptor TSS interrupts IOProgramer Memory test SimpleMemoryManager List Tree
 fallh = libx2 PMLoader Descriptor TSS interrupts IOProgramer Memory test List
@@ -20,7 +22,8 @@ f32o := $(patsubst %,%_32.o,$(f32))
 ld16 := image_16.ld
 ld32 := image_32.ld
 
-CCFLAGS :=  -fpack-struct=1 -fpermissive -fno-exceptions  -nostdinc -nostdinc++ -nostdlib -Winline --no-warnings
+fbackup := $(fhs) $(fcpp) $(ld16) $(ld32) Makefile TODO README 
+CCFLAGS :=  -fpack-struct=1 -fpermissive -fno-exceptions  -nostdinc -nostdinc++ -nostdlib -Winline --no-warnings -I ./include
 LDFLAGS :=    --print-gc-sections --no-gc-sections  
 UNUSED_CCFLAGS := -fkeep-inline-functions 
 CCMACROS16 := -D CODE16
@@ -33,7 +36,7 @@ RMFILES := $(f16o) $(f32o) $(f16s) $(f32s) main_32.img main_32.bimg main_16.img 
 # imageMacros := DRIVER SECSTART SECNUM CODESEG CODEOFF
 # imageSyms := JMPSEG JMPOFF
 #==================================================================================
-.PHONY : dump16 dump clean default nothing help debug start export
+.PHONY : dump16 dump clean default nothing help debug start export backup
 .ONESHELL:
 .SECONDEXPANSION:
 default:
@@ -59,9 +62,11 @@ start:
 	-@cmd /C 'cd D:\ForNew10\Users\13774\Desktop\bochs\devel\x2^ system && explorer start_bochs.cmd'
 export:VERSION $(fcpp) $(fhs) Makefile start_bochs.cmd main.bimg
 	@v=$$(cat VERSION)
-	mkdir --parents exports/$${v}
-	cp  $< -t exports/$${v}
+	mkdir --parents $(EXPORTS)/$${v}
+	cp  $< -t $(EXPORTS)/$${v}
 	echo VERSION:$${v}
+backup:
+	
 #===================================================================================
 $(GEN)/main_32.img $(GEN)/main_16.img:$$(patsubst %,$(GEN)/%, $$($$(patsubst $(GEN)/main_%.img,f%o,$$@)) )
 	ld -T$(patsubst $(GEN)/main_%.img,image_%.ld,$@) $(LDFLAGS) $^ -o $@

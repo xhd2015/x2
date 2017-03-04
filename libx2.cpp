@@ -5,8 +5,8 @@
 #endif
 
 
-#include "libx2.h"
-#include "def.h"
+#include <libx2.h>
+#include <def.h>
 //==============模板实例化
 //===在此声明实例化
 #ifdef CODE32
@@ -458,7 +458,7 @@ void Printer::putc(int chr)
     }
     Util::leaveEs(oldes);
 }
-void Printer::putsz(char* str)
+void Printer::putsz(const char* str)
 {
     int oldes;
     char *p=str;
@@ -476,7 +476,7 @@ void Printer::putsz(char* str)
     Util::leaveEs(oldes);
 
 }
-void Printer::putsn(char *str,int n)
+void Printer::putsn(const char *str,int n)
 {
     int oldes;
     char *p=str;

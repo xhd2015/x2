@@ -4,9 +4,9 @@ __asm__(".code16gcc \n\t");
 __asm__(".code32 \n\t");
 #endif
 
-#include "PMLoader.h"
-#include "libx2.h"
-#include "Descriptor.h"
+#include <PMLoader.h>
+#include <libx2.h>
+#include <Descriptor.h>
 
 const int PMLoader::SAFE_SEG=0x100;
 const int PMLoader::SECSIZE=512;

@@ -1,5 +1,5 @@
-#ifndef __Descriptor__
-#define __Descriptor__
+#ifndef Descriptor_h__
+#define Descriptor_h__
 /**
 *提供了对intel x86的8字节描述符的结构化描述
 *

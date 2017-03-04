@@ -1,5 +1,5 @@
-#ifndef __interrupts_h__
-#define __interrupts_h_
+#ifndef interrupts_h__
+#define interrupts_h__
 
 #include "def.h"
 
@@ -67,6 +67,9 @@ protected:
     static unsigned int intLen;
     
     static GENERAL_FUNC defaultHandler;
+
+    //提供一个用于当前进程的keyboard buffer
+    //默认情况下会忽略所有输入，除非进程明确表示：需要键盘输入
     
 };
 

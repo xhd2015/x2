@@ -1,0 +1,1 @@
+if the code is arch-independent and compiler-independent and anything-else-independent,then it is shared and which is placed here

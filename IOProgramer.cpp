@@ -1,8 +1,8 @@
 #ifdef CODE32
 __asm__(".code32 \n\t");
-#include "IOProgramer.h"
-#include "libx2.h"
-#include "def.h"
+#include <IOProgramer.h>
+#include <libx2.h>
+#include <def.h>
 
 #ifdef __I_REALLY_NEED_THIS
 const unsigned int IO_8259A::ICW1_EDGE_MODE_OFF=0b0,

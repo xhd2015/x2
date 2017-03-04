@@ -1,14 +1,16 @@
 #ifdef CODE32
 __asm__(".code32 \n\t");
 
-#include "interrupts.h"
-#include "libx2.h"
-#include "IOProgramer.h"
-#include "def.h"
+#include <interrupts.h>
+#include <libx2.h>
+#include <IOProgramer.h>
+#include <def.h>
 
 int __intAddresses[]={
      int0x0,
-     int0x1,     int0x2,     int0x3,
+     int0x1,
+     int0x2,
+     int0x3,
      int0x4,
      int0x5,
      int0x6,

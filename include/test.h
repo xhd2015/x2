@@ -1,8 +1,8 @@
 
 #ifndef test_h__
 #define test_h__
-#include "libx2.h"
-#include "Memory.h"
+#include <libx2.h>
+#include <Memory.h>
 
 class Test{
 public:

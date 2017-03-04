@@ -1,0 +1,18 @@
+[*]		2017-02-28 23:58:28 	stdarg.h
+[*]		2017-03-01 00:09:32		assert.h			
+[*]		2017-03-01 00:19:53		stddef.h
+[*]		If you want to use different FILE,time_t...etc,you may modify the ./local-definitions or you may just modify the stdio.h itself.
+[*]		2017-03-01 00:42:26		stdio.h
+[*]		size_t is defined in various headers: stddef.h, string.h, stdlib.h, and stdio.h. Including any one of them is enough to use size_t in your code.
+[*]		2017-03-01 01:04:32		stdlib.h
+[*]		2017-03-01 01:08:30		ctype.h
+[*]		2017-03-01 01:10:35		math.h
+[*]		2017-03-01 01:13:06		errno.h
+[*]		2017-03-01 01:24:43		signal.h
+[*]		2017-03-01 01:29:59		time.h
+[*]		2017-03-01 12:33:34		setjmp.h
+[*]		2017-03-01 12:40:56		limits.h
+[*]		2017-03-01 12:42:04		string.h
+[*]		2017-03-01 12:46:27		locale.h
+[*]		2017-03-01 12:55:58		float.h
+[*]		2017-03-01 12:56:19		*all done*

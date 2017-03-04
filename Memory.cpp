@@ -1,10 +1,10 @@
 #ifdef CODE32
 __asm__(".code32 \n\t");
-#include "Memory.h"
-#include "List.h"
-#include "libx2.h"
-#include "def.h"
-#include "test.h"
+#include <Memory.h>
+#include <List.h>
+#include <libx2.h>
+#include <def.h>
+#include <test.h>
 MemoryDescriptor::MemoryDescriptor(int start,unsigned int limit,int allocable=1):
 start(start),limit(limit),allocable(allocable)
 {

@@ -1,6 +1,6 @@
 
-#ifndef __PMLoder__
-#define __PMLoder__
+#ifndef PMLoder_h__
+#define PMLoder_h__
 //实模式下的 “保护模式加载器”
 // 主加载过程：（顺序有严格要求，见mainProcess）
 //

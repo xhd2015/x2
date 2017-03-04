@@ -1,7 +1,7 @@
 
-#ifndef __libx2__
-#define __libx2__
-#include "def.h"
+#ifndef libx2_h__
+#define libx2_h__
+#include <def.h>
 //静态工具类
 class Util{
     

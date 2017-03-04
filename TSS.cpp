@@ -1,10 +1,10 @@
 #ifdef CODE32
 __asm__(".code32 \n\t");
 
-#include "TSS.h"
-#include "libx2.h"
-#include "def.h"
-#include "PMLoader.h"
+#include <TSS.h>
+#include <libx2.h>
+#include <def.h>
+#include <PMLoader.h>
 TSS::TSS():IOADDR((char*)((&__IOBASEADDR)+2)),TRAP( (char*)(&__IOBASEADDR))
 {
 
