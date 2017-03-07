@@ -3,11 +3,11 @@ plugin_ctrl: unmapped=1, biosdev=1, speaker=1, extfpuirq=1, parallel=1, serial=1
 config_interface: win32config
 display_library: win32
 memory: host=32, guest=32
-romimage: file="D:\ForNew10\Program Files (x86)\Bochs-2.6.8\BIOS-bochs-latest"
-vgaromimage: file="D:\ForNew10\Program Files (x86)\Bochs-2.6.8\VGABIOS-lgpl-latest"
+romimage: file="C:\Program Files (x86)\Bochs-2.6.8\BIOS-bochs-latest"
+vgaromimage: file="C:\Program Files (x86)\Bochs-2.6.8\VGABIOS-lgpl-latest"
 boot: floppy
 floppy_bootsig_check: disabled=0
-floppya: type=1_44, 1_44="D:\ForNew10\Users\13774\Desktop\bochs\devel\x2 system\main.bimg", status=inserted, write_protected=0
+floppya: type=1_44, 1_44="C:\Users\13774\Desktop\bochs\devel\x2 system\main.bimg", status=inserted, write_protected=0
 floppyb: type=1_44, 1_44="floppyb.img", status=inserted, write_protected=0
 ata0: enabled=1, ioaddr1=0x1f0, ioaddr2=0x3f0, irq=14
 ata0-master: type=none
@@ -36,7 +36,7 @@ debug: action=ignore
 info: action=report
 error: action=report
 panic: action=ask
-keyboard: type=mf, serial_delay=250, paste_delay=100000, keymap=D:\ForNew10\Program Files (x86)\Bochs-2.6.8\keymaps\x11-pc-us.map", user_shortcut=none
+keyboard: type=mf, serial_delay=250, paste_delay=100000, keymap=C:\Program Files (x86)\Bochs-2.6.8\keymaps\x11-pc-us.map", user_shortcut=none
 mouse: type=ps2, enabled=0, toggle=ctrl+mbutton
 sound: waveoutdrv=win, waveout=none, waveindrv=win, wavein=none, midioutdrv=win, midiout=none
 speaker: enabled=1, mode=sound

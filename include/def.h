@@ -4,10 +4,11 @@
 
 //====数据宏
 #define NULL ((void*)0)
-//#define true 1
-//#define false 0
+#define true 1
+#define false 0
 typedef unsigned int size_t;
 typedef signed int ptrdiff_t;
+typedef char bool;
 
 //=====用于开发标记
 #define DEVEL_UNTESTED(who) /*0*/

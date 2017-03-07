@@ -1,61 +1,14 @@
-#ifdef CODE32
+#if defined(CODE16)
+//do nothing
+#elif defined(CODE32)
 __asm__(".code32 \n\t");
+#endif
+
 #include <Memory.h>
 #include <List.h>
 #include <libx2.h>
 #include <def.h>
 #include <test.h>
-MemoryDescriptor::MemoryDescriptor(int start,unsigned int limit,int allocable=1):
-start(start),limit(limit),allocable(allocable)
-{
-
-}
-MemoryDescriptor* MemoryDescriptor::init(int start,unsigned int limit,int allocable=1)
-{
-    this->start=start;
-    this->limit=limit;
-    this->allocable=allocable;
-    return this;
-
-}
-MemoryDescriptor::~MemoryDescriptor()
-{
-}
-int MemoryDescriptor::getStart()
-{
-    return start;
-}
-MemoryDescriptor* MemoryDescriptor::setAllocable(int allocable)
-{
-    this->allocable=allocable;
-    return this;
-}
-void MemoryDescriptor::setLimit(unsigned int limit)
-{
-    this->limit=limit;
-}
-
-unsigned int MemoryDescriptor::getLimit(){
-    return limit;
-}
-int MemoryDescriptor::isAllocable(){
-    return allocable;
-}
-void MemoryDescriptor::setStart(int start)
-{
-    this->start=start;
-}
-int MemoryDescriptor::operator==(const MemoryDescriptor& b)
-{
-    return this->getStart()==b.getStart() &&
-            this->getLimit()==b.getLimit();
-    
-}
-int MemoryDescriptor::operator!=(const MemoryDescriptor& b)
-{
-    return ! this->operator==(b);
-}
-
 //============class : MemoryManager
 
 MemoryManager::MemoryManager(SimpleMemoryManager<TreeNode<MemoryDescriptor> > *smm):
@@ -63,10 +16,10 @@ Tree<MemoryDescriptor>(smm) //调用父类的构造函数
 {
 
 }
-MemoryManager::MemoryManager(SimpleMemoryManager<TreeNode<MemoryDescriptor> > *smm,int start,unsigned int len,int fatherAllocable):
+MemoryManager::MemoryManager(SimpleMemoryManager<TreeNode<MemoryDescriptor> > *smm,int start,size_t len,bool fatherAllocable):
 MemoryManager(smm)
 {
-    setHead(smm->getNew()->init(MemoryDescriptor(start,len,fatherAllocable)));
+    setHead( new (smm->getNew()) TreeNode<MemoryDescriptor>(MemoryDescriptor(start,len,fatherAllocable)));
 }
 
 MemoryManager::~MemoryManager()
@@ -210,9 +163,31 @@ MemoryManager MemoryManager::allocFreeStart(int start, unsigned int len) {
 }
 
 MemoryManager MemoryManager::allocFree(unsigned int len) {
-
+    
+    MemoryManager          spaces(smm);
+    if(len<=0 || this->isNullManager() )
+    {
+        spaces.setNull();//ok
+    }else{
+        copyOnAllocation(getHead());//保证复制了父节点
+        TreeNode<MemoryDescriptor> *firstNode=MemoryManager::findFirstLen(getHead(),len);//ok,the information of head is ignored,it's full information is stored in it's sons 
+        spaces.setHead(allocOutNode(firstNode,start,len));//either not found or found,set the new manager
+    }
+    return spaces;
 }
-
+void* MemoryManager::mnew(int start,unsigned int size)
+{
+    TreeNode<MemoryDescriptor> *found=MemoryManager::findFirstStart(getHead(),start,size);
+    if(found)
+    {
+        TreeNode<MemoryDescriptor> *alloced = allocOutNode(found,found->getData().getStart(),size);
+        if(alloced)
+        {
+            return (void*)(alloced->getData().getStart());
+        }
+    }
+    return NULL;    
+}
 void* MemoryManager::mnew(unsigned int size) {
     TreeNode<MemoryDescriptor> *found=MemoryManager::findFirstLen(getHead(),size);
     if(found)
@@ -240,6 +215,15 @@ void MemoryManager::mdelete(void* p, unsigned int size) {
     }
 }
 
+void MemoryManager::mdelete(void *p)
+{
+    TreeNode<MemoryDescriptor>* toDeleteNode=MemoryManager::locateForDeleteStart(getHead(),(int)p,0);
+    if(toDeleteNode)//if found it
+    {
+        //Util::printStr("Found delete.   ");
+        withdrawNode(toDeleteNode);
+    }
+}
 
 /**
 *find the first node from loc's son nodes that is:
@@ -334,11 +318,29 @@ TreeNode<MemoryDescriptor>* MemoryManager::locateForDelete(TreeNode<MemoryDescri
 {
     if(loc==NULL||len==0)return NULL;
     TreeNode<MemoryDescriptor>* p=loc->getSon();
-    MemoryDescriptor temp(start,len,allocable);
 
     while(p && p->getData().getStart() < start)
             p=p->getNext();
-    if(p->getData().getStart() == start && p->getData().getLimit()==len && p->getData().isAllocable()==allocable)
+    if(p && p->getData().getStart() == start && p->getData().getLimit()==len && p->getData().isAllocable()==allocable)
+    {
+        return p;
+    }else{
+        return NULL;
+    }
+
+}
+
+/**
+* find for its sons which is exactly the same with passed arguments.
+*/
+TreeNode<MemoryDescriptor>* MemoryManager::locateForDeleteStart(TreeNode<MemoryDescriptor>* loc,int start,int allocable)
+{
+    if(loc==NULL||len==0)return NULL;
+    TreeNode<MemoryDescriptor>* p=loc->getSon();
+
+    while(p && p->getData().getStart() < start)
+            p=p->getNext();
+    if(p && p->getData().getStart() == start && p->getData().isAllocable()==allocable)
     {
         return p;
     }else{
@@ -395,5 +397,125 @@ TreeNode<MemoryDescriptor>* MemoryManager::nextAllocable(
         return node;
 }
 
-#endif //CODE32
+//==========class:LinearSourceManager
+template <class _LinearSourceDescriptor,template <class> class _NodeAllocator>
+LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator<_LinearSourceDescriptor> >::LinearSourceManager(_NodeAllocator<_LinearSourceDescriptor> *smm,
+    size_t start,size_t size):
+LocateableLinkedList<_LinearSourceDescriptor,Locator::DISCARD, _NodeAllocator<_LinearSourceDescriptor> >(smm),
+spaces(_LinearSourceDescriptor(start,size))
+{
+}
+template <class _LinearSourceDescriptor,template <class> class _NodeAllocator>
+LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator<_LinearSourceDescriptor> >::~LinearSourceManager()
+{
+
+}
+
+template <class _LinearSourceDescriptor,template <class> class _NodeAllocator>
+void* LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator<_LinearSourceDescriptor> >::mnew(size_t start,size_t size)
+{
+    if(!checkRange(start,size))return NULL;
+    ListNode<_LinearSourceDescriptor> *found=Father::findFirstStartLen(getHead(),start,size);
+    if(found)
+    {
+        ListNode<_LinearSourceDescriptor> *alloced = allocOutNode(found,start,size);
+        if(alloced)
+        {
+            return (void*)(alloced->getData().getStart());
+        }
+    }
+    return NULL;  
+}
+ 
+template <class _LinearSourceDescriptor,template <class> class _NodeAllocator>
+void* LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator<_LinearSourceDescriptor> >::mnew(size_t size)
+{
+    ListNode<_LinearSourceDescriptor> *found=Father::findFirstLen(getHead(),size);
+    if(found)
+    {
+        ListNode<_LinearSourceDescriptor> *alloced = allocOutNode(found,found->getData().getStart(),size);
+        if(alloced)
+        {
+            return (void*)(alloced->getData().getStart());
+        }
+    }
+    return NULL;
+}
+
+    
+template <class _LinearSourceDescriptor,template <class> class _NodeAllocator>
+void LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator<_LinearSourceDescriptor> >::mdelete(void* p,size_t size)
+{
+    if(!checkRange((size_t)p,size))return NULL;
+    ListNode<_LinearSourceDescriptor> *found=Father::findFirstForInsert(getHead(),(size_t)p,size);
+    if(found)
+    {
+        int diff=found->getData().getStart()-(size_t)p;
+        if(diff==0 || (diff>0 && !( This::checkPrevious(found->getPrevious(),(size_t)p) && This::checkNext(found,(size_t)p,size) ) ) ||
+                      (diff<0 && !(This::checkPrevious(found,(size_t)p) && This::checkNext(found->getNext(),(size_t)p,size) )  ) 
+                      )
+        {
+            //impossible to delete this memory
+            return;
+        }else{
+            if(diff>0)
+            {
+                found->insertPrevious(new (smm->getNew()) ListNode<_LinearSourceDescriptor>(_LinearSourceDescriptor((size_t)p,size)) );
+            }else{
+                found->insertNext(new (smm->getNew()) ListNode<_LinearSourceDescriptor>(_LinearSourceDescriptor((size_t)p,size)) );
+            }
+        }
+    }else{//empty list
+        appendHead(_LinearSourceDescriptor((size_t)p,size));
+    }
+
+}
+
+template <class _LinearSourceDescriptor,template <class> class _NodeAllocator>
+ bool LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator<_LinearSourceDescriptor> >::checkRange(size_t start,size_t size)
+ {
+    return (spaces.getStart() <= start) && (start-spaces.getStart() <= spaces.getLimit() - size );
+ }
+template <class _LinearSourceDescriptor,template <class> class _NodeAllocator>
+ bool LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator<_LinearSourceDescriptor> >::checkRange(size_t start)
+ {
+    return spaces.getStart() <= start;
+ }
+
+template <class _LinearSourceDescriptor,template <class> class _NodeAllocator>
+bool LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator<_LinearSourceDescriptor> >::checkPrevious(ListNode<_LinearSourceDescriptor> *prev,size_t start)
+{
+    return !prev || (start - prev->getData().getStart() >= prev->getData().getLimit());
+}
+
+template <class _LinearSourceDescriptor,template <class> class _NodeAllocator>
+bool LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator<_LinearSourceDescriptor> >::checkNext(ListNode<_LinearSourceDescriptor> *nxt,size_t start,size_t len)
+{
+    return !nxt || (nxt->getData().getStart() - start >= len );
+}
+template <class _LinearSourceDescriptor,template <class> class _NodeAllocator>
+_LinearSourceDescriptor LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator<_LinearSourceDescriptor> >::allocOutNode(ListNode<_LinearSourceDescriptor> *avlNode,size_t start,size_t len)
+{
+    char spaces[sizeof(_LinearSourceDescriptor)];
+    _LinearSourceDescriptor *newnode=new ((_LinearSourceDescriptor*)spaces) _LinearSourceDescriptor(start,len,0);
+    if(avlNode)
+    {
+        unsigned int len1=(unsigned int)(start-avlNode->getData().getStart());
+        unsigned int len2=(unsigned int)(avlNode->getData().getLimit() - len - len1);
+        if(len1==0 && len2==0)//前面有剩余,需要插入新的点
+        {
+            this->remove(avlNode);
+        }else if(len1==0 && len2 > 0){
+            avlNode->setStart(start+len);
+            avlNode->setLimit(len2);
+        }else if(len1 > 0 && len2==0){
+            avlNode->setLimit(len1);
+        }else{
+            avlNode->setLimit(len1);
+            avlNode->insertNext(new (smm->getNew()) ListNode<_LinearSourceDescriptor>(_LinearSourceDescriptor(start+len,len2)) );
+        }
+    }
+    return *newnode;
+}
+    
 

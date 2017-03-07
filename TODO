@@ -1,10 +1,19 @@
 [*] == done	[-] == deprecated	[]  == proposed		[+] == doing
 
+
+[*]	DO NOT use multiple implementation files,that means each header file should have at most only corresponding implementation file.For example,List.h had double implementation parts,'List.cpp' and 'SimpleMemoryManager.cpp',now they're combined into 'List.cpp'
+[]	REMOVE any init method,cause the placement new can do that gracefully.
+[*]	remove member'size' of LinkedList in List.h
+[]	Correct the usage of macro CODE16/CODE32,for there is some code can be used under 64-bit,by cygwin.
+[+]	add LinearSpaceManager,which will only keep the free space and complete almost the same function that MemoryManager does.
+[]	use policy design style to replace the old extension design style
+[]	set all types that used as boolean but stored with integer to char type.Such as 'allocable' in Memory.
+[]	leaving the dormitory,for people there can not work quietly.There is always someone that would encounter to interfer your work.
 []	use bit-structs with #pragma pack... or -fpack-struct=1 to completely redefine the CPU related structs
-[+]	add a new branch,named "stdc",and laterly a new branch "stdc++".To embed a c & c++ runtime
-[+]	printf() number()... series
-[+]	building filesystems so that we start log messages to files
-[+]	process keyboard interrupt
+[]	add a new branch,named "stdc",and laterly a new branch "stdc++".To embed a c & c++ runtime
+[]	printf() number()... series
+[]	building filesystems so that we start log messages to files
+[]	process keyboard interrupt
 [+]	repair MemoryManager::withdrawNode()	--	the sons of that nodes shoud be withdrawed also.
 []	printf() series functions
 []	keyboard process functions

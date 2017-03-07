@@ -367,6 +367,12 @@ int Util::strcopy(const char *src,char *dst,int len)
     *(dst+i)=0;
     return i;
 }
+int sign(int n)
+{
+    if(n<0)return -1;
+    if(n==0)return 0;
+    return 1;
+}
 //=================class : SimpleCharRotator
 const char SimpleCharRotator::rotateShapes[12]={'_','\b',0,'\\','\b',0,'|','\b',0,'/','\b',0};
 SimpleCharRotator::SimpleCharRotator(int x,int y,int attr,int direction):X(x),Y(y),Attr(attr),Status(0),Direction(direction)

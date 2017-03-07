@@ -6,14 +6,13 @@
 
 class SimpleMemoryNode{
 public:
-    SimpleMemoryNode(int NO=-1);
-    ~SimpleMemoryNode();
+    AS_MACRO SimpleMemoryNode(int NO=-1);//done
  
-    AS_MACRO int getNO();
-    AS_MACRO void setNO(int NO);
-    AS_MACRO int isFree();
-    AS_MACRO void free();
-    AS_MACRO void unfree();
+    AS_MACRO int getNO();//done
+    AS_MACRO void setNO(int NO);//done
+    AS_MACRO int isFree();//done
+    AS_MACRO void free();//done
+    AS_MACRO void unfree();//done
     
     
 protected:
@@ -35,43 +34,37 @@ protected:
 *   但是由于T的size未知，所以必须采用模板辅以继承的方法
 *
 *   注意，此管理器不能管理int等类型，除了继承自SimpleMemoryNode的class类型，他别无他能
+*
+*   This is a template for Allocator that will alloc out T
 */
 template <class T>
 class SimpleMemoryManager{
 public:
-    SimpleMemoryManager(int start,unsigned int limit);
-    ~SimpleMemoryManager();
+    SimpleMemoryManager(size_t start,size_t limit,bool doInit=true);//done
+    //~SimpleMemoryManager(); //the only way to free all list is a call to free
     
-    T* getNew();
-    void withdraw(T *t);//single free
-    void freeNext(T *t);//forward list free
-    void freePrevious(T *t);//backward list free
-    AS_MACRO int isFull();
-    AS_MACRO unsigned int getLen();
-    AS_MACRO unsigned int getCurSize();
-    AS_MACRO int getStart();
-    AS_MACRO unsigned int getLimit();
+    T* getNew();//done
+    void withdraw(T *t);//single free,done
+    AS_MACRO bool isFull();//done
+    AS_MACRO size_t getLen();//done
+    AS_MACRO size_t getCurSize();//done
+    AS_MACRO size_t getStart();//done
+    AS_MACRO size_t getLimit();//done
 protected:
-    int start;
-    unsigned int limit;
+    size_t start;
+    size_t limit;
     
     T *data;
-    unsigned int curSize,len;
+    size_t curSize,len;
     
-    unsigned int lastIndex;
-    
-    
-
-
+    size_t lastIndex;
 };
 
 template<class T>
-class ListNode : public SimpleMemoryNode{
+class ListNode{
 public:
     ListNode(const T& data,ListNode<T>* next=NULL,ListNode<T>* previous=NULL);
-    ListNode<T>* init(const T& data,ListNode<T>* next=NULL,ListNode<T>* previous=NULL);//构造函数,这是这种初始化在堆中的类的统一要求
     ~ListNode();
-    
     
     AS_MACRO const T& getData();
     AS_MACRO void setData(const T& data);
@@ -100,36 +93,102 @@ protected:
 *
 *   但是如果想要copy一个链表，可以直接使用operator=
 *   除了size
+*
+*   Requires:
+*      void _Allocator<T>::withdraw(T*);
+*       T*  _Allocator<T>::getNew(size_t size);
+*
 */
-template<class T>
+template<class T,template <class>class _Allocator >
 class LinkedList{
 public:
-    LinkedList(  SimpleMemoryManager<ListNode<T> > *smm);
-    LinkedList<T>* init(SimpleMemoryManager<ListNode<T> > *smm);
+    LinkedList(  _Allocator<ListNode<T> > *smm);
     ~LinkedList();
     
-    AS_MACRO ListNode<T>* getFirst();
-    ListNode<T>* getLast();
-    ListNode<T>*    append(const T &t);
-    ListNode<T>*   appendHead(const T &t);
-    ListNode<T>*    remove();
-    ListNode<T>*    removeHead();
-    void refresh();//如果从外部改变了数据，就要在此处刷新
-    
-    AS_MACRO unsigned int getSize();
-    
-    void free();
-    
+    AS_MACRO ListNode<T>* getHead();//done
+    AS_MACRO _Allocator<ListNode<T> > *getMemoryManager();//done
+
+
+    AS_MACRO ListNode<T>*    getLast();//done
+    ListNode<T>*    append(const T &t);//done
+    ListNode<T>*    append(ListNode<T>* p);//done
+    ListNode<T>*    appendHead(ListNode<T>* p);//done
+    ListNode<T>*   appendHead(const T &t);//done
+    ListNode<T>*    remove();//done
+    ListNode<T>*    removeHead();//done
+    void            remove(ListNode<T>* p);//done
+
+
+    void freeNode(ListNode<T> * node);//done
+    void free();//free this list,but not destruct,that means not including root & last              done
+    void freeNext(T *t);//forward list free,begin with this                 done
+    void freePrevious(T *t);//backward list free,begin with This            done
     
 
 protected:
-    SimpleMemoryManager<ListNode<T> > *smm; //空间分配代理器
+    _Allocator<ListNode<T> > *smm; //空间分配代理器
+
+    /**
+    *Designing them as pointer is the best choice I've ever made.
+    */
     ListNode<T>* root;
     ListNode<T>* last; //next指向最后一个
-    unsigned int size;
     
     
 };
+/**
+*It provides extra functions for location
+*To use this LocateableLinkedList,you must extends your class with Locateable,as for the method,you do not have to provide but if it is invalid the compiler will 
+*complain for that.
+*
+*   Require:
+*       Locateable::getStart()
+*                   setStart()
+*                   getLimit()
+*                   setLimit()
+*       Locateable::isAllocable()
+*                   setAllocable()
+*/
+//============for LinkedList<LinearSource>,there is some difference,you can invoke find/locate on this kind of list
+/**
+*   Extension or combination with template argument?
+*       Extension will cause longer class name
+*       template argument will interfer the orginal class
+*/
+template<class _Locateable,int _HowAllocated,template <class> class _Allocator >
+class LocateableLinkedList:public LinkedList<Locateable,Allocator<Locateable> >
+{
+public:
+    LocateableLinkedList( _Allocator<ListNode<_Locateable> > *smm );//done
+    ~LocateableLinkedList();//done
+    /**
+    * What should they return?The location,or a near location that can be later used to insert a node?
+    */
+    static ListNode<_Locateable> *findFirstStartLen(ListNode<_Locateable>* startNode,size_t start,size_t len);//done
+    static ListNode<_Locateable> *findFirstLen(ListNode<_Locateable>* startNode,size_t len);//done
+    static ListNode<_Locateable> *findFirstStart(ListNode<_Locateable>* startNode,size_t start);//done
+    /**
+    * return the first node whose start equals with or is bigger that argument start.
+    *  If there is no such node(e.g. the above returns NULL),then return the last one who is less.
+    *  If the above two process get NULL,then return NULL,meaning the list is empty.
+    */
+    static ListNode<_Locateable> *findFirstStartForInsert(ListNode<_Locateable> *startNode,size_t start);//done
+
+
+    /**
+    * The two locateForDeleteXXX methods are deprecated because now we have _HowAllocated.
+    */
+    DEPRECATED static ListNode<_Locateable> *locateForDelete(ListNode<_Locateable>* startNode,size_t start,size_t len,bool allocable);//done
+    DEPRECATED static ListNode<_Locateable>* locateForDeleteStart(ListNode<_Locateable>* startNode,size_t start,bool allocable);//done
+
+
+
+    static ListNode<_Locateable>* nextAllocable(ListNode<_Locateable>* startNode);//done
+protected:
+    static ListNode<_Locateable>* nextAllocable(ListNode<_Locateable>* startNode,Int2Type<Locator::KEEP>);//done
+    static ListNode<_Locateable>* nextAllocable(ListNode<_Locateable>* startNode,Int2Type<Locator::DISCARD>);//done
+};
+
 
 //===============TreeNode and Tree
 //	uses "Tree.cpp"
@@ -137,7 +196,6 @@ template <class T>
 class TreeNode:public ListNode<T>{
 public:
     TreeNode(const T& data,TreeNode<T>* father=NULL,TreeNode<T>* son=NULL,TreeNode<T>* next=NULL,TreeNode<T>* previous=NULL);
-    TreeNode<T>* init(const T& data,TreeNode<T>* father=NULL,TreeNode<T>* son=NULL,TreeNode<T>* next=NULL,TreeNode<T>* previous=NULL);
     ~TreeNode();
 
     TreeNode<T>* setSon(TreeNode<T>* son);//done
@@ -154,10 +212,10 @@ protected:
     
 };
 
-template <class T>
+template <class T,template <class> class Allocator>
 class Tree{
 public:
-    Tree(SimpleMemoryManager<TreeNode<T> > *smm);
+    Tree(Allocator<TreeNode<T> > *smm);
     ~Tree();
     
     TreeNode<T> *getHead();//done
@@ -165,7 +223,7 @@ public:
     void         free(TreeNode<T> *root);//将root自身和所有子节点都释放掉，== withdraw all nodes recursively  done
 
 protected:
-    SimpleMemoryManager<TreeNode<T> > *smm;
+    Allocator<TreeNode<T> > *smm;
     // 0
     // 1 
     // 2
@@ -181,7 +239,18 @@ protected:
     
 };
 
+/*These can be used in SimpleMemoryManager*/
+template<class T>
+class SimpleListNode:public ListNode<T>,public SimpleMemoryNode{
+
+};
+template<class T>
+class SimpleTreeNode:public TreeNode<T>,public SimpleMemoryNode{
+
+};
+
 //============函数宏区
+//=========class : ListNode
 template<class T>
 ListNode<T>* ListNode<T>::getNext()
 {
@@ -226,20 +295,28 @@ void ListNode<T>::setData(const T& data)
     this->data=data;
 }
 //=============class:LinkedList
-template<class T>
-ListNode<T>* LinkedList<T>::getFirst()
+template <class T,template <class> class _Allocator>
+ListNode<T>* LinkedList<T,_Allocator<T> >::getHead()
 {
     return root->getNext();
 }
-
-
-template<class T>
-unsigned int LinkedList<T>::getSize()
+template<class T,template <class> class _Allocator>
+ListNode<T>*  LinkedList<T,_Allocator<T> >::getLast()
 {
-    return size;
+    return last->getNext();
+}
+template <class T,template <class> class _Allocator>
+_Allocator<ListNode<T> > *LinkedList<T,_Allocator<T> >::getMemoryManager()
+{
+    return smm;
 }
 
-//                              class: SimpleMemoryNode
+//=====class: SimpleMemoryNode
+SimpleMemoryNode::SimpleMemoryNode(int NO=-1):
+NO(NO)
+{
+
+}
 int SimpleMemoryNode::getNO()
 {
     return this->NO;
@@ -261,29 +338,29 @@ void SimpleMemoryNode::setNO(int NO)
     this->NO = NO;
 }
 
-//                              class:SimpleMemoryManager
+//=====class:SimpleMemoryManager
 template<class T>
-int SimpleMemoryManager<T>::isFull()
+bool SimpleMemoryManager<T>::isFull()
 {
     return this->curSize==this->len;
 }
 template<class T>
-unsigned int SimpleMemoryManager<T>::getLen()
+size_t SimpleMemoryManager<T>::getLen()
 {
     return this->len;
 }
 template<class T>
-unsigned int SimpleMemoryManager<T>::getCurSize()
+size_t SimpleMemoryManager<T>::getCurSize()
 {
     return this->curSize;
 }
 template<class T>
-int SimpleMemoryManager<T>::getStart()
+size_t SimpleMemoryManager<T>::getStart()
 {
     return this->start;
 }
 template<class T>
-unsigned int SimpleMemoryManager<T>::getLimit()
+size_t SimpleMemoryManager<T>::getLimit()
 {
     return this->limit;
 }///////////

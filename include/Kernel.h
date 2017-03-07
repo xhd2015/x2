@@ -15,7 +15,7 @@ class Kernel{
 public:
 
 	//related to memory allocation
-	void* mnew(unsigned int mm_size);
+	void* mnew(unsigned int mm_size);//进程本身必须有一个用于储存已经有分配的节点的空间，回收的时候，进程只回收已经分配的空间。 这个空间只能够用于kernel访问
 	void  mdelete(void *p,unsigned int mm_size);
 
 	//related to process management

@@ -81,6 +81,8 @@ public:
     static int strlen(const char *a);
     static int strcopy(const char *src,char *dst,int len);
     
+    //math related
+    static int sign(int n);
     
     
     //========与调用相关的宏

@@ -1,13 +1,17 @@
 
 dir = /home/Fulton Shaw/x2-devel
 GEN := gen
+SRC := src
 EXPORTS := exports
 BACKUP := backups
+INCLUDE := include
+STDC := stdc
+STDCPP := stdc++
 f16 = main libx2 PMLoader Descriptor
-f32 = protected_main libx2 PMLoader Descriptor TSS interrupts IOProgramer Memory test SimpleMemoryManager List Tree
+f32 = protected_main libx2 PMLoader Descriptor TSS interrupts IOProgramer Memory test List Tree
 fallh = libx2 PMLoader Descriptor TSS interrupts IOProgramer Memory test List
 
-fallcpp = main libx2 PMLoader Descriptor protected_main TSS interrupts IOProgramer SimpleMemoryManager List
+fallcpp = main libx2 PMLoader Descriptor protected_main TSS interrupts IOProgramer List
 
 fhs = $(patsubst %,%.h,$(fallh))
 fcpp = $(patsubst %,%.cpp,$(fallcpp))
@@ -22,7 +26,7 @@ f32o := $(patsubst %,%_32.o,$(f32))
 ld16 := image_16.ld
 ld32 := image_32.ld
 
-fbackup := $(fhs) $(fcpp) $(ld16) $(ld32) Makefile TODO README 
+fbackup := $(INCLUDE) $(SRC) $(ld16) $(ld32) Makefile TODO README  $(STDC) $(STDCPP) test tools filesystem deprecated from-gcc
 CCFLAGS :=  -fpack-struct=1 -fpermissive -fno-exceptions  -nostdinc -nostdinc++ -nostdlib -Winline --no-warnings -I ./include
 LDFLAGS :=    --print-gc-sections --no-gc-sections  
 UNUSED_CCFLAGS := -fkeep-inline-functions 
@@ -59,14 +63,15 @@ dump:
 dump16:
 	@objdump -D $(GEN)/main_16.img -m i8086 | less
 start:
-	-@cmd /C 'cd D:\ForNew10\Users\13774\Desktop\bochs\devel\x2^ system && explorer start_bochs.cmd'
-export:VERSION $(fcpp) $(fhs) Makefile start_bochs.cmd main.bimg
+	-@cmd /C 'cd D:\ForNew10\Users\13774\Desktop\bochs\devel\x2^ system\tools\bochs^ run && explorer start_bochs.cmd'
+export:VERSION $(SRC) $(INCLUDE) Makefile start_bochs.cmd main.bimg
 	@v=$$(cat VERSION)
 	mkdir --parents $(EXPORTS)/$${v}
-	cp  $< -t $(EXPORTS)/$${v}
+	cp  $^ -t $(EXPORTS)/$${v}
 	echo VERSION:$${v}
-backup:
-	
+backup:$(fbackup)
+	@v=$$(cat VERSION)
+	tar --xz -cf $(BACKUP)/x2-$${v}.tar.xz $^
 #===================================================================================
 $(GEN)/main_32.img $(GEN)/main_16.img:$$(patsubst %,$(GEN)/%, $$($$(patsubst $(GEN)/main_%.img,f%o,$$@)) )
 	ld -T$(patsubst $(GEN)/main_%.img,image_%.ld,$@) $(LDFLAGS) $^ -o $@
@@ -82,14 +87,14 @@ $(patsubst %,$(GEN)/%,$(f16o) $(f32o)):$$(patsubst %.o,%.s,$$@)
 	as $(ASSYMS) $< -o $@
 
 # .cpp --> .s
-$(patsubst %,$(GEN)/%,$(f16s)):$$(patsubst $(GEN)/%_16.s,%.cpp,$$@)
+$(patsubst %,$(GEN)/%,$(f16s)):$$(patsubst $(GEN)/%_16.s,$(SRC)/%.cpp,$$@)
 	g++ $(CCFLAGS) $(CCMACROS) $(CCMACROS16) -S $< -o $@
 
-$(patsubst %,$(GEN)/%,$(f32s)):$$(patsubst $(GEN)/%_32.s,%.cpp,$$@)
+$(patsubst %,$(GEN)/%,$(f32s)):$$(patsubst $(GEN)/%_32.s,$(SRC)/%.cpp,$$@)
 	g++ $(CCFLAGS) $(CCMACROS) $(CCMACROS32) -S $< -o $@
 
 #.h --> .cpp
-$(fcpp):$(fhs)
+$(patsubst,%,$(SRC)/%,$(fcpp)):$(patsubst,%,$(INCLUDE)/%,$(fhs))
 	@#nothing
 # me --> .cpp .h  由我本人亲自操刀
 .cpp .h:
@@ -97,6 +102,8 @@ $(fcpp):$(fhs)
 #===特殊处理
 
 clean:
-	-cd $(GEN)
-	rm $(RMFILES)
-	rm ../main.bimg
+	@#
+	#-cd $(GEN)
+	#rm $(RMFILES)
+	#rm ../main.bimg
+	-rm $(GEN)/* main.bimg
