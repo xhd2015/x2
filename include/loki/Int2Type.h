@@ -3,8 +3,9 @@
 #define Int2Type_h__
 
 template <int V>
-struct Int2Type{
-	enum{value = v};
+class Int2Type{
+public:
+	enum{value = V};
 };
 
 

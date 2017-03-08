@@ -9,11 +9,11 @@
 *
 */
 template<class T>
-class MallocManager:public SimpleMemoryManager<T>
+class MallocToSimple
 {
 public:
-	MallocManager();
-	~MallocManager();
+	MallocToSimple();
+	~MallocToSimple();
 	virtual T *getNew();
 	virtual void withdraw(T *t);
 
@@ -24,4 +24,4 @@ protected:
 
 
 
-#endif 
+#endif //MallocToSimple_h__

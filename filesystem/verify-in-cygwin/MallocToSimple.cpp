@@ -1,9 +1,10 @@
 
 #include "MallocToSimple.h"
-#include <cmalloc>
+#include <cstdlib>
+#include <cstddef>
 
 template<class T>
-MallocToSimple<T>::MallocToSimple():SimpleMemoryManager<T>()
+MallocToSimple<T>::MallocToSimple()
 {
 
 }

@@ -3,6 +3,8 @@
 #define List_h__
 
 #include <def.h>
+#include <loki/Int2Type.h>
+#include <Locator.h>
 
 class SimpleMemoryNode{
 public:
@@ -41,6 +43,7 @@ template <class T>
 class SimpleMemoryManager{
 public:
     SimpleMemoryManager(size_t start,size_t limit,bool doInit=true);//done
+    SimpleMemoryManager();//default constructor that has nothing
     //~SimpleMemoryManager(); //the only way to free all list is a call to free
     
     T* getNew();//done
@@ -66,20 +69,21 @@ public:
     ListNode(const T& data,ListNode<T>* next=NULL,ListNode<T>* previous=NULL);
     ~ListNode();
     
-    AS_MACRO const T& getData();
+    AS_MACRO const T& getData()const;
+    AS_MACRO T& getData();
     AS_MACRO void setData(const T& data);
-    AS_MACRO ListNode<T>* getNext();
-    AS_MACRO ListNode<T>* getPrevious();
+    AS_MACRO ListNode<T>* getNext()const;
+    AS_MACRO ListNode<T>* getPrevious()const;
     AS_MACRO void setNext(ListNode<T>* next);
     AS_MACRO void  setPrevious(ListNode<T>* previous);
     ListNode<T>* removeNext();
     ListNode<T>* removePrevious();
     void    insertNext(ListNode<T>* next);
     void    insertPrevious(ListNode<T>* previous);
-    AS_MACRO int  hasNext();
-    AS_MACRO int  hasPrevious();//done
-    ListNode<T>*    getLast();//done
-    ListNode<T>*    getFirst();//done
+    AS_MACRO int  hasNext()const;
+    AS_MACRO int  hasPrevious()const;//done
+    ListNode<T>*    getLast()const;//done
+    ListNode<T>*    getFirst()const;//done
     //指向构造函数的地址
     //用 new (void*p) 构造函数,俗称placement new
 protected:
@@ -99,17 +103,17 @@ protected:
 *       T*  _Allocator<T>::getNew(size_t size);
 *
 */
-template<class T,template <class>class _Allocator >
+template<class T,template <class> class _Allocator >
 class LinkedList{
 public:
     LinkedList(  _Allocator<ListNode<T> > *smm);
     ~LinkedList();
     
-    AS_MACRO ListNode<T>* getHead();//done
-    AS_MACRO _Allocator<ListNode<T> > *getMemoryManager();//done
+    AS_MACRO ListNode<T>* getHead()const;//done
+    AS_MACRO _Allocator<ListNode<T> > *getMemoryManager()const;//done
 
 
-    AS_MACRO ListNode<T>*    getLast();//done
+    AS_MACRO ListNode<T>*    getLast()const;//done
     ListNode<T>*    append(const T &t);//done
     ListNode<T>*    append(ListNode<T>* p);//done
     ListNode<T>*    appendHead(ListNode<T>* p);//done
@@ -156,7 +160,7 @@ protected:
 *       template argument will interfer the orginal class
 */
 template<class _Locateable,int _HowAllocated,template <class> class _Allocator >
-class LocateableLinkedList:public LinkedList<Locateable,Allocator<Locateable> >
+class LocateableLinkedList:public LinkedList<_Locateable,_Allocator >
 {
 public:
     LocateableLinkedList( _Allocator<ListNode<_Locateable> > *smm );//done
@@ -185,8 +189,8 @@ public:
 
     static ListNode<_Locateable>* nextAllocable(ListNode<_Locateable>* startNode);//done
 protected:
-    static ListNode<_Locateable>* nextAllocable(ListNode<_Locateable>* startNode,Int2Type<Locator::KEEP>);//done
-    static ListNode<_Locateable>* nextAllocable(ListNode<_Locateable>* startNode,Int2Type<Locator::DISCARD>);//done
+    static ListNode<_Locateable>* nextAllocable(ListNode<_Locateable>* startNode,Int2Type<Locator<_Locateable>::KEEP>);//done
+    static ListNode<_Locateable>* nextAllocable(ListNode<_Locateable>* startNode,Int2Type<Locator<_Locateable>::DISCARD>);//done
 };
 
 
@@ -200,30 +204,31 @@ public:
 
     TreeNode<T>* setSon(TreeNode<T>* son);//done
     TreeNode<T>* setFather(TreeNode<T>* father);//done
-    TreeNode<T>* getSon(); //done
-    TreeNode<T>* getDirectFather();//direct father,done
+    TreeNode<T>* getSon()const; //done
+    TreeNode<T>* getDirectFather()const;//direct father,done
 
 
     
-    TreeNode<T>* getParent();//往previous一直遍历，直到是根，然后返回根的father,done
+    TreeNode<T>* getParent()const;//往previous一直遍历，直到是根，然后返回根的father,done
     
 protected:
     TreeNode<T> *son,*father;
     
 };
 
-template <class T,template <class> class Allocator>
+//============class Tree
+template <class T,template <class> class _Allocator>
 class Tree{
 public:
-    Tree(Allocator<TreeNode<T> > *smm);
+    Tree(_Allocator<TreeNode<T> > *smm,TreeNode<T>* root=NULL);//If give root=NULL,then assign root by smm,else by root.
     ~Tree();
     
-    TreeNode<T> *getHead();//done
-    Tree<T>     *setHead(TreeNode<T> *head);  //返回其自身,done
+    TreeNode<T> *getHead()const;//done
+    void 		setHead(TreeNode<T> *head);  //返回其自身,done
     void         free(TreeNode<T> *root);//将root自身和所有子节点都释放掉，== withdraw all nodes recursively  done
 
 protected:
-    Allocator<TreeNode<T> > *smm;
+    _Allocator<TreeNode<T> > *smm;
     // 0
     // 1 
     // 2
@@ -252,13 +257,13 @@ class SimpleTreeNode:public TreeNode<T>,public SimpleMemoryNode{
 //============函数宏区
 //=========class : ListNode
 template<class T>
-ListNode<T>* ListNode<T>::getNext()
+ListNode<T>* ListNode<T>::getNext()const
 {
     return next;
 }
 
 template<class T>
-ListNode<T>* ListNode<T>::getPrevious()
+ListNode<T>* ListNode<T>::getPrevious()const
 {
     return previous;
 }
@@ -274,18 +279,23 @@ void  ListNode<T>::setPrevious(ListNode<T>* previous)
     this->previous = previous;
 }
 template<class T>
-int  ListNode<T>::hasPrevious()
+int  ListNode<T>::hasPrevious()const
 {
     return (this->previous!=NULL);
 }
 template<class T>
-int  ListNode<T>::hasNext()
+int  ListNode<T>::hasNext()const
 {
     return (this->next!=NULL);
 }
 
 template<class T>
-const T& ListNode<T>::getData()
+const T& ListNode<T>::getData()const
+{
+    return data;
+}
+template<class T>
+T& ListNode<T>::getData()
 {
     return data;
 }
@@ -296,23 +306,23 @@ void ListNode<T>::setData(const T& data)
 }
 //=============class:LinkedList
 template <class T,template <class> class _Allocator>
-ListNode<T>* LinkedList<T,_Allocator<T> >::getHead()
+ListNode<T>* LinkedList<T,_Allocator >::getHead()const
 {
     return root->getNext();
 }
 template<class T,template <class> class _Allocator>
-ListNode<T>*  LinkedList<T,_Allocator<T> >::getLast()
+ListNode<T>*  LinkedList<T,_Allocator>::getLast()const
 {
     return last->getNext();
 }
 template <class T,template <class> class _Allocator>
-_Allocator<ListNode<T> > *LinkedList<T,_Allocator<T> >::getMemoryManager()
+_Allocator<ListNode<T> > *LinkedList<T,_Allocator>::getMemoryManager()const
 {
     return smm;
 }
 
 //=====class: SimpleMemoryNode
-SimpleMemoryNode::SimpleMemoryNode(int NO=-1):
+SimpleMemoryNode::SimpleMemoryNode(int NO):
 NO(NO)
 {
 
@@ -363,8 +373,7 @@ template<class T>
 size_t SimpleMemoryManager<T>::getLimit()
 {
     return this->limit;
-}///////////
-
+}    ///////////
 
 
 #endif //List_h__

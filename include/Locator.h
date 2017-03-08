@@ -4,6 +4,7 @@
 
 #include <List.h>
 #include <loki/Int2Type.h>
+#include <Locator.h>
 
 template <class T>
 class Locator{
@@ -12,8 +13,11 @@ public:
 	* If the template argument expected a known constant,then replace 'const static' with enum,which does not need actual space allocation
 	*		DISCARD=IGNORE,KEEP=EQUAL
 	*/
+	/*
 	const static int IGNORE,EQUAL,LESS,BIGGER;
 	const static int DISCARD,KEEP;
+	*/
+	enum{IGNORE=-2,LESS=-1,EQUAL=0,BIGGER=1,DISCARD=-2,KEEP=0};
 public:
 	//can constructor be virtual?But that is not necessary because poli.... can do that
 
@@ -39,14 +43,14 @@ class SourceLocator:public Locator<_Source>
 {
 public:
 	SourceLocator(const _Source& t);//a copy constructor
-	virtual bool tellLocation(const T &t);
+	virtual bool tellLocation(const _Source& t);
 	AS_MACRO const _Source* getComparator();//return p;
 protected:
 	const _Source* p;
 private:
 	//two conditions: -IgnoreAllocable=true|false
-	bool tellLocation(const _Source& t,Int2Type<Locator::EQUAL>);
-	bool tellLocation(const _Source& t,Int2Type<Locator::IGNORE>);
+	bool tellLocation(const _Source& t,Int2Type<Locator<_Source>::EQUAL>);
+	bool tellLocation(const _Source& t,Int2Type<Locator<_Source>::IGNORE>);
 };
 
 //============Function Macros

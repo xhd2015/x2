@@ -3,12 +3,18 @@
 #define DEF_h__
 
 //====数据宏
-#define NULL ((void*)0)
+#define NULL 0
 #define true 1
 #define false 0
-typedef unsigned int size_t;
+#if defined(CODE64)
+typedef __PTRDIFF_TYPE__ ptrdiff_t;
+typedef __SIZE_TYPE__ size_t;
+#else     //in standard host enviornment,do not use these definitions.
+			// You must be very careful about typedef
 typedef signed int ptrdiff_t;
-typedef char bool;
+typedef unsigned int size_t;
+#endif
+
 
 //=====用于开发标记
 #define DEVEL_UNTESTED(who) /*0*/
@@ -37,6 +43,7 @@ typedef char bool;
 
 //==进入死循环
 #define JMP_DIE() __asm__("jmp . \n\t")
+
 
 //=====中断调用
 #define CALL_INT_0(number) __asm__ __volatile__(\

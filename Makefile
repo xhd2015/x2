@@ -8,7 +8,7 @@ INCLUDE := include
 STDC := stdc
 STDCPP := stdc++
 f16 = main libx2 PMLoader Descriptor
-f32 = protected_main libx2 PMLoader Descriptor TSS interrupts IOProgramer Memory test List Tree
+f32 = protected_main libx2 PMLoader Descriptor TSS interrupts IOProgramer Memory test List
 fallh = libx2 PMLoader Descriptor TSS interrupts IOProgramer Memory test List
 
 fallcpp = main libx2 PMLoader Descriptor protected_main TSS interrupts IOProgramer List
