@@ -10,8 +10,6 @@ public:
     Test();
     ~Test();
     
-    
-    
     void testQueue();
     void testList();
     void testMemory();
@@ -24,7 +22,9 @@ public:
 	static void dumpMM( MemoryManager<SimpleMemoryManager> &mm);
 
 protected:
+#if defined(CODE32)
     Printer dbg;
+#endif
     char buf[10];
 
     

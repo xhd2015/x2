@@ -55,7 +55,7 @@ void protectedEntryHolder() //0x2016
     //SS0:ESP0之后会被int用到，发生到高特权级的中断会切换堆栈
     
     stdp.putsz("tss0 written\n");
-    SegmentDescriptor tss0_descr(PMLoader::TSS_AREA_START,PMLoader::TSS_MIN_SIZE-1,SegmentDescriptor::TYPE_S_TSS_32_AVL,0,0,0);
+    SegmentDescriptor tss0_descr((char*)PMLoader::TSS_AREA_START,PMLoader::TSS_MIN_SIZE-1,SegmentDescriptor::TYPE_S_TSS_32_AVL,0,0,0);
     tss0_descr.writeToMemory(Util::SEG_CURRENT,(char*)PMLoader::GDT_START+5*8);//TSS0描述符所处的位置
     Util::ltr(Util::makeSel(5));// load task register
     stdp.putsz("Had ltr done.\n");
@@ -106,7 +106,7 @@ void protectedEntryHolder() //0x2016
     //=====================一个闲置任务tss1
     TSS tss1;
     *(short*)tss1.CS=Util::makeSel(6,0x3);
-    *(int*)tss1.EIP=forTss1;
+    *(int*)tss1.EIP=(int)forTss1;
     *(short*)tss1.SS = Util::makeSel(8,0x3);
     *(int*)tss1.ESP=512*2-4;
     *(short*)tss1.SS0 = Util::makeSel(4);
@@ -114,7 +114,7 @@ void protectedEntryHolder() //0x2016
     *(int*)tss1.EFLAGS =0x202 ;//| 0x100;
     *(short*)tss1.DS = 0x3b;
     tss1.writeToMemory(Util::SEG_CURRENT,PMLoader::TSS_AREA_START+PMLoader::TSS_MIN_SIZE);
-    SegmentDescriptor tss1_sel(PMLoader::TSS_AREA_START+PMLoader::TSS_MIN_SIZE,PMLoader::TSS_MIN_SIZE-1,SegmentDescriptor::TYPE_S_TSS_32_AVL,0,0,0);
+    SegmentDescriptor tss1_sel((char*)PMLoader::TSS_AREA_START+PMLoader::TSS_MIN_SIZE,PMLoader::TSS_MIN_SIZE-1,SegmentDescriptor::TYPE_S_TSS_32_AVL,0,0,0);
     tss1_sel.writeToMemory(Util::SEG_CURRENT,(char*)PMLoader::GDT_START+9*8);
     
     

@@ -1,6 +1,6 @@
 #ifdef CODE16
     __asm__(".code16gcc \n\t");//此处开始为保护模式写代码
-#elif defined CODE32
+#elif defined(CODE32)
     __asm__(".code32 \n\t");
 #endif
 
@@ -71,33 +71,33 @@ int SegmentDescriptor::equals(SegmentDescriptor &sd2)
         }
         return 0;
 }
-
+#if defined(CODE32)||defined(CODE16)
 void SegmentDescriptor::writeToMemory(int seg,char* addr)
 {
     char *dst;
     dst = addr;
     //*(short*)dst = __MXp(short,Limit,0xffff,0,>>);
-    Util::setw(seg,dst,__MXp(short,Limit,0xffff,0,>>));
+    Util::setw(seg,(int)dst,__MXp(short,Limit,0xffff,0,>>));
     dst+=2;
     
     //*(short*)dst = __MXp(int,BaseAddr,0xffff,0,>>);
-    Util::setw(seg,dst,__MXp(int,BaseAddr,0xffff,0,>>));
+    Util::setw(seg,(int)dst,__MXp(int,BaseAddr,0xffff,0,>>));
     dst+=2;
     
     //*dst = __MXp(int,BaseAddr,0xff0000,16,>>);
-    Util::setb(seg,dst,__MXp(int,BaseAddr,0xff0000,16,>>));
+    Util::setb(seg,(int)dst,__MXp(int,BaseAddr,0xff0000,16,>>));
     dst++;
     
     //*dst = __MLd(P,0x1,7) | __MLd(DPL,0x3,5) | __MLd(S,0x1,4) | __MLd(Type,0x0f,0);
-    Util::setb(seg,dst,__MLd(P,0x1,7) | __MLd(DPL,0x3,5) | __MLd(S,0x1,4) | __MLd(Type,0x0f,0)); 
+    Util::setb(seg,(int)dst,__MLd(P,0x1,7) | __MLd(DPL,0x3,5) | __MLd(S,0x1,4) | __MLd(Type,0x0f,0));
     dst++;
     
     //*dst = __MLd(G,0x1,7) | __MLd(D,0x1,6) | __MLd(L,0x1,5) | __MLd(AVL,1,4) | __MXp(int,Limit,0x0f0000,16,>>);   
-    Util::setb(seg,dst,__MLd(G,0x1,7) | __MLd(D,0x1,6) | __MLd(L,0x1,5) | __MLd(AVL,1,4) | __MXp(int,Limit,0x0f0000,16,>>));
+    Util::setb(seg,(int)dst,__MLd(G,0x1,7) | __MLd(D,0x1,6) | __MLd(L,0x1,5) | __MLd(AVL,1,4) | __MXp(int,Limit,0x0f0000,16,>>));
     dst++;
     
     //*dst = __MXp(int,BaseAddr,0xff000000,24,>>);
-    Util::setb(seg,dst,__MXp(int,BaseAddr,0xff000000,24,>>));
+    Util::setb(seg,(int)dst,__MXp(int,BaseAddr,0xff000000,24,>>));
     dst++;//point to the end
     
 }
@@ -106,49 +106,48 @@ void SegmentDescriptor::fromMemory(SegmentDescriptor *sd,int seg,char* addr)
 {
     char *dst=(char*)sd->Limit;
     char *src=addr;
-    *(short*)dst = Util::get(seg,src);
+    *(short*)dst = Util::get((int)seg,(int)src);
     src+=2;dst = (char*)sd->BaseAddr;
     
-    *(short*)dst = Util::get(seg,src);
+    *(short*)dst = Util::get((int)seg,(int)src);
     src+=2;dst = (char*)sd->BaseAddr+2;
     
-    *dst = Util::get(seg,src);
+    *dst = Util::get((int)seg,(int)src);
     src++;dst = (char*)sd->Type;
     
-    *dst = Util::get(seg,src) & 0x0f;
+    *dst = Util::get((int)seg,(int)src) & 0x0f;
     dst=(char*)sd->S;
     
-    *dst = (Util::get(seg,src) & 0x10) >> 4;
+    *dst = (Util::get((int)seg,(int)src) & 0x10) >> 4;
     dst=(char*)sd->DPL;
     
-    *dst = (Util::get(seg,src) & 0x60) >> 5;
+    *dst = (Util::get((int)seg,(int)src) & 0x60) >> 5;
     dst=(char*)sd->P;
     
-    *dst = (Util::get(seg,src) & 0x80) >> 7;
+    *dst = (Util::get((int)seg,(int)src) & 0x80) >> 7;
     src++;dst=(char*)sd->Limit+2;
     
-    *dst = (Util::get(seg,src) & 0x0f);
+    *dst = (Util::get((int)seg,(int)src) & 0x0f);
     dst=(char*)sd->AVL;
     
-    *dst = ((Util::get(seg,src)) & 0x10) >> 4;
+    *dst = ((Util::get((int)seg,(int)src)) & 0x10) >> 4;
     dst=(char*)sd->L;
     
     
-    *dst = (Util::get(seg,src)& 0x20) >> 5;
+    *dst = (Util::get((int)seg,(int)src)& 0x20) >> 5;
     dst=(char*)sd->D;
     
     
-    *dst = (Util::get(seg,src) & 0x40) >> 6;
+    *dst = (Util::get((int)seg,(int)src) & 0x40) >> 6;
     dst=(char*)sd->G;
     
-    *dst = (Util::get(seg,src) & 0x80) >> 7;
+    *dst = (Util::get((int)seg,(int)src) & 0x80) >> 7;
     src++;dst=(char*)sd->BaseAddr+3;
     
-    *dst = Util::get(seg,src);
+    *dst = Util::get((int)seg,(int)src);
     src++;dst++;//指向末位
-    
-    
 }
+#endif //CODE16&& CODE32
 void SegmentDescriptor::init(char* baseaddr,int limit,char type,char dpl,char s,char b,char p,char g,char l,char avl)
 {
     *(char**)this->BaseAddr=baseaddr;
@@ -216,12 +215,25 @@ void SelectorDescriptor::init(int sel,int offset,int type,int dpl,int p,int segS
     this->DPL(dpl);
     this->P(p);
 }
+#if defined(CODE32)||defined(CODE16)
 void SelectorDescriptor::writeToMemory(int seg,int off)
 {
-    Util::memcopy(Util::SEG_CURRENT,this->I0,seg,off,this->I3  - this->I0 + 2);
+    Util::memcopy(Util::SEG_CURRENT,(int)this->I0,seg,off,this->I3  - this->I0 + 2);
 }
 void SelectorDescriptor::fromMemory(SelectorDescriptor &self,int seg,int off)
 {
-    Util::memcopy(seg,off,Util::SEG_CURRENT,self.I0,self.I3-self.I0+2);
+    Util::memcopy(seg,off,Util::SEG_CURRENT,(int)self.I0,self.I3-self.I0+2);
 }
+#elif defined(CODE64)
+#include <cstring>
+void SelectorDescriptor::writeToMemory(char *base)
+{
+	memcpy(base,this->I0,this->I3 - this->I0 +2);
+}
+void SelectorDescriptor::fromMemory(SelectorDescriptor &self,const char *base)
+{
+	memcpy(self.I0,base,self.I3 - self.I0 +2);
+}
+#endif
+
 #endif

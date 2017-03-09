@@ -4,9 +4,11 @@
 #include <def.h>
 //静态工具类
 class Util{
-    
-    
+
+
 public:
+
+#if defined(CODE16) || defined(CODE32)
     Util();
     ~Util();
     //*****兼容：16位，32位*******
@@ -39,10 +41,8 @@ public:
     static void memcopy(int srcSeg,int srcOff,int dstSeg,int dstOff,int len);
 
     //==================仅32位
-#ifdef CODE32
 public:
-    
-
+#if defined(CODE32)
     AS_MACRO static void cli();
     AS_MACRO static void sti();
     AS_MACRO static void enterDs(int seg,int& temp);
@@ -67,9 +67,12 @@ public:
     static int getEflags();
     static char getCPL();
     static char getDPL(int sel);
-    
+#endif //CODE32
+#endif //CODE32 && CODE16
+
+#if defined(CODE32)||defined(CODE64)
     //如果某些功能暂时不能由某个类实现，就在这里实现它们。
-    
+
     /**
     *将数字转换成10进制/16进制的字符串
     *如果空间不足以存储，就返回0
@@ -83,8 +86,9 @@ public:
     
     //math related
     static int sign(int n);
-    
-    
+#endif //CODE32 || CODE64
+
+#if defined(CODE32)
     //========与调用相关的宏
     /**
     *获取一个返回class类型的成员函数的返回对象的参数
@@ -94,7 +98,8 @@ public:
     DEPRECATED AS_MACRO static void initTarget(void** target);
 
     AS_MACRO static void intReturn();
-#endif
+#endif//CODE32
+
     
     
 #ifdef CODE16
@@ -135,7 +140,7 @@ public:
     
 };
 
-#ifdef CODE32
+#if defined(CODE32)
 class SimpleCharRotator{
 public:
     const static char rotateShapes[12];
@@ -211,7 +216,9 @@ private:
     */
     void __putc(int chr);
 };
+#endif //CODE32
 
+#if defined(CODE32)||defined(CODE64)
 //===============class :String
 class String{
 public:
@@ -245,10 +252,11 @@ protected:
     unsigned int curLen;
     int indexAdd,indexRemove;
 };
+#endif //CODE32 || CODE64
 
-#endif
 
 //================函数宏区：使用 __attribute__((always_inline))===============
+#if defined(CODE32)||defined(CODE16)
 void Util::reboot()
 {
     
@@ -263,8 +271,9 @@ void Util::reboot()
     :"eax"
     );
 }
+#endif
 
-#ifdef CODE32
+#if defined(CODE32)
 int Printer::getX()
 {
     return this->x;
@@ -352,11 +361,12 @@ void Util::initTarget(void *&target)
     __asm__ __volatile__("":"=c"(target)::);
 }
 */
+/************Deprecated
 void Util::initTarget(void **target)
 {
 __asm__ __volatile__("":"=c"(*(char**)target)::);
 }
-
+*/
 void Util::outb(int port,int data)
 {
     __asm__(
@@ -377,6 +387,7 @@ int Util::inb(int port)
     );
     return temp;
 }
+/*
 void Util::pusha()
 {
     __asm__("pusha \n\t");
@@ -385,7 +396,11 @@ void Util::popa()
 {
     __asm__("popa \n\t");
 }
+*/
+#endif
 
+
+#if defined(CODE32)||defined(CODE64)
 //=======class : Queue 宏
 template <typename T>
 int Queue<T>::empty()
@@ -407,4 +422,4 @@ unsigned int Queue<T>::size()
 //============================================================================
 
 
-#endif
+#endif //libx2_h__

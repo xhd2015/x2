@@ -2,10 +2,6 @@
 #ifndef List_h__
 #define List_h__
 
-#ifdef CODE32
-__asm__(".code32 \n\t");
-#endif
-
 #include <def.h>
 #include <loki/Int2Type.h>
 #include <Locator.h>

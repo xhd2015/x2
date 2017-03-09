@@ -1,4 +1,5 @@
 
+
 //compile: gcc -I ../include --static main.cpp -o main.out
 #include <List.h> //for linear space manager:SimpleMemoryManager, for LocateableLinkedList
 #include <cstdio>

@@ -1,4 +1,5 @@
 
+
 #ifndef File_h__
 #define File_h__
 
@@ -52,7 +53,7 @@ protected:
  *	RAW Section:
  *
  */
-class X2fsFileUtil{
+class X2fsUtil{
 public:
 	enum{SecSize=512,KiB=2*SecSize,MiB=1024*KiB,GiB=1024*MiB};
 	enum{FileNameSection=2*SecSize,FileNameSectionLen=5*SecSize,
@@ -122,6 +123,10 @@ nameStart(nameStart),createdTime(createdTime),lastModefiedTime(lastModefiedTime)
 
  void FileDescriptor::setSectionStart(size_t sectionStart) {
 	this->sectionStart = sectionStart;
+}
+
+char FileDescriptor::getType() const {
+	return type;
 }
 
  void FileDescriptor::setType(char type) {

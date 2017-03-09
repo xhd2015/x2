@@ -3,8 +3,9 @@
 
 #include <List.h>
 #include <Locator.h>
+#include <def.h>
 
-#if !defined(CODE64)
+#if defined(CODE32)
 //全局方法: placement new和placement delete
 // Default placement versions of operator new.
 void* operator new(size_t, void* __p);
@@ -13,6 +14,8 @@ void* operator new[](size_t, void* __p);
 // Default placement versions of operator delete.
 void operator delete  (void*, void*);
 void operator delete[](void*, void*);
+#elif defined(CODE64)
+		#include <new>
 #endif
 /**
 *   This is simple enough,and should not  be modified any longer.
@@ -123,6 +126,8 @@ protected:
 
 template <template <class> class _DescriptorAllocator>
 class MemoryManager:public Tree<MemoryDescriptor,_DescriptorAllocator>{
+protected:
+	typedef MemoryManager<_DescriptorAllocator> This;
 public:
     MemoryManager(_DescriptorAllocator<TreeNode<MemoryDescriptor> > *smm);//done
     MemoryManager(_DescriptorAllocator<TreeNode<MemoryDescriptor> > *smm,size_t start,size_t len,bool fatherAllocable=1);
@@ -247,4 +252,4 @@ bool MemoryDescriptor::operator!=(const MemoryDescriptor& b)const
 
 
 
-#endif
+#endif //Memory_h__

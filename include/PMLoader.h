@@ -34,7 +34,7 @@ public:
                         PROTECTED_SECNUMS,
                         TEMP_SEG;
 public:
-#ifdef CODE16
+#if defined(CODE16)
     PMLoader();//指定保护模式的代码区域： 1.磁盘区域:驱动器，逻辑起始地址 2.内存区域 段：偏移
     //一般而言，如果代码在同一个磁盘上，为保护模式预留12~20个扇区是足够测试用的。因此取值可以认为保护模式代码在第16个扇区
     ~PMLoader();
@@ -68,4 +68,4 @@ public:
     
 };
 //==================宏定义区
-#endif
+#endif //PMLoader_h__

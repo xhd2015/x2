@@ -1,6 +1,10 @@
 [*] == done	[-] == deprecated	[]  == proposed		[+] == doing
 
-
+[]	Before this Sunday,write a brief document about how to use gcc/g++ compile system code.(How to write a system in c/c++)(2017-03-09 16:20:33 Thursday)
+[*]	Do not use -fpermissive,cause those information are very useful.
+		no -fpermissive forces you to:
+			1.use this-> on member(functions & variables)
+			2.use cast between compitable types
 []	It very urgent to develop the hard disk read-write functions cause the size of code is getting bigger and bigger,the maxium(66 sectors) is not going to be able to contain all of them.
 [*]	There is a rule called 'avoid using virtual'
 [*]	Use eclipse instead of any other editor such as sublime or notepad++,eclipse is the best and the most excellent.

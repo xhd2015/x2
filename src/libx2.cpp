@@ -13,6 +13,8 @@
     template class Queue<unsigned char>;
 #endif
 
+#if defined(CODE32)||defined(CODE16)
+
 int Util::x=0;
 int Util::y=0;
 const int Util::MODE_FL_ON=0x80,
@@ -33,15 +35,15 @@ const int Util::MODE_FL_ON=0x80,
         Util::MODE_FG_RB=0b0000101,
         Util::MODE_FG_BG=0b0000011,
         Util::MODE_FG_BLACK=0b0000000,
-        Util::MODE_COMMON=Util::MODE_FL_OFF & Util::MODE_BG_BLACK | Util::MODE_FG_WHITE;
+        Util::MODE_COMMON=(Util::MODE_FL_OFF & Util::MODE_BG_BLACK) | Util::MODE_FG_WHITE;
 const int Util::SCREEN_X=25,Util::SCREEN_Y=80;
 const int Util::SEG_CURRENT=0x10000;
 
 //const int Util::SEG_CURRENT =    0x10000;//运行期常数，有时我需要一个编译期常数,那就在g++的命令行中定义之-D
 int Util::videoSelector=
-#ifdef CODE16
+#if defined(CODE16)
     0xb800;
-#elif defined CODE32
+#elif defined(CODE32)
     0b1000; //指向videoSelector
 #endif
 
@@ -57,6 +59,8 @@ Util::~Util()
     Util::printStr(">>>Destroy");
     Util::newLine();
 }
+
+
 void Util::test()
 {
     Util::printStr(">>>test");
@@ -192,6 +196,7 @@ void Util::memcopy(int srcSeg,int srcOff,int dstSeg,int dstOff,int len)
     LEAVE_DS(srcSeg,s1);
     LEAVE_ES(dstSeg,s2);
 }
+
 void Util::clr()
 {
     Util::setCursor(0,0);
@@ -206,8 +211,8 @@ void Util::setCursor(int x,int y)
     Util::y =y % Util::SCREEN_Y;
 }
 //======================仅32位=============
-#ifdef CODE32
-short Util::makeSel(int index,int dpl=0b00,int from=0)
+#if defined(CODE32)
+short Util::makeSel(int index,int dpl,int from)
 {
     return (short)(
         ((index & 0x1fff) << 3) | 
@@ -233,17 +238,17 @@ void Util::lgdt(short len,int address)
 }
 char Util::getCPL()
 {
-   __asm__(
+	char save;
+   __asm__ __volatile__(
     "mov %cs,%ax \n\t"
     "and $0b11,%al \n\t"
+		   :"=a"(save)
    );
+   return save;
 }
 char Util::getDPL(int sel)
 {
-    __asm__(
-    "movw 4+4*1(%ebp),%ax \n\t"
-    "and $0b11,%al \n\t"
-    );
+	return 0b11 & sel;
 }
 void Util::changeCPL(int eip,int cs,int eflags,int esp,int ss)
 {
@@ -254,11 +259,18 @@ void Util::changeCPL(int eip,int cs,int eflags,int esp,int ss)
 }
 int Util::getEflags()
 {
-    __asm__(
+	int save;
+    __asm__ __volatile__(
      "pushfl \n\t"
      "popl %eax \n\t"
+    		:"=a"(save)
     );
+    return save;
 }
+
+#endif //CODE32
+#endif //CODE32 || CODE16
+
 int Util::digitToStr(char* save,unsigned int space,int n)
 {
     int sign=1;
@@ -367,12 +379,15 @@ int Util::strcopy(const char *src,char *dst,int len)
     *(dst+i)=0;
     return i;
 }
-int sign(int n)
+int Util::sign(int n)
 {
     if(n<0)return -1;
     if(n==0)return 0;
     return 1;
 }
+
+
+#if defined(CODE32)
 //=================class : SimpleCharRotator
 const char SimpleCharRotator::rotateShapes[12]={'_','\b',0,'\\','\b',0,'|','\b',0,'/','\b',0};
 SimpleCharRotator::SimpleCharRotator(int x,int y,int attr,int direction):X(x),Y(y),Attr(attr),Status(0),Direction(direction)
@@ -388,7 +403,7 @@ void SimpleCharRotator::setPosition(int x,int y)
     this->X = x;
     this->Y = y;
 }
-void SimpleCharRotator::setAttr(int mode=Util::MODE_COMMON)
+void SimpleCharRotator::setAttr(int mode)
 {
     this->Attr=mode;
 }
@@ -407,6 +422,7 @@ void SimpleCharRotator::run()
 //=================class:Printer
 const int Printer::SCREEN_MAX_X=25,
         Printer::SCREEN_MAX_Y=80; //起始const static 也算是编译期常数，
+//This warning can be ignored because no need to assign these value
 Printer::Printer(unsigned int x0,unsigned int y0,unsigned int rows,unsigned int cols,int mode):
 rows(rows>Printer::SCREEN_MAX_X?Printer::SCREEN_MAX_X:rows),
 cols(cols>Printer::SCREEN_MAX_Y?Printer::SCREEN_MAX_Y:cols),
@@ -467,7 +483,7 @@ void Printer::putc(int chr)
 void Printer::putsz(const char* str)
 {
     int oldes;
-    char *p=str;
+    const char *p=str;
     Util::enterEs(Util::videoSelector,oldes);
     int rt;
     while((rt=this->specailCharProcessor(*p))!=-1)
@@ -485,7 +501,7 @@ void Printer::putsz(const char* str)
 void Printer::putsn(const char *str,int n)
 {
     int oldes;
-    char *p=str;
+    const char *p=str;
     Util::enterEs(Util::videoSelector,oldes);
     int rt;
     int i=0;
@@ -542,6 +558,7 @@ int Printer::getPos()
 {
     return (this->x0+this->x)*Printer::SCREEN_MAX_Y*2+(this->y0+this->y)*2;
 }
+
 void Printer::__putc(int chr)
 {
     __asm__ __volatile__(
@@ -552,6 +569,7 @@ void Printer::__putc(int chr)
     :
     );
 }
+
 void Printer::clr()
 {
     this->setPos(0,0);
@@ -582,6 +600,9 @@ Printer  Printer::getSubPrinter(unsigned int x0,unsigned int y0,unsigned int row
 
     //no return target, avoid copying on return
 }
+#endif //SimpleCharRotator,Printer in CODE32
+
+#if defined(CODE32) || defined(CODE64)
 //==========class : String
 String::String(const char* str)
 {
@@ -659,9 +680,9 @@ int Queue<T>::add(T t)
     return 1;
     
 }
+#endif //class Queue,String in CODE32 && CODE64
 
 //======================================================================
-#endif  //CODE32
 #ifdef CODE16
 //======================仅16位===========
 //ebp + 4 = 返回地址

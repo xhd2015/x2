@@ -1,0 +1,4 @@
+
+1. If make complains about 'ld',check Makefile+image_xx.ld
+2. The template class instantiate will only be valid in the implementation file(.cpp),coz only there exists the definitions.
+3. You must be very careful about using library,cause the order must be 'Reference first,Definition then'.Reference first makes the linker keeps the symbol,or it will be abandoned.

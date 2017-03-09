@@ -29,7 +29,7 @@ const int   PMLoader::JMPSEG = 0x10,
             PMLoader::REAL_SECNUMS=16,
             PMLoader::PROTECTED_SECNUMS=66,// (int)(PMLoader::TEMP_SEG*16 - PMLoader::CODE_START)/PMLoader::SECSIZE,This is the biggest allowed number.If this is exceeded,then the real-code will be covered.*/
             PMLoader::TEMP_SEG=0xa00;
-#ifdef CODE16
+#if defined(CODE16)
 PMLoader::PMLoader()
 {
     
@@ -112,15 +112,15 @@ void PMLoader::mainProcess() //仅16位
                         loaderSegCode(0,PMLoader::CODE_LIMIT,SegmentDescriptor::TYPE_U_CODE_NONCONFORMING,0),
                         loaderSegData(0,PMLoader::CODE_LIMIT,SegmentDescriptor::TYPE_U_DATA,0),
                         loaderSegStack(0,PMLoader::STACK_SIZE,SegmentDescriptor::TYPE_U_STACK,0),
-                        videoSeg(0xb8000,25*80*2,SegmentDescriptor::TYPE_U_DATA,0);
+                        videoSeg((char*)0xb8000,25*80*2,SegmentDescriptor::TYPE_U_DATA,0);
     nullSeg={0};//not really all zeros.
  
     //2.初始化GDT表
-    nullSeg.writeToMemory(0,PMLoader::GDT_START);      
-    videoSeg.writeToMemory(0,PMLoader::GDT_START+1*8);
-    loaderSegCode.writeToMemory(0,PMLoader::GDT_START+2*8); 
-    loaderSegData.writeToMemory(0,PMLoader::GDT_START+3*8);
-    loaderSegStack.writeToMemory(0,PMLoader::GDT_START+4*8);//B set 4GB 
+    nullSeg.writeToMemory(0,(char*)PMLoader::GDT_START);
+    videoSeg.writeToMemory(0,(char*)PMLoader::GDT_START+1*8);
+    loaderSegCode.writeToMemory(0,(char*)PMLoader::GDT_START+2*8);
+    loaderSegData.writeToMemory(0,(char*)PMLoader::GDT_START+3*8);
+    loaderSegStack.writeToMemory(0,(char*)PMLoader::GDT_START+4*8);//B set 4GB
 
     //3.启用A20
    PMLoader::enableA20();

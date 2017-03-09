@@ -1,5 +1,6 @@
 #ifndef Descriptor_h__
 #define Descriptor_h__
+
 /**
 *提供了对intel x86的8字节描述符的结构化描述
 *
@@ -60,22 +61,25 @@ public:
     
     SegmentDescriptor(char* baseaddr=0,int limit=0,char type=TYPE_U_DATA,char dpl=DPL_0,char s=1,char b=1,char p=1);
     ~SegmentDescriptor();
-    void writeToMemory(int seg,char* addr);//0x10000 means use current seg
+
     /**
     *相同返回1，不同返回0
     */
     int equals(SegmentDescriptor &sd2);
     void init(char* baseaddr=0,int limit=0,char type=TYPE_U_DATA,char dpl=DPL_0,char s=1,char b=1,char p=1,char g=0,char l=0,char avl=0);
+#if defined(CODE32)||defined(CODE16)
+    void writeToMemory(int seg,char* addr);//0x10000 means use current seg
     static void fromMemory(SegmentDescriptor *sd,int seg,char* addr);
+#endif
     
 };
 
 //====================仅32位===============
-#ifdef CODE32
+#if defined(CODE32)||defined(CODE64)
 /**
 *IDT中的描述符
 *采用新的方式，必须用选项 -fpack-struct=1什么来支持
-*兼容三种类型:  
+*兼容三种类型:
 * 主size：4byte
 */
 class SelectorDescriptor:public Descriptor{
@@ -112,8 +116,14 @@ public:
     void Offset(int offset);
     void Selector(int selector);
     void Type(int index);//0 task gate,1 int gate,2 trap gate
+#if defined(CODE32)||defined(CODE16)
     void writeToMemory(int seg,int off);
     static void fromMemory(SelectorDescriptor &self,int seg,int off);
+#elif defined(CODE64)
+    void writeToMemory(char *base);
+    static void fromMemory(SelectorDescriptor &self,const char *base);
+#endif
+
     
  private:
         
@@ -121,7 +131,7 @@ public:
         //D:0 16-bit  :1 32-bit
     
 };
-#endif //==32位==
+#endif //==CODE32 && CODE64==
 
 
-#endif
+#endif//Descriptor_h__

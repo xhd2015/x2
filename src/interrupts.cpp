@@ -6,7 +6,7 @@ __asm__(".code32 \n\t");
 #include <IOProgramer.h>
 #include <def.h>
 
-int __intAddresses[]={
+void (*__intAddresses[])() ={
      int0x0,
      int0x1,
      int0x2,
@@ -45,8 +45,8 @@ int __intAddresses[]={
      int0x1f,//---- 32
     
     
-     -1,//单独设置
-     -1,
+     0,//单独设置
+     0,
      intDefault,
      intDefault,
      int0x24,
@@ -620,7 +620,7 @@ void int0x24()
     :
     );
     Util::enterDs(dsSel,temp);
-    Util::printStr(off,attr);
+    Util::printStr((const char*)off,attr);
     Util::leaveDs(dsSel,temp);
     Util::intReturn();
 }

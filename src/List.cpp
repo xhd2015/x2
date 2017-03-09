@@ -2,7 +2,9 @@
 #include <List.h>
 #include <Memory.h>
 #include <libx2.h>
+
 #include <test.h>
+
 #include <Locator.h>
 
 //==========实例化模板
@@ -22,6 +24,12 @@
 	template class TreeNode<MemoryDescriptor>;
 	template class SimpleMemoryManager<ListNode<int> >;
 	template class SimpleMemoryManager<TreeNode<MemoryDescriptor> >;
+#elif defined(CODE64)
+	#include "/home/13774/x2-devel/filesystem/verify-in-cygwin/File.h"
+	template class TreeNode<FileDescriptor>;
+	template class SimpleMemoryManager<TreeNode<FileDescriptor> >;
+	template class TreeNode<int>;
+	template class SimpleMemoryManager<TreeNode<int> >;
 #endif
 
 
@@ -34,7 +42,7 @@
 template <class T>
 SimpleMemoryManager<T>::SimpleMemoryManager(size_t start,size_t limit,bool doInit):
 start(start),limit(limit),
-data((Freeable*)start),len((int)(limit/sizeof(T))),curSize(0),
+data((Freeable*)start),len((int)(limit/sizeof(Freeable))),curSize(0),
 lastIndex(0)
 {
     if(doInit)
@@ -87,7 +95,7 @@ void SimpleMemoryManager<T>::withdraw(T *t)
     {
         _t->free(); //如果被标记为可用，就用lastIndex指向之
         curSize--;
-        lastIndex = (unsigned int)(((int)_t - (int)start)/sizeof(Freeable));
+        lastIndex = (unsigned int)(((size_t)_t - (size_t)start)/sizeof(Freeable));
     }
 }
 
@@ -174,7 +182,7 @@ void    ListNode<T>::insertPrevious(ListNode<T>* previous)
 template<class T>
 ListNode<T>*   ListNode<T>::getLast()const
 {
-    ListNode<T>* p=this;
+    ListNode<T>* p=(ListNode<T>*)this;
     while(p->hasNext())
     {
         p=p->getNext();
@@ -184,7 +192,7 @@ ListNode<T>*   ListNode<T>::getLast()const
 template<class T>
 ListNode<T>*    ListNode<T>::getFirst()const
 {
-    ListNode<T> *p=this;
+    ListNode<T> *p=(ListNode<T>*)this;
     while(p->hasPrevious())
     {
         p=p->getPrevious();
@@ -524,10 +532,10 @@ template<class T>
   }
 template<class T>
 TreeNode<T>* TreeNode<T>::getParent()const {//往previous一直遍历，直到是跟，然后返回跟的father
-	TreeNode<T> *p=this;
+	TreeNode<T> *p=(TreeNode<T>*)this;
 	while(p->hasPrevious())
 	{
-		p=p->getPrevious();
+		p=(TreeNode<T>*)p->getPrevious();
 	}
 	return p->getDirectFather();
 }
@@ -554,7 +562,7 @@ void         Tree<T,_Allocator>::free(TreeNode<T> *root)
     while(p)
     {
         this->free(p);
-        p = p->getNext();
+        p =(TreeNode<T>*) p->getNext();
     }//OK,all the sons are free
     smm->withdraw(root);
   }

@@ -77,7 +77,7 @@ __attribute__((section(".test_section"))) int theEntry() //this is placed in .te
     {
         Util::printStr("Load Tested.\n");
     }
-    SegmentDescriptor sd1(readBase,1024);
+    SegmentDescriptor sd1((char*)readBase,1024);
     char saver[8];
     sd1.writeToMemory(0x10000,saver);
     SegmentDescriptor sd2;
