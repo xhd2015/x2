@@ -14,7 +14,7 @@
 //		hdd.img
 #define HDD_FILE "hdd.img"
 
-#define IMG_SIZE 100*X2fsFileUtil::SecSize;
+#define IMG_SIZE 100*X2fsFileUtil::SecSize
 
 int main()
 {

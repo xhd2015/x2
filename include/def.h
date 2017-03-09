@@ -4,8 +4,6 @@
 
 //====数据宏
 #define NULL 0
-#define true 1
-#define false 0
 #if defined(CODE64)
 typedef __PTRDIFF_TYPE__ ptrdiff_t;
 typedef __SIZE_TYPE__ size_t;

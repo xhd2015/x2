@@ -1,5 +1,7 @@
 
 #ifdef CODE32
+__asm__(".code32\n\t");
+#endif
 
 #include <def.h>
 #include <libx2.h>
@@ -51,7 +53,7 @@ void Test::dumpSMM( SimpleMemoryManager<TreeNode<MemoryDescriptor> > *smm)
     Util::digitToStr(buf,10,smm->getLimit());
     Util::printStr(buf);Util::printStr("\n");
 }
-void Test::dumpMM( MemoryManager &mm)
+void Test::dumpMM( MemoryManager<SimpleMemoryManager> &mm)
 {
     char buf[10];
     Util::printStr("Head: ");
@@ -92,49 +94,52 @@ void Test::testMemory()
     //==============
 
     Test::dumpSMM(&smm);
-    MemoryManager mm(&smm,0,0xfffff,0);//0~1MB,用于自身分配,模拟空间分配完毕的情况
+    MemoryManager<SimpleMemoryManager> mm(&smm,0,0xfffff,0);//0~1MB,用于自身分配,模拟空间分配完毕的情况
     Test::dumpSMM(&smm);
-
+    Test::dumpMM(mm);
 
 //    dbg.putsz("done init.\n");
   // dumpMemoryData(mm.getHead()->getData());//OK
 
-    MemoryManager reserved=mm.allocFreeStart(0,PMLoader::CODE_START); //this is for preserved area
+    MemoryManager<SimpleMemoryManager> reserved=mm.allocFreeStart(0,PMLoader::CODE_START); //this is for preserved area
         dbg.putsz("done init 1.\n");
-    MemoryManager code_area=mm.allocFreeStart(PMLoader::CODE_START,PMLoader::CODE_LIMIT/100);//for code
+        Test::dumpMM(mm);
+    MemoryManager<SimpleMemoryManager> code_area=mm.allocFreeStart(PMLoader::CODE_START,PMLoader::CODE_LIMIT/100);//for code
     //now it's free to use all the left area
     dbg.putsz("done allocFreeStart.\n");
-    
+    Test::dumpMM(mm);
     int *a=mm.mnew(sizeof(int)); 
+   // Test::dumpMM(mm);
      *a = 9;
-    Util::digitToStr(buf,sizeof(buf),a);//addr
+    Util::digitToStr(buf,sizeof(buf),(size_t)a);//addr
     dbg.putsz(buf);dbg.putsz(":");
 
     Util::digitToStr(buf,sizeof(buf),*a);
     dbg.putsz(buf);dbg.putsz("\n");
 
     int *b=mm.mnew(sizeof(int));
+    Test::dumpMM(mm);
      *b=20;
-    Util::digitToStr(buf,sizeof(buf),b);//addr
+    Util::digitToStr(buf,sizeof(buf),(size_t)b);//addr
     dbg.putsz(buf);dbg.putsz(":");
     
     Util::digitToStr(buf,sizeof(buf),*b);
     dbg.putsz(buf);
     
-    Test::dumpMM(mm);
+  //  Test::dumpMM(mm);
 
     mm.mdelete(a,sizeof(*a));
     mm.mdelete(b,sizeof(*b));
 
-    Test::dumpMM(mm);
+//    Test::dumpMM(mm);
     reserved.withdrawToParent();
     //Test::dumpMM(mm);
-    Test::dumpSMM(&smm);
+//    Test::dumpSMM(&smm);
     code_area.withdrawToParent();
     //last:
     mm.withdrawToParent();//撤销顶级管理器
     Test::dumpMM(mm);
-    Test::dumpSMM(&smm);
+ //   Test::dumpSMM(&smm);
     dbg.putsz("\n");
 
     dbg.putsz("End .\n");
@@ -149,7 +154,7 @@ void Test::testList()
     ListNode<int>* node;
     
 
-    LinkedList<int> list(&smm);
+    LinkedList<int,SimpleMemoryManager> list(&smm);
     node=list.append(5);
      Util::digitToStr(save,sizeof(save),node->getData());
      dbg.putsz(save);
@@ -221,5 +226,3 @@ void Test::run()
     testMemory();
     dbg.putsz("Test hook ended\n");
 }
-
-#endif

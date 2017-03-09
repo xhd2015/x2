@@ -2,6 +2,7 @@
 #ifndef test_h__
 #define test_h__
 #include <libx2.h>
+#include <List.h>
 #include <Memory.h>
 
 class Test{
@@ -20,7 +21,7 @@ public:
     static void dumpMemoryData(const int& data);
     
     static void dumpSMM( SimpleMemoryManager<TreeNode<MemoryDescriptor> > *smm);
-	static void dumpMM( MemoryManager &mm);
+	static void dumpMM( MemoryManager<SimpleMemoryManager> &mm);
 
 protected:
     Printer dbg;

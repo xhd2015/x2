@@ -8,7 +8,7 @@ __asm__(".code32 \n\t");
 #include <libx2.h>
 #include <Descriptor.h>
 
-const int PMLoader::SAFE_SEG=0x100;
+const int PMLoader::SAFE_SEG=0x50;
 const int PMLoader::SECSIZE=512;
 const int PMLoader::STACK_START=0,
            PMLoader::STACK_SIZE=PMLoader::SECSIZE*4,
@@ -27,7 +27,7 @@ const int PMLoader::STACK_START=0,
 const int   PMLoader::JMPSEG = 0x10,
             PMLoader::DRIVER=0,
             PMLoader::REAL_SECNUMS=16,
-            PMLoader::PROTECTED_SECNUMS=60,
+            PMLoader::PROTECTED_SECNUMS=66,// (int)(PMLoader::TEMP_SEG*16 - PMLoader::CODE_START)/PMLoader::SECSIZE,This is the biggest allowed number.If this is exceeded,then the real-code will be covered.*/
             PMLoader::TEMP_SEG=0xa00;
 #ifdef CODE16
 PMLoader::PMLoader()
@@ -88,13 +88,16 @@ void PMLoader::adjustProtectedCode()
     {
         if(PMLoader::SAFE_SEG*16 + PMLoader::PROTECTED_SECNUMS*PMLoader::SECSIZE >= PMLoader::TEMP_SEG*16)//this will overlap the current code,you should stop this behavior and go back to trim the size of your code
         {
+        	Util::printStr("Here 0\n");
             __asm__("#Please go back to reduce the size of your code \n\t");
         }else{
+        	Util::printStr("Here 1\n");
           Util::readSectors(PMLoader::SAFE_SEG,0,PMLoader::DRIVER,PMLoader::REAL_SECNUMS,PMLoader::PROTECTED_SECNUMS);
           Util::memcopy(PMLoader::SAFE_SEG,0,PMLoader::CODE_SEG,PMLoader::CODE_START,PMLoader::PROTECTED_SECNUMS * PMLoader::SECSIZE);
         }
 
     }else{
+    	Util::printStr("Here 3\n");
         Util::readSectors(PMLoader::CODE_SEG,PMLoader::CODE_START,PMLoader::DRIVER,PMLoader::REAL_SECNUMS,PMLoader::PROTECTED_SECNUMS);
     }
 

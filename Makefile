@@ -7,11 +7,11 @@ BACKUP := backups
 INCLUDE := include
 STDC := stdc
 STDCPP := stdc++
-f16 = main libx2 PMLoader Descriptor
+f16 = main libx2 Descriptor PMLoader
 f32 = protected_main libx2 PMLoader Descriptor TSS interrupts IOProgramer Memory test List
-fallh = libx2 PMLoader Descriptor TSS interrupts IOProgramer Memory test List
+fallh = libx2 PMLoader Descriptor TSS interrupts IOProgramer Memory test List def loki/Int2Type Locator
 
-fallcpp = main libx2 PMLoader Descriptor protected_main TSS interrupts IOProgramer List
+fallcpp = main libx2 PMLoader Descriptor protected_main TSS interrupts IOProgramer List Locator Memory test
 
 fhs = $(patsubst %,%.h,$(fallh))
 fcpp = $(patsubst %,%.cpp,$(fallcpp))
@@ -27,7 +27,7 @@ ld16 := image_16.ld
 ld32 := image_32.ld
 
 fbackup := $(INCLUDE) $(SRC) $(ld16) $(ld32) Makefile TODO README  $(STDC) $(STDCPP) test tools filesystem deprecated from-gcc
-CCFLAGS :=  -fpack-struct=1 -fpermissive -fno-exceptions  -nostdinc -nostdinc++ -nostdlib -Winline --no-warnings -I ./include
+CCFLAGS :=  -fpack-struct=1 -fpermissive -fno-exceptions  -nostdinc -nostdinc++ -nostdlib -Winline --no-warnings -I ./include -m32
 LDFLAGS :=    --print-gc-sections --no-gc-sections  
 UNUSED_CCFLAGS := -fkeep-inline-functions 
 CCMACROS16 := -D CODE16
@@ -63,7 +63,7 @@ dump:
 dump16:
 	@objdump -D $(GEN)/main_16.img -m i8086 | less
 start:
-	-@cmd /C 'cd D:\ForNew10\Users\13774\Desktop\bochs\devel\x2^ system\tools\bochs^ run && explorer start_bochs.cmd'
+	-@cmd /C 'cd C:\Users\13774\Desktop\bochs\devel\x2^ system\tools\bochs^ run && explorer start_bochs.cmd'
 export:VERSION $(SRC) $(INCLUDE) Makefile start_bochs.cmd main.bimg
 	@v=$$(cat VERSION)
 	mkdir --parents $(EXPORTS)/$${v}
@@ -78,7 +78,7 @@ $(GEN)/main_32.img $(GEN)/main_16.img:$$(patsubst %,$(GEN)/%, $$($$(patsubst $(G
 $(GEN)/main_16.bimg: $(GEN)/main_16.img
 	objcopy -g --pad-to $$((512*16)) -j .seclt -j .secld -j .seclb -j .secmain -j .lastsec -O binary $< $@
 $(GEN)/main_32.bimg: $(GEN)/main_32.img
-	objcopy -g --pad-to $$((512*60)) -j .text -j .data -O binary $< $@
+	objcopy -g -j .text -j .data -O binary $< $@
 main.bimg : $(GEN)/main_16.bimg $(GEN)/main_32.bimg
 	cat $^ > $@
 

@@ -6,7 +6,7 @@ __asm__(
 "STACKSIZE = 512*2 \n\t"
 "TEMP_SEG = 0xa00 \n\t"
 );
-extern int READSEG[];
+//extern int READSEG[];//use _READSEG in other file
 
 #include <libx2.h>
 #include <PMLoader.h>

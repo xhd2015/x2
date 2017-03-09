@@ -7,14 +7,12 @@
 #if !defined(CODE64)
 //全局方法: placement new和placement delete
 // Default placement versions of operator new.
-void* operator new(size_t, void* __p)
-{ return __p; }
-void* operator new[](size_t, void* __p)
-{ return __p; }
+void* operator new(size_t, void* __p);
+void* operator new[](size_t, void* __p);
 
 // Default placement versions of operator delete.
-void operator delete  (void*, void*) { }
-void operator delete[](void*, void*) { }
+void operator delete  (void*, void*);
+void operator delete[](void*, void*);
 #endif
 /**
 *   This is simple enough,and should not  be modified any longer.
@@ -22,6 +20,7 @@ void operator delete[](void*, void*) { }
 class LinearSourceDescriptor{
 public:
     AS_MACRO LinearSourceDescriptor(size_t start,size_t limit); //done
+    AS_MACRO ~LinearSourceDescriptor();//done
     AS_MACRO size_t getStart() const ;//done
     AS_MACRO size_t getLimit() const ;//done
     AS_MACRO bool isAllocable() const;//done,always return true;
@@ -30,8 +29,8 @@ public:
     /**
     * 逻辑相等而非全等
     */
-    AS_MACRO virtual bool operator==(const LinearSourceDescriptor& b)const;//done
-    AS_MACRO virtual bool operator!=(const LinearSourceDescriptor& b)const;//done
+    AS_MACRO	bool operator==(const LinearSourceDescriptor& b)const;//done
+    AS_MACRO    bool operator!=(const LinearSourceDescriptor& b)const;//done
 protected:
     size_t start;
     size_t limit;
@@ -42,12 +41,13 @@ protected:
 class MemoryDescriptor:public LinearSourceDescriptor{
 public:
     AS_MACRO MemoryDescriptor(size_t start,size_t limit,bool allocable=true);//done
+    AS_MACRO ~MemoryDescriptor();//done
     AS_MACRO bool isAllocable()const; //此方法仅对同层以及上层的节点有意义  done
     AS_MACRO void setAllocable(bool allocable);//这是指是否用于父类的分配，还是用于自己的分配  done
 
 
-    AS_MACRO virtual bool operator==(const MemoryDescriptor& b)const;//done
-    AS_MACRO virtual bool operator!=(const MemoryDescriptor& b)const;//done
+    AS_MACRO bool operator==(const MemoryDescriptor& b)const;//done
+    AS_MACRO bool operator!=(const MemoryDescriptor& b)const;//done
     //const static MemoryDescriptor NULL_DESCRIPTOR;
 protected:
     bool allocable;
@@ -131,10 +131,10 @@ public:
     ~MemoryManager(); 
     
     //注意：不能在父类管理器中
-    MemoryManager allocFreeStart(size_t start,size_t len); //从父级管理器衍生,done
-    MemoryManager allocFree(size_t len);//done
+    MemoryManager<_DescriptorAllocator> allocFreeStart(size_t start,size_t len); //从父级管理器衍生,done
+    MemoryManager<_DescriptorAllocator> allocFree(size_t len);//done
     
-    static TreeNode<MemoryDescriptor> *copyOnAllocation(TreeNode<MemoryDescriptor> *head);//复制后的allocable标志位与父节点相反，这从根本上保证了内存的一致性 done
+    TreeNode<MemoryDescriptor> *copyOnAllocation(TreeNode<MemoryDescriptor> *head);//复制后的allocable标志位与父节点相反，这从根本上保证了内存的一致性 done
     
     //operator new and delete
     void* mnew(size_t start,size_t size);//done
@@ -181,6 +181,8 @@ private:
  {
 
  }
+ LinearSourceDescriptor::~LinearSourceDescriptor() {
+ }
  size_t  LinearSourceDescriptor::getStart()const
  {
     return start;
@@ -202,6 +204,8 @@ bool LinearSourceDescriptor::operator==(const LinearSourceDescriptor& b)const
 
    return this->getStart()==b.getStart() && this->getLimit()==b.getLimit();
 }
+
+
 bool LinearSourceDescriptor::operator!=(const LinearSourceDescriptor& b)const
 {
     return ! this->operator==(b);
@@ -217,6 +221,9 @@ LinearSourceDescriptor(start,limit),allocable(allocable)
 {
 
 }
+
+ MemoryDescriptor::~MemoryDescriptor() {
+ }
 void MemoryDescriptor::setAllocable(bool allocable)
 {
     this->allocable=allocable;
@@ -231,6 +238,8 @@ bool MemoryDescriptor::operator==(const MemoryDescriptor& b)const
     return this->LinearSourceDescriptor::operator==(b) && this->allocable==b.allocable;
     
 }
+
+
 bool MemoryDescriptor::operator!=(const MemoryDescriptor& b)const
 {
     return ! this->operator==(b);

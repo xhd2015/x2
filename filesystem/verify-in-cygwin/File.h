@@ -2,7 +2,6 @@
 #ifndef File_h__
 #define File_h__
 
-#include <Memory.h>
 #include <def.h>
 
 /**

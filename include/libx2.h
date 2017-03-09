@@ -163,8 +163,8 @@ public:
     ~Printer();
     
     void putc(int chr);
-    void putsz(char* str);
-    void putsn(char *str,int n);
+    void putsz(const char* str);
+    void putsn(const char *str,int n);
     void setPos(int x,int y);
     void move(int n);
     void setMode(int mode);

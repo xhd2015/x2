@@ -14,6 +14,15 @@
 //template class TreeNode<MemoryDescriptor>;
 //template class SimpleMemoryManager<ListNode<int> >;
 //template class SimpleMemoryManager<TreeNode<MemoryDescriptor> >;
+#ifdef CODE32
+	template class ListNode<int>;
+	template class ListNode<MemoryDescriptor>;
+	template class LinkedList<int,SimpleMemoryManager>;
+	template class Tree<MemoryDescriptor,SimpleMemoryManager>;
+	template class TreeNode<MemoryDescriptor>;
+	template class SimpleMemoryManager<ListNode<int> >;
+	template class SimpleMemoryManager<TreeNode<MemoryDescriptor> >;
+#endif
 
 
 //====================class :SimpleMemoryNode
@@ -25,7 +34,7 @@
 template <class T>
 SimpleMemoryManager<T>::SimpleMemoryManager(size_t start,size_t limit,bool doInit):
 start(start),limit(limit),
-data((T*)start),len((int)(limit/sizeof(T))),curSize(0),
+data((Freeable*)start),len((int)(limit/sizeof(T))),curSize(0),
 lastIndex(0)
 {
     if(doInit)
@@ -51,7 +60,7 @@ start(-1),limit(0),data(NULL),len(0),curSize(0),lastIndex(0)
 template <class T>
 T* SimpleMemoryManager<T>::getNew()
 {
-    T *rt=NULL;
+    Freeable *rt=NULL;
     if(!isFull())
     {
         for(int i=0;i!=len;i++)
@@ -73,11 +82,12 @@ T* SimpleMemoryManager<T>::getNew()
 template <class T>
 void SimpleMemoryManager<T>::withdraw(T *t)
 {
-    if(t && !t->isFree())
+	Freeable* _t=(Freeable*)t;
+    if(_t && !_t->isFree())
     {
-        t->free(); //如果被标记为可用，就用lastIndex指向之
+        _t->free(); //如果被标记为可用，就用lastIndex指向之
         curSize--;
-        lastIndex = (unsigned int)(((int)t - (int)start)/sizeof(T));
+        lastIndex = (unsigned int)(((int)_t - (int)start)/sizeof(Freeable));
     }
 }
 
@@ -209,10 +219,10 @@ void LinkedList<T,_Allocator >::free()
 
 }
 template<class T,template<class> class _Allocator>
-void LinkedList<T,_Allocator >::freeNext(T *t)
+void LinkedList<T,_Allocator >::freeNext(ListNode<T> *t)
 {
     if(!t || t==root || t==last)return;
-    T *p=t;
+    ListNode<T> *p=t;
     while(p)
     {
         smm->withdraw(p);
@@ -225,10 +235,10 @@ void LinkedList<T,_Allocator >::freeNext(T *t)
 }
 
 template<class T,template<class> class _Allocator>
-void LinkedList<T,_Allocator >::freePrevious(T *t)
+void LinkedList<T,_Allocator >::freePrevious(ListNode<T> *t)
 {
     if(!t || t==root || t==last)return;
-    T *p=t;
+    ListNode<T> *p=t;
     while(p!=root)
     {
         smm->withdraw(p);
@@ -342,6 +352,17 @@ void    LinkedList<T,_Allocator >::remove(ListNode<T>* p)
     }
 }
 template<class T,template<class> class _Allocator>
+size_t   LinkedList<T,_Allocator >::getSize()
+{
+	size_t size=0;
+	ListNode<T>* p=root;
+	while(p->hasNext())
+	{
+		size++;
+		p=p->getNext();
+	}
+}
+template<class T,template<class> class _Allocator>
 ListNode<T>*    LinkedList<T,_Allocator >::removeHead()
 {
     ListNode<T>* p=root->removeNext();
@@ -358,7 +379,7 @@ ListNode<T>*    LinkedList<T,_Allocator >::removeHead()
 //=============class : LocateableLinkedList
 template<class _Locateable,int _HowAllocated,template <class> class _Allocator >
 LocateableLinkedList<_Locateable,_HowAllocated,_Allocator>::LocateableLinkedList( _Allocator<ListNode<_Locateable> > *smm ):
-LinkedList<_Locateable,_Allocator<_Locateable> >(smm)
+LinkedList<_Locateable,_Allocator >(smm)
 {
 
 }
@@ -378,13 +399,13 @@ ListNode<_Locateable> *LocateableLinkedList<_Locateable,_HowAllocated,_Allocator
     if(!startNode||len==0)return NULL;
     ListNode<_Locateable>* p=startNode;
     _Locateable tloc(start,len);
-    SourceLocator<_Locateable,Locator::LESS,Locator::IGNORE,Locator::IGNORE> lessLocator(&tloc);
+    SourceLocator<_Locateable,Locator<_Locateable>::LESS,Locator<_Locateable>::IGNORE,Locator<_Locateable>::IGNORE> lessLocator(&tloc);
 
     while(p && lessLocator.tellLocation(*p))p=LocateableLinkedList<_Locateable,_HowAllocated,_Allocator>::nextAllocable(p);
 
 
-    SourceLocator<_Locateable,Locator::EQUAL,Locator::EQUAL,Locator::IGNORE> equLocator(&loc);
-    SourceLocator<_Locateable,Locator::EQUAL,Locator::BIGGER,Locator::IGNORE> biggerLocator(&loc);
+    SourceLocator<_Locateable,Locator<_Locateable>::EQUAL,Locator<_Locateable>::EQUAL,Locator<_Locateable>::IGNORE> equLocator(&tloc);
+    SourceLocator<_Locateable,Locator<_Locateable>::EQUAL,Locator<_Locateable>::BIGGER,Locator<_Locateable>::IGNORE> biggerLocator(&tloc);
     if(p && (equLocator.tellLocation(*p) || biggerLocator.tellLocation(*p)) )
     {
         return p;
@@ -398,9 +419,9 @@ ListNode<_Locateable> *LocateableLinkedList<_Locateable,_HowAllocated,_Allocator
 {
     if(!startNode||len==0)return NULL;
     ListNode<_Locateable>* p=startNode;
-    _Locateable tloc(start,len);
-    SourceLocator<_Locateable,Locator::IGNORE,Locator::EQUAL,Locator::IGNORE> equLocator(&loc);
-    SourceLocator<_Locateable,Locator::IGNORE,Locator::BIGGER,Locator::IGNORE> biggerLocator(&loc);
+    _Locateable tloc(0,len);
+    SourceLocator<_Locateable,Locator<_Locateable>::IGNORE,Locator<_Locateable>::EQUAL,Locator<_Locateable>::IGNORE> equLocator(&tloc);
+    SourceLocator<_Locateable,Locator<_Locateable>::IGNORE,Locator<_Locateable>::BIGGER,Locator<_Locateable>::IGNORE> biggerLocator(&tloc);
     while(p && !equLocator.tellLocation(*p) && !biggerLocator.tellLocation(*p))
     {
         p=LocateableLinkedList<_Locateable,_HowAllocated,_Allocator>::nextAllocable(p);
@@ -411,9 +432,11 @@ ListNode<_Locateable> *LocateableLinkedList<_Locateable,_HowAllocated,_Allocator
 template<class _Locateable,int _HowAllocated,template <class> class _Allocator >
 ListNode<_Locateable> *LocateableLinkedList<_Locateable,_HowAllocated,_Allocator>::findFirstStart(ListNode<_Locateable>* startNode,size_t start)
 {
-    if(!startNode||len==0)return NULL;
+    if(!startNode)return NULL;
+
+    _Locateable tloc(start,0);
     ListNode<_Locateable>* p=LocateableLinkedList<_Locateable,_HowAllocated,_Allocator>::findFirstStartForInsert(startNode,start);
-    SourceLocator<_Locateable,Locator::EQUAL,Locator::IGNORE,Locator::IGNORE> equLocator(&loc);
+    SourceLocator<_Locateable,Locator<_Locateable>::EQUAL,Locator<_Locateable>::IGNORE,Locator<_Locateable>::IGNORE> equLocator(&tloc);
     if(p && (equLocator.tellLocation(*p) ))
     {
         return p;
@@ -424,10 +447,10 @@ ListNode<_Locateable> *LocateableLinkedList<_Locateable,_HowAllocated,_Allocator
 template<class _Locateable,int _HowAllocated,template <class> class _Allocator >
 ListNode<_Locateable> *LocateableLinkedList<_Locateable,_HowAllocated,_Allocator>::findFirstStartForInsert(ListNode<_Locateable> *startNode,size_t start)
 {
-    if(!startNode||len==0)return NULL;
+    if(!startNode)return NULL;
     ListNode<_Locateable> *p=startNode,*last=startNode;
-    _Locateable tloc(start,len);
-    SourceLocator<_Locateable,Locator::LESS,Locator::IGNORE,Locator::IGNORE> lessLocator(&tloc);
+    _Locateable tloc(start,0);
+    SourceLocator<_Locateable,Locator<_Locateable>::LESS,Locator<_Locateable>::IGNORE,Locator<_Locateable>::IGNORE> lessLocator(&tloc);
 
     while(p && lessLocator.tellLocation(*p))
         {
@@ -444,12 +467,12 @@ ListNode<_Locateable> *LocateableLinkedList<_Locateable,_HowAllocated,_Allocator
 template<class _Locateable,int _HowAllocated,template <class> class _Allocator >
 ListNode<_Locateable>* LocateableLinkedList<_Locateable,_HowAllocated,_Allocator>::nextAllocable(ListNode<_Locateable>* startNode)
 {
-    return LocateableLinkedList<_Locateable,_HowAllocated,_Allocator>::nextAllocable(start,Int2Type<_HowAllocated>());
+    return LocateableLinkedList<_Locateable,_HowAllocated,_Allocator>::nextAllocable(startNode,Int2Type<_HowAllocated>());
 }
 
 
 template<class _Locateable,int _HowAllocated,template <class> class _Allocator >
-ListNode<_Locateable>* LocateableLinkedList<_Locateable,_HowAllocated,_Allocator>::nextAllocable(ListNode<_Locateable>* startNode,Int2Type<Locator::KEEP>)
+ListNode<_Locateable>* LocateableLinkedList<_Locateable,_HowAllocated,_Allocator>::nextAllocable(ListNode<_Locateable>* startNode,Int2Type<Locator<_Locateable>::KEEP>)
 {
          if(startNode)
         {
@@ -461,9 +484,9 @@ ListNode<_Locateable>* LocateableLinkedList<_Locateable,_HowAllocated,_Allocator
 }
 
 template<class _Locateable,int _HowAllocated,template <class> class _Allocator >
-ListNode<_Locateable>* LocateableLinkedList<_Locateable,_HowAllocated,_Allocator>::nextAllocable(ListNode<_Locateable>* startNode,Int2Type<Locator::DISCARD>)
+ListNode<_Locateable>* LocateableLinkedList<_Locateable,_HowAllocated,_Allocator>::nextAllocable(ListNode<_Locateable>* startNode,Int2Type<Locator<_Locateable>::DISCARD>)
 {
-    return startNoe==NULL?NULL:startNode->getNext();
+    return startNode==NULL?NULL:startNode->getNext();
 }
 
 

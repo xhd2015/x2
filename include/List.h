@@ -2,6 +2,10 @@
 #ifndef List_h__
 #define List_h__
 
+#ifdef CODE32
+__asm__(".code32 \n\t");
+#endif
+
 #include <def.h>
 #include <loki/Int2Type.h>
 #include <Locator.h>
@@ -41,6 +45,10 @@ protected:
 */
 template <class T>
 class SimpleMemoryManager{
+protected:
+	struct Freeable:public T,public SimpleMemoryNode{
+
+	};
 public:
     SimpleMemoryManager(size_t start,size_t limit,bool doInit=true);//done
     SimpleMemoryManager();//default constructor that has nothing
@@ -57,7 +65,7 @@ protected:
     size_t start;
     size_t limit;
     
-    T *data;
+    Freeable *data;
     size_t curSize,len;
     
     size_t lastIndex;
@@ -121,12 +129,13 @@ public:
     ListNode<T>*    remove();//done
     ListNode<T>*    removeHead();//done
     void            remove(ListNode<T>* p);//done
+    size_t 			getSize();//doing
 
 
     void freeNode(ListNode<T> * node);//done
     void free();//free this list,but not destruct,that means not including root & last              done
-    void freeNext(T *t);//forward list free,begin with this                 done
-    void freePrevious(T *t);//backward list free,begin with This            done
+    void freeNext(ListNode<T> *t);//forward list free,begin with this                 done
+    void freePrevious(ListNode<T> *t);//backward list free,begin with This            done
     
 
 protected:
