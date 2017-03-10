@@ -96,6 +96,9 @@ typename SimpleMemoryManager<T>::Node *SimpleMemoryManager<T>::getNewNode()
             lastIndex = (lastIndex + 1 ) % len;
         }
     }
+#if defined(CODE64)
+    printf("returned\n");
+#endif
     return rt;
 }
 template <class T>
@@ -218,6 +221,10 @@ ListNode<T>*    ListNode<T>::getFirst()const
 }
 
 //===============class : LinkedList
+template<class T,template<class> class _Allocator>
+LinkedList<T,_Allocator >::LinkedList()
+{}
+
 template<class T,template<class> class _Allocator>
 LinkedList<T,_Allocator >::LinkedList(_Allocator<ListNode<T> > *smm):
 smm(smm)
@@ -437,6 +444,11 @@ ListNode<T>*    LinkedList<T,_Allocator >::removeHead()
 
 //=============class : LocateableLinkedList
 template<class _Locateable,int _HowAllocated,template <class> class _Allocator >
+LocateableLinkedList<_Locateable,_HowAllocated,_Allocator>::LocateableLinkedList()
+{
+
+}
+template<class _Locateable,int _HowAllocated,template <class> class _Allocator >
 LocateableLinkedList<_Locateable,_HowAllocated,_Allocator>::LocateableLinkedList( _Allocator<ListNode<_Locateable> > *smm ):
 LinkedList<_Locateable,_Allocator >(smm)
 {
@@ -584,13 +596,89 @@ TreeNode<T>* TreeNode<T>::setFather(TreeNode<T>* father) {
 
 template<class T>
 TreeNode<T>* TreeNode<T>::getSon() const{
+#if defined(CODE64)
+//	printf("gettSon \n");
+#endif
 	return son;
 }
 
 template<class T>
 TreeNode<T>* TreeNode<T>::getDirectFather()const {//direct father
+#if defined(CODE64)
+//	printf("call direct,this is %x,father is %x\n",this,this->father);
+#endif
     return father;
 }
+template<class T>
+void TreeNode<T>::insertSon(TreeNode<T>* son) {
+	if(son!=NULL)
+	{
+#if defined(CODE64)
+//	printf("insertSon 0\n");
+#endif
+	this->getSon();
+#if defined(CODE64)
+//	printf("getSon return\n");
+#endif
+		TreeNode<T> *orison=this->getSon();
+#if defined(CODE64)
+//	printf("insertSon 1\n");
+#endif
+		this->setSon(son);
+#if defined(CODE64)
+//	printf("insertSon 2\n");
+#endif
+		son->setFather(this);
+#if defined(CODE64)
+//	printf("insertSon 3\n");
+#endif
+		son->setSon(orison);
+		if(orison)
+		{
+			orison->setFather(son);
+		}
+	}
+}
+
+template<class T>
+void TreeNode<T>::insertFather(TreeNode<T>* father) {
+	if(father!=NULL)
+	{
+		TreeNode<T> *orifather=this->getDirectFather();
+		this->setFather(father);
+		father->setSon(this);
+		father->setFather(orifather);
+		if(orifather)
+		{
+			orifather->setSon(father);
+		}
+	}
+}
+
+template<class T>
+TreeNode<T>* TreeNode<T>::removeSon() {
+	if(this->getSon())
+	{
+		TreeNode<T> *son=this->getSon()->getSon();
+		this->setSon(son);
+		son->setFather(this);
+		this->getSon()->setFather(NULL);
+		this->getSon()->setSon(NULL);
+	}
+}
+
+template<class T>
+TreeNode<T>* TreeNode<T>::removeFather() {
+	if(this->getDirectFather())
+	{
+		TreeNode<T> *father=this->getDirectFather()->getDirectFather();
+		this->setFather(father);
+		father->setSon(this);
+		this->getDirectFather()->setFather(NULL);
+		this->getDirectFather()->setSon(NULL);
+	}
+}
+
 template<class T>
   TreeNode<T>* TreeNode<T>::setSon(TreeNode<T>* son)
   {
@@ -614,16 +702,28 @@ TreeNode<T>* TreeNode<T>::getParent()const {//往previous一直遍历，直到�
 #include <cstdio>
 #endif
 template<class T,template <class> class _Allocator>
+Tree<T,_Allocator>::Tree()
+{
+}
+template<class T,template <class> class _Allocator>
 Tree<T,_Allocator>::Tree(_Allocator<TreeNode<T> >* smm,TreeNode<T>* root):
 smm(smm)
 {
 	this->root=root==NULL?smm->getNew():root;
-	char saver[sizeof(T)];
+	//char saver[sizeof(T)];
 	//new (this->root) TreeNode<T>(*(T*)saver);//root must be very carefully initiated,but if you don't do that,it is fine.Do be very
 	//careful about the actual type at a position.Because that's really important.
 	//this->root->setSon(0);
 #if defined(CODE64)
-	//printf("arg root is : %x,this->root : %x\n",root,this->root);
+//	printf("arg root is : %x,this->root : %x\n",root,this->root);
+//	printf("ask you when TreeNode<FileDescriptor>,press y to stop\n");
+//	while(getchar()!='\n');
+//	int ask=getchar();
+//	if(ask=='y')
+//	{
+//		TreeNode<FileDescriptor> * head=(TreeNode<FileDescriptor>*)this->getHead();
+//		printf("call getFathter , %x \n",head->getDirectFather());
+//	}
 #endif
 }
 

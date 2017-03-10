@@ -19,6 +19,18 @@
 typedef SimpleMemoryManager<TreeNode<FileDescriptor> >::Node FileNode;
 int main()
 {
+	X2fsUtil xfu(HDD_FILE);
+//	xfu.createFileInRoot("kill.me", 2);
+//	printf("end create file\n");
+	xfu.listRoot();
+	printf("end listRoot \n");
+//	xfu.flush();
+//	printf("end flush \n");
+}
+
+
+int main_deprecated()
+{
 	char *const allbuf=(char*)malloc(IMG_SIZE);
 	char *const filename_section=allbuf+X2fsUtil::FileNameSection;
 	char *const dir_section=allbuf+X2fsUtil::DirSection;
@@ -98,16 +110,16 @@ int main()
 		if(!nodebuffer[i].SimpleMemoryNode::isFree())
 		{
 			nodebuffer[i].setFather((FileNode*)
-					(nodebuffer[i].getDirectFather()!=NULL?((size_t)nodebuffer[i].getDirectFather() + (size_t)dir_section ):NULL));
+					(nodebuffer[i].getDirectFather()!=NULL?(FileNode*)((size_t)nodebuffer[i].getDirectFather() + (size_t)dir_section ):(FileNode*)NULL));
 			nodebuffer[i].setNext(
 					(FileNode*)
-					(nodebuffer[i].getNext()!=NULL?((size_t)nodebuffer[i].getNext() + (size_t)dir_section):NULL) );
+					(nodebuffer[i].getNext()!=NULL?(FileNode*)((size_t)nodebuffer[i].getNext() + (size_t)dir_section):(FileNode*)NULL) );
 			nodebuffer[i].setPrevious(
 					(FileNode*)
-					(nodebuffer[i].getPrevious()!=NULL?((size_t)nodebuffer[i].getPrevious() + (size_t)dir_section):NULL ) );
+					(nodebuffer[i].getPrevious()!=NULL?(FileNode*)((size_t)nodebuffer[i].getPrevious() + (size_t)dir_section):(FileNode*)NULL ) );
 			nodebuffer[i].setSon(
 					(FileNode*)
-					(nodebuffer[i].getSon()!=NULL?((size_t)nodebuffer[i].getSon() + (size_t)dir_section):NULL) );
+					(nodebuffer[i].getSon()!=NULL?(FileNode*)((size_t)nodebuffer[i].getSon() + (size_t)dir_section):(FileNode*)NULL) );
 
 			printf("init pointer %d\n",i);
 		}
@@ -263,13 +275,13 @@ int main()
 	{
 		nodebuffer[i].setFather(
 				(FileNode*)
-				((nodebuffer[i].getDirectFather())!=NULL?((size_t)nodebuffer[i].getDirectFather() - (size_t)dir_section ):NULL) );
-		nodebuffer[i].setNext((FileNode*)(nodebuffer[i].getNext()!=NULL?((size_t)nodebuffer[i].getNext() - (size_t)dir_section):NULL) );
+				((nodebuffer[i].getDirectFather())!=NULL?(FileNode*)((size_t)nodebuffer[i].getDirectFather() - (size_t)dir_section ):(FileNode*)NULL) );
+		nodebuffer[i].setNext((FileNode*)(nodebuffer[i].getNext()!=NULL?(FileNode*)((size_t)nodebuffer[i].getNext() - (size_t)dir_section):(FileNode*)NULL) );
 		nodebuffer[i].setPrevious((FileNode*)
-				(nodebuffer[i].getPrevious()!=NULL?((size_t)nodebuffer[i].getPrevious() - (size_t)dir_section):NULL ));
+				(nodebuffer[i].getPrevious()!=NULL?(FileNode*)((size_t)nodebuffer[i].getPrevious() - (size_t)dir_section):(FileNode*)NULL ));
 		nodebuffer[i].setSon(
 				(FileNode*)
-				(nodebuffer[i].getSon()!=NULL?((size_t)nodebuffer[i].getSon() - (size_t)dir_section):NULL ) );
+				(nodebuffer[i].getSon()!=NULL?(FileNode*)((size_t)nodebuffer[i].getSon() - (size_t)dir_section):(FileNode*)NULL ) );
 	}
 
 	//write the buffer back to the image

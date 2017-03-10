@@ -22,6 +22,8 @@ void operator delete[](void*, void*);
 */
 class LinearSourceDescriptor{
 public:
+	AS_MACRO LinearSourceDescriptor();
+public:
     AS_MACRO LinearSourceDescriptor(size_t start,size_t limit); //done
     AS_MACRO ~LinearSourceDescriptor();//done
     AS_MACRO size_t getStart() const ;//done
@@ -70,9 +72,12 @@ protected:
 *   Remember that if the structure of a class is not really necessary,do not use extend.
 *   
 */
+
 template <class _LinearSourceDescriptor,template <class> class _NodeAllocator>
 class LinearSourceManager:public LocateableLinkedList<_LinearSourceDescriptor,Locator<_LinearSourceDescriptor>::DISCARD,_NodeAllocator >{
-private:
+public:
+	LinearSourceManager();
+public:
     typedef LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator > This;
 public:
     typedef LocateableLinkedList<_LinearSourceDescriptor,Locator<_LinearSourceDescriptor>::DISCARD,_NodeAllocator > Father;
@@ -184,6 +189,10 @@ private:
 
 //========Function Macro
 //===class: LinearSourceDescriptor
+LinearSourceDescriptor::LinearSourceDescriptor()
+{
+
+}
  LinearSourceDescriptor::LinearSourceDescriptor(size_t start,size_t limit):
  start(start),limit(limit)
  {

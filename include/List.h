@@ -42,14 +42,15 @@ protected:
 template <class T>
 class SimpleMemoryManager{
 public:
+    SimpleMemoryManager();//default constructor that has nothing
+    //~SimpleMemoryManager(); //the only way to free all list is a call to free
+public:
 	struct Freeable:public T,public SimpleMemoryNode{
 
 	};
 	typedef struct Freeable Node;
 public:
     SimpleMemoryManager(size_t start,size_t limit,bool doInit=true,size_t initSize=0);//done
-    SimpleMemoryManager();//default constructor that has nothing
-    //~SimpleMemoryManager(); //the only way to free all list is a call to free
     
     T* getNew();//done
     Node *getNewNode();//done
@@ -114,6 +115,8 @@ protected:
 template<class T,template <class> class _Allocator >
 class LinkedList{
 public:
+	LinkedList();
+public:
     LinkedList(  _Allocator<ListNode<T> > *smm);
     ~LinkedList();
     
@@ -174,6 +177,8 @@ template<class _Locateable,int _HowAllocated,template <class> class _Allocator >
 class LocateableLinkedList:public LinkedList<_Locateable,_Allocator >
 {
 public:
+	 LocateableLinkedList();//done
+public:
 	typedef LocateableLinkedList<_Locateable,_HowAllocated,_Allocator> This;
 public:
     LocateableLinkedList( _Allocator<ListNode<_Locateable> > *smm );//done
@@ -219,7 +224,10 @@ public:
     TreeNode<T>* setFather(TreeNode<T>* father);//done
     TreeNode<T>* getSon()const; //done
     TreeNode<T>* getDirectFather()const;//direct father,done
-
+    void		insertSon(TreeNode<T>* son);
+    void		insertFather(TreeNode<T>* father);
+    TreeNode<T>*	removeSon();
+	TreeNode<T>*	removeFather();
 
     
     TreeNode<T>* getParent()const;//往previous一直遍历，直到是根，然后返回根的father,done
@@ -232,6 +240,8 @@ protected:
 //============class Tree
 template <class T,template <class> class _Allocator>
 class Tree{
+public:
+	Tree();
 public:
     Tree(_Allocator<TreeNode<T> > *smm,TreeNode<T>* root=NULL);//If give root=NULL,then assign root by smm,else by root.
     ~Tree();

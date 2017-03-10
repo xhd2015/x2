@@ -4,7 +4,10 @@
 #define File_h__
 
 #include <def.h>
-
+#include <cstdio>
+#include "MallocToSimple.h"
+#include <Memory.h>
+#include <List.h>
 /**
 * 
 */
@@ -56,31 +59,69 @@ protected:
 class X2fsUtil{
 public:
 	enum{SecSize=512,KiB=2*SecSize,MiB=1024*KiB,GiB=1024*MiB};
-	enum{FileNameSection=2*SecSize,FileNameSectionLen=5*SecSize,
+	enum{
+
+		 FileNameSection=2*SecSize,FileNameSectionLen=5*SecSize,
 		 DirSection=FileNameSection+FileNameSectionLen,DirSectionLen=15*SecSize,
 		 FreeSpaceSection=DirSection+DirSectionLen,FreeSpaceSectionLen=5*SecSize
 
+	};
+	typedef X2fsUtil This;
+	typedef MallocToSimple<TreeNode<MemoryDescriptor> > TMSmm;
+	typedef MallocToSimple<ListNode<LinearSourceDescriptor> > LLSmm;
+	typedef MemoryManager<MallocToSimple> FileNameMM;
+	typedef SimpleMemoryManager<TreeNode<FileDescriptor> > FileNodeMM;
+	typedef FileNodeMM::Node FileNode;
+	typedef Tree<FileDescriptor,SimpleMemoryManager> FileTree;
+	typedef LinearSourceManager<LinearSourceDescriptor,MallocToSimple> FreeSpaceMM;
+
+	enum{
+		FileNodeSize=sizeof(FileNode)
 	};
 public:
 	X2fsUtil(const char *file);//create a handler to the image file.
 	~X2fsUtil();
 
-	bool createFile(const char *name,size_t secNum);//reserved number of sectors
+	bool createFileInRoot(const char *name,size_t secNum);//reserved number of sectors
 	void listRoot();
+	void flush();//write the buffered content back to file
+
 protected:
 	void initBuffers();
 	void adjustDirbufOffset(int off);//positive or negative
-	int  requestForFilename(const char *name);//if zero,then failed
 
+
+	void retriveFileNameSection();
+	/**
+	 * This is not necessary for filename section,cause all changes had been made as direct and immediate
+	 */
+	DEPRECATED void saveFileNameSection();
+
+	void retriveFreeSpaceSection();
+	void saveFreeSpaceSection();
+
+	void retriveDirSection();
+	void saveDirSection();
+	char *getFileName(const FileDescriptor &fd,size_t &nlen);
 
 protected:
 	char *namebuf,*dirbuf,*freebuf,*filebuf;
-	size_t namebufLen,dirbufLen,freebufLen,filebufLen;
+	size_t namebufLen,dirbufLen,freebufLen,filebufLen,reservedLen;
 	const char *imgFile;
+	FILE *fpimg;
+	TMSmm mmnodesmm;
+	FileNameMM filenamemm;
+	LLSmm listnodesmm;
+
+	FileNodeMM dirsmm;
+	FileTree fileTree;
+	FreeSpaceMM freemm;
+
+
 
 public:
 	static void mockMkfsX2fs(void *base,size_t secNum);
-	static void createFile(void *base,const char* name,size_t secNum);//default length=0,start=0,span=secNum
+	DEPRECATED static void createFile(void *base,const char* name,size_t secNum);//default length=0,start=0,span=secNum
 };
 
 

@@ -493,6 +493,11 @@ TreeNode<MemoryDescriptor>* MemoryManager<_DescriptorAllocator>::nextAllocable(
 
 //==========class:LinearSourceManager
 template <class _LinearSourceDescriptor,template <class> class _NodeAllocator>
+LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator >::LinearSourceManager()
+{
+}
+
+template <class _LinearSourceDescriptor,template <class> class _NodeAllocator>
 LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator >::LinearSourceManager(_NodeAllocator<ListNode<_LinearSourceDescriptor> > *smm,
     size_t start,size_t size):
 LocateableLinkedList<_LinearSourceDescriptor,Locator<_LinearSourceDescriptor>::DISCARD, _NodeAllocator >(smm),

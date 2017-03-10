@@ -4,3 +4,5 @@
 3. You must be very careful about using library,cause the order must be 'Reference first,Definition then'.Reference first makes the linker keeps the symbol,or it will be abandoned.
 4. Header files,cycle dependency?
 5. To retrive a Class from just a pointer,call placement new to do that.Or you will get unknown error
+6. How to print given length of string? use format as "%.[len]s".For instance,printf("%.2s","abvdd") or printf("%.*s",2,"abvdd");
+7. Encountered STATUS_ACCESSED_VOLATION exception in windows + cygwin? I'd like to tell you that is not a programming error,it's produced by the tool you use.  I suggest you,if anything accured unexpectedly and were verified many times,then change another enviornment(host). For instance,I do not use cygwin anymore,I use ubuntu instead.
