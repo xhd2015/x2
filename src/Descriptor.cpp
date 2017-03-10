@@ -172,7 +172,8 @@ const int SelectorDescriptor::TYPE_INT= 0x0600,//0b0000 0110 0000 0000,
             SelectorDescriptor::TYPE_TRAP=0x0700;
 const int SelectorDescriptor::SIZE_16=0,
         SelectorDescriptor::SIZE_32=1;
-SelectorDescriptor::SelectorDescriptor()
+SelectorDescriptor::SelectorDescriptor():
+		__D(0),__DPL(0),__P(0)
 {
 
 }

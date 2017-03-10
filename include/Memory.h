@@ -29,6 +29,8 @@ public:
     AS_MACRO bool isAllocable() const;//done,always return true;
     AS_MACRO void setStart(size_t start);//done
     AS_MACRO void setLimit(size_t limit);//done
+    AS_MACRO bool contains(const LinearSourceDescriptor& b)const;//done
+    AS_MACRO bool contains(size_t start,size_t limit)const;//done
     /**
     * 逻辑相等而非全等
     */
@@ -77,6 +79,7 @@ public:
     LinearSourceManager(_NodeAllocator< ListNode<_LinearSourceDescriptor> >*smm,size_t start,size_t size);//done
     ~LinearSourceManager();//done
     
+    AS_MACRO const _LinearSourceDescriptor & getSpace()const;
     void* mnew(size_t start,size_t size);//done
     void* mnew(size_t size);//done
 
@@ -204,6 +207,15 @@ private:
  {
     this->limit=limit;
  }
+
+bool LinearSourceDescriptor::contains(const LinearSourceDescriptor& b)const
+{
+	return this->contains(b.getStart(),b.getLimit());
+}
+bool LinearSourceDescriptor::contains(size_t start,size_t limit)const
+{
+	return (this->start<=start)&&(this->start-start>=limit-this->limit);
+}
 bool LinearSourceDescriptor::operator==(const LinearSourceDescriptor& b)const
 {
 
@@ -248,6 +260,12 @@ bool MemoryDescriptor::operator==(const MemoryDescriptor& b)const
 bool MemoryDescriptor::operator!=(const MemoryDescriptor& b)const
 {
     return ! this->operator==(b);
+}
+//==============class LinearSourceManager
+template <class _LinearSourceDescriptor,template <class> class _NodeAllocator>
+const _LinearSourceDescriptor & LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator>::getSpace()const
+{
+	return this->space;
 }
 
 

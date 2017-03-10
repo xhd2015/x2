@@ -15,7 +15,7 @@ STDCPP := stdc++
 #control which files are compiled.
 f16 := main libx2 PMLoader Descriptor
 f32 := protected_main libx2 PMLoader Descriptor TSS interrupts IOProgramer Memory test List
-f64 := libx2 PMLoader Descriptor TSS Memory List
+f64 := libx2 PMLoader Descriptor TSS Memory List Locator
 
 
 ld16 := image_16.ld

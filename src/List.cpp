@@ -1,11 +1,6 @@
 
 #include <List.h>
 #include <Memory.h>
-#include <libx2.h>
-
-#include <test.h>
-
-#include <Locator.h>
 
 //==========实例化模板
 ////===========模板声明区
@@ -25,11 +20,22 @@
 	template class SimpleMemoryManager<ListNode<int> >;
 	template class SimpleMemoryManager<TreeNode<MemoryDescriptor> >;
 #elif defined(CODE64)
+#include <cstdio>
 	#include "/home/13774/x2-devel/filesystem/verify-in-cygwin/File.h"
+#include "/home/13774/x2-devel/filesystem/verify-in-cygwin/MallocToSimple.h"
 	template class TreeNode<FileDescriptor>;
 	template class SimpleMemoryManager<TreeNode<FileDescriptor> >;
 	template class TreeNode<int>;
 	template class SimpleMemoryManager<TreeNode<int> >;
+	template class TreeNode<MemoryDescriptor>;
+	template class Tree<FileDescriptor,SimpleMemoryManager>;
+	template class Tree<MemoryDescriptor, MallocToSimple>;
+	template class ListNode<LinearSourceDescriptor>;
+	template class ListNode<FileDescriptor>;
+	template class ListNode<MemoryDescriptor>;
+	template class LinkedList<LinearSourceDescriptor, MallocToSimple>;
+	template class LocateableLinkedList<LinearSourceDescriptor, Locator<LinearSourceDescriptor>::KEEP, MallocToSimple>;
+	template class LocateableLinkedList<LinearSourceDescriptor, Locator<LinearSourceDescriptor>::DISCARD, MallocToSimple>;
 #endif
 
 
@@ -40,9 +46,9 @@
 //===================class: SimpleMemoryManager
 
 template <class T>
-SimpleMemoryManager<T>::SimpleMemoryManager(size_t start,size_t limit,bool doInit):
+SimpleMemoryManager<T>::SimpleMemoryManager(size_t start,size_t limit,bool doInit,size_t initSize):
 start(start),limit(limit),
-data((Freeable*)start),len((int)(limit/sizeof(Freeable))),curSize(0),
+data((Freeable*)start),len((int)(limit/sizeof(Freeable))),curSize(initSize),
 lastIndex(0)
 {
     if(doInit)
@@ -68,7 +74,13 @@ start(-1),limit(0),data(NULL),len(0),curSize(0),lastIndex(0)
 template <class T>
 T* SimpleMemoryManager<T>::getNew()
 {
-    Freeable *rt=NULL;
+	return (T*)this->getNewNode();
+}
+
+template <class T>
+typename SimpleMemoryManager<T>::Node *SimpleMemoryManager<T>::getNewNode()
+{
+    Node *rt=NULL;
     if(!isFull())
     {
         for(int i=0;i!=len;i++)
@@ -86,17 +98,22 @@ T* SimpleMemoryManager<T>::getNew()
     }
     return rt;
 }
-
 template <class T>
-void SimpleMemoryManager<T>::withdraw(T *t)
+void SimpleMemoryManager<T>::withdraw(SimpleMemoryManager<T>::Node *t)
 {
-	Freeable* _t=(Freeable*)t;
+	Node* _t=(Node*)t;
     if(_t && !_t->isFree())
     {
         _t->free(); //如果被标记为可用，就用lastIndex指向之
         curSize--;
-        lastIndex = (unsigned int)(((size_t)_t - (size_t)start)/sizeof(Freeable));
+        lastIndex = (size_t)(((size_t)_t - (size_t)start)/sizeof(Node)) % len;
     }
+}
+
+template <class T>
+void SimpleMemoryManager<T>::withdraw(T *t)
+{
+	this->withdraw((Node*)t);
 }
 
 
@@ -322,7 +339,7 @@ template<class T,template<class> class _Allocator>
 ListNode<T>* LinkedList<T,_Allocator >::appendHead(ListNode<T>* p)
 {
     if(!p)return NULL;
-    root->setNext(p);
+    root->insertNext(p);
     if(getLast()==NULL)
     {
         last->setNext(p);
@@ -351,13 +368,46 @@ ListNode<T>*    LinkedList<T,_Allocator >::remove()
 template<class T,template<class> class _Allocator>
 void    LinkedList<T,_Allocator >::remove(ListNode<T>* p)
 {
+#if defined(CODE64)
+    	printf("p->previous=%x,root=%x\n",p->getPrevious(),this->root);
+#endif
     if(!p || p==root || p==last)return;
-    if(p==getLast())
+    if(p==this->getLast())
     {
         remove();
     }else{
+#if defined(CODE64)
+    	printf("p->previous=%x,root=%x\n",p->getPrevious(),this->root);
+#endif
         p->getPrevious()->removeNext();    
     }
+}
+
+template<class T,template<class> class _Allocator>
+void	 LinkedList<T,_Allocator >::insertNext(ListNode<T>* where,ListNode<T>* p)
+{
+	if(where==NULL||p==NULL)return;
+	if(where==this->root)
+	{
+		this->appendHead(p);
+	}else if(where==this->getLast())
+	{
+		this->append(p);
+	}else{
+		where->insertNext(p);
+	}
+}
+template<class T,template<class> class _Allocator>
+void	 LinkedList<T,_Allocator >::insertPrevious(ListNode<T>* where,ListNode<T>* p)
+{
+	if(where==NULL||where==this->root||p==NULL)return;
+	if(root->getNext()==where)
+	{
+		this->appendHead(p);
+	}else{
+		where->insertPrevious(p);
+	}
+
 }
 template<class T,template<class> class _Allocator>
 size_t   LinkedList<T,_Allocator >::getSize()
@@ -384,6 +434,7 @@ ListNode<T>*    LinkedList<T,_Allocator >::removeHead()
 
 
 
+
 //=============class : LocateableLinkedList
 template<class _Locateable,int _HowAllocated,template <class> class _Allocator >
 LocateableLinkedList<_Locateable,_HowAllocated,_Allocator>::LocateableLinkedList( _Allocator<ListNode<_Locateable> > *smm ):
@@ -399,27 +450,42 @@ LocateableLinkedList<_Locateable,_HowAllocated,_Allocator>::~LocateableLinkedLis
 /**
 * Do I work on a KEEP-ALLOCATED or DISCARD-ALLOCATED list?
 *
+*  Find  a node that is less than or equal to start,and can contain it
 *   The 'template argument' combination technnique is(maybe that I now say 'often' appears too early) used in an extension system.The template arguments will cover all the nodes from base to the deepest derived class.
 */
 template<class _Locateable,int _HowAllocated,template <class> class _Allocator >
 ListNode<_Locateable> *LocateableLinkedList<_Locateable,_HowAllocated,_Allocator>::findFirstStartLen(ListNode<_Locateable>* startNode,size_t start,size_t len)
 {
     if(!startNode||len==0)return NULL;
+#if defined(CODE64)
+    printf("findFirstStartLen for (%x,%x)\n",start,len);
+#endif
     ListNode<_Locateable>* p=startNode;
     _Locateable tloc(start,len);
-    SourceLocator<_Locateable,Locator<_Locateable>::LESS,Locator<_Locateable>::IGNORE,Locator<_Locateable>::IGNORE> lessLocator(&tloc);
+    SourceLocator<_Locateable,Locator<_Locateable>::LESS,Locator<_Locateable>::IGNORE,Locator<_Locateable>::IGNORE> lessLocator(tloc);
 
-    while(p && lessLocator.tellLocation(*p))p=LocateableLinkedList<_Locateable,_HowAllocated,_Allocator>::nextAllocable(p);
-
-
-    SourceLocator<_Locateable,Locator<_Locateable>::EQUAL,Locator<_Locateable>::EQUAL,Locator<_Locateable>::IGNORE> equLocator(&tloc);
-    SourceLocator<_Locateable,Locator<_Locateable>::EQUAL,Locator<_Locateable>::BIGGER,Locator<_Locateable>::IGNORE> biggerLocator(&tloc);
-    if(p && (equLocator.tellLocation(*p) || biggerLocator.tellLocation(*p)) )
+    while(p && lessLocator.tellLocation(p->getData()))
+    	{
+    		if(p->getData().contains(tloc))
+    		{
+    			break;
+    		}
+    		p=This::nextAllocable(p);
+    	}
+   while(p && !p->getData().contains(tloc))
     {
-        return p;
-    }else{
-        return NULL;
+    	p=This::nextAllocable(p);
     }
+#if defined(CODE64)
+    printf("end of findFirstStartLen,result is ");
+    if(p==NULL)
+    {
+    	printf("NULL\n");
+    }else{
+    	printf("(%x,%x) \n",p->getData().getStart(),p->getData().getLimit());
+    }
+#endif
+    return p;
 }
 
 template<class _Locateable,int _HowAllocated,template <class> class _Allocator >
@@ -428,9 +494,9 @@ ListNode<_Locateable> *LocateableLinkedList<_Locateable,_HowAllocated,_Allocator
     if(!startNode||len==0)return NULL;
     ListNode<_Locateable>* p=startNode;
     _Locateable tloc(0,len);
-    SourceLocator<_Locateable,Locator<_Locateable>::IGNORE,Locator<_Locateable>::EQUAL,Locator<_Locateable>::IGNORE> equLocator(&tloc);
-    SourceLocator<_Locateable,Locator<_Locateable>::IGNORE,Locator<_Locateable>::BIGGER,Locator<_Locateable>::IGNORE> biggerLocator(&tloc);
-    while(p && !equLocator.tellLocation(*p) && !biggerLocator.tellLocation(*p))
+    SourceLocator<_Locateable,Locator<_Locateable>::IGNORE,Locator<_Locateable>::EQUAL,Locator<_Locateable>::IGNORE> equLocator(tloc);
+    SourceLocator<_Locateable,Locator<_Locateable>::IGNORE,Locator<_Locateable>::BIGGER,Locator<_Locateable>::IGNORE> biggerLocator(tloc);
+    while(p && !equLocator.tellLocation(p->getData()) && !biggerLocator.tellLocation(p->getData()))
     {
         p=LocateableLinkedList<_Locateable,_HowAllocated,_Allocator>::nextAllocable(p);
     }
@@ -444,8 +510,8 @@ ListNode<_Locateable> *LocateableLinkedList<_Locateable,_HowAllocated,_Allocator
 
     _Locateable tloc(start,0);
     ListNode<_Locateable>* p=LocateableLinkedList<_Locateable,_HowAllocated,_Allocator>::findFirstStartForInsert(startNode,start);
-    SourceLocator<_Locateable,Locator<_Locateable>::EQUAL,Locator<_Locateable>::IGNORE,Locator<_Locateable>::IGNORE> equLocator(&tloc);
-    if(p && (equLocator.tellLocation(*p) ))
+    SourceLocator<_Locateable,Locator<_Locateable>::EQUAL,Locator<_Locateable>::IGNORE,Locator<_Locateable>::IGNORE> equLocator(tloc);
+    if(p && (equLocator.tellLocation(p->getData()) ))
     {
         return p;
     }else{
@@ -458,9 +524,9 @@ ListNode<_Locateable> *LocateableLinkedList<_Locateable,_HowAllocated,_Allocator
     if(!startNode)return NULL;
     ListNode<_Locateable> *p=startNode,*last=startNode;
     _Locateable tloc(start,0);
-    SourceLocator<_Locateable,Locator<_Locateable>::LESS,Locator<_Locateable>::IGNORE,Locator<_Locateable>::IGNORE> lessLocator(&tloc);
+    SourceLocator<_Locateable,Locator<_Locateable>::LESS,Locator<_Locateable>::IGNORE,Locator<_Locateable>::IGNORE> lessLocator(tloc);
 
-    while(p && lessLocator.tellLocation(*p))
+    while(p && lessLocator.tellLocation(p->getData()))
         {
             startNode=p;
             p=LocateableLinkedList<_Locateable,_HowAllocated,_Allocator>::nextAllocable(p);
@@ -528,6 +594,9 @@ TreeNode<T>* TreeNode<T>::getDirectFather()const {//direct father
 template<class T>
   TreeNode<T>* TreeNode<T>::setSon(TreeNode<T>* son)
   {
+#if defined(CODE64)
+	//printf("setSon is : %x \n",son);
+#endif
   	this->son=son;
   }
 template<class T>
@@ -541,12 +610,21 @@ TreeNode<T>* TreeNode<T>::getParent()const {//往previous一直遍历，直到�
 }
 
 //===============class Tree
-
+#if defined(CODE64)
+#include <cstdio>
+#endif
 template<class T,template <class> class _Allocator>
 Tree<T,_Allocator>::Tree(_Allocator<TreeNode<T> >* smm,TreeNode<T>* root):
 smm(smm)
 {
 	this->root=root==NULL?smm->getNew():root;
+	char saver[sizeof(T)];
+	//new (this->root) TreeNode<T>(*(T*)saver);//root must be very carefully initiated,but if you don't do that,it is fine.Do be very
+	//careful about the actual type at a position.Because that's really important.
+	//this->root->setSon(0);
+#if defined(CODE64)
+	//printf("arg root is : %x,this->root : %x\n",root,this->root);
+#endif
 }
 
 template<class T,template <class> class _Allocator>
@@ -577,5 +655,14 @@ TreeNode<T>* Tree<T,_Allocator>::getHead()const {
 template<class T,template <class> class _Allocator>
 void  Tree<T,_Allocator>::setHead(TreeNode<T> *head)
  {
- 	root->setSon(head);
+#if defined(CODE64)
+	//printf("root : %x  , head : %x\n",root,head);
+	//head->setFather(root);
+	//head->setSon(root);
+	//printf("head data : %x \n",head->getDirectFather());
+#endif
+ 	root->setSon(head);//wrong
+#if defined(CODE64)
+ 	//printf("root->setSon : %x\n",root->getSon());
+#endif
  }

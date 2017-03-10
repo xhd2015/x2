@@ -2,9 +2,8 @@
 #ifndef Locator_h__
 #define Locator_h__
 
-#include <List.h>
 #include <loki/Int2Type.h>
-#include <Locator.h>
+#include <def.h>
 
 template <class T>
 class Locator{
@@ -30,7 +29,7 @@ public:
 	/**
 	*	Tell the location of t,is it before p,at p,or after p
 	*/
-	virtual bool tellLocation(const T &t)=0;
+	bool tellLocation(const T &t);//This is non-virtual and not defined=0;
 };
 
 
@@ -43,20 +42,20 @@ class SourceLocator:public Locator<_Source>
 {
 public:
 	SourceLocator(const _Source& t);//a copy constructor
-	virtual bool tellLocation(const _Source& t);
-	AS_MACRO const _Source* getComparator();//return p;
+	bool tellLocation(const _Source &t)const;
+	AS_MACRO const _Source* getComparator()const;//return p;
 protected:
 	const _Source* p;
 private:
 	//two conditions: -IgnoreAllocable=true|false
-	bool tellLocation(const _Source& t,Int2Type<Locator<_Source>::EQUAL>);
-	bool tellLocation(const _Source& t,Int2Type<Locator<_Source>::IGNORE>);
+	bool tellLocation(const _Source& t,Int2Type<Locator<_Source>::EQUAL>)const;
+	bool tellLocation(const _Source& t,Int2Type<Locator<_Source>::IGNORE>)const;
 };
 
 //============Function Macros
 //=====class SourceLocator
 template <class _Source,int _HowStart,int _HowLength,int _HowAllocable>
-const _Source* SourceLocator<_Source,_HowStart,_HowLength,_HowAllocable>::getComparator()
+const _Source* SourceLocator<_Source,_HowStart,_HowLength,_HowAllocable>::getComparator()const
 {
 	return p;
 }

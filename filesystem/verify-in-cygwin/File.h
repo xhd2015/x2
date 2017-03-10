@@ -62,6 +62,23 @@ public:
 
 	};
 public:
+	X2fsUtil(const char *file);//create a handler to the image file.
+	~X2fsUtil();
+
+	bool createFile(const char *name,size_t secNum);//reserved number of sectors
+	void listRoot();
+protected:
+	void initBuffers();
+	void adjustDirbufOffset(int off);//positive or negative
+	int  requestForFilename(const char *name);//if zero,then failed
+
+
+protected:
+	char *namebuf,*dirbuf,*freebuf,*filebuf;
+	size_t namebufLen,dirbufLen,freebufLen,filebufLen;
+	const char *imgFile;
+
+public:
 	static void mockMkfsX2fs(void *base,size_t secNum);
 	static void createFile(void *base,const char* name,size_t secNum);//default length=0,start=0,span=secNum
 };

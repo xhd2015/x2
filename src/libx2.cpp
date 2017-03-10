@@ -429,7 +429,8 @@ cols(cols>Printer::SCREEN_MAX_Y?Printer::SCREEN_MAX_Y:cols),
 x0(x0+this->rows>=Printer::SCREEN_MAX_X?0:x0),
 y0(y0+this->cols>=Printer::SCREEN_MAX_Y?0:y0),
 x(0),y(0),
-mode(mode)
+mode(mode),
+sonSize(0),father(NULL)
 {
      
 }
@@ -604,7 +605,8 @@ Printer  Printer::getSubPrinter(unsigned int x0,unsigned int y0,unsigned int row
 
 #if defined(CODE32) || defined(CODE64)
 //==========class : String
-String::String(const char* str)
+String::String(const char* str):
+		str(NULL)
 {
     
 }
@@ -615,11 +617,11 @@ String::~String()
 
 int String::size()
 {
-    
+    return 0;
 }
 char String::get(int index)
 {
-    
+	return 0;
 }
 void String::set(int index,int ch)
 {
@@ -628,7 +630,7 @@ void String::set(int index,int ch)
 
 String String::valueOf(int n)
 {
-    
+    return String(NULL);
 }
 
 //============class : Queue<T>

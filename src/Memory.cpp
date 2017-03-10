@@ -16,6 +16,11 @@ __asm__(".code32 \n\t");
 //=============template ininstantiate
 #if defined(CODE32)
 	template class MemoryManager<SimpleMemoryManager>;
+#elif defined(CODE64)
+#include <cstdio>
+#include "/home/13774/x2-devel/filesystem/verify-in-cygwin/MallocToSimple.h"
+	template class MemoryManager<MallocToSimple>;
+	template class LinearSourceManager<LinearSourceDescriptor, MallocToSimple>;
 #endif
 
 #if defined(CODE32)
@@ -42,7 +47,15 @@ template<template <class> class _DescriptorAllocator>
 MemoryManager<_DescriptorAllocator>::MemoryManager(_DescriptorAllocator<TreeNode<MemoryDescriptor> > *smm,size_t start,size_t len,bool fatherAllocable):
 MemoryManager(smm)
 {
+#if defined(CODE64)
+	//printf("set Head\n");
+#endif
     this->setHead( new (smm->getNew()) TreeNode<MemoryDescriptor>(MemoryDescriptor(start,len,fatherAllocable)));
+#if defined(CODE64)
+    //printf("in constructor : ");
+    //getchar();
+    //printf("%x ~ %x\n",this->getHead()->getData().getStart(),this->getHead()->getData().getLimit());
+#endif
 }
 
 template<template <class> class _DescriptorAllocator>
@@ -263,7 +276,7 @@ void* MemoryManager<_DescriptorAllocator>::mnew(size_t size) {
 
 template<template <class> class _DescriptorAllocator>
 void MemoryManager<_DescriptorAllocator>::mdelete(void* p, size_t size) {
-    TreeNode<MemoryDescriptor>* toDeleteNode=MemoryManager<_DescriptorAllocator>::locateForDelete(this->getHead(),(int)p,size,0);
+    TreeNode<MemoryDescriptor>* toDeleteNode=MemoryManager<_DescriptorAllocator>::locateForDelete(this->getHead(),(size_t)p,size,0);
     if(toDeleteNode)//if found it
     {
         //Util::printStr("Found delete.   ");
@@ -274,7 +287,7 @@ void MemoryManager<_DescriptorAllocator>::mdelete(void* p, size_t size) {
 template<template <class> class _DescriptorAllocator>
 void MemoryManager<_DescriptorAllocator>::mdelete(void *p)
 {
-    TreeNode<MemoryDescriptor>* toDeleteNode=MemoryManager<_DescriptorAllocator>::locateForDeleteStart(this->getHead(),(int)p,0);
+    TreeNode<MemoryDescriptor>* toDeleteNode=MemoryManager<_DescriptorAllocator>::locateForDeleteStart(this->getHead(),(size_t)p,0);
     if(toDeleteNode)//if found it
     {
         //Util::printStr("Found delete.   ");
@@ -485,7 +498,9 @@ LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator >::LinearSourceManage
 LocateableLinkedList<_LinearSourceDescriptor,Locator<_LinearSourceDescriptor>::DISCARD, _NodeAllocator >(smm),
 space(_LinearSourceDescriptor(start,size))
 {
+	this->appendHead(new (smm->getNew()) ListNode<_LinearSourceDescriptor>(space));
 }
+
 template <class _LinearSourceDescriptor,template <class> class _NodeAllocator>
 LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator >::~LinearSourceManager()
 {
@@ -495,11 +510,23 @@ LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator >::~LinearSourceManag
 template <class _LinearSourceDescriptor,template <class> class _NodeAllocator>
 void* LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator >::mnew(size_t start,size_t size)
 {
-    if(!checkRange(start,size))return NULL;
+    if(!this->checkRange(start,size))return NULL;
+#if defined(CODE64)
+    printf("not null,request for (%x,%x)\n",start,size);
+#endif
     ListNode<_LinearSourceDescriptor> *found=Father::findFirstStartLen(this->getHead(),start,size);
+#if defined(CODE64)
     if(found)
     {
-        _LinearSourceDescriptor alloced = allocOutNode(found,found->getData().getStart(),size);
+    	ListNode<LinearSourceDescriptor> *foundp=(ListNode<LinearSourceDescriptor>*)found;
+    	printf("found is (%x,%x)\n",foundp->getData().getStart(),foundp->getData().getLimit());
+    }else{
+    	printf("found is NULL\n");
+    }
+#endif
+    if(found)
+    {
+        _LinearSourceDescriptor alloced = allocOutNode(found,start,size);
         if(alloced.getLimit())
         {
             return (void*)(alloced.getStart());
@@ -527,8 +554,8 @@ void* LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator >::mnew(size_t 
 template <class _LinearSourceDescriptor,template <class> class _NodeAllocator>
 void LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator >::mdelete(void* p,size_t size)
 {
-    if(!checkRange((size_t)p,size))return NULL;
-    ListNode<_LinearSourceDescriptor> *found=Father::findFirstForInsert(this->getHead(),(size_t)p,size);
+    if(!this->checkRange((size_t)p,size))return;
+    ListNode<_LinearSourceDescriptor> *found=Father::findFirstStartForInsert(this->getHead(),(size_t)p);
     if(found)
     {
         int diff=found->getData().getStart()-(size_t)p;
@@ -547,7 +574,7 @@ void LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator >::mdelete(void*
             }
         }
     }else{//empty list
-        appendHead(_LinearSourceDescriptor((size_t)p,size));
+        this->appendHead(_LinearSourceDescriptor((size_t)p,size));
     }
 
 }
@@ -588,18 +615,25 @@ _LinearSourceDescriptor LinearSourceManager<_LinearSourceDescriptor,_NodeAllocat
     {
         int len1=start - avlNode->getData().getStart();
         int len2=avlNode->getData().getLimit() - len - len1;
+#if defined(CODE64)
+        //printf("len1=%x,len2=%x\n",len1,len2);
+#endif
         if(len1<0 || len2 < 0)newnode.setLimit(0);
         else if(len1==0 && len2==0)//前后都没有剩余
         {
+#if defined(CODE64)
+        	printf("remove whole node\n");
+#endif
             this->remove(avlNode);
         }else if(len1==0 && len2 > 0){//后面有剩余
-            avlNode->setStart(start+len);
-            avlNode->setLimit(len2);
+            avlNode->getData().setStart(start+len);
+            avlNode->getData().setLimit(len2);
         }else if(len1 > 0 && len2==0){//前面有剩余
-            avlNode->setLimit(len1);
+            avlNode->getData().setLimit(len1);
         }else{//前后都有剩余
-            avlNode->setLimit(len1);
-            avlNode->insertNext(new (this->smm->getNew()) ListNode<_LinearSourceDescriptor>(_LinearSourceDescriptor(start+len,len2)) );
+            avlNode->getData().setLimit(len1);
+            this->insertNext(avlNode, new (this->smm->getNew()) ListNode<_LinearSourceDescriptor>(_LinearSourceDescriptor(start+len,len2)) );
+
         }
     }
     return newnode;

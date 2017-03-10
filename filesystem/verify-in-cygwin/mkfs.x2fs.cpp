@@ -11,7 +11,7 @@
 int main()
 {
 	char *buf=(char*)malloc(IMG_SIZE);
-	printf("dir node size:%d\n",sizeof(TreeNode<FileDescriptor>));
+	printf("dir node size:%d\n",sizeof(SimpleMemoryManager<TreeNode<FileDescriptor> >::Node));
 	printf("file : %s \nfile size:%x\n",HDD_FILE,IMG_SIZE);
 	printf("Sections:\n");
 		printf("\treserved:%x ~ %x\n",0,X2fsUtil::FileNameSection);

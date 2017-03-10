@@ -681,7 +681,7 @@ InterruptsManager::~InterruptsManager()
 
 InterruptsManager::GENERAL_FUNC InterruptsManager::getIntAddr(unsigned int i)
 {
-    
+    return NULL;
 }
 void InterruptsManager::setIntAddr(unsigned int i)
 {

@@ -14,8 +14,8 @@ class MallocToSimple
 public:
 	MallocToSimple();
 	~MallocToSimple();
-	virtual T *getNew();
-	virtual void withdraw(T *t);
+	T *getNew();
+	void withdraw(T *t);
 
 protected:
 

@@ -8,20 +8,20 @@
 
 class SimpleMemoryNode{
 public:
-    AS_MACRO SimpleMemoryNode(int NO=-1);//done
+    AS_MACRO SimpleMemoryNode(bool NO=false);//done
  
-    AS_MACRO int getNO();//done
-    AS_MACRO void setNO(int NO);//done
-    AS_MACRO int isFree();//done
+    AS_MACRO bool getNO();//done
+    AS_MACRO void setNO(bool NO);//done
+    AS_MACRO bool isFree();//done
     AS_MACRO void free();//done
     AS_MACRO void unfree();//done
     
     
 protected:
     /**
-    *NO=-1,then not using
+    *NO=false,then not using
     */
-    int NO;
+    bool NO;
 };
 
 /**
@@ -41,22 +41,26 @@ protected:
 */
 template <class T>
 class SimpleMemoryManager{
-protected:
+public:
 	struct Freeable:public T,public SimpleMemoryNode{
 
 	};
+	typedef struct Freeable Node;
 public:
-    SimpleMemoryManager(size_t start,size_t limit,bool doInit=true);//done
+    SimpleMemoryManager(size_t start,size_t limit,bool doInit=true,size_t initSize=0);//done
     SimpleMemoryManager();//default constructor that has nothing
     //~SimpleMemoryManager(); //the only way to free all list is a call to free
     
     T* getNew();//done
+    Node *getNewNode();//done
+    void withdraw(Node *t);//done
     void withdraw(T *t);//single free,done
-    AS_MACRO bool isFull();//done
-    AS_MACRO size_t getLen();//done
-    AS_MACRO size_t getCurSize();//done
-    AS_MACRO size_t getStart();//done
-    AS_MACRO size_t getLimit();//done
+    AS_MACRO bool isFull()const;//done
+    AS_MACRO size_t getLen()const;//done
+    AS_MACRO size_t getCurSize()const;//done
+    AS_MACRO size_t getStart()const;//done
+    AS_MACRO size_t getLimit()const;//done
+    AS_MACRO static size_t getNodeSize();//done
 protected:
     size_t start;
     size_t limit;
@@ -125,7 +129,9 @@ public:
     ListNode<T>*    remove();//done
     ListNode<T>*    removeHead();//done
     void            remove(ListNode<T>* p);//done
-    size_t 			getSize();//doing
+    void			insertNext(ListNode<T>* where,ListNode<T>* p);//done
+    void			insertPrevious(ListNode<T>* where,ListNode<T>* p);//done
+    size_t 			getSize();//done
 
 
     void freeNode(ListNode<T> * node);//done
@@ -167,6 +173,8 @@ protected:
 template<class _Locateable,int _HowAllocated,template <class> class _Allocator >
 class LocateableLinkedList:public LinkedList<_Locateable,_Allocator >
 {
+public:
+	typedef LocateableLinkedList<_Locateable,_HowAllocated,_Allocator> This;
 public:
     LocateableLinkedList( _Allocator<ListNode<_Locateable> > *smm );//done
     ~LocateableLinkedList();//done
@@ -327,58 +335,63 @@ _Allocator<ListNode<T> > *LinkedList<T,_Allocator>::getMemoryManager()const
 }
 
 //=====class: SimpleMemoryNode
-SimpleMemoryNode::SimpleMemoryNode(int NO):
+SimpleMemoryNode::SimpleMemoryNode(bool NO):
 NO(NO)
 {
 
 }
-int SimpleMemoryNode::getNO()
+bool SimpleMemoryNode::getNO()
 {
     return this->NO;
 }
-int SimpleMemoryNode::isFree()
+bool SimpleMemoryNode::isFree()
 {
-    return this->NO==-1;
+    return this->NO==false;
 }
 void SimpleMemoryNode::free()
 {
-    this->NO=-1;
+    this->NO=false;
 }
 void SimpleMemoryNode::unfree()
 {
-    this->NO=0;
+    this->NO=true;
 }
-void SimpleMemoryNode::setNO(int NO)
+void SimpleMemoryNode::setNO(bool NO)
 {
     this->NO = NO;
 }
 
 //=====class:SimpleMemoryManager
 template<class T>
-bool SimpleMemoryManager<T>::isFull()
+bool SimpleMemoryManager<T>::isFull()const
 {
     return this->curSize==this->len;
 }
 template<class T>
-size_t SimpleMemoryManager<T>::getLen()
+size_t SimpleMemoryManager<T>::getLen()const
 {
     return this->len;
 }
 template<class T>
-size_t SimpleMemoryManager<T>::getCurSize()
+size_t SimpleMemoryManager<T>::getCurSize()const
 {
     return this->curSize;
 }
 template<class T>
-size_t SimpleMemoryManager<T>::getStart()
+size_t SimpleMemoryManager<T>::getStart()const
 {
     return this->start;
 }
 template<class T>
-size_t SimpleMemoryManager<T>::getLimit()
+size_t SimpleMemoryManager<T>::getLimit()const
 {
     return this->limit;
 }    ///////////
 
+template<class T>
+size_t  SimpleMemoryManager<T>::getNodeSize()
+{
+	return sizeof(Node);
+}
 
 #endif //List_h__

@@ -5,6 +5,7 @@
 		no -fpermissive forces you to:
 			1.use this-> on member(functions & variables)
 			2.use cast between compitable types
+			3.not using default argument in definition
 []	It very urgent to develop the hard disk read-write functions cause the size of code is getting bigger and bigger,the maxium(66 sectors) is not going to be able to contain all of them.
 [*]	There is a rule called 'avoid using virtual'
 [*]	Use eclipse instead of any other editor such as sublime or notepad++,eclipse is the best and the most excellent.
