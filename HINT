@@ -1,8 +1,33 @@
-
 1. If make complains about 'ld',check Makefile+image_xx.ld
+
 2. The template class instantiate will only be valid in the implementation file(.cpp),coz only there exists the definitions.
+
 3. You must be very careful about using library,cause the order must be 'Reference first,Definition then'.Reference first makes the linker keeps the symbol,or it will be abandoned.
+
 4. Header files,cycle dependency?
+
 5. To retrive a Class from just a pointer,call placement new to do that.Or you will get unknown error
+
 6. How to print given length of string? use format as "%.[len]s".For instance,printf("%.2s","abvdd") or printf("%.*s",2,"abvdd");
+
 7. Encountered STATUS_ACCESSED_VOLATION exception in windows + cygwin? I'd like to tell you that is not a programming error,it's produced by the tool you use.  I suggest you,if anything accured unexpectedly and were verified many times,then change another enviornment(host). For instance,I do not use cygwin anymore,I use ubuntu instead.
+
+8. Father,This...etc,these utilities for class programming  becomes powerful because C++(or just g++) will find a typename firstly in the inner scope.If there is a conficting name in the outter scope,then name in the inner scope is adapted.
+
+9. can you understand that 0>=-49986 == false? Anytime if you want to compare two numbers,make sure they have the same type and that type is what you desired.
+
+10. We should consider 'const' as a classification on all const and non-const methods,not just think of single methods.
+
+11. Had you ever used sizeof(arr) to directly calculate the size of arr?However that is almostly wrong,because the right way is sizeof(arr)/sizeof(arr[0])
+
+12. You cannot know a problem before you don't see it.
+
+13. I've made repeating mistakes on 'File name section' many times.Remember,the length of an entry is the length of the name plus 1.And the order btw memset and mdelete is very import,because the information of length is valid only before memset.
+
+14. Every class should necessary provide a default constructor.It's because that ,if a class holds another class,which will be retrived from the saved data(such as hard disk or the network),and to instantiate the base class,we must get to know those required arguments which will only be valid after the class instantiate,if we don't provide such default constructor,we cannot instantiate it. 
+
+15. Do not expect that 'bool' will return non-bool value(that means if you treat the value set of type bool as the same with type char,you will almost get error,because it will treat all non-false as true.There is only 2 values for type bool).
+
+16. If g++ complains about goto,try to move all definitions ahead of the first goto.
+
+17. Hard disk read/write error? You'd full the 512 Byte buffer throught 0x1f0,otherwise data will not be written to disk.

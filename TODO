@@ -1,23 +1,26 @@
 [*] == done	[-] == deprecated	[]  == proposed		[+] == doing
 
+
+[]	I think there is a unified way to manage cache-design(cahce level controls) style.
 []	Before this Sunday,write a brief document about how to use gcc/g++ compile system code.(How to write a system in c/c++)(2017-03-09 16:20:33 Thursday)
 [*]	Do not use -fpermissive,cause those information are very useful.
 		no -fpermissive forces you to:
 			1.use this-> on member(functions & variables)
 			2.use cast between compitable types
 			3.not using default argument in definition
-[]	It very urgent to develop the hard disk read-write functions cause the size of code is getting bigger and bigger,the maxium(66 sectors) is not going to be able to contain all of them.
+			4.do not use goto.
+[*]	It very urgent to develop the hard disk read-write functions cause the size of code is getting bigger and bigger,the maxium(66 sectors) is not going to be able to contain all of them.
 [*]	There is a rule called 'avoid using virtual'
 [*]	Use eclipse instead of any other editor such as sublime or notepad++,eclipse is the best and the most excellent.
 [*]	Remove any cpp file that does not have a coresponding header file.
 [*]	DO NOT use multiple implementation files,that means each header file should have at most only corresponding implementation file.For example,List.h had double implementation parts,'List.cpp' and 'SimpleMemoryManager.cpp',now they're combined into 'List.cpp'
 [*]	REMOVE any init method,cause the placement new can do that gracefully.
 [*]	remove member'size' of LinkedList in List.h
-[]	Correct the usage of macro CODE16/CODE32,for there is some code can be used under 64-bit,by cygwin.
-[+]	add LinearSpaceManager,which will only keep the free space and complete almost the same function that MemoryManager does.
-[]	use policy design style to replace the old extension design style(NOTE:this is and should be only used in Memory Allocation Policy)
-[]	set all types that used as boolean but stored with integer to char type.Such as 'allocable' in Memory.
-[]	leaving the dormitory,for people there can not work quietly.There is always someone that would encounter to interfer your work.
+[*]	Correct the usage of macro CODE16/CODE32,for there is some code can be used under 64-bit,by cygwin.
+[*]	add LinearSpaceManager,which will only keep the free space and complete almost the same function that MemoryManager does.
+[*]	use policy design style to replace the old extension design style(NOTE:this is and should be only used in Memory Allocation Policy)
+[*]	set all types that used as boolean but stored with integer or char type.Such as 'allocable' in Memory.
+[*]	leaving the dormitory,for people there can not work quietly.There is always someone that would encounter to interfer your work.
 []	use bit-structs with #pragma pack... or -fpack-struct=1 to completely redefine the CPU related structs
 []	add a new branch,named "stdc",and laterly a new branch "stdc++".To embed a c & c++ runtime
 []	printf() number()... series

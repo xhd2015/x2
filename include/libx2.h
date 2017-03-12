@@ -7,7 +7,7 @@ class Util{
 
 
 public:
-
+	static int printf(const char *fmt,...);
 #if defined(CODE16) || defined(CODE32)
     Util();
     ~Util();
@@ -50,8 +50,10 @@ public:
     AS_MACRO static void enterEs(int seg,int& temp);
     AS_MACRO static void leaveEs(int temp);
     AS_MACRO static void jmpDie();
-    AS_MACRO static void outb(int port,int data);
-    AS_MACRO static int inb(int port);
+    AS_MACRO static void outb(short port,char data);
+    AS_MACRO static void outw(short port,short data);
+    AS_MACRO static char inb(short port);
+    AS_MACRO static short inw(short port);
     AS_MACRO static void ltr(int sel);
     static void lidt(short len,int address);
     static void lgdt(short len,int address);
@@ -367,7 +369,7 @@ void Util::initTarget(void **target)
 __asm__ __volatile__("":"=c"(*(char**)target)::);
 }
 */
-void Util::outb(int port,int data)
+void Util::outb(short port,char data)
 {
     __asm__(
     "outb %%al,%%dx \n\t"
@@ -376,11 +378,31 @@ void Util::outb(int port,int data)
     :
     );
 }
-int Util::inb(int port)
+void Util::outw(short port,short data)
 {
-    int temp;
+    __asm__(
+    "outw %%ax,%%dx \n\t"
+    :
+    :"d"(port),"a"(data)
+    :
+    );
+}
+char Util::inb(short port)
+{
+    char temp;
     __asm__(
     "inb %%dx,%%al \n\t"
+    :"=a"(temp)
+    :"d"(port)
+    :
+    );
+    return temp;
+}
+short Util::inw(short port)
+{
+    short temp;
+    __asm__(
+    "inw %%dx,%%ax \n\t"
     :"=a"(temp)
     :"d"(port)
     :

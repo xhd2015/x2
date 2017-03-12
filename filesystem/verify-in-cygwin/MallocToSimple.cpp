@@ -27,9 +27,10 @@ MallocToSimple<T>::~MallocToSimple()
 template<class T>
 T *MallocToSimple<T>::getNew()
 {
-	//printf("in getNew of MallocToSimple\n");
+//	printf("in getNew of MallocToSimple\n");
 //	printf("sizeof(T)=%d,sizeof(mynode)=%d\n",sizeof(T),sizeof(TreeNode<MemoryDescriptor>));
 	return (T*)malloc(sizeof(T));
+//	return (T*) (new char[sizeof(T)]);
 //	TreeNode<MemoryDescriptor> *p=(TreeNode<MemoryDescriptor>*)malloc(sizeof(T));
 //	new (p) TreeNode<MemoryDescriptor>(MemoryDescriptor(0,0));
 //	p->setSon(NULL);

@@ -67,6 +67,90 @@ public:
     
 };
 
+/**
+ * CMOS中包含基本的磁盘信息,时间信息
+ *
+ * 应当全部是静态函数
+ *
+ */
+class IO_CMOS{
+protected:
+	IO_CMOS();
+	~IO_CMOS();
+public:
+
+
+};
+
+/**
+ * Very simple,just a demo of how hard disk is accessed
+ */
+class IO_HDD{
+protected:
+public:
+	typedef IO_HDD This;
+	//If use LBA28,then this is used
+	enum{
+		PORT_DATA=0x1f0,/*16 bit,data is read from/write to here*/
+		PORT_ERROR_CODE=0x1f1,
+		PORT_SECNUM=0x1f2,
+		PORT_SECSTART_0=0x1f3,
+		PORT_SECSTART_1=0x1f4,
+		PORT_SECSTART_2=0x1f5,
+		PORT_SECSTART_3=0x1f6/*the ending 4 bits of LBA28*/,
+		PORT_READ_COMMAND=0x1f7,PORT_WRITE_COMMAND=0x1f7,
+		PORT_STATUS = PORT_READ_COMMAND
+
+	};
+
+	IO_HDD(int hddNo,size_t secStart,unsigned char secNumber,int dstSeg,size_t dstOff);
+	IO_HDD();
+	~IO_HDD();
+	/**
+	 * hddNumber  = 0 ,master
+	 * 			  = 1 ,slave
+	 *  secStart must contains a valid LBA28
+	 */
+	void read();
+	INCOMPLETE void write();
+	AS_MACRO static bool	isBusy(char status);
+	AS_MACRO static bool	isReady(char status);
+	AS_MACRO static bool	isError(char status);
+	AS_MACRO static char readStatus();
+	AS_MACRO size_t getDstOff() const;
+	AS_MACRO void setDstOff(size_t dstOff);
+	AS_MACRO int getDstSeg() const;
+	AS_MACRO void setDstSeg(int dstSeg);
+	AS_MACRO int getHddNo() const;
+	AS_MACRO void setHddNo(int hddNo);
+	AS_MACRO bool isLbaMode() const;
+	AS_MACRO unsigned char getSecNumber() const;
+	AS_MACRO void setSecNumber(unsigned char secNumber);
+	AS_MACRO size_t getSecStart() const;
+	AS_MACRO void setSecStart(size_t secStart);
+
+protected:
+	AS_MACRO void writeSecNum();
+	AS_MACRO void writeSecStart();
+	AS_MACRO void requestRead();
+	AS_MACRO void requestWrite();
+	void readData();
+	AS_MACRO void waitUntilReady();
+	void writeData();
+
+	int hddNo;
+	bool LBAMode;
+	size_t secStart;
+	unsigned char secNumber;
+	int dstSeg;
+	size_t dstOff;
+
+};
+
+class IO_Floppy{
+
+};
+
 class Keyboard{
 public:
     const static int PORT_DATA,PORT_CONTROL,PORT_PPI;
@@ -128,6 +212,9 @@ protected:
     
     
 };
+
+//================Function Macros
+//=========class : Keyboard
 int Keyboard::isBusy()
 {
     return Util::inb(Keyboard::PORT_CONTROL) & 0x2;
@@ -149,6 +236,104 @@ void Keyboard::disable()
 {
     int a=Util::inb(Keyboard::PORT_PPI);
     Util::outb(Keyboard::PORT_PPI,a | 0x80);
+}
+
+
+//========class :IO_HDD
+bool  IO_HDD::isBusy(char status)
+{
+	return (status & 0x80);
+}
+
+bool IO_HDD::isReady(char status)
+{
+	return (status & 0x8);
+}
+
+bool IO_HDD::isError(char status)
+{
+	return (status & 0x1);
+}
+
+char IO_HDD::readStatus()
+{
+	return Util::inb(This::PORT_STATUS);
+}
+
+void  IO_HDD::writeSecNum()
+{
+	Util::outb(This::PORT_SECNUM,this->secNumber);
+}
+
+void IO_HDD::writeSecStart() {
+	Util::outb(This::PORT_SECSTART_0, (char)this->secStart);
+	Util::outb(This::PORT_SECSTART_1, (char)(this->secStart >> 8));
+	Util::outb(This::PORT_SECSTART_2, (char)(this->secStart >> 16));
+	Util::outb(This::PORT_SECSTART_3, ((char)(this->secStart >> 24) & (0xf) )|
+				(( this->LBAMode & 0x1) <<6)|
+				((this->hddNo & 0x1) << 4) |
+				0xa0
+	);
+}
+void IO_HDD::requestRead()
+{
+	Util::outb(This::PORT_READ_COMMAND, 0x20);
+}
+void IO_HDD::requestWrite()
+{
+	Util::outb(This::PORT_WRITE_COMMAND, 0x30);
+}
+void IO_HDD::waitUntilReady()
+{
+	char status;//=This::readStatus();
+	while(true)
+	{
+		status=This::readStatus();
+		if(!This::isBusy(status) && This::isReady(status))break;
+	}
+}
+size_t IO_HDD::getDstOff() const {
+	return dstOff;
+}
+
+void IO_HDD::setDstOff(size_t dstOff) {
+	this->dstOff = dstOff;
+}
+
+int IO_HDD::getDstSeg() const {
+	return dstSeg;
+}
+
+void IO_HDD::setDstSeg(int dstSeg) {
+	this->dstSeg = dstSeg;
+}
+
+int IO_HDD::getHddNo() const {
+	return hddNo;
+}
+
+void IO_HDD::setHddNo(int hddNo) {
+	this->hddNo = hddNo;
+}
+
+bool IO_HDD::isLbaMode() const {
+	return LBAMode;
+}
+
+unsigned char IO_HDD::getSecNumber() const {
+	return secNumber;
+}
+
+void IO_HDD::setSecNumber(unsigned char secNumber) {
+	this->secNumber = secNumber;
+}
+
+size_t IO_HDD::getSecStart() const {
+	return secStart;
+}
+
+void IO_HDD::setSecStart(size_t secStart) {
+	this->secStart = secStart;
 }
 #endif //CODE32
 

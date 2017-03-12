@@ -138,7 +138,7 @@ public:
 
 
     void freeNode(ListNode<T> * node);//done
-    void free();//free this list,but not destruct,that means not including root & last              done
+    void free();//free this list,(equals to destruct) that means free all,then set root&last as NULL.   done
     void freeNext(ListNode<T> *t);//forward list free,begin with this                 done
     void freePrevious(ListNode<T> *t);//backward list free,begin with This            done
     
@@ -220,10 +220,13 @@ public:
     TreeNode(const T& data,TreeNode<T>* father=NULL,TreeNode<T>* son=NULL,TreeNode<T>* next=NULL,TreeNode<T>* previous=NULL);
     ~TreeNode();
 
-    TreeNode<T>* setSon(TreeNode<T>* son);//done
-    TreeNode<T>* setFather(TreeNode<T>* father);//done
-    TreeNode<T>* getSon()const; //done
-    TreeNode<T>* getDirectFather()const;//direct father,done
+    AS_MACRO TreeNode<T>* setSon(TreeNode<T>* son);//done
+    AS_MACRO TreeNode<T>* setFather(TreeNode<T>* father);//done
+    AS_MACRO TreeNode<T>* getSon()const; //done
+    AS_MACRO TreeNode<T>* getDirectFather()const;//direct father,done
+    AS_MACRO bool		hasSon()const;
+    AS_MACRO bool 		hasFather()const;
+
     void		insertSon(TreeNode<T>* son);
     void		insertFather(TreeNode<T>* father);
     TreeNode<T>*	removeSon();
@@ -404,4 +407,45 @@ size_t  SimpleMemoryManager<T>::getNodeSize()
 	return sizeof(Node);
 }
 
+//===========class TreeNode
+
+template<class T>
+  TreeNode<T>* TreeNode<T>::setSon(TreeNode<T>* son)
+  {
+#if defined(CODE64)
+	//printf("setSon is : %x \n",son);
+#endif
+  	this->son=son;
+  }
+template<class T>
+TreeNode<T>* TreeNode<T>::setFather(TreeNode<T>* father) {
+    this->father=father;
+}
+
+template<class T>
+TreeNode<T>* TreeNode<T>::getSon() const{
+#if defined(CODE64)
+//	printf("gettSon \n");
+#endif
+	return son;
+}
+
+template<class T>
+TreeNode<T>* TreeNode<T>::getDirectFather()const {//direct father
+#if defined(CODE64)
+//	printf("call direct,this is %x,father is %x\n",this,this->father);
+#endif
+    return father;
+}
+
+template<class T>
+bool		 TreeNode<T>::hasSon()const
+{
+	return this->son!=NULL;
+}
+template<class T>
+bool 		 TreeNode<T>::hasFather()const
+{
+	return this->father!=NULL;
+}
 #endif //List_h__

@@ -10,16 +10,17 @@ public:
     Test();
     ~Test();
     
-    void testQueue();
-    void testList();
-    void testMemory();
+//    void testQueue();
+//    void testList();
+//    void testMemory();
+    void testIO_HDD();
     void run();
 
-    static void dumpMemoryData(const MemoryDescriptor & data);
-    static void dumpMemoryData(const int& data);
-    
-    static void dumpSMM( SimpleMemoryManager<TreeNode<MemoryDescriptor> > *smm);
-	static void dumpMM( MemoryManager<SimpleMemoryManager> &mm);
+//    static void dumpMemoryData(const MemoryDescriptor & data);
+//    static void dumpMemoryData(const int& data);
+//
+//    static void dumpSMM( SimpleMemoryManager<TreeNode<MemoryDescriptor> > *smm);
+//	static void dumpMM( MemoryManager<SimpleMemoryManager> &mm);
 
 protected:
 #if defined(CODE32)

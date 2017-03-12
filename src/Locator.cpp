@@ -1,7 +1,9 @@
 
 #include <Locator.h>
 #include <libx2.h>
-
+#if defined(CODE32)
+	__asm__(".code32 \n\t");
+#endif
 //=========template instantiate
 #ifdef CODE32
 
@@ -48,20 +50,20 @@ template <class _Source,int _HowStart,int _HowLength,int _HowAllocable>
 bool SourceLocator<_Source,_HowStart,_HowLength,_HowAllocable>::tellLocation(const _Source& t,Int2Type<Locator<_Source>::IGNORE>)const
 {
 #if defined(CODE64)
-	printf("in tellLocation(ignore allocable),_HowStart==%d  _HowLength=%d sign(start diff(%x-%x))=%d  sign(limit diff(%x-%x))=%d\n",
-			_HowStart,_HowLength,
-			t.getStart(),
-			this->p->getStart(),
-			Util::sign(t.getStart() - this->p->getStart()),
-			t.getLimit(),
-			this->p->getLimit(),
-			Util::sign(t.getLimit() - this->p->getStart())
-	);
+//	printf("in tellLocation(ignore allocable),_HowStart==%d  _HowLength=%d sign(start diff(%x-%x))=%d  sign(limit diff(%x-%x))=%d\n",
+//			_HowStart,_HowLength,
+//			t.getStart(),
+//			this->p->getStart(),
+//			Util::sign(t.getStart() - this->p->getStart()),
+//			t.getLimit(),
+//			this->p->getLimit(),
+//			Util::sign(t.getLimit() - this->p->getStart())
+//	);
 #endif
 	if(_HowStart!=Locator<_Source>::IGNORE && Util::sign(t.getStart() - this->p->getStart()) != _HowStart)return false;
 	if(_HowLength!=Locator<_Source>::IGNORE && Util::sign(t.getLimit() - this->p->getStart()) != _HowLength)return false;
 #if defined(CODE64)
-	printf("return true\n");
+//	printf("return true\n");
 #endif
 	return true;
 }

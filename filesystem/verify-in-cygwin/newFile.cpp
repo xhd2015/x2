@@ -12,14 +12,21 @@
 //suppose the disk image is :
 //		hdd.img
 #define HDD_FILE "hdd.img"
-
-int main()
+//run like '$thisprog $filename $spanSec
+int main(int argc,char *argv[])
 {
 	X2fsUtil xfu(HDD_FILE);
-	xfu.createFileInRoot("kill.me", 2);
-//	printf("end create file\n");
+	assert(argc>=3);
+	printf("file = %s, secSpan = %d\n",argv[1],atoi(argv[2]));
+	if(xfu.createFileInRoot(argv[1],(size_t) atoi(argv[2])))
+	{
+		printf("create successful \n");
+	}else{
+		printf("create failed \n");
+	}
+//	printf("end create file : %s\n",argv[1]);
 	xfu.listRoot();
-	printf("end listRoot \n");
+//	printf("end listRoot \n");
 	xfu.flush();
 //	printf("end flush \n");
 }

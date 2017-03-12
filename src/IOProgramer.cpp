@@ -194,4 +194,74 @@ const char* Keyboard::getAsciiChar(unsigned char code)
         return "Exceed.";
 }
 
+IO_HDD::IO_HDD(int hddNo,size_t secStart,unsigned char secNumber,int dstSeg,size_t dstOff) :
+hddNo(hddNo),secStart(secStart),secNumber(secNumber),dstSeg(dstSeg),dstOff(dstOff),
+LBAMode(true)
+{
+}
+
+IO_HDD::~IO_HDD() {
+}
+
+void  IO_HDD::read()
+{
+	this->writeSecNum();
+	this->writeSecStart();
+	this->requestRead();
+	this->waitUntilReady();
+	this->readData();
+}
+
+void IO_HDD::write()
+{
+	this->writeSecNum();
+	this->writeSecStart();
+	this->requestWrite();
+	this->waitUntilReady();
+	this->writeData();
+}
+
+
+void IO_HDD::readData()
+{
+	int temp;
+	Util::enterDs(this->dstSeg, temp);
+	for(unsigned char i=0;i<this->secNumber;i++)
+	{
+		for(int j=0;j < 512;j+=2)
+		{
+			*(short*)(this->dstOff + i*512 + j)=Util::inw(This::PORT_DATA);
+		}
+		this->waitUntilReady();
+	}
+	Util::leaveDs(this->dstSeg, temp);
+
+}
+
+/**
+ * Only when the buffer is full,data will be transfered to disk
+ */
+void IO_HDD::writeData()
+{
+	int temp;
+//	Util::printStr("writting2 \n");
+//	Util::printStr((char*)this->dstOff);
+//	Util::printStr("\n");
+	Util::enterDs(this->dstSeg, temp);
+
+	//Utilisation,from Linux 0.11
+	__asm__ __volatile__("cld;rep;outsw\n\t"::"d"(This::PORT_DATA),"S"(this->dstOff),"c"(this->secNumber * 512/2):);
+//
+//	for(unsigned char i=0;i<this->secNumber;i++)
+//	{
+//		for(int j=0;j < 512;j+=2)
+//		{
+//			Util::outw(This::PORT_DATA,*(short*)(this->dstOff + i*512 + j));
+//		}
+//		this->waitUntilReady();
+//	}
+
+	Util::leaveDs(this->dstSeg, temp);
+
+}
 #endif

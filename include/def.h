@@ -29,6 +29,9 @@ typedef unsigned int size_t;
 #define DEVEL_AUTHOR(author...)    /*who is the author*/
 #define DEVEL_DEP(deps...)          /*depend on what?*/
 
+//===========数学宏
+#define arrsizeof(arr) (sizeof(arr)/sizeof((arr)[0]))
+
 
 //====字符串宏
 #define __STR(x) #x
@@ -41,8 +44,13 @@ typedef unsigned int size_t;
 #define DEPRECATED __attribute__((deprecated))
 #define NORETURN __attribute__((noreturn))
 
+
 //定义如果一个功能还没有完全实现，就不要使用
 #define INCOMPLETE __attribute__((deprecated))
+#define UNTESTED __attribute__((deprecated))
+#define TEMPORARY	__attribute__((deprecated))  /*TEMPORARY means that a functoin does not complete all functions as its name
+	denotes,it's just for test
+*/
 
 //==进入死循环
 #define JMP_DIE() __asm__("jmp . \n\t")

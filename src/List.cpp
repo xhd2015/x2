@@ -1,6 +1,9 @@
 
 #include <List.h>
 #include <Memory.h>
+#if defined(CODE32)
+	__asm__(".code32 \n\t");
+#endif
 
 //==========实例化模板
 ////===========模板声明区
@@ -12,13 +15,13 @@
 //template class SimpleMemoryManager<ListNode<int> >;
 //template class SimpleMemoryManager<TreeNode<MemoryDescriptor> >;
 #ifdef CODE32
-	template class ListNode<int>;
-	template class ListNode<MemoryDescriptor>;
-	template class LinkedList<int,SimpleMemoryManager>;
-	template class Tree<MemoryDescriptor,SimpleMemoryManager>;
-	template class TreeNode<MemoryDescriptor>;
-	template class SimpleMemoryManager<ListNode<int> >;
-	template class SimpleMemoryManager<TreeNode<MemoryDescriptor> >;
+//	template class ListNode<int>;
+//	template class ListNode<MemoryDescriptor>;
+//	template class LinkedList<int,SimpleMemoryManager>;
+//	template class Tree<MemoryDescriptor,SimpleMemoryManager>;
+//	template class TreeNode<MemoryDescriptor>;
+//	template class SimpleMemoryManager<ListNode<int> >;
+//	template class SimpleMemoryManager<TreeNode<MemoryDescriptor> >;
 #elif defined(CODE64)
 #include <cstdio>
 	#include "/home/13774/x2-devel/filesystem/verify-in-cygwin/File.h"
@@ -97,7 +100,7 @@ typename SimpleMemoryManager<T>::Node *SimpleMemoryManager<T>::getNewNode()
         }
     }
 #if defined(CODE64)
-    printf("returned\n");
+//    printf("returned\n");
 #endif
     return rt;
 }
@@ -237,7 +240,7 @@ smm(smm)
 template<class T,template<class> class _Allocator>
 LinkedList<T,_Allocator >::~LinkedList()
 {
-    
+    this->free();
 }
 template<class T,template<class> class _Allocator>
 void LinkedList<T,_Allocator >::free()
@@ -246,8 +249,8 @@ void LinkedList<T,_Allocator >::free()
 
     this->freeNext(this->root);
 
-    this->root->setNext(NULL);
-    this->last->setNext(NULL);
+    this->root=NULL;
+    this->last=NULL;
 
 }
 template<class T,template<class> class _Allocator>
@@ -376,7 +379,7 @@ template<class T,template<class> class _Allocator>
 void    LinkedList<T,_Allocator >::remove(ListNode<T>* p)
 {
 #if defined(CODE64)
-    	printf("p->previous=%x,root=%x\n",p->getPrevious(),this->root);
+//    	printf("p->previous=%x,root=%x\n",p->getPrevious(),this->root);
 #endif
     if(!p || p==root || p==last)return;
     if(p==this->getLast())
@@ -384,7 +387,7 @@ void    LinkedList<T,_Allocator >::remove(ListNode<T>* p)
         remove();
     }else{
 #if defined(CODE64)
-    	printf("p->previous=%x,root=%x\n",p->getPrevious(),this->root);
+//    	printf("p->previous=%x,root=%x\n",p->getPrevious(),this->root);
 #endif
         p->getPrevious()->removeNext();    
     }
@@ -426,6 +429,7 @@ size_t   LinkedList<T,_Allocator >::getSize()
 		size++;
 		p=p->getNext();
 	}
+	return size;
 }
 template<class T,template<class> class _Allocator>
 ListNode<T>*    LinkedList<T,_Allocator >::removeHead()
@@ -470,32 +474,63 @@ ListNode<_Locateable> *LocateableLinkedList<_Locateable,_HowAllocated,_Allocator
 {
     if(!startNode||len==0)return NULL;
 #if defined(CODE64)
-    printf("findFirstStartLen for (%x,%x)\n",start,len);
+//    printf("findFirstStartLen for (%x,%x)\n",start,len);
 #endif
     ListNode<_Locateable>* p=startNode;
     _Locateable tloc(start,len);
     SourceLocator<_Locateable,Locator<_Locateable>::LESS,Locator<_Locateable>::IGNORE,Locator<_Locateable>::IGNORE> lessLocator(tloc);
-
+#if defined(CODE64)
+//    	printf("1 : p is(%x - %x) ,tloc is (%x - %x)\n ",p->getData().getStart(),p->getData().getStart()+p->getData().getLimit(),
+//    			tloc.getStart(),
+//				tloc.getStart()+tloc.getLimit()
+//    			);
+#endif
     while(p && lessLocator.tellLocation(p->getData()))
     	{
+#if defined(CODE64)
+//    	printf("2 : p is(%x - %x) ,tloc is (%x - %x)\n ",p->getData().getStart(),p->getData().getStart()+p->getData().getLimit(),
+//    			tloc.getStart(),
+//				tloc.getStart()+tloc.getLimit()
+//    			);
+#endif
     		if(p->getData().contains(tloc))
     		{
     			break;
+    		}else{
+    			p=This::nextAllocable(p);
     		}
-    		p=This::nextAllocable(p);
     	}
+#if defined(CODE64)
+//    	printf("3 : p is(%x - %x) ,tloc is (%x - %x)\n ",p->getData().getStart(),p->getData().getStart()+p->getData().getLimit(),
+//    			tloc.getStart(),
+//				tloc.getStart()+tloc.getLimit()
+//    			);
+#endif
    while(p && !p->getData().contains(tloc))
     {
+#if defined(CODE64)
+//    	printf("4 : p is(%x - %x) ,tloc is (%x - %x)\n ",p->getData().getStart(),p->getData().getStart()+p->getData().getLimit(),
+//    			tloc.getStart(),
+//				tloc.getStart()+tloc.getLimit()
+//    			);
+//    	printf("p contains tloc ? %d \n",p->getData().contains(tloc));
+#endif
     	p=This::nextAllocable(p);
     }
 #if defined(CODE64)
-    printf("end of findFirstStartLen,result is ");
-    if(p==NULL)
-    {
-    	printf("NULL\n");
-    }else{
-    	printf("(%x,%x) \n",p->getData().getStart(),p->getData().getLimit());
-    }
+//    	printf("5 : p is(%x - %x) ,tloc is (%x - %x)\n ",p->getData().getStart(),p->getData().getStart()+p->getData().getLimit(),
+//    			tloc.getStart(),
+//				tloc.getStart()+tloc.getLimit()
+//    			);
+#endif
+#if defined(CODE64)
+//    printf("end of findFirstStartLen,result is ");
+//    if(p==NULL)
+//    {
+//    	printf("NULL\n");
+//    }else{
+//    	printf("(%x,%x) \n",p->getData().getStart(),p->getData().getLimit());
+//    }
 #endif
     return p;
 }
@@ -590,26 +625,6 @@ inline TreeNode<T>::~TreeNode() {
 }
 
 template<class T>
-TreeNode<T>* TreeNode<T>::setFather(TreeNode<T>* father) {
-    this->father=father;
-}
-
-template<class T>
-TreeNode<T>* TreeNode<T>::getSon() const{
-#if defined(CODE64)
-//	printf("gettSon \n");
-#endif
-	return son;
-}
-
-template<class T>
-TreeNode<T>* TreeNode<T>::getDirectFather()const {//direct father
-#if defined(CODE64)
-//	printf("call direct,this is %x,father is %x\n",this,this->father);
-#endif
-    return father;
-}
-template<class T>
 void TreeNode<T>::insertSon(TreeNode<T>* son) {
 	if(son!=NULL)
 	{
@@ -680,14 +695,6 @@ TreeNode<T>* TreeNode<T>::removeFather() {
 }
 
 template<class T>
-  TreeNode<T>* TreeNode<T>::setSon(TreeNode<T>* son)
-  {
-#if defined(CODE64)
-	//printf("setSon is : %x \n",son);
-#endif
-  	this->son=son;
-  }
-template<class T>
 TreeNode<T>* TreeNode<T>::getParent()const {//往previous一直遍历，直到是跟，然后返回跟的father
 	TreeNode<T> *p=(TreeNode<T>*)this;
 	while(p->hasPrevious())
@@ -744,8 +751,6 @@ void         Tree<T,_Allocator>::free(TreeNode<T> *root)
     }//OK,all the sons are free
     smm->withdraw(root);
   }
-
-
 }
 template<class T,template <class> class _Allocator>
 TreeNode<T>* Tree<T,_Allocator>::getHead()const {

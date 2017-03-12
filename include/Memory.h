@@ -16,6 +16,7 @@ void operator delete  (void*, void*);
 void operator delete[](void*, void*);
 #elif defined(CODE64)
 		#include <new>
+#include <cstdio>
 #endif
 /**
 *   This is simple enough,and should not  be modified any longer.
@@ -76,24 +77,34 @@ protected:
 template <class _LinearSourceDescriptor,template <class> class _NodeAllocator>
 class LinearSourceManager:public LocateableLinkedList<_LinearSourceDescriptor,Locator<_LinearSourceDescriptor>::DISCARD,_NodeAllocator >{
 public:
+	typedef LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator> This;
+    typedef LocateableLinkedList<_LinearSourceDescriptor,Locator<_LinearSourceDescriptor>::DISCARD,_NodeAllocator > Father;
+	typedef ListNode<_LinearSourceDescriptor> NodeType;
 	LinearSourceManager();
 public:
-    typedef LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator > This;
-public:
-    typedef LocateableLinkedList<_LinearSourceDescriptor,Locator<_LinearSourceDescriptor>::DISCARD,_NodeAllocator > Father;
     LinearSourceManager(_NodeAllocator< ListNode<_LinearSourceDescriptor> >*smm,size_t start,size_t size);//done
     ~LinearSourceManager();//done
     
     AS_MACRO const _LinearSourceDescriptor & getSpace()const;
+
+    //These are for continuous memory allocation
     void* mnew(size_t start,size_t size);//done
     void* mnew(size_t size);//done
-
+    void* extend(size_t start,size_t size,int extsize,char *realBase=NULL,bool moveData=false);
     void mdelete(void* p,size_t size);//done
 
     /**
     * Currently,this manager does not support withdrawing a pointer without size,so this is deprecated or incomplete
     */
     DEPRECATED void mdelete(void *p);//done 
+
+    //These are for linked memory allocation
+    /**
+     * The 'eachSectionExtraSize' is the extra size for each section.
+     */
+    bool mnewLinked(size_t size,LinkedList<LinearSourceDescriptor,_NodeAllocator> &list,size_t eachSectionExtraSize=0);//list must be empty
+    void												mdeleteLinked(LinkedList<LinearSourceDescriptor,_NodeAllocator> &ist);
+
 
 protected:
     _LinearSourceDescriptor  allocOutNode(ListNode<_LinearSourceDescriptor> *avlNode,size_t start,size_t len);//done
@@ -134,8 +145,9 @@ protected:
 
 template <template <class> class _DescriptorAllocator>
 class MemoryManager:public Tree<MemoryDescriptor,_DescriptorAllocator>{
-protected:
+public:
 	typedef MemoryManager<_DescriptorAllocator> This;
+	typedef TreeNode<MemoryDescriptor>			NodeType;
 public:
     MemoryManager(_DescriptorAllocator<TreeNode<MemoryDescriptor> > *smm);//done
     MemoryManager(_DescriptorAllocator<TreeNode<MemoryDescriptor> > *smm,size_t start,size_t len,bool fatherAllocable=1);
@@ -152,6 +164,16 @@ public:
     //operator new and delete
     void* mnew(size_t start,size_t size);//done
     void* mnew(size_t size);//done
+    /*
+     * if returned true,then the it worked
+     * else not worked,nothing effected
+     *
+     * Note: if extsize = 0,do nothing
+     * 		else if extsize < 0,trim the original allocated space,if extsize+size=0,then delete the original memory
+     * 		else realloc new space.
+     * Note: if realBase=0,it still works.The realBase is used to memory move.
+     */
+    void*  extend(size_t start,size_t size,int extsize,char *realBase=NULL,bool moveData=false);//similar to realloc
 
     void mdelete(void* p,size_t size);//查找p开始的连续个大小，看是否能满足要求,使用locateForDelete,withdrawNode协同完成，done
     void mdelete(void *p);//done
@@ -178,6 +200,13 @@ public:
 protected:
     TreeNode<MemoryDescriptor> * allocOutNode(TreeNode<MemoryDescriptor> *avlNode,size_t start,size_t len);//done
     void withdrawNode(TreeNode<MemoryDescriptor> *exactNode);//done
+    /**
+     * Note: extsize is size_t,it cannot be less than 0.if it is 0,then returned false.
+     * if not found,return false
+     * 	if found at original,return true
+     * 	if found at somewhere not corrupted with the original,return true+1
+     */
+    char findExtend(size_t start,size_t size,size_t extsize,TreeNode<MemoryDescriptor> * &rtnode)const;
     
 protected:
     //SimpleMemoryManager<TreeNode<MemoryDescriptor> > *smm;  //the base class already has one
@@ -223,7 +252,11 @@ bool LinearSourceDescriptor::contains(const LinearSourceDescriptor& b)const
 }
 bool LinearSourceDescriptor::contains(size_t start,size_t limit)const
 {
-	return (this->start<=start)&&(this->start-start>=limit-this->limit);
+#if defined(CODE64)
+//	printf("this->start-start>=limit-this->limit   : (%d >= %d = %d)\n",this->start-start,limit-this->limit,(int)(this->start-start)>=(int)(limit-this->limit));
+#endif
+	return (this->start<=start)&&((int)(this->start-start)>=(int)(limit-this->limit));
+
 }
 bool LinearSourceDescriptor::operator==(const LinearSourceDescriptor& b)const
 {
@@ -276,7 +309,6 @@ const _LinearSourceDescriptor & LinearSourceManager<_LinearSourceDescriptor,_Nod
 {
 	return this->space;
 }
-
 
 
 #endif //Memory_h__

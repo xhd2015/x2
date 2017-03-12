@@ -60,7 +60,7 @@ help:
 	echo	make dump16 f=main_16.bimg
 	echo	make dump opt="-m i8086" file=main_16.bimg
 dump:
-	@objdump -D $(GEN32)/main.img|less
+	@objdump -D $(GEN32)/main.img -m i386|less
 dump16:
 	@objdump -D $(GEN16)/main.img -m i8086 | less
 start:

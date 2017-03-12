@@ -7,11 +7,29 @@
 
 #include <libx2.h>
 #include <def.h>
+
+#if defined(CODE64)
+#include <cstdio>
+#include <cstdarg>
+#endif
 //==============模板实例化
 //===在此声明实例化
 #ifdef CODE32
     template class Queue<unsigned char>;
 #endif
+
+int Util::printf(const char *fmt,...)
+{
+#if defined(CODE64)
+	va_list ap;
+	va_start(ap,fmt);
+	int n=vprintf(fmt,ap);
+	va_end(ap);
+	return n;
+#elif defined(CODE32) || defined(CODE16)
+	//I don't know what todo
+#endif
+}
 
 #if defined(CODE32)||defined(CODE16)
 
@@ -240,9 +258,9 @@ char Util::getCPL()
 {
 	char save;
    __asm__ __volatile__(
-    "mov %cs,%ax \n\t"
-    "and $0b11,%al \n\t"
-		   :"=a"(save)
+    "mov %%cs,%%ax \n\t"
+    "and $0b11,%%al \n\t"
+	:"=a"(save)
    );
    return save;
 }
@@ -262,7 +280,7 @@ int Util::getEflags()
 	int save;
     __asm__ __volatile__(
      "pushfl \n\t"
-     "popl %eax \n\t"
+     "popl %%eax \n\t"
     		:"=a"(save)
     );
     return save;
@@ -271,6 +289,8 @@ int Util::getEflags()
 #endif //CODE32
 #endif //CODE32 || CODE16
 
+
+#if defined(CODE32)||defined(CODE64)
 int Util::digitToStr(char* save,unsigned int space,int n)
 {
     int sign=1;
@@ -385,7 +405,7 @@ int Util::sign(int n)
     if(n==0)return 0;
     return 1;
 }
-
+#endif //CODE32 || CODE64
 
 #if defined(CODE32)
 //=================class : SimpleCharRotator

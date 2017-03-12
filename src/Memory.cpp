@@ -15,9 +15,10 @@ __asm__(".code32 \n\t");
 
 //=============template ininstantiate
 #if defined(CODE32)
-	template class MemoryManager<SimpleMemoryManager>;
+//	template class MemoryManager<SimpleMemoryManager>;
 #elif defined(CODE64)
 #include <cstdio>
+#include <cstring>
 #include "/home/13774/x2-devel/filesystem/verify-in-cygwin/MallocToSimple.h"
 	template class MemoryManager<MallocToSimple>;
 	template class LinearSourceManager<LinearSourceDescriptor, MallocToSimple>;
@@ -102,12 +103,16 @@ template<template <class> class _DescriptorAllocator>
 TreeNode<MemoryDescriptor> * MemoryManager<_DescriptorAllocator>::allocOutNode(TreeNode<MemoryDescriptor> *avlNode,size_t start,size_t len)
 {
 
+	Util::printf("in mm allocOut for %x,%x\n",start,len);
     // Test::dumpMemoryData(avlNode->getData());
     TreeNode<MemoryDescriptor> *newnode=NULL;
     if(avlNode)
     {
         size_t len1=(size_t)(start-avlNode->getData().getStart());
         size_t len2=(size_t)(avlNode->getData().getLimit() - len - len1);
+#if defined(CODE64)
+      printf("len1=%x,len2=%x\n",len1,len2);
+#endif
 
         /*
         char saver[10];
@@ -137,10 +142,18 @@ TreeNode<MemoryDescriptor> * MemoryManager<_DescriptorAllocator>::allocOutNode(T
             newnode->getData().setStart(start);
             newnode->getData().setLimit(len);
             newnode->getData().setAllocable(false);
+#if defined(CODE64)
+            printf("newnode is %x,%x,%d\n",newnode->getData().getStart(),newnode->getData().getLimit(),newnode->getData().isAllocable());
+#endif
         }
         if(len2>0)//后面有剩余
         {
-            TreeNode<MemoryDescriptor> *newnodeEnd= new (this->smm->getNew()) TreeNode<MemoryDescriptor>(MemoryDescriptor(start+len,len2));
+        	Util::printf("before smm new\n");
+        	TreeNode<MemoryDescriptor> *newnodeEnd=this->smm->getNew();
+        	Util::printf("after smm new \n");
+            new (newnodeEnd) TreeNode<MemoryDescriptor>(MemoryDescriptor(start+len,len2));
+            Util::printf("newnodeend is %x,%x,%d\n",newnodeEnd->getData().getStart(),newnodeEnd->getData().getLimit(),newnodeEnd->getData().isAllocable());
+
             newnode->insertNext(newnodeEnd);
         }else{//没有就不进行任何操作
 
@@ -166,6 +179,7 @@ void MemoryManager<_DescriptorAllocator>::withdrawNode(TreeNode<MemoryDescriptor
         this->free(p);
         p=(TreeNode<MemoryDescriptor>*)p->getNext();
     }
+//    Util::printf("in mm,withdrawNode \n");
     exactNode->setSon(NULL);//free完毕
 
     //开始合并
@@ -206,6 +220,31 @@ void MemoryManager<_DescriptorAllocator>::withdrawNode(TreeNode<MemoryDescriptor
     }
 
 }
+template<template<class > class _DescriptorAllocator>
+char MemoryManager<_DescriptorAllocator>::findExtend(size_t start,
+		size_t size, size_t extsize,TreeNode<MemoryDescriptor> * &rtnode) const
+{
+//	Util::printf("in findExtend,start=%x,size=%x,extsize=%d\n",start,size,extsize);
+	if(extsize==0)return false;
+	TreeNode<MemoryDescriptor>* found=This::findFirstStart(this->getHead(), start + size, extsize);/*starts at start or upper,hold size or more*/
+	if(found && (found->getData().getStart() - start == size))//exactly starts at start + size
+	{
+		rtnode=found;
+//		Util::printf("in findExtend,find at tail,start=%x,size=%x,extsize=%d\n",start,size,extsize);
+		return 1;
+	}else{//NULL or not extensible
+		found=This::findFirstLen(this->getHead(),size+extsize);
+		if(found)
+		{
+			rtnode=found;
+//			Util::printf("in findExtend,find for new len %x,found at %x,%x\n",size+extsize,found->getData().getStart(),found->getData().getLimit());
+			return 2;
+		}else{
+			return 0;
+		}
+	}
+
+}
 
 DEVEL_UNTESTED(Douglas_Fulton_Shaw)
 template<template <class> class _DescriptorAllocator>
@@ -232,7 +271,7 @@ MemoryManager<_DescriptorAllocator> MemoryManager<_DescriptorAllocator>::allocFr
     {
         spaces.setNull();//ok
     }else{
-        copyOnAllocation(this->getHead());//保证复制了父节点
+        this->copyOnAllocation(this->getHead());//保证复制了父节点
         TreeNode<MemoryDescriptor> *firstNode=MemoryManager<_DescriptorAllocator>::findFirstLen(this->getHead(),len);//ok,the information of head is ignored,it's full information is stored in it's sons
         spaces.setHead(allocOutNode(firstNode,firstNode->getData().getStart(),len));//either not found or found,set the new manager
     }
@@ -242,10 +281,21 @@ MemoryManager<_DescriptorAllocator> MemoryManager<_DescriptorAllocator>::allocFr
 template<template <class> class _DescriptorAllocator>
 void* MemoryManager<_DescriptorAllocator>::mnew(size_t start,size_t size)
 {
+
+    this->copyOnAllocation(this->getHead());//保证复制了父节点
     TreeNode<MemoryDescriptor> *found=MemoryManager<_DescriptorAllocator>::findFirstStart(this->getHead(),start,size);
+#if defined(CODE64)
+//    printf("MemoryManager mnew\n");
+//    if(found==NULL)
+//    {
+//    	printf("found NULL\n");
+//    }else{
+//    	printf("found is %x,%x\n",found->getData().getStart(),found->getData().getLimit());
+//    }
+#endif
     if(found)
     {
-        TreeNode<MemoryDescriptor> *alloced = allocOutNode(found,found->getData().getStart(),size);
+        TreeNode<MemoryDescriptor> *alloced = allocOutNode(found,start,size);
         if(alloced)
         {
             return (void*)(alloced->getData().getStart());
@@ -256,6 +306,8 @@ void* MemoryManager<_DescriptorAllocator>::mnew(size_t start,size_t size)
 
 template<template <class> class _DescriptorAllocator>
 void* MemoryManager<_DescriptorAllocator>::mnew(size_t size) {
+
+    this->copyOnAllocation(this->getHead());//保证复制了父节点
     TreeNode<MemoryDescriptor> *found=MemoryManager<_DescriptorAllocator>::findFirstLen(this->getHead(),size);
     if(found)
     {
@@ -267,6 +319,67 @@ void* MemoryManager<_DescriptorAllocator>::mnew(size_t size) {
     }
     return NULL;
 }
+template<template <class> class _DescriptorAllocator>
+void*   MemoryManager<_DescriptorAllocator>::extend(size_t start,size_t size,int extsize,char *realBase,bool moveData)
+{
+//	Util::printf("extend arg: start,size,extsize = %d,%d,%d\n",start,size,extsize);
+	if(extsize==0)return (char*)start;
+    this->copyOnAllocation(this->getHead());//保证复制了父节点
+    TreeNode<MemoryDescriptor> *found;
+    if(extsize < 0)
+    {
+    	found=This::locateForDelete(this->getHead(), start, size, false);
+    	if(!found)
+    	{
+    		return NULL;//can not find the node
+    	}else{
+    		if(size + extsize == 0)
+    		{
+    			this->withdrawNode(found);
+    		}else{
+        		found->getData().setLimit(size + extsize);
+    		}
+			return (char*)start;
+    	}
+    }
+    char flag=this->findExtend(start, size, extsize, found);
+    switch(flag)
+    {
+    	case 0:
+//    			Util::printf("find extend returned 0\n");
+    			return NULL;
+			break;
+		case 1:
+//				Util::printf("find extend returned 1\n");
+				this->allocOutNode(found, start + size, extsize);
+				return (char*)start;
+			break;
+		case 2:
+//				Util::printf("find extend returned 2\n");
+				NodeType *todeleteOri=This::locateForDelete(this->getHead(), start, size,false);
+				if(todeleteOri)
+				{
+					if(moveData)
+					{
+#if defined(CODE64) /*use memcopy*/
+					memcpy(realBase + found->getData().getStart(),realBase + start,size);
+#elif defined(CODE32)
+					Util::memcopy(Util::SEG_CURRENT, (int)(size_t)(realBase + start),
+							Util::SEG_CURRENT, (int)(size_t)(realBase + found->getData().getStart()), size);
+#endif
+					}
+//					Util::printf("before withdrawn \n");
+					this->withdrawNode(todeleteOri);
+//					Util::printf("after withdrawn \n");
+					this->allocOutNode(found, found->getData().getStart(), size + extsize);
+					return (char*)found->getData().getStart();
+				}else{
+					return NULL;/*cannot locate the original node to delete*/
+				}
+			break;
+    }
+
+}
 /**
 *   Following:
 *       find the exact node by required arguments with {starting with p, limit is size,not allocable}
@@ -276,11 +389,22 @@ void* MemoryManager<_DescriptorAllocator>::mnew(size_t size) {
 
 template<template <class> class _DescriptorAllocator>
 void MemoryManager<_DescriptorAllocator>::mdelete(void* p, size_t size) {
-    TreeNode<MemoryDescriptor>* toDeleteNode=MemoryManager<_DescriptorAllocator>::locateForDelete(this->getHead(),(size_t)p,size,0);
+#if defined(CODE64)
+//	printf("in mdelete,request for %x,%x\n",p,size);
+#endif
+    TreeNode<MemoryDescriptor>* toDeleteNode=This::locateForDelete(this->getHead(),(size_t)p,size,0);
+#if defined(CODE64)
+//    if(toDeleteNode==NULL)
+//    {
+//    	printf("found NULL \n");
+//    }else{
+//    	printf("found is  %x,%x\n",toDeleteNode->getData().getStart(),toDeleteNode->getData().getLimit());
+//    }
+#endif
     if(toDeleteNode)//if found it
     {
         //Util::printStr("Found delete.   ");
-        withdrawNode(toDeleteNode);
+        this->withdrawNode(toDeleteNode);
     }
 }
 
@@ -317,10 +441,8 @@ TreeNode<MemoryDescriptor>* MemoryManager<_DescriptorAllocator>::findFirstStart(
     // }else{
     //     Util::printStr("p is NULL \n");
     // }
-
-	char saver[50];
-
 	/*
+	char saver[50];
 	Util::printStr("in find...");
 	Util::digitToStr(saver, 50, p->getData().getStart());
 	Util::printStr(saver);Util::printStr("..");
@@ -331,8 +453,12 @@ TreeNode<MemoryDescriptor>* MemoryManager<_DescriptorAllocator>::findFirstStart(
 	{
 		p=This::nextAllocable(p);
 	}
-	while(p && start < p->getData().getStart())
+	while(p && start > p->getData().getStart())
 	{
+		if(p->getData().contains(start,len))
+		{
+			break;
+		}
         p=This::nextAllocable(p);
 	}
 	while(p && (int)(p->getData().getLimit() - len) < start - p->getData().getStart() )
@@ -352,7 +478,7 @@ TreeNode<MemoryDescriptor>* MemoryManager<_DescriptorAllocator>::findFirstLen(
 	}
 	while(p && p->getData().getLimit() < len )
     {
-        p=MemoryManager<_DescriptorAllocator>::nextAllocable(p);
+        p=This::nextAllocable(p);
     }
 	return p;
 }
@@ -517,22 +643,22 @@ void* LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator >::mnew(size_t 
 {
     if(!this->checkRange(start,size))return NULL;
 #if defined(CODE64)
-    printf("not null,request for (%x,%x)\n",start,size);
+//    printf("not null,request for (%x,%x)\n",start,size);
 #endif
     ListNode<_LinearSourceDescriptor> *found=Father::findFirstStartLen(this->getHead(),start,size);
 #if defined(CODE64)
-    if(found)
-    {
-    	ListNode<LinearSourceDescriptor> *foundp=(ListNode<LinearSourceDescriptor>*)found;
-    	printf("found is (%x,%x)\n",foundp->getData().getStart(),foundp->getData().getLimit());
-    }else{
-    	printf("found is NULL\n");
-    }
+//    if(found)
+//    {
+//    	ListNode<LinearSourceDescriptor> *foundp=(ListNode<LinearSourceDescriptor>*)found;
+//    	printf("found is (%x,%x)\n",foundp->getData().getStart(),foundp->getData().getLimit());
+//    }else{
+//    	printf("found is NULL\n");
+//    }
 #endif
     if(found)
     {
-        _LinearSourceDescriptor alloced = allocOutNode(found,start,size);
-        if(alloced.getLimit())
+        _LinearSourceDescriptor alloced = this->allocOutNode(found,start,size);
+        if(alloced.getLimit()>0)
         {
             return (void*)(alloced.getStart());
         }
@@ -544,15 +670,55 @@ template <class _LinearSourceDescriptor,template <class> class _NodeAllocator>
 void* LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator >::mnew(size_t size)
 {
     ListNode<_LinearSourceDescriptor> *found=Father::findFirstLen(this->getHead(),size);
+//    Util::printf("in lm,mnew for len %d\n",size);
     if(found)
     {
+//    	Util::printf("found is %x,%x\n",found->getData().getStart(),found->getData().getLimit());
         _LinearSourceDescriptor alloced = allocOutNode(found,found->getData().getStart(),size);
         if(alloced.getLimit())
         {
             return (void*)(alloced.getStart());
         }
     }
+//    Util::printf("found is NULL\n");
     return NULL;
+}
+template <class _LinearSourceDescriptor,template <class> class _NodeAllocator>
+void* LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator >::extend(size_t start,size_t size,int extsize,char *realBase,bool moveData)
+{
+
+	if(extsize == 0)return (char*)start;
+    if(!this->checkRange(start,size))return NULL;
+    if(extsize<0)
+    {
+    	this->mdelete((char*)(start+size+extsize),0 - extsize);
+    	return (char*)start;
+    }
+    NodeType *found=Father::findFirstStartLen(this->getHead(),start+size,extsize);
+    if(found && found->getData().getStart()==start + size)
+    {
+    		this->allocOutNode(found, start+size, extsize);
+    		return (char*)start;
+    }else{
+    	found = Father::findFirstLen(this->getHead(), size + extsize);
+    	if(found)
+    	{
+    		if(moveData)
+    		{
+#if defined(CODE64)
+    		memcpy(realBase + found->getData().getStart(),realBase+start,size);
+#elif defined(CODE32)
+    		Util::memcopy(Util::SEG_CURRENT, (size_t)realBase + start, Util::SEG_CURRENT,(size_t)realBase + found->getData().getStart(),size);
+#endif
+    		}
+		   this->mdelete((char*)start,size);
+    		this->allocOutNode(found, found->getData().getStart(), size+extsize);
+    		return (char*)found->getData().getStart();
+    	}else{
+    		return NULL;
+    	}
+
+    }
 }
 
     
@@ -582,6 +748,65 @@ void LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator >::mdelete(void*
         this->appendHead(_LinearSourceDescriptor((size_t)p,size));
     }
 
+}
+template<class _LinearSourceDescriptor, template<class > class _NodeAllocator>
+ bool LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator>::mnewLinked(size_t size,LinkedList<LinearSourceDescriptor, _NodeAllocator> &list,size_t eachSectionExtraSize)
+{
+//	printf("in mnewlinked,size is %d,this space is %d,%d\n",size,this->space.getStart(),this->space.getLimit());
+	NodeType * p=this->getHead(),*lastAvl=NULL;
+	if(p==NULL || size == 0)return false; //head is null or size is 0,no thing to look up.
+	int leftSize=size;
+	//Do check first
+	while(p && leftSize > 0)
+	{
+//		printf("leftSize is %d,current node is %d,%d\n",leftSize,  p->getData().getStart(),p->getData().getLimit());
+		leftSize =leftSize + eachSectionExtraSize -  p->getData().getLimit();
+		lastAvl = p;
+		p = p->getNext();
+	}
+	if(leftSize>0)
+	{
+		return false;//space not enough
+	}
+	//===OK,we have enough space
+	if(leftSize < 0)//not perfect,do need additional node,cannot just cut
+	{// |leftSize| is the left to be kept in the original.
+		leftSize = -leftSize;
+//		printf("avl has left,left is %d\n",leftSize);
+		size_t orilimit=lastAvl->getData().getLimit();
+		lastAvl->getData().setLimit( orilimit  - leftSize );
+		NodeType * newnode=new (this->smm->getNew()) NodeType(_LinearSourceDescriptor(
+				lastAvl->getData().getStart() + lastAvl->getData().getLimit(),
+				leftSize
+		));
+		this->insertNext(lastAvl, newnode);
+//		printf("avl = %d,%d  avl.next = %d,%d\n",lastAvl->getData().getStart(),lastAvl->getData().getLimit(),
+//				lastAvl->getNext()->getData().getStart(),lastAvl->getNext()->getData().getLimit());
+	}
+	list.appendHead(this->getHead());
+//	printf("list.head is %d,%d\n",list.getHead()->getData().getStart(),list.getHead()->getData().getLimit());
+	this->root->setNext(NULL);
+	this->last->setNext(NULL);
+	this->appendHead(lastAvl->getNext());
+	lastAvl->setNext(NULL);
+
+//	printf("list.head is %d,%d\n",list.getHead()->getData().getStart(),list.getHead()->getData().getLimit());
+	return true;
+
+}
+
+
+
+
+template<class _LinearSourceDescriptor, template<class > class _NodeAllocator>
+void  LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator>::mdeleteLinked(LinkedList<LinearSourceDescriptor, _NodeAllocator>& list)
+{
+	NodeType *p=list.getHead();
+	while(p)
+	{
+		this->mdelete((char*)p->getData().getStart(),p->getData().getLimit());
+		p=p->getNext();
+	}
 }
 
 template <class _LinearSourceDescriptor,template <class> class _NodeAllocator>
@@ -627,12 +852,15 @@ _LinearSourceDescriptor LinearSourceManager<_LinearSourceDescriptor,_NodeAllocat
         else if(len1==0 && len2==0)//前后都没有剩余
         {
 #if defined(CODE64)
-        	printf("remove whole node\n");
+//        	printf("remove whole node\n");
 #endif
             this->remove(avlNode);
         }else if(len1==0 && len2 > 0){//后面有剩余
             avlNode->getData().setStart(start+len);
             avlNode->getData().setLimit(len2);
+#if defined(CODE64)
+//            printf("reset avlnode,no adding or removing\n");
+#endif
         }else if(len1 > 0 && len2==0){//前面有剩余
             avlNode->getData().setLimit(len1);
         }else{//前后都有剩余
