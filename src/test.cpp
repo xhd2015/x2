@@ -252,6 +252,6 @@ void Test::run()
     //testList();
     dbg.putsz("Test hook started.\n");
    // testMemory();
-    this->testIO_HDD();
+//    this->testIO_HDD();
     dbg.putsz("Test hook ended\n");
 }

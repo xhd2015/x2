@@ -173,8 +173,8 @@ void X2fsUtil::retriveLinkedInfoSection() {
 
 	//====build the free space of the linked section
 //	printf("linkarr off is %x(sec nums,relative to dirbase) \n",((size_t)this->linkarr - (size_t)this->dirbuf)/This::SecSize);
-	printf("sizeof(node) = %d,maxi = %d ,linkarr[0].start = %x,linkarr[1].start=%x \n",sizeof(this->linkarr[0]),this->linkarrLen,
-			this->linkarr[0].getStart(),this->linkarr[1].getStart());
+//	printf("sizeof(node) = %d,maxi = %d ,linkarr[0].start = %x,linkarr[1].start=%x \n",sizeof(this->linkarr[0]),this->linkarrLen,
+//			this->linkarr[0].getStart(),this->linkarr[1].getStart());
 	int i=0;
 	while(i < this->linkarrLen && this->linkarr[i].getLimit()==0)i++;
 	int lastNonZero=i;
@@ -193,14 +193,14 @@ void X2fsUtil::retriveLinkedInfoSection() {
 		}
 //		printf("i = %d \n",i);
 	}
-	printf("dump link mm\n");
-	printf("space is %x,%x\n",this->linkmm.getSpace().getStart(),this->linkmm.getSpace().getLimit());
-	ListNode<LinearSourceDescriptor> *p=this->linkmm.getHead();
-	while(p)
-	{
-		printf("(%x,%x)\n",p->getData().getStart(),p->getData().getLimit());
-		p = p->getNext();
-	}
+//	printf("dump link mm\n");
+//	printf("space is %x,%x\n",this->linkmm.getSpace().getStart(),this->linkmm.getSpace().getLimit());
+//	ListNode<LinearSourceDescriptor> *p=this->linkmm.getHead();
+//	while(p)
+//	{
+//		printf("(%x,%x)\n",p->getData().getStart(),p->getData().getLimit());
+//		p = p->getNext();
+//	}
 }
 
 

@@ -30,6 +30,7 @@ public:
     static void setw(int seg,int off,int halfWord);
     static void setl(int seg,int off,int word);
     static void clr();
+    AS_MACRO static void jmpDie();
     /**
     *使0x92端口的位0从0变化成1从而重启计算机
     */
@@ -49,7 +50,6 @@ public:
     AS_MACRO static void leaveDs(int seg,int temp);
     AS_MACRO static void enterEs(int seg,int& temp);
     AS_MACRO static void leaveEs(int temp);
-    AS_MACRO static void jmpDie();
     AS_MACRO static void outb(short port,char data);
     AS_MACRO static void outw(short port,short data);
     AS_MACRO static char inb(short port);
@@ -273,6 +273,10 @@ void Util::reboot()
     :"eax"
     );
 }
+void Util::jmpDie()
+{
+    __asm__("jmp .\n\t");
+}
 #endif
 
 #if defined(CODE32)
@@ -346,10 +350,7 @@ void Util::leaveEs(int temp)
 {
     __asm__ __volatile__("mov %%ax,%%es \n\t"::"a"(temp):);
 }
-void Util::jmpDie()
-{
-    __asm__("jmp .\n\t");
-}
+
 void Util::intReturn()
 {
     __asm__(

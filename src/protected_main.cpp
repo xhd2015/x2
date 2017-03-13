@@ -33,7 +33,7 @@ __asm__(
 "jmp DIE \n\t"
 );
 
-void protectedEntryHolder() //0x2016
+void protectedEntryHolder()
 {      
     //=====================清除屏幕，初始化调试信息打印器区域
     Util::clr();

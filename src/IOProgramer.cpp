@@ -1,9 +1,14 @@
 #ifdef CODE32
 __asm__(".code32 \n\t");
+#elif defined(CODE16)
+__asm__(".code16gcc \n\t");
+#endif
+
 #include <IOProgramer.h>
 #include <libx2.h>
 #include <def.h>
 
+#if defined(CODE32)
 #ifdef __I_REALLY_NEED_THIS
 const unsigned int IO_8259A::ICW1_EDGE_MODE_OFF=0b0,
                    IO_8259A::ICW1_ELEC_MODE_ON=0b1000,
@@ -168,7 +173,8 @@ const char* Keyboard::KEY_MAP_STD[]={
     "UNUSED","ESC","1","2","3","4","5","6","7","8","9","0","_","=","BS","TAB","q","w","e","r","t",
     "y","u","i","o","p","[","]","Enter","CNTL","a","s","d","f","g","h","j","k","l",";","'","`","LSHFT",
     "\\","z","x","c","v","b","n","m",",",".","/","RSHFT","*","ALT"," ","CAP","F1","F2","F3","F4","F5","F6",
-    "F7","F8","F9","F10","NUML","CtrlBreak","Home","Up","PgUp","-","Left","Center","Right","+","End","Down","PgDn","Ins","Del","Unknown","Unknown","Unknown","F11","F12","Unkown","Unknown","Windows","Unknown","Menu"
+    "F7","F8","F9","F10","NUML","CtrlBreak","Home","Up","PgUp","-","Left","Center","Right","+","End","Down","PgDn",
+	"Ins","Del","Unknown","Unknown","Unknown","F11","F12","Unkown","Unknown","Windows","Unknown","Menu"
 };
 //e0 x e0 x -- up down left right  _  表示需要接受两个e0
 //长按无用
@@ -194,6 +200,9 @@ const char* Keyboard::getAsciiChar(unsigned char code)
         return "Exceed.";
 }
 
+#endif //CODE32
+
+#if defined(CODE32)||defined(CODE16)
 IO_HDD::IO_HDD(int hddNo,size_t secStart,unsigned char secNumber,int dstSeg,size_t dstOff) :
 hddNo(hddNo),secStart(secStart),secNumber(secNumber),dstSeg(dstSeg),dstOff(dstOff),
 LBAMode(true)
@@ -264,4 +273,5 @@ void IO_HDD::writeData()
 	Util::leaveDs(this->dstSeg, temp);
 
 }
-#endif
+
+#endif //CODE32||CODE16

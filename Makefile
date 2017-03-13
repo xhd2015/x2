@@ -25,6 +25,9 @@ fbackup := $(INCLUDE) $(SRC) $(ld16) $(ld32) Makefile TODO README  $(STDC) $(STD
 CCFLAGS :=  -fpack-struct=1 -fno-exceptions  -nostdinc -nostdinc++ -nostdlib -Winline --no-warnings -I ./include
 CCFLAGS32 := -m32
 CCFLAGS16 := -m32
+
+DDFLAGS := conv=notrunc bs=1c
+
 CCMACROS := 
 CCMACROS16 := -D CODE16
 CCMACROS32 := -D CODE32
@@ -87,12 +90,17 @@ $(GEN32)/main.img:$(patsubst %,$(GEN32)/%.o,$(f32))
 $(GEN16)/main.img:$(patsubst %,$(GEN16)/%.o,$(f16))
 	ld -Timage_16.ld $(LDFLAGS) $^ -o $@
 $(GEN16)/main.bimg: $(GEN16)/main.img
-	objcopy -g --pad-to $$((512*16)) -j .seclt -j .secld -j .seclb -j .secmain -j .lastsec -O binary $< $@
+	objcopy -g -j .secmbr -j .secmain -O binary $< $@
 $(GEN32)/main.bimg: $(GEN32)/main.img
-	objcopy -g --pad-to $$((512*60)) -j .text -j .data -O binary $< $@
-$(GEN)/main.bimg : $(GEN16)/main.bimg $(GEN32)/main.bimg
-	cat $^ > $@
-
+	objcopy -g -j .text -j .data -O binary $< $@
+$(GEN)/main.bimg : partitions_table $(GEN16)/main.bimg $(GEN32)/main.bimg
+	if [ ! -f $@ ];then 
+	cmd /C 'cd C:\Users\13774\Desktop\bochs\devel\x2^ system\tools\bochs^ run && explorer create_main_image.cmd'
+	fi
+	while [ ! -f $@ ];do :;done
+	dd if=$(GEN16)/main.bimg of=$@ bs=1c count=$$((512*16)) conv=notrunc
+	dd if=partitions_table of=$@  bs=1c conv=notrunc seek=$$((0x1BE)) count=$$((512  - 0x1BE)) 
+	dd if=$(GEN32)/main.bimg of=$@ bs=1c conv=notrunc seek=$$((512*16)) count=$$((512*100))
 # .s --> .o
 $(GEN16)/%.o:$(GEN16)/%.s
 	as $(ASSYMS) $< -o $@

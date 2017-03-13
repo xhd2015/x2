@@ -25,7 +25,7 @@ const int PMLoader::STACK_START=0,
            PMLoader::CODE_SEG = 0,
            PMLoader::CODE_LIMIT = 0xfffff;
 const int   PMLoader::JMPSEG = 0x10,
-            PMLoader::DRIVER=0,
+            PMLoader::DRIVER=0x80,
             PMLoader::REAL_SECNUMS=16,
             PMLoader::PROTECTED_SECNUMS=66,// (int)(PMLoader::TEMP_SEG*16 - PMLoader::CODE_START)/PMLoader::SECSIZE,This is the biggest allowed number.If this is exceeded,then the real-code will be covered.*/
             PMLoader::TEMP_SEG=0xa00;
@@ -71,15 +71,18 @@ void PMLoader::setgdtr(short len,int address)
 }
 void PMLoader::enterProtected()
 {
-    __asm__(
-    "mov %cr0,%eax \n\t" //100b
-    "or $0x1,%eax \n\t"
-    "mov %eax,%cr0 \n\t"
-    "movw __ZN8PMLoader6JMPSEGE,%ax \n\t"
-    "movw __ZN8PMLoader10CODE_STARTE,%bx \n\t"
-    "pushw %ax \n\t"
-    "pushw %bx \n\t"
-    "ljmp *(%esp) \n\t"
+    __asm__ __volatile__(
+    "mov %%cr0,%%eax \n\t" //100b
+    "or $0x1,%%eax \n\t"
+    "mov %%eax,%%cr0 \n\t"
+//    "movw __ZN8PMLoader6JMPSEGE,%cx \n\t"
+//    "movw __ZN8PMLoader10CODE_STARTE,%bx \n\t"
+    "pushw %0 \n\t"  //JMPSEG:CODE_START
+    "pushw %1 \n\t"
+    "ljmp *(%%esp) \n\t"
+	:
+	:"c"(PMLoader::JMPSEG),"b"(PMLoader::CODE_START)
+	 :
     );
 }
 void PMLoader::adjustProtectedCode()
