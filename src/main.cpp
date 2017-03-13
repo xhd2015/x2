@@ -35,7 +35,7 @@ __asm__(
 extern "C" void readLaterSectors()
 {
     __asm__(
-        "READLEN =  16 -2  \n\t"
+        "READLEN =  25 -2  \n\t"
         "push %es\n\t"
         "movw $TEMP_SEG,%ax \n\t"  //这些来自PMLoader的参数尚未加载
         "mov %ax,%es\n\t"
@@ -75,17 +75,17 @@ __attribute__((section(".test_section"))) void theEntry() //this is placed in .t
     int readBase=PMLoader::TEMP_SEG*16;
     Util::memcopy(PMLoader::TEMP_SEG,512,PMLoader::TEMP_SEG,0,512);//将第一个扇区清空
     Util::insertMark(0x555);
-    if(Util::readSectors(PMLoader::TEMP_SEG,0,0x80,0,1))
+    if(Util::readSectors(PMLoader::TEMP_SEG,0,0x80,0,1))//at lower is ok
     {
         Util::printStr("Load Tested.\n");
     }
     SegmentDescriptor sd1((char*)readBase,1024);
     char saver[8];
-    sd1.writeToMemory(0x10000,saver);
+    sd1.writeToMemory(Util::SEG_CURRENT,saver);
     SegmentDescriptor sd2;
-    SegmentDescriptor::fromMemory(&sd2,0x10000,saver);
+    SegmentDescriptor::fromMemory(&sd2,Util::SEG_CURRENT,saver);
     char saver2[8];
-    sd2.writeToMemory(0x10000,saver2);
+    sd2.writeToMemory(Util::SEG_CURRENT,saver2);
     if(sd1.equals(sd2))
     {
         Util::printStr("SegmentDescriptor Right!!!\n");

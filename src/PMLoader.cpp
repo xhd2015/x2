@@ -7,28 +7,31 @@ __asm__(".code32 \n\t");
 #include <PMLoader.h>
 #include <libx2.h>
 #include <Descriptor.h>
+#include <IOProgramer.h> //for IO_HDD
 
-const int PMLoader::SAFE_SEG=0x50;
-const int PMLoader::SECSIZE=512;
-const int PMLoader::STACK_START=0,
-           PMLoader::STACK_SIZE=PMLoader::SECSIZE*4,
-           PMLoader::IDT_START=PMLoader::STACK_START+PMLoader::STACK_SIZE,
-           PMLoader::IDT_SIZE=PMLoader::SECSIZE*1,
-           PMLoader::GDT_START=PMLoader::IDT_START+PMLoader::IDT_SIZE,
-           PMLoader::GDT_SIZE=PMLoader::SECSIZE*2,
-           PMLoader::TSS_AREA_SIZE=PMLoader::SECSIZE*2,
-           PMLoader::TSS_AREA_START=PMLoader::GDT_START+PMLoader::GDT_SIZE,
-           PMLoader::TSS_MIN_SIZE=104,
-           PMLoader::FREE_HEAP_SIZE=PMLoader::SECSIZE*5,
-           PMLoader::FREE_HEAP_START=PMLoader::TSS_AREA_START+PMLoader::TSS_AREA_SIZE,
-           PMLoader::CODE_START=PMLoader::FREE_HEAP_START+PMLoader::FREE_HEAP_SIZE,
-           PMLoader::CODE_SEG = 0,
-           PMLoader::CODE_LIMIT = 0xfffff;
-const int   PMLoader::JMPSEG = 0x10,
-            PMLoader::DRIVER=0x80,
-            PMLoader::REAL_SECNUMS=16,
-            PMLoader::PROTECTED_SECNUMS=66,// (int)(PMLoader::TEMP_SEG*16 - PMLoader::CODE_START)/PMLoader::SECSIZE,This is the biggest allowed number.If this is exceeded,then the real-code will be covered.*/
-            PMLoader::TEMP_SEG=0xa00;
+// /*****************They have been DEPRECATED************************
+//const int PMLoader::SAFE_SEG=0x50;
+//const int PMLoader::SECSIZE=512;
+//const int PMLoader::STACK_START=0,
+//           PMLoader::STACK_SIZE=PMLoader::SECSIZE*4,
+//           PMLoader::IDT_START=PMLoader::STACK_START+PMLoader::STACK_SIZE,
+//           PMLoader::IDT_SIZE=PMLoader::SECSIZE*1,
+//           PMLoader::GDT_START=PMLoader::IDT_START+PMLoader::IDT_SIZE,
+//           PMLoader::GDT_SIZE=PMLoader::SECSIZE*2,
+//           PMLoader::TSS_AREA_SIZE=PMLoader::SECSIZE*2,
+//           PMLoader::TSS_AREA_START=PMLoader::GDT_START+PMLoader::GDT_SIZE,
+//           PMLoader::TSS_MIN_SIZE=104,
+//           PMLoader::FREE_HEAP_SIZE=PMLoader::SECSIZE*5,
+//           PMLoader::FREE_HEAP_START=PMLoader::TSS_AREA_START+PMLoader::TSS_AREA_SIZE,
+//           PMLoader::CODE_START=PMLoader::FREE_HEAP_START+PMLoader::FREE_HEAP_SIZE,
+//           PMLoader::CODE_SEG = 0,
+//           PMLoader::CODE_LIMIT = 0xfffff;
+//const int   PMLoader::JMPSEG = 0x10,
+//            PMLoader::DRIVER=0x80,
+//            PMLoader::REAL_SECNUMS=16,
+//            PMLoader::PROTECTED_SECNUMS=66,// (int)(PMLoader::TEMP_SEG*16 - PMLoader::CODE_START)/PMLoader::SECSIZE,This is the biggest allowed number.If this is exceeded,then the real-code will be covered.*/
+//            PMLoader::TEMP_SEG=0xa00;
+///*************************************************************************
 #if defined(CODE16)
 PMLoader::PMLoader()
 {
@@ -77,33 +80,48 @@ void PMLoader::enterProtected()
     "mov %%eax,%%cr0 \n\t"
 //    "movw __ZN8PMLoader6JMPSEGE,%cx \n\t"
 //    "movw __ZN8PMLoader10CODE_STARTE,%bx \n\t"
-    "pushw %0 \n\t"  //JMPSEG:CODE_START
-    "pushw %1 \n\t"
+    "pushw %%cx \n\t"  //JMPSEG:CODE_START
+    "pushw %%bx \n\t"
     "ljmp *(%%esp) \n\t"
 	:
 	:"c"(PMLoader::JMPSEG),"b"(PMLoader::CODE_START)
 	 :
     );
 }
+//UNTESTED
 void PMLoader::adjustProtectedCode()
 {
-    if(PMLoader::CODE_SEG*16+PMLoader::CODE_START < PMLoader::SAFE_SEG*16) //maybe wrong
+	int left;
+	IO_HDD iohd(0,PMLoader::REAL_SECNUMS,0,0,PMLoader::CODE_START);
+	left=(PMLoader::CODE_START + PMLoader::PROTECTED_SECNUMS * PMLoader::SECSIZE - PMLoader::TEMP_SEG * 16)/PMLoader::SECSIZE;
+	if(left>0)
+	{
+//		Util::printStr("Kernel code size exceeds reserved size,the extra sectors will be read after entering protected mode\n");
+	}else{
+		left=0;//enough
+	}
+	/*need to set the left sectors unread to FREE_HEAP_START*/
+    if(PMLoader::CODE_START < PMLoader::SAFE_SEG*16) //may overlap the BIOS data or programs
     {
-        if(PMLoader::SAFE_SEG*16 + PMLoader::PROTECTED_SECNUMS*PMLoader::SECSIZE >= PMLoader::TEMP_SEG*16)//this will overlap the current code,you should stop this behavior and go back to trim the size of your code
-        {
-        	Util::printStr("Here 0\n");
-            __asm__("#Please go back to reduce the size of your code \n\t");
-        }else{
-        	Util::printStr("Here 1\n");
-          Util::readSectors(PMLoader::SAFE_SEG,0,PMLoader::DRIVER,PMLoader::REAL_SECNUMS,PMLoader::PROTECTED_SECNUMS);
-          Util::memcopy(PMLoader::SAFE_SEG,0,PMLoader::CODE_SEG,PMLoader::CODE_START,PMLoader::PROTECTED_SECNUMS * PMLoader::SECSIZE);
-        }
+//    	Util::printStr("Kernel code start at lower than BIOS data segment\n");
+        left += (PMLoader::SAFE_SEG*16 + PMLoader::PROTECTED_SECNUMS*PMLoader::SECSIZE - PMLoader::TEMP_SEG*16)/PMLoader::SECSIZE;
+//	    Util::readSectors(PMLoader::SAFE_SEG,0,PMLoader::DRIVER,PMLoader::REAL_SECNUMS,PMLoader::PROTECTED_SECNUMS - left);
+        iohd.setDstSeg(PMLoader::SAFE_SEG);
+        iohd.setDstOff(0);
+        iohd.setSecNumber(PMLoader::PROTECTED_SECNUMS - left);
+        iohd.read();
+	    Util::memcopy(PMLoader::SAFE_SEG,0,0,PMLoader::CODE_START,(PMLoader::PROTECTED_SECNUMS -left) * PMLoader::SECSIZE);
 
     }else{
-    	Util::printStr("Here 3\n");
-        Util::readSectors(PMLoader::CODE_SEG,PMLoader::CODE_START,PMLoader::DRIVER,PMLoader::REAL_SECNUMS,PMLoader::PROTECTED_SECNUMS);
+//    	char buf[10];
+//    	Util::digitToStr(buf,10,left);
+//    	Util::printStr("left is :");Util::printStr(buf);Util::printStr("\n");
+//        Util::readSectors(0,PMLoader::CODE_START,PMLoader::DRIVER,PMLoader::REAL_SECNUMS,PMLoader::PROTECTED_SECNUMS - left);
+    	iohd.setSecNumber(PMLoader::PROTECTED_SECNUMS - left);
+    	iohd.read();
     }
-
+    Util::printStr("leaving adjust\n");
+    Util::setl(0, PMLoader::FREE_HEAP_START,left);
 }
 void PMLoader::mainProcess() //仅16位
 {

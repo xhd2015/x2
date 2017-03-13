@@ -55,7 +55,6 @@ const int Util::MODE_FL_ON=0x80,
         Util::MODE_FG_BLACK=0b0000000,
         Util::MODE_COMMON=(Util::MODE_FL_OFF & Util::MODE_BG_BLACK) | Util::MODE_FG_WHITE;
 const int Util::SCREEN_X=25,Util::SCREEN_Y=80;
-const int Util::SEG_CURRENT=0x10000;
 
 //const int Util::SEG_CURRENT =    0x10000;//运行期常数，有时我需要一个编译期常数,那就在g++的命令行中定义之-D
 int Util::videoSelector=
@@ -271,7 +270,7 @@ char Util::getDPL(int sel)
 void Util::changeCPL(int eip,int cs,int eflags,int esp,int ss)
 {
     __asm__(
-      "add $4*2,%esp \n\t"
+      "add $4*2,%esp \n\t" //skip return addr & ebp
      "iret \n\t"
     );
 }
@@ -290,7 +289,7 @@ int Util::getEflags()
 #endif //CODE32 || CODE16
 
 
-#if defined(CODE32)||defined(CODE64)
+#if defined(CODE32)||defined(CODE64)||defined(CODE16)
 int Util::digitToStr(char* save,unsigned int space,int n)
 {
     int sign=1;

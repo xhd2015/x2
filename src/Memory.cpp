@@ -23,19 +23,19 @@ __asm__(".code32 \n\t");
 	template class MemoryManager<MallocToSimple>;
 	template class LinearSourceManager<LinearSourceDescriptor, MallocToSimple>;
 #endif
-
-#if defined(CODE32)
-//全局方法: placement new和placement delete
-// Default placement versions of operator new.
-void* operator new(size_t, void* __p)
-{ return __p; }
-void* operator new[](size_t, void* __p)
-{ return __p; }
-
-// Default placement versions of operator delete.
-void operator delete  (void*, void*) { }
-void operator delete[](void*, void*) { }
-#endif
+//
+//#if defined(CODE32)
+////全局方法: placement new和placement delete
+//// Default placement versions of operator new.
+//void* operator new(size_t, void* __p)
+//{ return __p; }
+//void* operator new[](size_t, void* __p)
+//{ return __p; }
+//
+//// Default placement versions of operator delete.
+//void operator delete  (void*, void*) { }
+//void operator delete[](void*, void*) { }
+//#endif
 
 //============class : MemoryManager
 template<template <class> class _DescriptorAllocator>

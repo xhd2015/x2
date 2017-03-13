@@ -199,6 +199,9 @@ void int0x9()
 */
 void int0xa()
 {
+	__asm__("leave \n\t");
+	Util::jmpDie();
+	Util::insertMark(0x5aa);
     int sel=Util::makeSel(3);
     ENTER_DS(sel,s);
     Util::printStr("int 0xa.\n");

@@ -40,6 +40,17 @@ void protectedEntryHolder()
     Printer stdp(3,30,6,20,Util::MODE_COMMON);//系统的标准打印器
     stdp.clr();
     stdp.putsz("Entered Protected Mode.\n");
+    //=======================读取剩余的扇区
+    stdp.putsz("Reading left sectors...\n");
+    int nleft=*(int*)PMLoader::FREE_HEAP_START;
+    char buf[10];
+    Util::digitToStr(buf, arrsizeof(buf), nleft);
+    stdp.putsz("Left sector number is :");stdp.putsz(buf);stdp.putsz("\n");
+    if(nleft > 0)
+    {
+    	IO_HDD iohd(0,(unsigned char)(PMLoader::REAL_SECNUMS + PMLoader::PROTECTED_SECNUMS - nleft),(size_t)nleft,Util::SEG_CURRENT,(size_t)PMLoader::TEMP_SEG*16);
+    	iohd.read();
+    }
     //===================从这里插入test的hook
     stdp.putsz("Running Test.\n");
     Test test;
@@ -49,8 +60,8 @@ void protectedEntryHolder()
     //====================tss0 & 描述符
     TSS tss0;//
     
-    *(short*)tss0.SS0 = Util::makeSel(4);
-    *(int*)tss0.ESP0 = 3*512 - 4;
+    tss0.SS0 = Util::makeSel(4);
+    tss0.ESP0 = 3*512 - 4;
     tss0.writeToMemory(Util::SEG_CURRENT,PMLoader::TSS_AREA_START);
     //SS0:ESP0之后会被int用到，发生到高特权级的中断会切换堆栈
     
@@ -105,14 +116,14 @@ void protectedEntryHolder()
     
     //=====================一个闲置任务tss1
     TSS tss1;
-    *(short*)tss1.CS=Util::makeSel(6,0x3);
-    *(int*)tss1.EIP=(int)forTss1;
-    *(short*)tss1.SS = Util::makeSel(8,0x3);
-    *(int*)tss1.ESP=512*2-4;
-    *(short*)tss1.SS0 = Util::makeSel(4);
-    *(int*)tss1.ESP0 = 512 - 4;
-    *(int*)tss1.EFLAGS =0x202 ;//| 0x100;
-    *(short*)tss1.DS = 0x3b;
+    tss1.CS=Util::makeSel(6,0x3);
+    tss1.EIP=(int)forTss1;
+    tss1.SS = Util::makeSel(8,0x3);
+    tss1.ESP=512*2-4;
+    tss1.SS0 = Util::makeSel(4);
+    tss1.ESP0 = 512 - 4;
+    tss1.EFLAGS =0x202 ;//| 0x100;
+    tss1.DS = 0x3b;
     tss1.writeToMemory(Util::SEG_CURRENT,PMLoader::TSS_AREA_START+PMLoader::TSS_MIN_SIZE);
     SegmentDescriptor tss1_sel((char*)PMLoader::TSS_AREA_START+PMLoader::TSS_MIN_SIZE,PMLoader::TSS_MIN_SIZE-1,SegmentDescriptor::TYPE_S_TSS_32_AVL,0,0,0);
     tss1_sel.writeToMemory(Util::SEG_CURRENT,(char*)PMLoader::GDT_START+9*8);

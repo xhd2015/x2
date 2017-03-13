@@ -8,12 +8,12 @@
 #if defined(CODE32)
 //全局方法: placement new和placement delete
 // Default placement versions of operator new.
-void* operator new(size_t, void* __p);
-void* operator new[](size_t, void* __p);
+inline void* operator new(size_t, void* __p){ return __p; };
+inline void* operator new[](size_t, void* __p){ return __p; };
 
 // Default placement versions of operator delete.
-void operator delete  (void*, void*);
-void operator delete[](void*, void*);
+inline void operator delete  (void*, void*){};
+inline void operator delete[](void*, void*){};
 #elif defined(CODE64)
 		#include <new>
 #include <cstdio>

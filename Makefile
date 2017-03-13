@@ -13,7 +13,7 @@ STDC := stdc
 STDCPP := stdc++
 
 #control which files are compiled.
-f16 := main libx2 PMLoader Descriptor
+f16 := main libx2 PMLoader Descriptor IOProgramer
 f32 := protected_main libx2 PMLoader Descriptor TSS interrupts IOProgramer Memory test List
 f64 := libx2 PMLoader Descriptor TSS Memory List Locator
 
@@ -98,9 +98,9 @@ $(GEN)/main.bimg : partitions_table $(GEN16)/main.bimg $(GEN32)/main.bimg
 	cmd /C 'cd C:\Users\13774\Desktop\bochs\devel\x2^ system\tools\bochs^ run && explorer create_main_image.cmd'
 	fi
 	while [ ! -f $@ ];do :;done
-	dd if=$(GEN16)/main.bimg of=$@ bs=1c count=$$((512*16)) conv=notrunc
+	dd if=$(GEN16)/main.bimg of=$@ bs=1c count=$$((512*25)) conv=notrunc
 	dd if=partitions_table of=$@  bs=1c conv=notrunc seek=$$((0x1BE)) count=$$((512  - 0x1BE)) 
-	dd if=$(GEN32)/main.bimg of=$@ bs=1c conv=notrunc seek=$$((512*16)) count=$$((512*100))
+	dd if=$(GEN32)/main.bimg of=$@ bs=1c conv=notrunc seek=$$((512*25)) count=$$((512*100))
 # .s --> .o
 $(GEN16)/%.o:$(GEN16)/%.s
 	as $(ASSYMS) $< -o $@

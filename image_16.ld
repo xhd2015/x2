@@ -10,7 +10,7 @@ SECTIONS {
 	}
 	.secmain 1024:{
 		gen/16/main.o(.test_section) *(.data) *(.rdata)	*(.bss)	*(.text)
-		. = 16*512-1024;/*共占有16个扇区*/
+		. = 25*512-1024;/*共占有25个扇区*/
 	}
 	/DISCARD/ : {
 		*( ".rdata$zzz" ) *(.free)

@@ -208,6 +208,10 @@ hddNo(hddNo),secStart(secStart),secNumber(secNumber),dstSeg(dstSeg),dstOff(dstOf
 LBAMode(true)
 {
 }
+IO_HDD::IO_HDD() :
+LBAMode(true)
+{
+}
 
 IO_HDD::~IO_HDD() {
 }
@@ -234,17 +238,14 @@ void IO_HDD::write()
 void IO_HDD::readData()
 {
 	int temp;
-	Util::enterDs(this->dstSeg, temp);
-	for(unsigned char i=0;i<this->secNumber;i++)
-	{
-		for(int j=0;j < 512;j+=2)
-		{
-			*(short*)(this->dstOff + i*512 + j)=Util::inw(This::PORT_DATA);
-		}
-		this->waitUntilReady();
-	}
-	Util::leaveDs(this->dstSeg, temp);
-
+	Util::enterEs(this->dstSeg, temp);
+	__asm__ __volatile__(
+			"cld;rep;insw\n\t"
+			:
+			:"d"(This::PORT_DATA),"D"(this->dstOff),"c"(this->secNumber * 512/2)
+			 :
+	);
+	Util::leaveEs(temp);
 }
 
 /**
@@ -252,14 +253,32 @@ void IO_HDD::readData()
  */
 void IO_HDD::writeData()
 {
-	int temp;
+//	int temp;
 //	Util::printStr("writting2 \n");
 //	Util::printStr((char*)this->dstOff);
 //	Util::printStr("\n");
-	Util::enterDs(this->dstSeg, temp);
 
 	//Utilisation,from Linux 0.11
-	__asm__ __volatile__("cld;rep;outsw\n\t"::"d"(This::PORT_DATA),"S"(this->dstOff),"c"(this->secNumber * 512/2):);
+	if(this->dstSeg!=Util::SEG_CURRENT)
+	{
+		__asm__ __volatile__(
+				"push %%ds \n\t"
+				"movw %%ax,%%ds \n\t"
+				"cld;rep;outsw\n\t"
+				"pop %%ds \n\t"
+				:
+				:"a"(this->dstSeg),"d"(This::PORT_DATA),"S"(this->dstOff),"c"(this->secNumber * 512/2)
+				 :
+		);
+	}else{
+		__asm__ __volatile__(
+				"cld;rep;outsw\n\t"
+				:
+				:"d"(This::PORT_DATA),"S"(this->dstOff),"c"(this->secNumber * 512/2)
+				 :
+		);
+	}
+
 //
 //	for(unsigned char i=0;i<this->secNumber;i++)
 //	{
@@ -269,8 +288,6 @@ void IO_HDD::writeData()
 //		}
 //		this->waitUntilReady();
 //	}
-
-	Util::leaveDs(this->dstSeg, temp);
 
 }
 

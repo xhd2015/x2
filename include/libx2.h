@@ -17,7 +17,7 @@ public:
     //OFF用 &
     const static int MODE_COMMON,MODE_FL_ON,MODE_FL_OFF,MODE_BG_RED,MODE_BG_GREEN,MODE_BG_BLUE,MODE_BG_WHITE,MODE_BG_RG,MODE_BG_RB,MODE_BG_BG,MODE_BG_BLACK,MODE_FG_RED,MODE_FG_GREEN,MODE_FG_BLUE,MODE_FG_WHITE,MODE_FG_RG,MODE_FG_RB,MODE_FG_BG,MODE_FG_BLACK;
     const static int SCREEN_X,SCREEN_Y;
-    const static int SEG_CURRENT;
+    enum{SEG_CURRENT=0x10000};
     static int videoSelector;
     static void printStr(const char* str_addr,int mode=MODE_COMMON);
     static void printChar(char ch,int mode=MODE_COMMON);//0x7:White_Black_NoFlash
@@ -41,9 +41,7 @@ public:
      */
     static void memcopy(int srcSeg,int srcOff,int dstSeg,int dstOff,int len);
 
-    //==================仅32位
-public:
-#if defined(CODE32)
+    //==========macros
     AS_MACRO static void cli();
     AS_MACRO static void sti();
     AS_MACRO static void enterDs(int seg,int& temp);
@@ -55,6 +53,10 @@ public:
     AS_MACRO static char inb(short port);
     AS_MACRO static short inw(short port);
     AS_MACRO static void ltr(int sel);
+
+    //==================仅32位
+public:
+#if defined(CODE32)
     static void lidt(short len,int address);
     static void lgdt(short len,int address);
     
@@ -72,7 +74,7 @@ public:
 #endif //CODE32
 #endif //CODE32 && CODE16
 
-#if defined(CODE32)||defined(CODE64)
+#if defined(CODE32)||defined(CODE64)||defined(CODE16)
     //如果某些功能暂时不能由某个类实现，就在这里实现它们。
 
     /**
@@ -277,27 +279,7 @@ void Util::jmpDie()
 {
     __asm__("jmp .\n\t");
 }
-#endif
 
-#if defined(CODE32)
-int Printer::getX()
-{
-    return this->x;
-}
-
-int Printer::getY()
-{
-    return this->y;
-}
-void Util::ltr(int sel)
-{
-    __asm__ __volatile__(
-    "ltr %0 \n\t"
-    :
-    :"m"(sel)
-    :
-    );
-}
 void Util::cli()
 {
     __asm__("cli \n\t");
@@ -351,25 +333,6 @@ void Util::leaveEs(int temp)
     __asm__ __volatile__("mov %%ax,%%es \n\t"::"a"(temp):);
 }
 
-void Util::intReturn()
-{
-    __asm__(
-    "leave \n\t"
-    "iret \n\t"
-    );
-}
-/**this originally works
-void Util::initTarget(void *&target)
-{
-    __asm__ __volatile__("":"=c"(target)::);
-}
-*/
-/************Deprecated
-void Util::initTarget(void **target)
-{
-__asm__ __volatile__("":"=c"(*(char**)target)::);
-}
-*/
 void Util::outb(short port,char data)
 {
     __asm__(
@@ -418,6 +381,46 @@ void Util::pusha()
 void Util::popa()
 {
     __asm__("popa \n\t");
+}
+*/
+#endif
+
+#if defined(CODE32)
+int Printer::getX()
+{
+    return this->x;
+}
+
+int Printer::getY()
+{
+    return this->y;
+}
+void Util::ltr(int sel)
+{
+    __asm__ __volatile__(
+    "ltr %0 \n\t"
+    :
+    :"m"(sel)
+    :
+    );
+}
+void Util::intReturn()
+{
+    __asm__(
+    "leave \n\t"
+    "iret \n\t"
+    );
+}
+/**this originally works
+void Util::initTarget(void *&target)
+{
+    __asm__ __volatile__("":"=c"(target)::);
+}
+*/
+/************Deprecated
+void Util::initTarget(void **target)
+{
+__asm__ __volatile__("":"=c"(*(char**)target)::);
 }
 */
 #endif

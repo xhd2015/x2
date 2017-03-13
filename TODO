@@ -21,7 +21,7 @@
 [*]	use policy design style to replace the old extension design style(NOTE:this is and should be only used in Memory Allocation Policy)
 [*]	set all types that used as boolean but stored with integer or char type.Such as 'allocable' in Memory.
 [*]	leaving the dormitory,for people there can not work quietly.There is always someone that would encounter to interfer your work.
-[]	use bit-structs with #pragma pack... or -fpack-struct=1 to completely redefine the CPU related structs
+[*](2017-03-13 20:28:06)	use bit-structs with #pragma pack... or -fpack-struct=1 to completely redefine the CPU related structs
 []	add a new branch,named "stdc",and laterly a new branch "stdc++".To embed a c & c++ runtime
 []	printf() number()... series
 []	building filesystems so that we start log messages to files

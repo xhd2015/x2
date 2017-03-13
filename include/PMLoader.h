@@ -12,27 +12,31 @@
 
 class PMLoader{
 public:
-    const static int SAFE_SEG;
-    const static int SECSIZE;
-    const static int STACK_START,
-                       STACK_SIZE,
-                       IDT_START,
-                       IDT_SIZE,
-                       GDT_START,
-                       GDT_SIZE,
-                       TSS_AREA_SIZE,
-                       TSS_AREA_START,
-                       TSS_MIN_SIZE,
-                       FREE_HEAP_SIZE,
-                       FREE_HEAP_START,
-                       CODE_START,
-                       CODE_SEG,
-                       CODE_LIMIT;
-    const static int    JMPSEG,
-                        DRIVER,
-                        REAL_SECNUMS,
-                        PROTECTED_SECNUMS,
-                        TEMP_SEG;
+	enum{
+		SAFE_SEG = 0x50,
+		SECSIZE = 512,
+		STACK_START = 0,/*for kernel*/
+	   STACK_SIZE = 4 * SECSIZE,
+	   IDT_START = STACK_START + STACK_SIZE,
+	   IDT_SIZE = 1 * SECSIZE,
+	   GDT_START = IDT_START + IDT_SIZE,
+	   GDT_SIZE = 2 * SECSIZE,
+	   TSS_AREA_SIZE = 2 * SECSIZE,
+	   TSS_AREA_START = GDT_START + GDT_SIZE,
+	   TSS_MIN_SIZE = 104,
+	   FREE_HEAP_SIZE = 5 * SECSIZE,
+	   FREE_HEAP_START = TSS_AREA_START + TSS_AREA_SIZE,
+	   CODE_START = FREE_HEAP_START + FREE_HEAP_SIZE,
+/* CODE_SEG must be 0 ******DEPRECATED****	   CODE_SEG = 0, *******/
+	   CODE_LIMIT = 0xfffff,
+		JMPSEG = 0x10,
+#if defined(CODE16)
+		DRIVER = 0x80,  /*valid only for real mode*/
+#endif
+		REAL_SECNUMS = 25,
+		PROTECTED_SECNUMS = 100,
+		TEMP_SEG = 0xa00
+	};
 public:
 #if defined(CODE16)
     PMLoader();//指定保护模式的代码区域： 1.磁盘区域:驱动器，逻辑起始地址 2.内存区域 段：偏移

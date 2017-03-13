@@ -31,3 +31,5 @@
 16. If g++ complains about goto,try to move all definitions ahead of the first goto.
 
 17. Hard disk read/write error? You'd full the 512 Byte buffer throught 0x1f0,otherwise data will not be written to disk.
+
+18. Error code may only denote segment descriptor.
