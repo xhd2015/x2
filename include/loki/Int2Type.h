@@ -9,4 +9,9 @@ public:
 };
 
 
+template <class T>
+class NullType;
+
+class EmptyType{};
+
 #endif //Int2Type_h__

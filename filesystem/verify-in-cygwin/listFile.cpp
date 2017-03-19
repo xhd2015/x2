@@ -1,13 +1,13 @@
 
 
 //compile: gcc -I ../include --static main.cpp -o main.out
+#include <64/MallocToSimple.h>
 #include <List.h> //for linear space manager:SimpleMemoryManager, for LocateableLinkedList
 #include <cstdio>
 #include <cstring>
 #include <cassert>
 #include <cstdlib>
 #include <new>
-#include "MallocToSimple.h"
 #include "File.h"
 #include <Memory.h>
 

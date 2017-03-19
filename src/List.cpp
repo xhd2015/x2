@@ -49,10 +49,11 @@
 //===================class: SimpleMemoryManager
 
 template <class T>
-SimpleMemoryManager<T>::SimpleMemoryManager(size_t start,size_t limit,bool doInit,size_t initSize):
+SimpleMemoryManager<T>::SimpleMemoryManager(size_t start,size_t limit,bool doInit,size_t initSize,SimpleMemoryManager<T>::ERROR_HANDLER errhandle):
 start(start),limit(limit),
 data((Freeable*)start),len((int)(limit/sizeof(Freeable))),curSize(initSize),
-lastIndex(0)
+lastIndex(0),
+errhandle(errhandle)
 {
     if(doInit)
     {
@@ -67,7 +68,7 @@ lastIndex(0)
 
 template <class T>
 SimpleMemoryManager<T>::SimpleMemoryManager():
-start(-1),limit(0),data(NULL),len(0),curSize(0),lastIndex(0)
+start(-1),limit(0),data(NULL),len(0),curSize(0),lastIndex(0),errhandle(NULL)
 {
 
 
@@ -203,6 +204,12 @@ void    ListNode<T>::insertPrevious(ListNode<T>* previous)
     }
 }
 template<class T>
+void   ListNode<T>::adjustOffset(ptrdiff_t diff)
+{
+	This::adjustOffset(this->next, diff);
+	This::adjustOffset(this->previous, diff);
+}
+template<class T>
 ListNode<T>*   ListNode<T>::getLast()const
 {
     ListNode<T>* p=(ListNode<T>*)this;
@@ -225,7 +232,8 @@ ListNode<T>*    ListNode<T>::getFirst()const
 
 //===============class : LinkedList
 template<class T,template<class> class _Allocator>
-LinkedList<T,_Allocator >::LinkedList()
+LinkedList<T,_Allocator >::LinkedList():
+smm(NULL),root(NULL),last(NULL)
 {}
 
 template<class T,template<class> class _Allocator>
@@ -680,6 +688,13 @@ TreeNode<T>* TreeNode<T>::removeSon() {
 		this->getSon()->setFather(NULL);
 		this->getSon()->setSon(NULL);
 	}
+}
+template<class T>
+void 			TreeNode<T>::adjustOffset(ptrdiff_t diff)
+{
+	this->Father::adjustOffset(diff);
+	Father::adjustOffset(this->father,diff);
+	Father::adjustOffset(this->son,diff);
 }
 
 template<class T>

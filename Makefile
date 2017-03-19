@@ -14,8 +14,8 @@ STDCPP := stdc++
 
 #control which files are compiled.
 f16 := main libx2 PMLoader Descriptor IOProgramer
-f32 := protected_main libx2 PMLoader Descriptor TSS interrupts IOProgramer Memory test List
-f64 := libx2 PMLoader Descriptor TSS Memory List Locator
+f32 := protected_main libx2 PMLoader Descriptor TSS interrupts IOProgramer Memory test List AssociatedMemoryManager Process Kernel
+f64 := libx2 PMLoader Descriptor TSS Memory List Locator AssociatedMemoryManager
 
 
 ld16 := image_16.ld
@@ -97,7 +97,7 @@ $(GEN)/main.bimg : partitions_table $(GEN16)/main.bimg $(GEN32)/main.bimg
 	if [ ! -f $@ ];then 
 	cmd /C 'cd C:\Users\13774\Desktop\bochs\devel\x2^ system\tools\bochs^ run && explorer create_main_image.cmd'
 	fi
-	while [ ! -f $@ ];do :;done
+	while [ ! -f $@ ];do :;done  #wait until that image file is created
 	dd if=$(GEN16)/main.bimg of=$@ bs=1c count=$$((512*25)) conv=notrunc
 	dd if=partitions_table of=$@  bs=1c conv=notrunc seek=$$((0x1BE)) count=$$((512  - 0x1BE)) 
 	dd if=$(GEN32)/main.bimg of=$@ bs=1c conv=notrunc seek=$$((512*25)) count=$$((512*100))
@@ -123,7 +123,6 @@ $(SRC)/%.cpp:$(INCLUDE)/*
 # me --> .cpp .h  由我本人亲自操刀
 .cpp .h:
 	@echo Fulton is doing it.
-#===特殊处理
 
 #Keep the directory structure
 clean:

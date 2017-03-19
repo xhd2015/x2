@@ -1,6 +1,9 @@
 [*] == done	[-] == deprecated	[]  == proposed		[+] == doing
 
 
+[]	SimpleMemoryManager	--	Error handling style:
+		1.Simplified : pass an error function to it(which accepts this & error code as argument),it will call that handle whenever error condition happened
+		2.Unified but complicated: use c++ exception
 []	I think there is a unified way to manage cache-design(cahce level controls) style.
 []	Before this Sunday,write a brief document about how to use gcc/g++ compile system code.(How to write a system in c/c++)(2017-03-09 16:20:33 Thursday)
 [*]	Do not use -fpermissive,cause those information are very useful.

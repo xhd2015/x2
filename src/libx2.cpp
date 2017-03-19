@@ -86,6 +86,14 @@ void Util::test()
 
 void Util::printStr(const char* str_addr,int mode)
 {
+#if defined(CODE32)
+//	 __asm__(
+//	"mov $0x8,%ax \n\t"
+//	"mov %ax,%ds\n\t"
+//	"movb $120,0\n\t" //print 'x' in the screen
+//	 );
+//	Util::jmpDie(); //Very OK
+#endif
     while(*str_addr)
     {
         Util::printChar(*str_addr++,mode);
@@ -93,6 +101,17 @@ void Util::printStr(const char* str_addr,int mode)
 }
 void Util::printChar(char ch,int mode)
 {
+#if defined(CODE32)
+//	 __asm__ __volatile__(
+//	""
+////	"mov $0x8,%%ax \n\t"
+////	"mov %%ax,%%ds\n\t"  //error
+////	"movb $'h',0\n\t" //print 'x' in the screen
+//	 :
+////	 :"b"('x') //w is wroong,try x
+//	 :);
+//	Util::jmpDie(); //vbox OK
+#endif
     if(ch == '\n')
     {
         Util::newLine();
@@ -216,6 +235,9 @@ void Util::memcopy(int srcSeg,int srcOff,int dstSeg,int dstOff,int len)
 
 void Util::clr()
 {
+#if defined(CODE32)
+//	Util::jmpDie(); //vbox wrong
+#endif
     Util::setCursor(0,0);
     for(int i=0;i!=Util::SCREEN_X;i++)
         for(int j=0;j!=Util::SCREEN_Y;j++)

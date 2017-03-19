@@ -144,6 +144,7 @@ void PMLoader::mainProcess() //仅16位
     loaderSegStack.writeToMemory(0,(char*)PMLoader::GDT_START+4*8);//B set 4GB
 
     //3.启用A20
+    Util::printStr("enable a20...\n");
    PMLoader::enableA20();
     //===BUG with int 0x13
     
@@ -154,6 +155,7 @@ void PMLoader::mainProcess() //仅16位
     //===BUG
     
     //5.设置cr0，进入保护模式
+    Util::printStr("changing cr0\n");
    PMLoader::enterProtected();
     
     //===========PMLoader End==============

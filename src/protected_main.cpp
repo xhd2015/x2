@@ -12,14 +12,17 @@ __asm__(".code32 \n\t");
 #include <IOProgramer.h>
 #include <test.h>
 #include <PMLoader.h>
+#include <Kernel.h>
 
 extern "C" {
+	void extraVboxTest();
     void protectedEntryHolder();
     void afterCPL3();    
     void forTss1();
 }
 __asm__(
 ".text \n\t"
+//		"jmp .\n\t"  //vbox ok
 "movw $0b11000,%ax \n\t" //ds选择子，
 "movw %ax,%ds \n\t"
 "mov  %ax,%es \n\t"
@@ -28,20 +31,37 @@ __asm__(
 "mov $0b100000,%ax \n\t"
 "movw %ax,%ss \n\t" //ss选择子
 "mov  $512*4,%esp \n\t" 
+"call _extraVboxTest\n\t"
 "call _protectedEntryHolder \n\t"
 "DIE: \n\t"
 "jmp DIE \n\t"
 );
 
+ void extraVboxTest()
+{
+//	 __asm__(
+//	"mov $0x8,%ax \n\t"
+//	"mov %ax,%ds\n\t"
+//	"movb $120,0\n\t" //print 'x' in the screen,this is OK
+//	 );
+//	 Util::jmpDie();
+}
+
 void protectedEntryHolder()
 {      
+//	Util::printStr("a function call\n");
+//	Util::jmpDie(); //vbox OK
     //=====================清除屏幕，初始化调试信息打印器区域
     Util::clr();
-    Printer stdp(3,30,6,20,Util::MODE_COMMON);//系统的标准打印器
+//    Util::jmpDie();  //vbox wrong
+    Printer stdp(3,30,15,40,Util::MODE_COMMON);//系统的标准打印器
+//    Util::jmpDie(); //vbox wrong
     stdp.clr();
+//    Util::jmpDie(); //vbox wrong
     stdp.putsz("Entered Protected Mode.\n");
     //=======================读取剩余的扇区
     stdp.putsz("Reading left sectors...\n");
+//    Util::jmpDie(); //vbox wrong
     int nleft=*(int*)PMLoader::FREE_HEAP_START;
     char buf[10];
     Util::digitToStr(buf, arrsizeof(buf), nleft);
@@ -56,13 +76,35 @@ void protectedEntryHolder()
     Test test;
     test.run();
     
+    //==================初始化内核，这里可以明显看到内核的概念：资源管理器的集合
+    Kernel *pkernel=(Kernel*)PMLoader::KERNEL_START;
+    new (pkernel) Kernel(
+
+
+    );//初始化一个新的kernel
+
+    Kernel::initTheKernel(pkernel);
+
+    //do some adjustment so that the allocated space will not be corrupted
+    Kernel::getTheKernel()->mnew(0,0);
+
+    Kernel::getTheKernel()->createTheIdlePreocess();//or created by the constructor
+    						//idle process is useful because when treating the kernel as a process too,we can benefit from the existing
+    						//handles.
+    Kernel::getTheKernel()->createProcess();//task 1,create a process,but do not run it.
+    Kernel::getTheKernel()->createProcess();//task 2
+
+
+
+
     
     //====================tss0 & 描述符
-    TSS tss0;//
+//    TSS tss0;//
+    TSS *ptss=(TSS*)PMLoader::TSS_AREA_START;
     
-    tss0.SS0 = Util::makeSel(4);
-    tss0.ESP0 = 3*512 - 4;
-    tss0.writeToMemory(Util::SEG_CURRENT,PMLoader::TSS_AREA_START);
+    ptss[0].SS0 = Util::makeSel(4);
+    ptss[0].ESP0 = 3*512 - 4;
+//    tss0.writeToMemory(Util::SEG_CURRENT,PMLoader::TSS_AREA_START);
     //SS0:ESP0之后会被int用到，发生到高特权级的中断会切换堆栈
     
     stdp.putsz("tss0 written\n");
@@ -97,7 +139,7 @@ void protectedEntryHolder()
     p1.sendICW3(1,0x2);
     p1.sendICW4(0,0,0,0,1);
     p1.sendICW4(1,0,0,0,1); //普通全嵌套，非缓冲，非自动结束，用于80x86
-    p1.sendOCW1(0,0xfc);//屏蔽一些中断
+    p1.sendOCW1(0,0xfc);//屏蔽一些中断,允许定时中断，键盘中断
     p1.sendOCW1(1,0xff);
     
     //对8253编程
@@ -115,16 +157,16 @@ void protectedEntryHolder()
     
     
     //=====================一个闲置任务tss1
-    TSS tss1;
-    tss1.CS=Util::makeSel(6,0x3);
-    tss1.EIP=(int)forTss1;
-    tss1.SS = Util::makeSel(8,0x3);
-    tss1.ESP=512*2-4;
-    tss1.SS0 = Util::makeSel(4);
-    tss1.ESP0 = 512 - 4;
-    tss1.EFLAGS =0x202 ;//| 0x100;
-    tss1.DS = 0x3b;
-    tss1.writeToMemory(Util::SEG_CURRENT,PMLoader::TSS_AREA_START+PMLoader::TSS_MIN_SIZE);
+//    TSS tss1;
+    ptss[1].CS=Util::makeSel(6,0x3);
+    ptss[1].EIP=(int)forTss1;
+    ptss[1].SS = Util::makeSel(8,0x3);
+    ptss[1].ESP=512*2-4;
+    ptss[1].SS0 = Util::makeSel(4);
+    ptss[1].ESP0 = 512 - 4;
+    ptss[1].EFLAGS =0x202 ;//| 0x100;
+    ptss[1].DS = 0x3b;
+//    tss1.writeToMemory(Util::SEG_CURRENT,PMLoader::TSS_AREA_START+PMLoader::TSS_MIN_SIZE);
     SegmentDescriptor tss1_sel((char*)PMLoader::TSS_AREA_START+PMLoader::TSS_MIN_SIZE,PMLoader::TSS_MIN_SIZE-1,SegmentDescriptor::TYPE_S_TSS_32_AVL,0,0,0);
     tss1_sel.writeToMemory(Util::SEG_CURRENT,(char*)PMLoader::GDT_START+9*8);
     

@@ -1,6 +1,11 @@
 
 #ifndef PMLoder_h__
 #define PMLoder_h__
+
+#include <Kernel.h> //for kernel
+#include <Memory.h>  //for MemoryManager
+#include <List.h>  //for SimpleMemoryManager
+
 //实模式下的 “保护模式加载器”
 // 主加载过程：（顺序有严格要求，见mainProcess）
 //
@@ -36,6 +41,25 @@ public:
 		REAL_SECNUMS = 25,
 		PROTECTED_SECNUMS = 100,
 		TEMP_SEG = 0xa00
+#if defined(CODE32) //
+		/////////////Kernel arguments
+		,
+		KERNEL_START,
+		KERNEL_LENGTH = sizeof(Kernel),
+		MEMMAN_START,
+		MEMMAN_LENGTH = sizeof(MemoryManager),
+		SMM_MEM_START,
+		SMM_MEM_LENGTH = sizeof(SimpleMemoryManager<TreeNode<MemoryDescriptor> >),
+		SMM_MAN_INIT_NODES = 100,
+		SMM_MAN_AREA_START,
+		SMM_MAN_AREA_LENGTH = sizeof(TreeNode<MemoryDescriptor>) *SMM_MAN_INIT_NODES,
+		END_OF_WHOLE_KERNEL,
+		GLOBAL_SHARE_START,
+		GLOBAL_SHARE_LENGH, //全局共享的库或者数据
+		PROCESS_SPECIAL_START,
+		PROCESS_SPECIAL_LENGTH
+#endif
+
 	};
 public:
 #if defined(CODE16)

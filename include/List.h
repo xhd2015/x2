@@ -49,20 +49,37 @@ public:
 
 	};
 	typedef struct Freeable Node;
+	typedef void (*ERROR_HANDLER)(SimpleMemoryManager *smm,int errcode);
+	enum{
+		ERR_SPACE_IS_FULL,
+		ERR_NODE_NOT_INTERNAL,//NULL is treated not internal but also not external
+		ERR_GENERAL /*an error not currently defined*/
+	};/*when it receives an error,it will call the errhandle,after which it will continue normally,but if error condition is
+	not cleared,it will repeatly call errhandle.That means the error is not correctly corrected.
+	We  should define a max-repeating error , if the same error process repeated for times such like that,we should abort/destroy the process
+	*/
 public:
-    SimpleMemoryManager(size_t start,size_t limit,bool doInit=true,size_t initSize=0);//done
+    SimpleMemoryManager(size_t start,size_t limit,bool doInit=true,size_t initSize=0,ERROR_HANDLER errhandler=NULL);//done
     
+    /**
+     * The following methods may throw exception/may call error handler,after which it executes normally
+     */
     T* getNew();//done
     Node *getNewNode();//done
     void withdraw(Node *t);//done
     void withdraw(T *t);//single free,done
+
+
     AS_MACRO bool isFull()const;//done
     AS_MACRO size_t getLen()const;//done
     AS_MACRO size_t getCurSize()const;//done
     AS_MACRO size_t getStart()const;//done
     AS_MACRO size_t getLimit()const;//done
     AS_MACRO static size_t getNodeSize();//done
+    AS_MACRO ERROR_HANDLER getErrHandler();
+    AS_MACRO void			setErrHandler(ERROR_HANDLER errhandle);
 protected:
+    AS_MACRO bool	checkIsInternal(Node *t);
     size_t start;
     size_t limit;
     
@@ -70,10 +87,13 @@ protected:
     size_t curSize,len;
     
     size_t lastIndex;
+    ERROR_HANDLER errhandle;
 };
 
 template<class T>
 class ListNode{
+public:
+	typedef ListNode<T> This;
 public:
     ListNode(const T& data,ListNode<T>* next=NULL,ListNode<T>* previous=NULL);
     ~ListNode();
@@ -91,8 +111,15 @@ public:
     void    insertPrevious(ListNode<T>* previous);
     AS_MACRO int  hasNext()const;
     AS_MACRO int  hasPrevious()const;//done
+    /**
+     * @new method since 2017-03-18 21:23:10
+     */
+    void		adjustOffset(ptrdiff_t diff);
+
+
     ListNode<T>*    getLast()const;//done
     ListNode<T>*    getFirst()const;//done
+    AS_MACRO static void adjustOffset(void *&p,ptrdiff_t off);
     //指向构造函数的地址
     //用 new (void*p) 构造函数,俗称placement new
 protected:
@@ -128,7 +155,7 @@ public:
     ListNode<T>*    append(const T &t);//done
     ListNode<T>*    append(ListNode<T>* p);//done
     ListNode<T>*    appendHead(ListNode<T>* p);//done
-    ListNode<T>*   appendHead(const T &t);//done
+    ListNode<T>*    appendHead(const T &t);//done
     ListNode<T>*    remove();//done
     ListNode<T>*    removeHead();//done
     void            remove(ListNode<T>* p);//done
@@ -217,6 +244,8 @@ protected:
 template <class T>
 class TreeNode:public ListNode<T>{
 public:
+	typedef ListNode<T> Father;
+public:
     TreeNode(const T& data,TreeNode<T>* father=NULL,TreeNode<T>* son=NULL,TreeNode<T>* next=NULL,TreeNode<T>* previous=NULL);
     ~TreeNode();
 
@@ -231,11 +260,13 @@ public:
     void		insertFather(TreeNode<T>* father);
     TreeNode<T>*	removeSon();
 	TreeNode<T>*	removeFather();
+	void 			adjustOffset(ptrdiff_t diff);
 
-    
+
     TreeNode<T>* getParent()const;//往previous一直遍历，直到是根，然后返回根的father,done
     
 protected:
+    
     TreeNode<T> *son,*father;
     
 };
@@ -308,6 +339,11 @@ template<class T>
 int  ListNode<T>::hasPrevious()const
 {
     return (this->previous!=NULL);
+}
+template<class T>
+void ListNode<T>::adjustOffset(void *&p,ptrdiff_t diff)
+{
+	if(p!=NULL)p+=diff;
 }
 template<class T>
 int  ListNode<T>::hasNext()const
@@ -407,6 +443,21 @@ size_t  SimpleMemoryManager<T>::getNodeSize()
 	return sizeof(Node);
 }
 
+template<class T>
+typename SimpleMemoryManager<T>::ERROR_HANDLER SimpleMemoryManager<T>::getErrHandler()
+{
+	return this->errhandle;
+}
+template<class T>
+void			SimpleMemoryManager<T>::setErrHandler(SimpleMemoryManager<T>::ERROR_HANDLER errhandle)
+{
+	this->errhandle= errhandle;
+}
+template<class T>
+bool			SimpleMemoryManager<T>::checkIsInternal(Node *t)
+{
+	return this->start <= t && (size_t)t - (size_t)this->start <= this->limit ;
+}
 //===========class TreeNode
 
 template<class T>
@@ -448,4 +499,5 @@ bool 		 TreeNode<T>::hasFather()const
 {
 	return this->father!=NULL;
 }
+
 #endif //List_h__

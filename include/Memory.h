@@ -4,6 +4,7 @@
 #include <List.h>
 #include <Locator.h>
 #include <def.h>
+#include <Kernel.h>
 
 #if defined(CODE32)
 //全局方法: placement new和placement delete
@@ -66,12 +67,14 @@ protected:
 /**
 *   What this manager manages must provide a way to get start and limit.
 *       There are two types of LinearSourceManager
-*       1.All are equal among the free nodes and used nodes themselves.
+*       1.All nodes inside are equal to each other .
 *           If the allocated nodes have specific use,they are different from each other
 *       2.
 *   It does not assume the managed node is a subclass of a certain class or not.It just assume it provides some methods that is required by it.
 *   Remember that if the structure of a class is not really necessary,do not use extend.
 *   
+*   _NodeAllocator must provide a function for condition that space is not enough
+*
 */
 
 template <class _LinearSourceDescriptor,template <class> class _NodeAllocator>
@@ -213,6 +216,19 @@ protected:
 private:
 
 };
+
+//================High Level Memory Allocation====================
+
+/**
+ * Just a wrapper of MemoryManager.It directly interact with theKernel,and cast whatever it returns
+ */
+template <class T>
+class HighLevelSimpleMemoryManager{
+
+
+};
+
+
 /***************CLASS DEFINITION END***********************/
 
 
