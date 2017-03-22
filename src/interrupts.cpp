@@ -5,6 +5,7 @@ __asm__(".code32 \n\t");
 #include <libx2.h>
 #include <IOProgramer.h>
 #include <def.h>
+#include <Kernel.h>
 
 void (*__intAddresses[])() ={
      int0x0,
@@ -50,7 +51,10 @@ void (*__intAddresses[])() ={
      intDefault,
      intDefault,
      int0x24,
-     int0x25
+     int0x25,
+	 intDefault,
+	 int0x27, // 0x27 --- 40
+	 intDefault
  };
 int *intAddresses=(int*)__intAddresses;
 int intLen=sizeof(__intAddresses)/sizeof(int);
@@ -94,6 +98,8 @@ void int0x1()
 */
 void int0x2()
 {
+    __asm__("leave \n\t");
+    JMP_DIE();
     int sel=Util::makeSel(3);
     ENTER_DS(sel,s);
     Util::printStr("int 0x2.\n");
@@ -107,6 +113,8 @@ void int0x2()
 */
 void int0x3()
 {
+    __asm__("leave \n\t");
+    JMP_DIE();
     int sel=Util::makeSel(3);
     ENTER_DS(sel,s);
     Util::printStr("int 0x3.\n");
@@ -120,6 +128,8 @@ void int0x3()
 */
 void int0x4()
 {
+    __asm__("leave \n\t");
+    JMP_DIE();
     int sel=Util::makeSel(3);
     ENTER_DS(sel,s);
     Util::printStr("int 0x4.\n");
@@ -133,6 +143,8 @@ void int0x4()
 */
 void int0x5()
 {
+    __asm__("leave \n\t");
+    JMP_DIE();
     int sel=Util::makeSel(3);
     ENTER_DS(sel,s);
     Util::printStr("int 0x5.\n");
@@ -146,6 +158,8 @@ void int0x5()
 */
 void int0x6()
 {
+    __asm__("leave \n\t");
+    JMP_DIE();
     int sel=Util::makeSel(3);
     ENTER_DS(sel,s);
     Util::printStr("int 0x6.\n");
@@ -160,6 +174,8 @@ void int0x6()
 */
 void int0x7()
 {
+    __asm__("leave \n\t");
+    JMP_DIE();
     int sel=Util::makeSel(3);
     ENTER_DS(sel,s);
     Util::printStr("int 0x7.\n");
@@ -173,6 +189,8 @@ void int0x7()
 */
 void int0x8()
 {
+    __asm__("leave \n\t");
+    JMP_DIE();
     int sel=Util::makeSel(3);
     ENTER_DS(sel,s);
     Util::printStr("int 0x9.\n");
@@ -186,6 +204,8 @@ void int0x8()
 */
 void int0x9()
 {
+    __asm__("leave \n\t");
+    JMP_DIE();
     int sel=Util::makeSel(3);
     ENTER_DS(sel,s);
     Util::printStr("int 0x9.\n");
@@ -199,6 +219,8 @@ void int0x9()
 */
 void int0xa()
 {
+    __asm__("leave \n\t");
+    JMP_DIE();
 	__asm__("leave \n\t");
 	Util::jmpDie();
 	Util::insertMark(0x5aa);
@@ -215,6 +237,8 @@ void int0xa()
 */
 void int0xb()
 {
+    __asm__("leave \n\t");
+    JMP_DIE();
     int sel=Util::makeSel(3);
     ENTER_DS(sel,s);
     Util::printStr("int 0xb.\n");
@@ -228,6 +252,8 @@ void int0xb()
 */
 void int0xc()
 {
+    __asm__("leave \n\t");
+    JMP_DIE();
     int sel=Util::makeSel(3);
     ENTER_DS(sel,s);
     Util::printStr("int 0xc.\n");
@@ -238,12 +264,14 @@ void int0xc()
 //===============中断处理程序：13============
 /**
 *不需要参数
+*
+*Segment Error
 */
 void int0xd()
 {
     __asm__("leave \n\t");
     JMP_DIE();
-    Util::insertMark(0x555d);
+    Util::insertMark(0x555d);//0x555 for interrupts,0xd for number
     int eax,ebx,ecx,esp;
     __asm__ __volatile__(
     "mov %%esp,%%edx \n\t"
@@ -265,6 +293,8 @@ void int0xd()
 */
 void int0xe()
 {
+    __asm__("leave \n\t");
+    JMP_DIE();
     int sel=Util::makeSel(3);
     ENTER_DS(sel,s);
     Util::printStr("int 0xe.\n");
@@ -278,6 +308,8 @@ void int0xe()
 */
 void int0xf()
 {
+    __asm__("leave \n\t");
+    JMP_DIE();
     int sel=Util::makeSel(3);
     ENTER_DS(sel,s);
     Util::printStr("int 0xf.\n");
@@ -291,6 +323,8 @@ void int0xf()
 */
 void int0x10()
 {
+    __asm__("leave \n\t");
+    JMP_DIE();
     int sel=Util::makeSel(3);
     ENTER_DS(sel,s);
     Util::printStr("int 0x10.\n");
@@ -304,6 +338,8 @@ void int0x10()
 */
 void int0x11()
 {
+    __asm__("leave \n\t");
+    JMP_DIE();
     int sel=Util::makeSel(3);
     ENTER_DS(sel,s);
     Util::printStr("int 0x11.\n");
@@ -317,6 +353,8 @@ void int0x11()
 */
 void int0x12()
 {
+    __asm__("leave \n\t");
+    JMP_DIE();
     int sel=Util::makeSel(3);
     ENTER_DS(sel,s);
     Util::printStr("int 0x12.\n");
@@ -330,6 +368,8 @@ void int0x12()
 */
 void int0x13()
 {
+    __asm__("leave \n\t");
+    JMP_DIE();
     int sel=Util::makeSel(3);
     ENTER_DS(sel,s);
     Util::printStr("int 0x13.\n");
@@ -343,6 +383,8 @@ void int0x13()
 */
 void int0x14()
 {
+    __asm__("leave \n\t");
+    JMP_DIE();
     int sel=Util::makeSel(3);
     ENTER_DS(sel,s);
     Util::printStr("int 0x14.\n");
@@ -356,6 +398,8 @@ void int0x14()
 */
 void int0x15()
 {
+    __asm__("leave \n\t");
+    JMP_DIE();
     int sel=Util::makeSel(3);
     ENTER_DS(sel,s);
     Util::printStr("int 0x15.\n");
@@ -369,6 +413,8 @@ void int0x15()
 */
 void int0x16()
 {
+    __asm__("leave \n\t");
+    JMP_DIE();
     int sel=Util::makeSel(3);
     ENTER_DS(sel,s);
     Util::printStr("int 0x16.\n");
@@ -382,6 +428,8 @@ void int0x16()
 */
 void int0x17()
 {
+    __asm__("leave \n\t");
+    JMP_DIE();
     int sel=Util::makeSel(3);
     ENTER_DS(sel,s);
     Util::printStr("int 0x17.\n");
@@ -395,6 +443,8 @@ void int0x17()
 */
 void int0x18()
 {
+    __asm__("leave \n\t");
+    JMP_DIE();
     int sel=Util::makeSel(3);
     ENTER_DS(sel,s);
     Util::printStr("int 0x18.\n");
@@ -408,6 +458,8 @@ void int0x18()
 */
 void int0x19()
 {
+    __asm__("leave \n\t");
+    JMP_DIE();
     int sel=Util::makeSel(3);
     ENTER_DS(sel,s);
     Util::printStr("int 0x19.\n");
@@ -421,6 +473,8 @@ void int0x19()
 */
 void int0x1a()
 {
+    __asm__("leave \n\t");
+    JMP_DIE();
     int sel=Util::makeSel(3);
     ENTER_DS(sel,s);
     Util::printStr("int 0x1a.\n");
@@ -434,6 +488,8 @@ void int0x1a()
 */
 void int0x1b()
 {
+    __asm__("leave \n\t");
+    JMP_DIE();
     int sel=Util::makeSel(3);
     ENTER_DS(sel,s);
     Util::printStr("int 0x1b.\n");
@@ -447,6 +503,8 @@ void int0x1b()
 */
 void int0x1c()
 {
+    __asm__("leave \n\t");
+    JMP_DIE();
     int sel=Util::makeSel(3);
     ENTER_DS(sel,s);
     Util::printStr("int 0x1c.\n");
@@ -460,6 +518,8 @@ void int0x1c()
 */
 void int0x1d()
 {
+    __asm__("leave \n\t");
+    JMP_DIE();
     int sel=Util::makeSel(3);
     ENTER_DS(sel,s);
     Util::printStr("int 0x1d.\n");
@@ -473,6 +533,8 @@ void int0x1d()
 */
 void int0x1e()
 {
+    __asm__("leave \n\t");
+    JMP_DIE();
     int sel=Util::makeSel(3);
     ENTER_DS(sel,s);
     Util::printStr("int 0x1e.\n");
@@ -486,6 +548,8 @@ void int0x1e()
 */
 void int0x1f()
 {
+    __asm__("leave \n\t");
+    JMP_DIE();
     int sel=Util::makeSel(3);
     ENTER_DS(sel,s);
     Util::printStr("int 0x1f.\n");
@@ -505,24 +569,37 @@ __asm__(
 ".global _int0x20 \n\t"
 "_int0x20:\n\t "
 "pusha \n\t"
+"push  %ds\n\t"
+"mov $0x18,%eax\n\t"
+"mov %eax,%ds\n\t"
 );
+/**
+ * I may propose some questions:
+ * 		1.during switch process, a timer interrupt happens
+ *
+ *
+ */
 void _int0x20()  //保护现场只能发生在堆栈框架之前，所以编写中断有所不同
 {
     //CALL_INT_3(0x24,c,SEG_CURRENT,b,"int 0x20.\n",d,Util::MODE_COMMON);
+//	Util::printStr("int 0x20 start\n");
     Util::insertMark(0x55520);
     IO_8259A p1;
     p1.sendOCW2(0,0x20);
-    if(Int_0x20::current==0)
-    {
-        Int_0x20::current=1;
-        __asm__("ljmp $0b1001000,$0 \n\t");
-    }else{
-        Int_0x20::current=0;
-        __asm__("ljmp $0b101000,$0 \n\t");
-    }
-    
+    Kernel::getTheKernel()->switchNextProcess();
+//    Util::printStr("int 0x20 end \n");
+//    if(Int_0x20::current==0)
+//    {
+//        Int_0x20::current=1;
+//        __asm__("ljmp $0b1001000,$0 \n\t");
+//    }else{
+//        Int_0x20::current=0;
+//        __asm__("ljmp $0b101000,$0 \n\t");
+//    }
+
     __asm__(
     "leave \n\t"
+    "pop %ds \n\t"
     "popa \n\t"
     "iret \n\t"
     );
@@ -614,18 +691,36 @@ void _int0x21()
 void int0x24()
 {
     int dsSel,off,attr;
-    int temp;
-    Util::insertMark(0x55524);
     __asm__ __volatile__(
     ""
     :"=c"(dsSel),"=b"(off),"=d"(attr)
     :
     :
     );
-    Util::enterDs(dsSel,temp);
+
+	int temp;
+	__asm__ __volatile__(
+		"mov  %%ds,%%ebx\n\t"
+		"mov %%eax,%%ds\n\t"
+			:"=b"(temp)
+			:"a"(0x18)
+			:
+
+	);
+    if(dsSel!=Util::SEG_CURRENT)
+    	Util::setStrSel(dsSel);
     Util::printStr((const char*)off,attr);
-    Util::leaveDs(dsSel,temp);
-    Util::intReturn();
+
+    __asm__ __volatile__(
+    		"mov %%eax,%%ds \n\t"
+    		:
+    		:"a"(temp)
+			:
+    );
+    __asm__(
+    "leave \n\t"
+    "iret \n\t"
+    );
 }
 //===================================================
 //============中断处理程序: 37============
@@ -647,6 +742,45 @@ void int0x25()
     );
     __asm__("popa \n\t");
     INTRETURN();
+}
+//===================================================
+
+
+
+//============中断处理程序: 39============
+/**
+*仅用于低特权级进行sti
+*
+*/
+void int0x27()
+{
+	__asm__("leave \n\t"
+			"iret \n\t"
+	);
+//	int temp;
+//	__asm__ __volatile__(
+//		"mov  %%ds,%%ebx\n\t"
+//		"mov $0x18,%%eax\n\t"
+//		"mov %%eax,%%ds\n\t"
+//			:"=b"(temp)
+//			:
+//			:"eax"
+//	);
+//	IO_8259A p1;
+//    p1.sendOCW1(0,0xfc);//屏蔽一些中断,允许定时中断，键盘中断
+//    p1.sendOCW1(1,0xff);
+//    p1.IO_8259A::~IO_8259A();
+////	__asm__("leave \n\t");
+////	Util::jmpDie();
+//	Util::insertMark(0x55527);
+//
+//	__asm__ __volatile__(
+//			"mov %%eax,%%ds \n\t"
+//			:
+//			:"a"(temp)
+//			:
+//			);
+
 }
 //===================================================
 

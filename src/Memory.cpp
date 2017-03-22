@@ -15,7 +15,7 @@ __asm__(".code32 \n\t");
 
 //=============template ininstantiate
 #if defined(CODE32)
-//	template class MemoryManager<SimpleMemoryManager>;
+	template class MemoryManager<SimpleMemoryManager>;
 #elif defined(CODE64)
 #include <cstdio>
 #include <cstring>
@@ -103,7 +103,7 @@ template<template <class> class _DescriptorAllocator>
 TreeNode<MemoryDescriptor> * MemoryManager<_DescriptorAllocator>::allocOutNode(TreeNode<MemoryDescriptor> *avlNode,size_t start,size_t len)
 {
 
-	Util::printf("in mm allocOut for %x,%x\n",start,len);
+//	Util::printf("in mm allocOut for %x,%x\n",start,len);
     // Test::dumpMemoryData(avlNode->getData());
     TreeNode<MemoryDescriptor> *newnode=NULL;
     if(avlNode)
@@ -111,7 +111,7 @@ TreeNode<MemoryDescriptor> * MemoryManager<_DescriptorAllocator>::allocOutNode(T
         size_t len1=(size_t)(start-avlNode->getData().getStart());
         size_t len2=(size_t)(avlNode->getData().getLimit() - len - len1);
 #if defined(CODE64)
-      printf("len1=%x,len2=%x\n",len1,len2);
+//      printf("len1=%x,len2=%x\n",len1,len2);
 #endif
 
         /*
@@ -143,16 +143,16 @@ TreeNode<MemoryDescriptor> * MemoryManager<_DescriptorAllocator>::allocOutNode(T
             newnode->getData().setLimit(len);
             newnode->getData().setAllocable(false);
 #if defined(CODE64)
-            printf("newnode is %x,%x,%d\n",newnode->getData().getStart(),newnode->getData().getLimit(),newnode->getData().isAllocable());
+//            printf("newnode is %x,%x,%d\n",newnode->getData().getStart(),newnode->getData().getLimit(),newnode->getData().isAllocable());
 #endif
         }
         if(len2>0)//后面有剩余
         {
-        	Util::printf("before smm new\n");
+//        	Util::printf("before smm new\n");
         	TreeNode<MemoryDescriptor> *newnodeEnd=this->smm->getNew();
-        	Util::printf("after smm new \n");
+//        	Util::printf("after smm new \n");
             new (newnodeEnd) TreeNode<MemoryDescriptor>(MemoryDescriptor(start+len,len2));
-            Util::printf("newnodeend is %x,%x,%d\n",newnodeEnd->getData().getStart(),newnodeEnd->getData().getLimit(),newnodeEnd->getData().isAllocable());
+//            Util::printf("newnodeend is %x,%x,%d\n",newnodeEnd->getData().getStart(),newnodeEnd->getData().getLimit(),newnodeEnd->getData().isAllocable());
 
             newnode->insertNext(newnodeEnd);
         }else{//没有就不进行任何操作
@@ -309,8 +309,10 @@ void* MemoryManager<_DescriptorAllocator>::mnew(size_t size) {
 
     this->copyOnAllocation(this->getHead());//保证复制了父节点
     TreeNode<MemoryDescriptor> *found=MemoryManager<_DescriptorAllocator>::findFirstLen(this->getHead(),size);
+
     if(found)
     {
+//    	Util::printf("found is ok.\n");
         TreeNode<MemoryDescriptor> *alloced = allocOutNode(found,found->getData().getStart(),size);
         if(alloced)
         {

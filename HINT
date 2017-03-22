@@ -33,3 +33,14 @@
 17. Hard disk read/write error? You'd full the 512 Byte buffer throught 0x1f0,otherwise data will not be written to disk.
 
 18. Error code may only denote segment descriptor.
+
+19.interrupt(): soft_int && (gate.dpl < CPL)		--		Gate.GPL is the least priviliged level.Often,if it is desired to be called by ring3,it should be 3.
+(The DPL of the syscall IDT entry needs to be numerically >= to the CPL. To make a syscall this way from ring 3, the DPL needs to be 3. Seems like your DPL is < the CPL. -- quote from http://www.google.com/search?q=interrupt()%3A+SS.rpl+!%3D+CS.dpl)
+
+20.	says 'PIT count cannot be 1 in mode 3',that's really because you set it to 1,change to 10 will fix this.
+
+21.	again fall in stack balance.I used 'pushw %cx;pushl %ebx;ljmp;'
+	so when it returns from another task,the stack is not balanced.to correctt this,add
+		'popl %ebx;popw %cx'
+	this will finely correct every thing.
+	cost me 5 hours.

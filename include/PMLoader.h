@@ -26,38 +26,91 @@ public:
 	   IDT_SIZE = 1 * SECSIZE,
 	   GDT_START = IDT_START + IDT_SIZE,
 	   GDT_SIZE = 2 * SECSIZE,
-	   TSS_AREA_SIZE = 2 * SECSIZE,
-	   TSS_AREA_START = GDT_START + GDT_SIZE,
+	   /**
+	    * TSS_AREA_XXX is deprecated because  TSS will be allocated dynamically
+	    */
+//	   TSS_AREA_SIZE = 2 * SECSIZE,
+//	   TSS_AREA_START = GDT_START + GDT_SIZE,
+
+	   /**
+	    * memory layout:
+	    * 	0	[		]
+	    * 512*4	[		]-->stack
+	    * 512*1	[		]-->IDT
+	    * 512*2	[		]-->GDT
+	    * 		[		]-->theKernel,FreeHeap
+	    * 		[		]-->SMMNode*100
+	    * 		[		]-->GDT Assocaited Nodes
+	    * 		[		]-->IDT Assocaited Nodes
+	    * 		[		]-->Code Start
+	    * 0xfffff[		]-->Code End
+	    * 		[		]-->Global Share Start	-->Kernel MemoryManager
+	    *512*100[		]-->Global Share End --> End of Whole Kernel
+	    *		[		]-->Process MemoryManager
+	    *
+	    */
 	   TSS_MIN_SIZE = 104,
-	   FREE_HEAP_SIZE = 5 * SECSIZE,
-	   FREE_HEAP_START = TSS_AREA_START + TSS_AREA_SIZE,
+	   FREE_HEAP_SIZE = 7 * SECSIZE,
+	   FREE_HEAP_START = GDT_START + GDT_SIZE,
 	   CODE_START = FREE_HEAP_START + FREE_HEAP_SIZE,
 /* CODE_SEG must be 0 ******DEPRECATED****	   CODE_SEG = 0, *******/
 	   CODE_LIMIT = 0xfffff,
+	   CODE_SIZE = CODE_LIMIT - CODE_START,
 		JMPSEG = 0x10,
+		JMPOFF = CODE_START + 10*SECSIZE,//从某个扇区开始
 #if defined(CODE16)
 		DRIVER = 0x80,  /*valid only for real mode*/
 #endif
 		REAL_SECNUMS = 25,
-		PROTECTED_SECNUMS = 100,
-		TEMP_SEG = 0xa00
-#if defined(CODE32) //
+		PROTECTED_SECNUMS = 132,/*100 for codes,8 for process1 & process2*/
+		TEMP_SEG = 0xa00,
+#if defined(CODE32)
 		/////////////Kernel arguments
-		,
-		KERNEL_START,
-		KERNEL_LENGTH = sizeof(Kernel),
-		MEMMAN_START,
-		MEMMAN_LENGTH = sizeof(MemoryManager),
-		SMM_MEM_START,
-		SMM_MEM_LENGTH = sizeof(SimpleMemoryManager<TreeNode<MemoryDescriptor> >),
+
+		/**
+		 * For theKernel
+		 */
+		KERNEL_START=FREE_HEAP_START,
+		KERNEL_SIZE = sizeof(Kernel),
+
+
+		/**
+		 * For theKernel->smm
+		 */
+		SMM_MEM_START = KERNEL_START + KERNEL_SIZE,
+		SMM_NODE_SIZE = sizeof(TreeNode<MemoryDescriptor>),
 		SMM_MAN_INIT_NODES = 100,
-		SMM_MAN_AREA_START,
-		SMM_MAN_AREA_LENGTH = sizeof(TreeNode<MemoryDescriptor>) *SMM_MAN_INIT_NODES,
-		END_OF_WHOLE_KERNEL,
-		GLOBAL_SHARE_START,
-		GLOBAL_SHARE_LENGH, //全局共享的库或者数据
-		PROCESS_SPECIAL_START,
-		PROCESS_SPECIAL_LENGTH
+		SMM_MEM_SIZE = SMM_NODE_SIZE * SMM_MAN_INIT_NODES,
+		/**
+		 * for idtm,gdtm
+		 */
+		GDT_NODE_START = SMM_MEM_START + SMM_MEM_SIZE,
+		GDT_NODE_ITEMS = GDT_SIZE / sizeof(SegmentDescriptor),
+		IDT_NODE_START = GDT_NODE_START + GDT_NODE_ITEMS * GDT_NODE_ITEMS*sizeof(SegmentDescriptor),
+		IDT_NODE_ITEMS = IDT_SIZE / sizeof(SegmentDescriptor),
+#endif
+
+#if defined(CODE32)||defined(CODE16)
+		/**
+		 * Global shares
+		 */
+		GLOBAL_SHARE_START = CODE_LIMIT,
+		GLOBAL_SHARE_SIZE = 100*SECSIZE, //全局共享的库或者数据,100 sectors
+		/**
+		 * for theKernel->kernelMM
+		 */
+		KERNEL_MM_START = GLOBAL_SHARE_START,
+		KERNEL_MM_SIZE = GLOBAL_SHARE_SIZE, //point to the end of whole kernel
+
+		END_OF_WHOLE_KERNEL = GLOBAL_SHARE_START + GLOBAL_SHARE_SIZE, //32MB
+
+
+
+		/**
+		 * for theKernel->processMM
+		 */
+		PROCESS_MM_START = END_OF_WHOLE_KERNEL,
+		PROCESS_MM_SIZE = 32*1024*1024 - PROCESS_MM_START,//实际内存的大小
 #endif
 
 	};

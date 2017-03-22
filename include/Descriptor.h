@@ -20,9 +20,51 @@ private:
 class SegmentDescriptor:public Descriptor{
 public:
 //conforming can let low privilage keeps
-    const static int TYPE_U_EXPANEDDOWN,TYPE_U_STACK,TYPE_U_DATA,TYPE_U_CODE_NONCONFORMING,TYPE_U_CODE_CONFORMING;
-    const static int TYPE_S_UNUSED_1,TYPE_S_UNUSED_2,TYPE_S_UNUSED_3,TYPE_S_UNUSED_4,TYPE_S_TSS_16_AVL,TYPE_S_TSS_16_BUSY,TYPE_S_TSS_32_AVL,TYPE_S_TSS_32_BUSY,TYPE_S_CALLGATE_16,TYPE_S_CALLGATE_32,TYPE_S_TASKGATE,TYPE_S_INTGATE_16,TYPE_S_TRAPGATE_16,TYPE_S_INTGATE_32,TYPE_S_TRAPGATE_32;
-    const static int DPL_0,DPL_1,DPL_2,DPL_3;
+	enum{
+						TYPE_U_STACK = 0b0010,
+		                TYPE_U_EXPANEDDOWN=0b0110,
+		                TYPE_U_DATA = 0b0010,
+		                TYPE_U_CODE_NONCONFORMING = 0b1010,
+		                TYPE_U_CODE_CONFORMING = 0b1110,
+		                TYPE_S_UNUSED_1=0b0000,
+						TYPE_S_LDT 		=0b0010,
+		                TYPE_S_UNUSED_2=0b1000,
+		                TYPE_S_UNUSED_3=0b1010,
+		                TYPE_S_UNUSED_4=0b1101,
+		                TYPE_S_TSS_16_AVL=0b0001,
+		                TYPE_S_TSS_16_BUSY=0b0011,
+		                TYPE_S_TSS_32_AVL=0b1001,
+		                TYPE_S_TSS_32_BUSY=0b1011,
+		                TYPE_S_CALLGATE_16=0b0100,
+		                TYPE_S_CALLGATE_32=0b1100,
+		                TYPE_S_TASKGATE=0b0101,
+		                TYPE_S_INTGATE_16=0b0110,
+		                TYPE_S_TRAPGATE_16=0b0111,
+		                TYPE_S_INTGATE_32=0b1110,
+		                TYPE_S_TRAPGATE_32=0b1111,
+						DPL_0=0x0,
+		                DPL_1=0x1,
+		                DPL_2=0x2,
+		                DPL_3=0x3,
+						S_SYSTEM=0x0,
+						S_USER=0x1,
+						L_LONG_SEGMENT=0x1, //L: 64bit  only for IA-32e
+						L_LEGACY_SEGMENT=0x0 ,//L: 32bit
+						P_PRESENT=0x1,
+						P_NON_PRESENT=0x0,
+						G_4KB=0x1,
+						G_1B = 0x0,
+						G_4KB_SCALE=4*1024,
+						D_OPSIZE32=0x1,
+						D_OPSIZE16=0x0,
+						B_UPPER_BOUND32=0x1,
+						B_UPPER_BOUND16=0x0,
+						RESERVED=0,
+
+	};
+//    const static int TYPE_U_EXPANEDDOWN,TYPE_U_STACK,TYPE_U_DATA,TYPE_U_CODE_NONCONFORMING,TYPE_U_CODE_CONFORMING;
+//    const static int TYPE_S_UNUSED_1,TYPE_S_UNUSED_2,TYPE_S_UNUSED_3,TYPE_S_UNUSED_4,TYPE_S_TSS_16_AVL,TYPE_S_TSS_16_BUSY,TYPE_S_TSS_32_AVL,TYPE_S_TSS_32_BUSY,TYPE_S_CALLGATE_16,TYPE_S_CALLGATE_32,TYPE_S_TASKGATE,TYPE_S_INTGATE_16,TYPE_S_TRAPGATE_16,TYPE_S_INTGATE_32,TYPE_S_TRAPGATE_32;
+//    const static int DPL_0,DPL_1,DPL_2,DPL_3;
 protected:
     short		limitLow_16:16;
     int			baseAddrLow_24:24;
@@ -69,7 +111,7 @@ public:
 //        char DefaultOperationSize;//0=16 1=32
 //        char D;//for Code Segment,it is
 //
-//        char LittleUpperBound;//for stack(expand down),it is 0xffff(64K),else if 0xffffffff(4G)
+//        char LittleUpperBound;//for stack(expand down),it is 0xffff(64K),else is 0xffffffff(4G)
 //        char B;
 //    };
 //    union{
@@ -96,7 +138,7 @@ public:
 //        char CCRA;//=1,code /Conforming ; Execute Only/Readable ; Accessed
 //    };
     
-    SegmentDescriptor(char* baseaddr=0,int limit=0,char type=TYPE_U_DATA,char dpl=DPL_0,char s=1,char b=1,char p=1);
+    SegmentDescriptor(char* baseaddr=0,int limit=0,char g=0,char type=TYPE_U_DATA,char dpl=DPL_0,char s=1,char b=1,char p=1);
     ~SegmentDescriptor();
 
     /**
@@ -114,6 +156,7 @@ public:
 
 //====================仅32位===============
 #if defined(CODE32)||defined(CODE64)
+#pragma pack(push,1)
 /**
 *IDT中的描述符
 *采用新的方式，必须用选项 -fpack-struct=1什么来支持
@@ -158,6 +201,7 @@ public:
         //D:0 16-bit  :1 32-bit
     
 };
+#pragma pack(pop)
 #endif //==CODE32 && CODE64==
 
 //=================function macros

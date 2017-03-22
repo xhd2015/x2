@@ -47,7 +47,7 @@ typedef unsigned int size_t;
 //定义如果一个功能还没有完全实现，就不要使用
 #define INCOMPLETE __attribute__((deprecated))
 #define UNTESTED __attribute__((deprecated))
-#define TEMPORARY	__attribute__((deprecated))  /*TEMPORARY means that a functoin does not complete all functions as its name
+#define TEMPORARY	__attribute__((deprecated))  /*TEMPORARY means that a function does not complete all functions as its name
 	denotes,it's just for test
 */
 
@@ -107,7 +107,7 @@ typedef unsigned int size_t;
 
 //===================设置ds,es的上下文环境====================
 /**
-*涉及堆栈平衡，不可能由非内联函数函数来实现。
+*涉及堆栈平衡，不可能由非内联函数来实现。
 */
 #define ENTER_DS(seg,saver) \
     int saver;\

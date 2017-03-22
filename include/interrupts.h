@@ -46,6 +46,7 @@ extern "C" {
    // int int0x20;//超越堆栈框架的中断处理程序
     void int0x24();
     void int0x25();
+    void int0x27();
     void intDefault();
 }
 extern int int0x20,int0x21;

@@ -28,6 +28,7 @@ int Util::printf(const char *fmt,...)
 	return n;
 #elif defined(CODE32) || defined(CODE16)
 	//I don't know what todo
+	Util::printStr(fmt);
 #endif
 }
 
@@ -55,14 +56,15 @@ const int Util::MODE_FL_ON=0x80,
         Util::MODE_FG_BLACK=0b0000000,
         Util::MODE_COMMON=(Util::MODE_FL_OFF & Util::MODE_BG_BLACK) | Util::MODE_FG_WHITE;
 const int Util::SCREEN_X=25,Util::SCREEN_Y=80;
+int		Util::strSel=0;
 
 //const int Util::SEG_CURRENT =    0x10000;//运行期常数，有时我需要一个编译期常数,那就在g++的命令行中定义之-D
-int Util::videoSelector=
-#if defined(CODE16)
-    0xb800;
-#elif defined(CODE32)
-    0b1000; //指向videoSelector
-#endif
+//int Util::videoSelector=
+//#if defined(CODE16)
+//    0xb800;
+//#elif defined(CODE32)
+//    0x8; //指向videoSelector
+//#endif
 
 
 Util::Util()
@@ -94,9 +96,11 @@ void Util::printStr(const char* str_addr,int mode)
 //	 );
 //	Util::jmpDie(); //Very OK
 #endif
-    while(*str_addr)
+	if(str_addr==NULL)return;
+	char ch;
+    while( (ch=(char)Util::get(Util::strSel,(int)str_addr++))!=0 )
     {
-        Util::printChar(*str_addr++,mode);
+        Util::printChar(ch,mode);
     }
 }
 void Util::printChar(char ch,int mode)
@@ -153,12 +157,7 @@ void Util::newLine()
     Util::y = 0;
     Util::x = (Util::x+1)%25;
 }
-void Util::insertMark(int marker)
-{
-    __asm__(
-     "nop \n\t"
-    );
-}
+
  int Util::get(int seg,int off)
  {
      ENTER_DS(seg,s);
@@ -431,7 +430,8 @@ int Util::sign(int n)
 #if defined(CODE32)
 //=================class : SimpleCharRotator
 const char SimpleCharRotator::rotateShapes[12]={'_','\b',0,'\\','\b',0,'|','\b',0,'/','\b',0};
-SimpleCharRotator::SimpleCharRotator(int x,int y,int attr,int direction):X(x),Y(y),Attr(attr),Status(0),Direction(direction)
+SimpleCharRotator::SimpleCharRotator(int x,int y,int attr,int direction):
+X(x),Y(y),Attr(attr),Status(0),Direction(direction)
 {
     
 }
@@ -455,7 +455,7 @@ void SimpleCharRotator::run()
         Util::setCursor(this->X,this->Y);
         //调用0x24中断打印字符
         Util::insertMark(0x5561);
-        CALL_INT_3(0x24,c,Util::SEG_CURRENT,b,&SimpleCharRotator::rotateShapes[this->Status],d,this->Attr);
+        CALL_INT_3(0x24,c,Util::getCurrentDs(),b,&SimpleCharRotator::rotateShapes[this->Status],d,this->Attr);
         this->Status = (this->Status*this->Direction + 3) % (sizeof(SimpleCharRotator::rotateShapes)/sizeof(char));
     }
 }
@@ -642,7 +642,8 @@ Printer  Printer::getSubPrinter(unsigned int x0,unsigned int y0,unsigned int row
 
     //no return target, avoid copying on return
 }
-#endif //SimpleCharRotator,Printer in CODE32
+
+#endif //SimpleCharRotator,Printer ,ErrorSaverin CODE32
 
 #if defined(CODE32) || defined(CODE64)
 //==========class : String
@@ -722,7 +723,10 @@ int Queue<T>::add(T t)
     }
     return 1;
     
+
 }
+
+
 #endif //class Queue,String in CODE32 && CODE64
 
 //======================================================================

@@ -14,7 +14,8 @@ STDCPP := stdc++
 
 #control which files are compiled.
 f16 := main libx2 PMLoader Descriptor IOProgramer
-f32 := protected_main libx2 PMLoader Descriptor TSS interrupts IOProgramer Memory test List AssociatedMemoryManager Process Kernel
+f32 := protected_main libx2 PMLoader Descriptor TSS interrupts IOProgramer Memory test List AssociatedMemoryManager Process Kernel idleProcess Cache
+f32user := UserProcess libx2
 f64 := libx2 PMLoader Descriptor TSS Memory List Locator AssociatedMemoryManager
 
 
@@ -89,18 +90,41 @@ $(GEN32)/main.img:$(patsubst %,$(GEN32)/%.o,$(f32))
 	ld -Timage_32.ld $(LDFLAGS) $^ -o $@
 $(GEN16)/main.img:$(patsubst %,$(GEN16)/%.o,$(f16))
 	ld -Timage_16.ld $(LDFLAGS) $^ -o $@
+	
 $(GEN16)/main.bimg: $(GEN16)/main.img
 	objcopy -g -j .secmbr -j .secmain -O binary $< $@
 $(GEN32)/main.bimg: $(GEN32)/main.img
 	objcopy -g -j .text -j .data -O binary $< $@
-$(GEN)/main.bimg : partitions_table $(GEN16)/main.bimg $(GEN32)/main.bimg
+	
+
+$(GEN32)/UserProcess2.img:$(patsubst %,$(GEN32)/%.o,$(f32user))
+	ld -Timage_32_proc2.ld	$(LDFLAGS) $^ -o $@
+$(GEN32)/UserProcess1.img:$(patsubst %,$(GEN32)/%.o,$(f32user))
+	ld -Timage_32_proc1.ld	$(LDFLAGS) $^ -o $@
+	
+$(GEN32)/UserProcess1.bimg:$(GEN32)/UserProcess1.img
+	objcopy -g -j .text -j .data -O binary $< $@
+$(GEN32)/UserProcess2.bimg:$(GEN32)/UserProcess2.img
+	objcopy -g -j .text -j .data -O binary $< $@
+
+#16 sectors for each process code/data
+$(GEN32)/UserProcess.bimg:$(GEN32)/UserProcess1.bimg $(GEN32)/UserProcess2.bimg
+	if [ ! -f $@ ];then
+		touch $@
+	fi
+	while [ ! -f $@ ];do :;done
+	dd if=$(GEN32)/UserProcess1.bimg of=$@	bs=1c count=$$((16*512))	conv=notrunc &&\
+	dd if=$(GEN32)/UserProcess2.bimg of=$@	seek=$$((512*16)) bs=1c count=$$((16*512))	conv=notrunc
+	
+$(GEN)/main.bimg : partitions_table $(GEN16)/main.bimg $(GEN32)/main.bimg $(GEN32)/UserProcess.bimg
 	if [ ! -f $@ ];then 
 	cmd /C 'cd C:\Users\13774\Desktop\bochs\devel\x2^ system\tools\bochs^ run && explorer create_main_image.cmd'
 	fi
 	while [ ! -f $@ ];do :;done  #wait until that image file is created
-	dd if=$(GEN16)/main.bimg of=$@ bs=1c count=$$((512*25)) conv=notrunc
-	dd if=partitions_table of=$@  bs=1c conv=notrunc seek=$$((0x1BE)) count=$$((512  - 0x1BE)) 
-	dd if=$(GEN32)/main.bimg of=$@ bs=1c conv=notrunc seek=$$((512*25)) count=$$((512*100))
+	dd if=$(GEN16)/main.bimg of=$@ bs=1c count=$$((512*25)) conv=notrunc &&\
+	dd if=partitions_table of=$@  bs=1c conv=notrunc seek=$$((0x1BE)) count=$$((512  - 0x1BE)) &&\
+	dd if=$(GEN32)/main.bimg of=$@ bs=1c conv=notrunc seek=$$((512*25)) count=$$((512*100)) &&\
+	dd if=$(GEN32)/UserProcess.bimg of=$@ bs=1c conv=notrunc seek=$$((512*100 + 512*25)) count=$$((32*512))
 # .s --> .o
 $(GEN16)/%.o:$(GEN16)/%.s
 	as $(ASSYMS) $< -o $@
@@ -126,4 +150,5 @@ $(SRC)/%.cpp:$(INCLUDE)/*
 
 #Keep the directory structure
 clean:
-	-rm -rf $(GEN16)/* $(GEN32)/* $(GEN64)/* $(GEN)/main.bimg
+	-rm -rf $(GEN16)/* $(GEN32)/* $(GEN64)/* 
+	#-rm -rf $(GEN)/main.bimg

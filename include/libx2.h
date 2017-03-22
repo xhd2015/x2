@@ -18,12 +18,24 @@ public:
     const static int MODE_COMMON,MODE_FL_ON,MODE_FL_OFF,MODE_BG_RED,MODE_BG_GREEN,MODE_BG_BLUE,MODE_BG_WHITE,MODE_BG_RG,MODE_BG_RB,MODE_BG_BG,MODE_BG_BLACK,MODE_FG_RED,MODE_FG_GREEN,MODE_FG_BLUE,MODE_FG_WHITE,MODE_FG_RG,MODE_FG_RB,MODE_FG_BG,MODE_FG_BLACK;
     const static int SCREEN_X,SCREEN_Y;
     enum{SEG_CURRENT=0x10000};
-    static int videoSelector;
+//    static int videoSelector;
+    enum{
+    	videoSelector=
+#if defined(CODE16)
+    0xb800,
+#elif defined(CODE32)
+    0x8, //指向videoSelector
+#endif
+		END_ENUM
+    };
+    static int strSel;
+    AS_MACRO static void	setStrSel(int sel);
+    AS_MACRO static int  getStrSel();
     static void printStr(const char* str_addr,int mode=MODE_COMMON);
     static void printChar(char ch,int mode=MODE_COMMON);//0x7:White_Black_NoFlash
     static void setCursor(int x,int y); //25 * 80
     static void newLine();
-    static void insertMark(int marker=0x1234);//插入一个语句 mov $,%eax
+    AS_MACRO static void insertMark(int marker=0x1234);//插入一个语句 mov $,%eax
  
     static int get(int seg,int off);//seg=0x10000指向当前ds
     static void setb(int seg,int off,int byte);
@@ -53,6 +65,8 @@ public:
     AS_MACRO static char inb(short port);
     AS_MACRO static short inw(short port);
     AS_MACRO static void ltr(int sel);
+    AS_MACRO static void lldt(int sel);
+    AS_MACRO static int	getCurrentDs();
 
     //==================仅32位
 public:
@@ -220,6 +234,15 @@ private:
     */
     void __putc(int chr);
 };
+
+class ErrorSaver{
+public:
+	AS_MACRO ErrorSaver(int errno=0);
+	AS_MACRO int getErrno()const;
+protected:
+	AS_MACRO void setErrno(int errno);
+	int errno;
+};
 #endif //CODE32
 
 #if defined(CODE32)||defined(CODE64)
@@ -273,6 +296,20 @@ void Util::reboot()
     :
     :
     :"eax"
+    );
+}
+void	Util::setStrSel(int sel)
+{
+	Util::strSel=sel;
+}
+int  Util::getStrSel()
+{
+	return Util::strSel;
+}
+void Util::insertMark(int marker)
+{
+    __asm__(
+     "nop \n\t"
     );
 }
 void Util::jmpDie()
@@ -395,6 +432,19 @@ int Printer::getY()
 {
     return this->y;
 }
+
+//=======class ErrorSaver
+ErrorSaver::ErrorSaver(int errno):errno(errno) {
+}
+
+int ErrorSaver::getErrno() const {
+	return this->errno;
+}
+
+void ErrorSaver::setErrno(int errno) {
+	this->errno=errno;
+}
+
 void Util::ltr(int sel)
 {
     __asm__ __volatile__(
@@ -403,6 +453,27 @@ void Util::ltr(int sel)
     :"m"(sel)
     :
     );
+}
+void Util::lldt(int sel)
+{
+    __asm__ __volatile__(
+    "lldt %0 \n\t"
+    :
+    :"m"(sel)
+    :
+    );
+}
+int	Util::getCurrentDs()
+{
+	int temp;
+	__asm__ __volatile__(
+	"push %%ds \n\t"
+	"pop %%eax \n\t"
+	:"=a"(temp)
+	:
+	:
+	);
+	return temp;
 }
 void Util::intReturn()
 {

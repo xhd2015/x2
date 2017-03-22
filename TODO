@@ -1,6 +1,7 @@
 [*] == done	[-] == deprecated	[]  == proposed		[+] == doing
 
-
+[]	int 0x27 happens but which should have been masked.
+		int 0x27 should be irq7.And it is corresponding to parallel port 1 , for printers,and 		if printers are not present,then it is for parallel port.
 []	SimpleMemoryManager	--	Error handling style:
 		1.Simplified : pass an error function to it(which accepts this & error code as argument),it will call that handle whenever error condition happened
 		2.Unified but complicated: use c++ exception

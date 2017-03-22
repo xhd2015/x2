@@ -24,35 +24,36 @@ Descriptor::~Descriptor()
 
 }
 //==========For SegmentDescriptor===========
-const int       SegmentDescriptor::TYPE_U_STACK = 0b0010,
-                SegmentDescriptor::TYPE_U_EXPANEDDOWN=0b0110,
-                SegmentDescriptor::TYPE_U_DATA = 0b0010,
-                SegmentDescriptor::TYPE_U_CODE_NONCONFORMING = 0b1010,
-                SegmentDescriptor::TYPE_U_CODE_CONFORMING = 0b1110,
-                SegmentDescriptor::TYPE_S_UNUSED_1=0b0000,
-                SegmentDescriptor::TYPE_S_UNUSED_2=0b1000,
-                SegmentDescriptor::TYPE_S_UNUSED_3=0b1010,
-                SegmentDescriptor::TYPE_S_UNUSED_4=0b1101,
-                SegmentDescriptor::TYPE_S_TSS_16_AVL=0b0001,
-                SegmentDescriptor::TYPE_S_TSS_16_BUSY=0b0011,
-                SegmentDescriptor::TYPE_S_TSS_32_AVL=0b1001,
-                SegmentDescriptor::TYPE_S_TSS_32_BUSY=0b1011,
-                SegmentDescriptor::TYPE_S_CALLGATE_16=0b0100,
-                SegmentDescriptor::TYPE_S_CALLGATE_32=0b1100,
-                SegmentDescriptor::TYPE_S_TASKGATE=0b0101,
-                SegmentDescriptor::TYPE_S_INTGATE_16=0b0110,
-                SegmentDescriptor::TYPE_S_TRAPGATE_16=0b0111,
-                SegmentDescriptor::TYPE_S_INTGATE_32=0b1110,
-                SegmentDescriptor::TYPE_S_TRAPGATE_32=0b1111;
-const int       SegmentDescriptor::DPL_0=0x0,
-                SegmentDescriptor::DPL_1=0x1,
-                SegmentDescriptor::DPL_2=0x2,
-                SegmentDescriptor::DPL_3=0x3;
+//=====DEPRECATED=========
+//const int       SegmentDescriptor::TYPE_U_STACK = 0b0010,
+//                SegmentDescriptor::TYPE_U_EXPANEDDOWN=0b0110,
+//                SegmentDescriptor::TYPE_U_DATA = 0b0010,
+//                SegmentDescriptor::TYPE_U_CODE_NONCONFORMING = 0b1010,
+//                SegmentDescriptor::TYPE_U_CODE_CONFORMING = 0b1110,
+//                SegmentDescriptor::TYPE_S_UNUSED_1=0b0000,
+//                SegmentDescriptor::TYPE_S_UNUSED_2=0b1000,
+//                SegmentDescriptor::TYPE_S_UNUSED_3=0b1010,
+//                SegmentDescriptor::TYPE_S_UNUSED_4=0b1101,
+//                SegmentDescriptor::TYPE_S_TSS_16_AVL=0b0001,
+//                SegmentDescriptor::TYPE_S_TSS_16_BUSY=0b0011,
+//                SegmentDescriptor::TYPE_S_TSS_32_AVL=0b1001,
+//                SegmentDescriptor::TYPE_S_TSS_32_BUSY=0b1011,
+//                SegmentDescriptor::TYPE_S_CALLGATE_16=0b0100,
+//                SegmentDescriptor::TYPE_S_CALLGATE_32=0b1100,
+//                SegmentDescriptor::TYPE_S_TASKGATE=0b0101,
+//                SegmentDescriptor::TYPE_S_INTGATE_16=0b0110,
+//                SegmentDescriptor::TYPE_S_TRAPGATE_16=0b0111,
+//                SegmentDescriptor::TYPE_S_INTGATE_32=0b1110,
+//                SegmentDescriptor::TYPE_S_TRAPGATE_32=0b1111;
+//const int       SegmentDescriptor::DPL_0=0x0,
+//                SegmentDescriptor::DPL_1=0x1,
+//                SegmentDescriptor::DPL_2=0x2,
+//                SegmentDescriptor::DPL_3=0x3;
 SegmentDescriptor::~SegmentDescriptor()
 {
 
 }
-SegmentDescriptor::SegmentDescriptor(char* baseaddr,int limit,char type,char dpl,char s,char b,char p):AVL(0),G(0),D(b),P(p),S(s),L(0),DPL(dpl),type(type)
+SegmentDescriptor::SegmentDescriptor(char* baseaddr,int limit,char g,char type,char dpl,char s,char b,char p):AVL(0),G(g),D(b),P(p),S(s),L(0),DPL(dpl),type(type)
 {
 	this->setBaseAddr((int)(size_t)baseaddr);
 	this->setLimit(limit);
@@ -187,7 +188,6 @@ void SegmentDescriptor::init(char* baseaddr,int limit,char type,char dpl,char s,
 	this->setLimit(limit);
 	this->type = type;
 	this->DPL = dpl;
-    this->DPL = dpl;
     this->S = s;
     this->D = b;
     this->P = p;

@@ -11,12 +11,12 @@ SECTIONS {
 
 	}
 	*/ /*This is discarded by objcopy even said -j .stack*/
-	.text 512*14: { 
+	.data 512*14: {
+		*(.rdata .data .bss)
+	}
+	.text 512*(14+10): { 
 		 /*PROVIDE( _CODE_START = ABSOLUTE(.) );*/
 		*(.text)
-	}
-	.data : {
-		*(.rdata .data .bss)
 	}
 	
 	/DISCARD/ : {

@@ -15,13 +15,19 @@
 //template class SimpleMemoryManager<ListNode<int> >;
 //template class SimpleMemoryManager<TreeNode<MemoryDescriptor> >;
 #ifdef CODE32
-//	template class ListNode<int>;
-//	template class ListNode<MemoryDescriptor>;
-//	template class LinkedList<int,SimpleMemoryManager>;
-//	template class Tree<MemoryDescriptor,SimpleMemoryManager>;
-//	template class TreeNode<MemoryDescriptor>;
-//	template class SimpleMemoryManager<ListNode<int> >;
-//	template class SimpleMemoryManager<TreeNode<MemoryDescriptor> >;
+#include <Process.h>
+#include <Kernel.h>
+	template class ListNode<MemoryDescriptor>;
+	template class TreeNode<MemoryDescriptor>;
+	template class SimpleMemoryManager<ListNode<MemoryDescriptor> >;
+	template class SimpleMemoryManager<TreeNode<MemoryDescriptor> >;
+	template class Tree<MemoryDescriptor,SimpleMemoryManager>;
+	template class ListNode<TreeNode<Process*>* >;
+
+	template class ListNode<Process*>;
+	template class TreeNode<Process*>;
+	template class Tree<Process*,KernelSmmWrapper>;
+	template class LinkedList<TreeNode<Process*>*,KernelSmmWrapper>;
 #elif defined(CODE64)
 #include <cstdio>
 	#include "/home/13774/x2-devel/filesystem/verify-in-cygwin/File.h"
@@ -206,17 +212,21 @@ void    ListNode<T>::insertPrevious(ListNode<T>* previous)
 template<class T>
 void   ListNode<T>::adjustOffset(ptrdiff_t diff)
 {
-	This::adjustOffset(this->next, diff);
-	This::adjustOffset(this->previous, diff);
+	if(this->next!=NULL)
+		this->next = (ListNode<T>*)((char*)this->next + diff);
+	if(this->previous!=NULL)
+		this->previous = (ListNode<T>*)((char*)this->previous + diff);
 }
 template<class T>
 ListNode<T>*   ListNode<T>::getLast()const
 {
+//	Util::printStr("in ListNode getLast\n");
     ListNode<T>* p=(ListNode<T>*)this;
     while(p->hasNext())
     {
         p=p->getNext();
     }
+//    Util::printStr("in getLast returning \n");
     return p;
 }
 template<class T>
@@ -428,7 +438,7 @@ void	 LinkedList<T,_Allocator >::insertPrevious(ListNode<T>* where,ListNode<T>* 
 
 }
 template<class T,template<class> class _Allocator>
-size_t   LinkedList<T,_Allocator >::getSize()
+size_t   LinkedList<T,_Allocator >::getSize()const
 {
 	size_t size=0;
 	ListNode<T>* p=root;
@@ -633,13 +643,24 @@ inline TreeNode<T>::~TreeNode() {
 }
 
 template<class T>
+void TreeNode<T>::addSon(TreeNode<T>* son)
+{
+//	Util::printStr("in TreeNode addSon \n");
+	TreeNode<T>*	orison=this->getSon();
+	if(orison)
+	{
+		orison->getLast()->insertNext(son);
+	}else{
+		this->setSon(son);
+	}
+}
+template<class T>
 void TreeNode<T>::insertSon(TreeNode<T>* son) {
 	if(son!=NULL)
 	{
 #if defined(CODE64)
 //	printf("insertSon 0\n");
 #endif
-	this->getSon();
 #if defined(CODE64)
 //	printf("getSon return\n");
 #endif
@@ -693,8 +714,10 @@ template<class T>
 void 			TreeNode<T>::adjustOffset(ptrdiff_t diff)
 {
 	this->Father::adjustOffset(diff);
-	Father::adjustOffset(this->father,diff);
-	Father::adjustOffset(this->son,diff);
+	if(this->father!=NULL)
+		this->father = (TreeNode<T>*)((char*)this->father + diff);
+	if(this->son!=NULL)
+		this->son = (TreeNode<T>*)((char*)this->son + diff);
 }
 
 template<class T>
@@ -731,7 +754,7 @@ template<class T,template <class> class _Allocator>
 Tree<T,_Allocator>::Tree(_Allocator<TreeNode<T> >* smm,TreeNode<T>* root):
 smm(smm)
 {
-	this->root=root==NULL?smm->getNew():root;
+	this->root=(root==NULL?smm->getNew():root);
 	//char saver[sizeof(T)];
 	//new (this->root) TreeNode<T>(*(T*)saver);//root must be very carefully initiated,but if you don't do that,it is fine.Do be very
 	//careful about the actual type at a position.Because that's really important.
@@ -767,22 +790,3 @@ void         Tree<T,_Allocator>::free(TreeNode<T> *root)
     smm->withdraw(root);
   }
 }
-template<class T,template <class> class _Allocator>
-TreeNode<T>* Tree<T,_Allocator>::getHead()const {
-	return root->getSon();
-}
-
-template<class T,template <class> class _Allocator>
-void  Tree<T,_Allocator>::setHead(TreeNode<T> *head)
- {
-#if defined(CODE64)
-	//printf("root : %x  , head : %x\n",root,head);
-	//head->setFather(root);
-	//head->setSon(root);
-	//printf("head data : %x \n",head->getDirectFather());
-#endif
- 	root->setSon(head);//wrong
-#if defined(CODE64)
- 	//printf("root->setSon : %x\n",root->getSon());
-#endif
- }

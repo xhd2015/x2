@@ -51,6 +51,7 @@ public:
 	typedef struct Freeable Node;
 	typedef void (*ERROR_HANDLER)(SimpleMemoryManager *smm,int errcode);
 	enum{
+		ERR_NO_ERROR=0,
 		ERR_SPACE_IS_FULL,
 		ERR_NODE_NOT_INTERNAL,//NULL is treated not internal but also not external
 		ERR_GENERAL /*an error not currently defined*/
@@ -119,7 +120,7 @@ public:
 
     ListNode<T>*    getLast()const;//done
     ListNode<T>*    getFirst()const;//done
-    AS_MACRO static void adjustOffset(void *&p,ptrdiff_t off);
+    DEPRECATED AS_MACRO static void adjustOffset(char **p,ptrdiff_t off);
     //指向构造函数的地址
     //用 new (void*p) 构造函数,俗称placement new
 protected:
@@ -161,7 +162,8 @@ public:
     void            remove(ListNode<T>* p);//done
     void			insertNext(ListNode<T>* where,ListNode<T>* p);//done
     void			insertPrevious(ListNode<T>* where,ListNode<T>* p);//done
-    size_t 			getSize();//done
+    size_t 			getSize()const;//done
+    AS_MACRO 		bool			isEmpty()const;
 
 
     void freeNode(ListNode<T> * node);//done
@@ -253,6 +255,7 @@ public:
     AS_MACRO TreeNode<T>* setFather(TreeNode<T>* father);//done
     AS_MACRO TreeNode<T>* getSon()const; //done
     AS_MACRO TreeNode<T>* getDirectFather()const;//direct father,done
+    		void		addSon(TreeNode<T>* son);
     AS_MACRO bool		hasSon()const;
     AS_MACRO bool 		hasFather()const;
 
@@ -280,8 +283,11 @@ public:
     Tree(_Allocator<TreeNode<T> > *smm,TreeNode<T>* root=NULL);//If give root=NULL,then assign root by smm,else by root.
     ~Tree();
     
-    TreeNode<T> *getHead()const;//done
-    void 		setHead(TreeNode<T> *head);  //返回其自身,done
+    AS_MACRO TreeNode<T> *getHead()const;//done
+    AS_MACRO void 		setHead(TreeNode<T> *head);  //返回其自身,done
+    AS_MACRO void		addRoot(TreeNode<T>* node);
+    AS_MACRO bool		isEmpty()const;
+    AS_MACRO	_Allocator<TreeNode<T> >*	getSmm()const;
     void         free(TreeNode<T> *root);//将root自身和所有子节点都释放掉，== withdraw all nodes recursively  done
 
 protected:
@@ -340,11 +346,11 @@ int  ListNode<T>::hasPrevious()const
 {
     return (this->previous!=NULL);
 }
-template<class T>
-void ListNode<T>::adjustOffset(void *&p,ptrdiff_t diff)
-{
-	if(p!=NULL)p+=diff;
-}
+//template<class T>
+//void ListNode<T>::adjustOffset(char **p,ptrdiff_t diff)
+//{
+//	if(p!=NULL && *p!=NULL)*p+=diff;
+//}
 template<class T>
 int  ListNode<T>::hasNext()const
 {
@@ -376,6 +382,11 @@ template<class T,template <class> class _Allocator>
 ListNode<T>*  LinkedList<T,_Allocator>::getLast()const
 {
     return last->getNext();
+}
+template <class T,template <class> class _Allocator>
+bool			LinkedList<T,_Allocator>::isEmpty()const
+{
+	return this->getHead()==NULL;
 }
 template <class T,template <class> class _Allocator>
 _Allocator<ListNode<T> > *LinkedList<T,_Allocator>::getMemoryManager()const
@@ -456,7 +467,7 @@ void			SimpleMemoryManager<T>::setErrHandler(SimpleMemoryManager<T>::ERROR_HANDL
 template<class T>
 bool			SimpleMemoryManager<T>::checkIsInternal(Node *t)
 {
-	return this->start <= t && (size_t)t - (size_t)this->start <= this->limit ;
+	return this->start <= (size_t)t && (size_t)t - (size_t)this->start <= this->limit ;
 }
 //===========class TreeNode
 
@@ -500,4 +511,40 @@ bool 		 TreeNode<T>::hasFather()const
 	return this->father!=NULL;
 }
 
+//======class Tree
+template<class T,template <class> class _Allocator>
+TreeNode<T>* Tree<T,_Allocator>::getHead()const {
+	return root->getSon();
+}
+
+template<class T,template <class> class _Allocator>
+void  Tree<T,_Allocator>::setHead(TreeNode<T> *head)
+ {
+#if defined(CODE64)
+	//printf("root : %x  , head : %x\n",root,head);
+	//head->setFather(root);
+	//head->setSon(root);
+	//printf("head data : %x \n",head->getDirectFather());
+#endif
+ 	root->setSon(head);
+#if defined(CODE64)
+ 	//printf("root->setSon : %x\n",root->getSon());
+#endif
+ }
+
+template<class T,template <class> class _Allocator>
+void		Tree<T,_Allocator>::addRoot(TreeNode<T>* node)
+{
+	this->root->addSon(node);
+}
+template<class T,template <class> class _Allocator>
+bool		Tree<T,_Allocator>::isEmpty()const
+{
+	return !(this->root->hasSon());
+}
+template<class T,template <class> class _Allocator>
+_Allocator<TreeNode<T> >*	Tree<T,_Allocator>::getSmm()const
+{
+	return this->smm;
+}
 #endif //List_h__

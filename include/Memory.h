@@ -4,17 +4,21 @@
 #include <List.h>
 #include <Locator.h>
 #include <def.h>
-#include <Kernel.h>
+//#include <Kernel.h>
 
 #if defined(CODE32)
+//new & delete
+AS_MACRO void*	operator new(size_t size){return NULL;}
+AS_MACRO void	operator delete(void *p){}
+
 //全局方法: placement new和placement delete
 // Default placement versions of operator new.
-inline void* operator new(size_t, void* __p){ return __p; };
-inline void* operator new[](size_t, void* __p){ return __p; };
+AS_MACRO void* operator new(size_t, void* __p){ return __p; };
+AS_MACRO void* operator new[](size_t, void* __p){ return __p; };
 
 // Default placement versions of operator delete.
-inline void operator delete  (void*, void*){};
-inline void operator delete[](void*, void*){};
+AS_MACRO void operator delete  (void*, void*){};
+AS_MACRO void operator delete[](void*, void*){};
 #elif defined(CODE64)
 		#include <new>
 #include <cstdio>
@@ -183,6 +187,10 @@ public:
 
     void withdrawToParent();                    //回收到父级管理器,当其撤销的时候，必须将子类移动到父类的子类中,done
 
+    //=========getter & setter
+    AS_MACRO size_t	getBase()const;
+    AS_MACRO size_t getLimit()const;
+
     //===support for List
     static TreeNode<MemoryDescriptor> *findFirstStart(TreeNode<MemoryDescriptor>* loc,size_t start,size_t len);//done
     static TreeNode<MemoryDescriptor> *findFirstLen(TreeNode<MemoryDescriptor>* loc,size_t len);//done
@@ -319,6 +327,7 @@ bool MemoryDescriptor::operator!=(const MemoryDescriptor& b)const
 {
     return ! this->operator==(b);
 }
+
 //==============class LinearSourceManager
 template <class _LinearSourceDescriptor,template <class> class _NodeAllocator>
 const _LinearSourceDescriptor & LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator>::getSpace()const
@@ -326,5 +335,15 @@ const _LinearSourceDescriptor & LinearSourceManager<_LinearSourceDescriptor,_Nod
 	return this->space;
 }
 
+//============class MemoryManager<_DescriptorAllocator>
+template<template<class > class _DescriptorAllocator>
+size_t MemoryManager<_DescriptorAllocator>::getBase() const {
+	return this->root->getData().getStart();
+}
+
+template<template<class > class _DescriptorAllocator>
+size_t MemoryManager<_DescriptorAllocator>::getLimit() const {
+	return this->root->getData().getLimit();
+}
 
 #endif //Memory_h__

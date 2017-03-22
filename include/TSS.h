@@ -28,7 +28,7 @@ public:
         union{  char I21[4];int DS:16;};
         union{  char I22[4];int FS:16;};
         union{  char I23[4];int GS:16;};
-        union{  char I24[4];int LDTSELECTOR:16;int LDTSEL:16;};
+        union{  char I24[4];int LDTSELECTOR:16;int LDTSEL:16;int LDT:16;};
         union{  char I25[2];char TRAP:1;};
         union{  char __I25[2];int IOBASE:16;};
 
