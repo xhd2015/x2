@@ -9,6 +9,7 @@ __asm__(
 //extern int READSEG[];//use _READSEG in other file
 
 #include <libx2.h>
+#include <macros/libx2_macros.h>
 #include <PMLoader.h>
 #include <Descriptor.h>
 #include <def.h>

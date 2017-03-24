@@ -11,8 +11,10 @@ __asm__(".code32\n\t");
 #include <Memory.h>
 #include <IOProgramer.h>
 
+#include <macros/all.h>
+
 Test::Test():
-dbg(Printer(5,40,15,30))
+dbg(Printer(5,60,15,10))
 {
     
     
@@ -246,6 +248,11 @@ void Test::testIO_HDD()
 //    p=q.remove();
 //    dbg.putc(p);
 //}
+void Test::testVM()
+{
+	//=====enabling virtual memory
+
+}
 void Test::run()
 {
     //testQueue();

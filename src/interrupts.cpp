@@ -7,6 +7,8 @@ __asm__(".code32 \n\t");
 #include <def.h>
 #include <Kernel.h>
 
+#include <macros/all.h>
+
 void (*__intAddresses[])() ={
      int0x0,
      int0x1,
@@ -54,7 +56,18 @@ void (*__intAddresses[])() ={
      int0x25,
 	 intDefault,
 	 int0x27, // 0x27 --- 40
-	 intDefault
+
+	 intDefault,
+	 intDefault,
+	 intDefault,
+	 intDefault,
+	 intDefault,
+	 intDefault,
+	 intDefault,
+	 intDefault,  // 0x2f
+
+	 0 /*GPUI*/
+
  };
 int *intAddresses=(int*)__intAddresses;
 int intLen=sizeof(__intAddresses)/sizeof(int);
@@ -782,6 +795,73 @@ void int0x27()
 //			);
 
 }
+
+
+//============中断处理程序: 42============
+/**
+* General Purposed User Interrupt
+* 	The only interface that user process contact with kernel
+*
+* 	eax	--	main function index
+* 		high 24 bits for main index
+* 		low  8  bits for sub index
+* 	ecx --	arguments	data segment
+* 	ebx --  arguments	data pointer
+* 	edx --	...
+*
+*/
+__asm__(
+".text \n\t"
+".global _int0x30 \n\t"
+"_int0x30: \n\t"
+"push %edx \n\t"
+"push %ds \n\t"
+
+);
+void _int0x30()
+{
+    int dsSel,off,mainIndex,subIndex;
+    __asm__ __volatile__(
+    "mov %%al,%2 \n\t"
+    "shr $8,%%eax \n\t"
+    "mov %%eax,%3 \n\t"
+    :"=c"(dsSel),"=b"(off),"=m"(subIndex),"=m"(mainIndex)
+    :
+    :"eax"
+    );
+	__asm__ __volatile__(
+		"mov %%eax,%%ds\n\t"
+			:
+			:"a"(Kernel::KERNEL_DS)
+			:
+	);
+
+	if(mainIndex==Kernel::GPUI_MEM)
+	{
+		/**
+		 *   processMM allocate
+		 *
+		 *   rule 1:
+		 *   	if only 1 arg & 1 return
+		 *   		ecx is used to store argument
+		 *   		ebx is used to return result
+		 */
+		if(subIndex==Kernel::GPUI_MEM_NEW) // int new(size_t newsize)
+		{
+
+		}
+	}
+
+    __asm__(
+    "leave \n\t"
+    "pop %edx \n\t"
+    "pop %ds \n\t"
+    "iret \n\t"
+    );
+}
+//===================================================
+
+
 //===================================================
 
 //===============中断处理程序：默认打印信息============

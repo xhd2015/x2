@@ -49,7 +49,7 @@ extern "C" {
     void int0x27();
     void intDefault();
 }
-extern int int0x20,int0x21;
+extern int int0x20,int0x21,int0x30;
 
 class InterruptsManager{
 public:

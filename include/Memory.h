@@ -171,6 +171,7 @@ public:
     //operator new and delete
     void* mnew(size_t start,size_t size);//done
     void* mnew(size_t size);//done
+    void* mnewAlign(size_t size,size_t alignment);
     /*
      * if returned true,then the it worked
      * else not worked,nothing effected
@@ -194,6 +195,7 @@ public:
     //===support for List
     static TreeNode<MemoryDescriptor> *findFirstStart(TreeNode<MemoryDescriptor>* loc,size_t start,size_t len);//done
     static TreeNode<MemoryDescriptor> *findFirstLen(TreeNode<MemoryDescriptor>* loc,size_t len);//done
+    static TreeNode<MemoryDescriptor>*findFirstLenAlign(TreeNode<MemoryDescriptor>* loc, size_t len,size_t &extra,size_t alignment);
     static TreeNode<MemoryDescriptor> *locateForInsertation(TreeNode<MemoryDescriptor>* loc,TreeNode<MemoryDescriptor> *son);
     static TreeNode<MemoryDescriptor> *locateForDelete(TreeNode<MemoryDescriptor>* loc,size_t start,size_t len,bool allocable);//done
     static TreeNode<MemoryDescriptor>* locateForDeleteStart(TreeNode<MemoryDescriptor>* loc,size_t start,bool allocable);//done
@@ -240,110 +242,5 @@ class HighLevelSimpleMemoryManager{
 /***************CLASS DEFINITION END***********************/
 
 
-//========Function Macro
-//===class: LinearSourceDescriptor
-LinearSourceDescriptor::LinearSourceDescriptor()
-{
-
-}
- LinearSourceDescriptor::LinearSourceDescriptor(size_t start,size_t limit):
- start(start),limit(limit)
- {
-
- }
- LinearSourceDescriptor::~LinearSourceDescriptor() {
- }
- size_t  LinearSourceDescriptor::getStart()const
- {
-    return start;
- }
- size_t LinearSourceDescriptor::getLimit()const
- {
-    return limit;
- }
- void  LinearSourceDescriptor::setStart(size_t start)
- {
-    this->start=start;
- }
- void  LinearSourceDescriptor::setLimit(size_t limit)
- {
-    this->limit=limit;
- }
-
-bool LinearSourceDescriptor::contains(const LinearSourceDescriptor& b)const
-{
-	return this->contains(b.getStart(),b.getLimit());
-}
-bool LinearSourceDescriptor::contains(size_t start,size_t limit)const
-{
-#if defined(CODE64)
-//	printf("this->start-start>=limit-this->limit   : (%d >= %d = %d)\n",this->start-start,limit-this->limit,(int)(this->start-start)>=(int)(limit-this->limit));
-#endif
-	return (this->start<=start)&&((int)(this->start-start)>=(int)(limit-this->limit));
-
-}
-bool LinearSourceDescriptor::operator==(const LinearSourceDescriptor& b)const
-{
-
-   return this->getStart()==b.getStart() && this->getLimit()==b.getLimit();
-}
-
-
-bool LinearSourceDescriptor::operator!=(const LinearSourceDescriptor& b)const
-{
-    return ! this->operator==(b);
-}
-bool LinearSourceDescriptor::isAllocable()const
-{
-    return true;
-}
-
- //==========class: MemoryDescriptor
- MemoryDescriptor::MemoryDescriptor(size_t start,size_t limit,bool allocable):
-LinearSourceDescriptor(start,limit),allocable(allocable)
-{
-
-}
-
- MemoryDescriptor::~MemoryDescriptor() {
- }
-void MemoryDescriptor::setAllocable(bool allocable)
-{
-    this->allocable=allocable;
-}
-
-bool MemoryDescriptor::isAllocable()const{
-    return allocable;
-}
-
-bool MemoryDescriptor::operator==(const MemoryDescriptor& b)const
-{
-    return this->LinearSourceDescriptor::operator==(b) && this->allocable==b.allocable;
-    
-}
-
-
-bool MemoryDescriptor::operator!=(const MemoryDescriptor& b)const
-{
-    return ! this->operator==(b);
-}
-
-//==============class LinearSourceManager
-template <class _LinearSourceDescriptor,template <class> class _NodeAllocator>
-const _LinearSourceDescriptor & LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator>::getSpace()const
-{
-	return this->space;
-}
-
-//============class MemoryManager<_DescriptorAllocator>
-template<template<class > class _DescriptorAllocator>
-size_t MemoryManager<_DescriptorAllocator>::getBase() const {
-	return this->root->getData().getStart();
-}
-
-template<template<class > class _DescriptorAllocator>
-size_t MemoryManager<_DescriptorAllocator>::getLimit() const {
-	return this->root->getData().getLimit();
-}
 
 #endif //Memory_h__

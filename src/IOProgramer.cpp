@@ -8,6 +8,9 @@ __asm__(".code16gcc \n\t");
 #include <libx2.h>
 #include <def.h>
 
+#include <macros/libx2_macros.h>
+#include <macros/IOProgramer_macros.h>
+
 #if defined(CODE32)
 #ifdef __I_REALLY_NEED_THIS
 const unsigned int IO_8259A::ICW1_EDGE_MODE_OFF=0b0,

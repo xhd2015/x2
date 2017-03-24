@@ -7,6 +7,9 @@
 
 #include <AssociatedMemoryManager.h>
 #include <Memory.h>
+
+#include <macros/all.h>
+
 #if defined(CODE32)
 __asm__(".code32 \n\t");
 #endif
@@ -14,8 +17,14 @@ __asm__(".code32 \n\t");
 //===========template instantiation
 #if defined(CODE32)
 #include <Descriptor.h>
+#include <VirtualMemory.h>
 	template class AssociatedMemoryManager<SegmentDescriptor,1>;
 	template class AssociatedMemoryManager<SegmentDescriptor,10>;
+	template class AssociatedMemoryManager<PTE,1>;
+	template class AssociatedMemoryManager<PDE,1>;
+
+	typedef AssociatedMemoryManager<SegmentDescriptor,1> SegManager;
+	typedef AssociatedMemoryManager<PTE,1>	PTEManager;
 #endif
 
 //========== class AssociatedMemoryManager<T,MaxArrNum>
@@ -120,6 +129,7 @@ typename AssociatedMemoryManager<T,1>::TargetType *AssociatedMemoryManager<T,1>:
     }
     return rt;
 }
+
 template <class T>
 typename AssociatedMemoryManager<T,1>::TargetType *AssociatedMemoryManager<T,1>::getNew(int &index)
 {
@@ -144,4 +154,28 @@ void AssociatedMemoryManager<T,1>::withdraw(TargetType *t)
         this->curSize--;
         this->lastIndex = index;
     }
+}
+
+template<class T>
+int AssociatedMemoryManager<T, 1>::findContinuousFree(size_t n) const
+{
+	const size_t len=this->len;
+	if(len - this->curSize < n)return -1;
+	size_t curCon=0;
+
+	for(int i=0;len -i >= (int)n;i++)
+	{
+		if(this->narr[i].isFree())
+		{
+			while(len - i >= (int)(n - curCon) && this->narr[i++].isFree())curCon++;
+			if(curCon==n)
+			{
+				return i - curCon;
+			}else{
+				i--;
+				curCon=0;
+			}
+		}
+	}
+	return -1;
 }

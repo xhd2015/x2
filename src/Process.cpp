@@ -3,6 +3,8 @@
 #include <Process.h>
 #include <AssociatedMemoryManager.h>
 
+#include <macros/all.h>
+
 #if defined(CODE32)
 __asm__(".code32 \n\t");
 #endif
@@ -56,8 +58,9 @@ processBase(processBase)
 		this->ldtm.unfreeNode(3);
 		this->ldtm.unfreeNode(4);
 		char GSEL;
-		SELECT_SCALE(codeLimit,GSEL);
 
+
+		SELECT_SCALE(codeLimit,GSEL);
 		new (this->ldtm.getTarget(1)) SegmentDescriptor(pbase,codeLimit, GSEL,
 				SegmentDescriptor::TYPE_U_CODE_NONCONFORMING,
 				/*SegmentDescriptor::DPL_3*/dpl,
@@ -101,6 +104,7 @@ processBase(processBase)
 		ptss->ESP0 = sysStack - 4;
 		ptss->LDT = this->ldtSel;
 		ptss->EFLAGS = 0x246;//0x246;
+		ptss->CR3 = 0;
 
 }
 
