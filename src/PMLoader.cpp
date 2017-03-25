@@ -8,7 +8,7 @@ __asm__(".code32 \n\t");
 #include <libx2.h>
 #include <Descriptor.h>
 #include <IOProgramer.h> //for IO_HDD
-
+#include <macros/IOProgramer_macros.h>
 // /*****************They have been DEPRECATED************************
 //const int PMLoader::SAFE_SEG=0x50;
 //const int PMLoader::SECSIZE=512;
@@ -131,14 +131,14 @@ void PMLoader::mainProcess() //仅16位
     
     SegmentDescriptor nullSeg,
                         loaderSegCode(0,PMLoader::CODE_LIMIT,SegmentDescriptor::G_1B,SegmentDescriptor::TYPE_U_CODE_NONCONFORMING,0),
-                        loaderSegData(0,(PMLoader::CODE_LIMIT + PMLoader::GLOBAL_SHARE_SIZE)/(4*1024),SegmentDescriptor::G_4KB,SegmentDescriptor::TYPE_U_DATA,0),
-                        loaderSegStack(0,PMLoader::STACK_SIZE,SegmentDescriptor::G_1B,SegmentDescriptor::TYPE_U_STACK,0),
+                        loaderSegData(0,PMLoader::DATA_LIMIT/SegmentDescriptor::G_4KB_SCALE,SegmentDescriptor::G_4KB,SegmentDescriptor::TYPE_U_DATA,0),
+                        loaderSegStack(0,PMLoader::STACK_LIMIT,SegmentDescriptor::G_1B,SegmentDescriptor::TYPE_U_STACK,0),
                         videoSeg((char*)0xb8000,
-                        		25*80*2,
+                        		25*80*2-1,
 								SegmentDescriptor::G_1B,
 								SegmentDescriptor::TYPE_U_DATA,0),
 						processSeg((char*)PMLoader::PROCESS_MM_START,
-								PMLoader::PROCESS_MM_SIZE/SegmentDescriptor::G_4KB_SCALE,
+								(PMLoader::PROCESS_MM_SIZE-1)/SegmentDescriptor::G_4KB_SCALE,
 								SegmentDescriptor::G_4KB,
 								SegmentDescriptor::TYPE_U_DATA,0);
     nullSeg={0};//not really all zeros.

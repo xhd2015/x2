@@ -8,6 +8,8 @@
 #include <libx2.h>
 #include <def.h>
 
+#include <macros/libx2_macros.h>
+
 #if defined(CODE64)
 #include <cstdio>
 #include <cstdarg>
@@ -199,16 +201,15 @@ void Util::setw(int seg,int off,int halfWorld)
 }
 void Util::setl(int seg,int off,int word)
 {
-    ENTER_DS(seg,s);
     __asm__ __volatile__(
-        "movl 4+4*2(%%ebp),%%ebx \n\t"
-        "mov 4+4*3(%%ebp),%%eax \n\t"
-        "mov %%eax,%%ds:(%%ebx) \n\t"
+        "push %%ds \n\t"
+    	"mov %%eax,%%ds \n\t"
+        "mov %%ecx,%%ds:(%%ebx) \n\t"
+    	"pop %%ds \n\t"
         :
-        :
-        :"ebx","eax","memory"
+        :"a"(seg),"b"(off),"c"(word)
+        :"memory"
     );
-    LEAVE_DS(seg,s);
 }
 
 void Util::memcopy(int srcSeg,int srcOff,int dstSeg,int dstOff,int len)

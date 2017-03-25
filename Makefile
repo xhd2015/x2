@@ -6,6 +6,7 @@ GEN16 := gen/16
 GEN32 := gen/32
 GEN64 := gen/64
 SRC := src
+KERNEL_SRC := $(SRC)/kernel
 EXPORTS := exports
 BACKUP := backups
 INCLUDE := include
@@ -14,7 +15,7 @@ STDCPP := stdc++
 
 #control which files are compiled.
 f16 := main libx2 PMLoader Descriptor IOProgramer
-f32 := protected_main libx2 PMLoader Descriptor TSS interrupts IOProgramer Memory test List AssociatedMemoryManager Process Kernel idleProcess Cache
+f32 := protected_main libx2  VirtualMemory PMLoader Descriptor TSS interrupts IOProgramer Memory test List	AssociatedMemoryManager Process Kernel idleProcess Cache
 f32user := UserProcess libx2
 f64 := libx2 PMLoader Descriptor TSS Memory List Locator AssociatedMemoryManager
 
@@ -46,7 +47,7 @@ UNUSED_CCFLAGS := -fkeep-inline-functions -fpermissive
 # imageMacros := DRIVER SECSTART SECNUM CODESEG CODEOFF
 # imageSyms := JMPSEG JMPOFF
 #==================================================================================
-.PHONY : dump16 dump clean default nothing help debug start run export backup
+.PHONY : dump16 dump default nothing help debug start run export backup push
 .ONESHELL:
 .SECONDEXPANSION:
 default:
@@ -64,9 +65,9 @@ help:
 	echo	make dump16 f=main_16.bimg
 	echo	make dump opt="-m i8086" file=main_16.bimg
 dump:
-	@objdump -D $(GEN32)/main.img -m i386|less
+	@objdump -dS $(GEN32)/main.img -m i386|less
 dump16:
-	@objdump -D $(GEN16)/main.img -m i8086 | less
+	@objdump -dS $(GEN16)/main.img -m i8086 | less
 start:
 	-@cmd /C 'cd C:\Users\13774\Desktop\bochs\devel\x2^ system\tools\bochs^ run && explorer start_bochs.cmd'
 run:
@@ -79,8 +80,10 @@ export:VERSION $(SRC) $(INCLUDE) Makefile start_bochs.cmd main.bimg
 backup:$(fbackup)
 	@v=$$(cat VERSION)
 	tar --xz -cf $(BACKUP)/x2-$${v}.tar.xz $^
+push : 
+	git push https://github.com/xhd2015/x2.git $(B)
 #===================================================================================
-.PHONY : lib64
+.PHONY : lib64 clean clean32 clean64 clean16
 lib64:$(GEN64)/lib64.a
 	@echo Generated for host 64.
 	
@@ -149,6 +152,11 @@ $(SRC)/%.cpp:$(INCLUDE)/*
 	@echo Fulton is doing it.
 
 #Keep the directory structure
-clean:
-	-rm -rf $(GEN16)/* $(GEN32)/* $(GEN64)/* 
-	#-rm -rf $(GEN)/main.bimg
+clean:clean16 clean32 clean64
+	#clean all
+clean16:
+	-rm -rf $(GEN16)/*
+clean32:
+	-rm -rf $(GEN32)/*
+clean64:
+	-rm -rf $(GEN64)/*

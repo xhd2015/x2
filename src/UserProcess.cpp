@@ -1,7 +1,11 @@
 
 
-#include <libx2.h>
+/**
+ * There is nothing you can include from kernel,except def.h which does not produce any code
+ */
 #include <def.h>
+#include <libx2.h>
+#include <macros/all.h>
 #if defined(CODE32)
 	__asm__(".code32 \n\t");
 #endif

@@ -3,6 +3,8 @@
 #include <Process.h>
 #include <AssociatedMemoryManager.h>
 
+#include <macros/all.h>
+
 #if defined(CODE32)
 __asm__(".code32 \n\t");
 #endif
@@ -39,12 +41,34 @@ status(This::STATUS_READY),
 linearBase(linearBase),
 processBase(processBase)
 {
+		//==============设置PDE PTE CR3
+		char *pbase=(char*)(linearBase+processBase);
+		Kernel *k=Kernel::getTheKernel();
+//		int kindex=k->preparePhysicalMap((size_t)pbase,dataLimit + 1);//dataLimit shoud be the biggest
+//		int ksel = Util::makeSel(kindex, SegmentDescriptor::DPL_0,0);
+		//new (&this->pdeman) ((size_t)pbase,This:：RESERVED_PDE_NUM);//这样做对于内核有什么意义呢？因为毫无疑问只有内核会访问进程中这些区域的数据
+		//什么时候需要这些数据？
+		//1.任何时候当进程访问（包括执行代码）进程体中的数据时
+		//2.当进程申请新的内存时
+		//    进程通过某个数据段自己实现这些PDE的修改？
+		//	内核在进程空间分配一段物理空间
+		//   然后为了进程实现对这些物理地址的访问，进程首先申请一系列连续的PTE，足以访问这些物理地址（连续性访问）
+		//	 然后设置PTE的值为物理地址首地址
+		//
+		//	如果不需要分配新的PDE，则由于当前的PDE中已经足够容纳，所以PDE，PTE都是进程可直接访问的，所以可以无需内核参与即可完成（亦即可以在非中断模式下完成，不需要任何Kernel的数据）
+		//  如果需要分配新的PDE，则需要从内核申请一个不在当前进程空间的PTE Manager
+
+		//一个问题是，PDEManager以及PTEManager中指针值该怎么设置？
+		//	1.物理地址  -- 则进程不可以访问这些数据
+		//  2. tarr为虚假数组，从不访问其内容（全是指针）  narr为真实的内容，在进程的可访问范围内。则此种情况下偏移不重要。
+
+
+
 		//==============init pid & ldt & tss selector
 		this->pid = pid;
 		this->ldtSel = Util::makeSel(ldtIndex, dpl, 0);
 		this->tssSel = Util::makeSel(tssIndex, dpl, 0);
 
-		char *pbase=(char*)(linearBase+processBase);
 		//==============init LDT
 		/**
 		 *  1 		2 		3
@@ -55,9 +79,13 @@ processBase(processBase)
 		this->ldtm.unfreeNode(2);
 		this->ldtm.unfreeNode(3);
 		this->ldtm.unfreeNode(4);
-		char GSEL;
-		SELECT_SCALE(codeLimit,GSEL);
 
+
+
+		char GSEL;
+
+
+		SELECT_SCALE(codeLimit,GSEL);
 		new (this->ldtm.getTarget(1)) SegmentDescriptor(pbase,codeLimit, GSEL,
 				SegmentDescriptor::TYPE_U_CODE_NONCONFORMING,
 				/*SegmentDescriptor::DPL_3*/dpl,
@@ -101,6 +129,8 @@ processBase(processBase)
 		ptss->ESP0 = sysStack - 4;
 		ptss->LDT = this->ldtSel;
 		ptss->EFLAGS = 0x246;//0x246;
+		CR3 tempcr3(((int)pbase)>>12,PageAttributes::PWT_ALWAYS_UPDATE);
+		ptss->CR3 = *(u32_t*)&tempcr3;
 
 }
 

@@ -111,7 +111,19 @@ public:
 	typedef MemoryManager<SimpleMemoryManager>		 		MmType;
 	typedef AssociatedMemoryManager<SegmentDescriptor,1> SegManager;
 	enum{
-		LDT_ITEMS=10
+		LDT_ITEMS=10,
+		VIDEO_SEL=0x8,
+		KERNEL_CS=0x10,
+		KERNEL_DS=0x18,
+		KERNEL_SS=0x20
+	};
+	enum{
+		GPUI_MEM=0,
+		GPUI_PRINT=1
+	};
+	enum{
+		GPUI_MEM_NEW=0,
+		GPUI_MEM_DELETE=1
 	};
 protected://static statement
 	//reserve a space for theKernel
@@ -125,7 +137,11 @@ protected:
 public:
 
 	Kernel();
-	Kernel(size_t smmStart,size_t smmLimit,size_t kmmStart,size_t kmmSize,size_t pmmStart,size_t pmmSize,
+	Kernel(size_t smmStart,size_t smmLimit,
+			size_t kmmStart,size_t kmmSize,
+			size_t pmmStart,size_t pmmSize,
+			size_t pde0_start,size_t pde0_size,
+			size_t pte0_start,size_t pte_size,
 			size_t	gdtnstart,size_t gdttstart,size_t gdtitems,int *gusedList,size_t gusedLen,
 			size_t	idtnstart,size_t idttstart,size_t idtitems,int *iusedList,size_t iusedLen
 			);//只需要指定内存管理特性
@@ -133,11 +149,13 @@ public:
 	//related to memory allocation
 	AS_MACRO void* mnewKernel(size_t mmStart,size_t mmSize);
 	AS_MACRO void* mnewKernel(size_t mmSize);//进程本身必须有一个用于储存已经有分配的节点的空间，回收的时候，进程只回收已经分配的空间。 这个空间只能够用于kernel访问
+	AS_MACRO void* mnewKernelAlign(size_t mmSize,size_t alignment=1);
 	AS_MACRO void  mdeleteKernel(void *p,size_t mmSize);
 	AS_MACRO void mdeleteKernel(void* p);
 
 	AS_MACRO void* mnewProcess(size_t mmStart,size_t mmSize);
 	AS_MACRO void* mnewProcess(size_t mmSize);
+	AS_MACRO void* mnewProcessAlign(size_t mmSize,size_t alignment=1);
 	AS_MACRO void mdeleteProcess(void *p,size_t mmSize);
 	AS_MACRO void mdeleteProcess(void *p);
 
@@ -166,7 +184,14 @@ public:
 	AS_MACRO void markGdtUnused(int index);
 	AS_MACRO void markIdtUsed(int index);
 	AS_MACRO void markIdtUnused(int index);
+	AS_MACRO SegManager& getGdtm();
+	AS_MACRO SegManager& getIdtm();
 	int newidt();
+
+	//=============virtual memory
+	AS_MACRO int preparePhysicalMap(size_t physical,size_t size);
+	INCOMPLETE void destroyPhysicalMap();
+
 
 protected:
 	/**
@@ -181,121 +206,16 @@ protected:
 	InterruptsManager intm;
 	SegManager gdtm; //size = ptr
 	SegManager idtm;// size =ptr
+
 	ProcessManager	processMan;//this one relies on gdtm,kernelMM,processMM
+
+	CR3 cr3;
+	PDEManager	pdeman; //PDE manager
 
 
 };
 
 #endif
-//===============function macros
-#if defined(CODE32)||defined(CODE64)
-//====class : KernelSmmWrapper
-template <class T>
-KernelSmmWrapper<T>::KernelSmmWrapper()
-{}
-template <class T>
-KernelSmmWrapper<T>::~KernelSmmWrapper()
-{}
-template <class T>
-T* KernelSmmWrapper<T>::getNew()
-{
-	return (T*)Kernel::getTheKernel()->mnewKernel(sizeof(T));
-}
-template <class T>
-void KernelSmmWrapper<T>::withdraw(T *t)
-{
-	Kernel::getTheKernel()->mdeleteKernel(t, sizeof(T));
-}
-//====class:ProcessManager
-TreeNode<Process*>*	ProcessManager::createProcessWrapper(Process* p)
-{
-	return new (this->prcsTree.getSmm()->getNew()) TreeNode<Process*>(p);
-}
-TreeNode<Process*>*	ProcessManager::getFatherProcess(TreeNode<Process*> *p)
-{
-	TreeNode<Process*> *pyield;
-	return p?
-			((pyield=p->getParent())==this->prcsTree.getHead()?NULL:pyield):
-			NULL;
-}
-//Process*	ProcessManager::getIdelProcess()const
-//{
-//	return this->idleProcess;
-//}
 
-//=======class Kernel
-Kernel* Kernel::getTheKernel()
-{
-	return This::theKernel;
-}
-void* Kernel::mnewKernel(size_t mmStart, size_t mmSize)
-{
-	return this->kernelMM.mnew(mmStart, mmSize);
-}
-
-void* Kernel::mnewKernel(size_t mmSize)
-{
-//	Util::printf("OK\n");
-	return this->kernelMM.mnew(mmSize);
-}
-
-void Kernel::mdeleteKernel(void* p, size_t mmSize)
-{
-	this->kernelMM.mdelete(p, mmSize);
-}
-void Kernel::mdeleteKernel(void *p)
-{
-	this->kernelMM.mdelete(p);
-}
-void* Kernel::mnewProcess(size_t mmStart, size_t mmSize)
-{
-	return this->processMM.mnew(mmStart, mmSize);
-}
-
-void* Kernel::mnewProcess(size_t mmSize)
-{
-	return this->processMM.mnew(mmSize);
-}
-
-void Kernel::mdeleteProcess(void* p, size_t mmSize)
-{
-	this->processMM.mdelete(p,mmSize);
-}
-void Kernel::mdeleteProcess(void *p)
-{
-	this->processMM.mdelete(p);
-}
-void	Kernel::switchNextProcess()
-{
-	this->processMan.swithcNextProcess();
-}
-TreeNode<Process*>* Kernel::addNewProcess(
-		size_t codeLimit, size_t dataLimit, size_t stackLimit, char dpl)
-{
-	return this->processMan.addNewProcess(codeLimit, dataLimit, stackLimit, dpl);
-}
-
-
-
-void Kernel::markGdtUsed(int index)
-{
-	this->gdtm.unfreeNode(index);
-}
-void Kernel::markGdtUnused(int index)
-{
-	this->gdtm.freeNode(index);
-}
-void Kernel::markIdtUsed(int index)
-{
-	this->idtm.unfreeNode(index);
-}
-
-void Kernel::markIdtUnused(int index)
-{
-	this->idtm.freeNode(index);
-}
-
-
-#endif //CODE32 || CODE64
 
 #endif //Kernel_h

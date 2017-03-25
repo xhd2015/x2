@@ -6,6 +6,7 @@
 #include <List.h>
 #include <TSS.h>
 #include <AssociatedMemoryManager.h>
+#include <VirtualMemory.h>
 #include <Descriptor.h>
 
 //class Process;
@@ -45,6 +46,14 @@ public:
 	typedef Process This;
 	typedef AssociatedMemoryManager<SegmentDescriptor,1> SegManager;
 	enum{
+		RESERVED_PDE_START = 0,
+		RESERVED_PDE_NUM=10,
+		RESERVED_PTE_START = (RESERVED_PDE_NUM*(sizeof(PDEManager::NodeType) + sizeof(PDEManager::TargetType)) + 4)&0xfffffffc,//it must align with 4
+		RESERVED_PTE_NUM=(PMLoader::SECSIZE - RESERVED_PTE_START)/(sizeof(PTEManager::NodeType)+sizeof(PTEManager::TargetType)),
+		RESERVED_PTE_MANAGER_START = PMLoader::SECSIZE,
+		RESERVED_PTE_MANAGER_NUM = RESERVED_PDE_NUM,
+		RESERVED_END = RESERVED_PTE_MANAGER_START + RESERVED_PTE_MANAGER_NUM * sizeof(PTEManager*),
+
 		ERROR_NO_ERROR=0,
 		ERROR_NO_ENOUGH_PROCESS_SPACE,
 		ERROR_GDT_IS_FULL,
@@ -99,82 +108,14 @@ protected:
 	int		ldtSel;
 	SegManager	ldtm;//size
 	size_t		linearBase,processBase;
+
+	PDEManager	pdeman;
 };
 
 
 
 #endif
 
-//==========function macros
-#if defined(CODE32)||defined(CODE64)
-
-//=====class:Process
-int	Process::getTSSSel()const
-{
-	return this->tssSel;
-}
-unsigned int	Process::getPid()const
-{
-	return this->pid;
-}
-void Process::setStack0(size_t stack0)
-{
-	ptss->ESP0 = stack0;
-}
-
-void Process::setStack3(size_t stack3)
-{
-	ptss->ESP = stack3;
-}
-
-void Process::setSSSel0(int sel)
-{
-	ptss->SS0 = sel;
-}
-
-void Process::setSSSel3(int sel)
-{
-	ptss->SS = sel;
-}
-
-void Process::setCSSel(int sel)
-{
-	ptss->CS = sel;
-}
-
-void Process::setCodeStart(size_t start)
-{
-	ptss->EIP = start;
-}
-size_t	Process::getCodeStart()const
-{
-	return this->ptss->EIP;
-}
-
-int	Process::getLDTSsel()const
-{
-	return this->ldtSel;
-}
-int Process::getSatus() const
-{
-	return this->status;
-}
-
-void Process::setStatus(
-	int status)
-{
-	this->status=status;
-}
-int	Process::getStatus()const
-{
-	return this->status;
-}
-size_t Process::getProcessBase()const
-{
-	return this->processBase;
-}
-
-#endif
 
 
 #endif //Process_h

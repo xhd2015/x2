@@ -1,5 +1,16 @@
 [*] == done	[-] == deprecated	[]  == proposed		[+] == doing
 
+[]	in last commit(2017-03-24 21:20:59),I forgot to refer that I solved the 'circle including problem' when using function macros, by just moving those macros to another file and including them when including the corresponding headers.See folder include/macros.The general usage is that only include macros/all.h is fine to all cases.
+[]	mark Util::SEG_CURRENT & enterDs,leaveDs,enterEs,leaveEs are DEPRECATED, use Util::getCurrentDs() instead.
+[]	develop virtual memory to make executeables have the ability to access the whole process specified memory.By using that,new memory allocation is done more easily.
+	**remember** this problem originates from memory allocation for process,but it has also imported more complicated problems.
+[]	techniques are required:
+		what is PIE & PIC
+			PIE (PI Excuteable)
+			PIC (PI Code)
+		the only difference between them is that PIC is allowed to inserted symbols(thus it is a shared library).PIE is an executeable and is not used as a library.
+		what is flat mode
+		
 []	int 0x27 happens but which should have been masked.
 		int 0x27 should be irq7.And it is corresponding to parallel port 1 , for printers,and 		if printers are not present,then it is for parallel port.
 []	SimpleMemoryManager	--	Error handling style:

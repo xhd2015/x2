@@ -9,6 +9,9 @@ __asm__(".code32 \n\t");
 #include <List.h>
 #include <libx2.h>
 #include <def.h>
+
+#include <macros/all.h>
+
 #if defined(CODE32)||defined(CODE16)
 #include <test.h>
 #endif
@@ -322,6 +325,24 @@ void* MemoryManager<_DescriptorAllocator>::mnew(size_t size) {
     return NULL;
 }
 template<template <class> class _DescriptorAllocator>
+void* MemoryManager<_DescriptorAllocator>::mnewAlign(size_t size,size_t alignment) {
+
+    this->copyOnAllocation(this->getHead());//保证复制了父节点
+    size_t extra;
+    TreeNode<MemoryDescriptor> *found=MemoryManager<_DescriptorAllocator>::findFirstLenAlign(this->getHead(),size,extra,alignment);
+
+    if(found)
+    {
+//    	Util::printf("found is ok.\n");
+        TreeNode<MemoryDescriptor> *alloced = allocOutNode(found,found->getData().getStart()+extra,size);
+        if(alloced)
+        {
+            return (void*)(alloced->getData().getStart());
+        }
+    }
+    return NULL;
+}
+template<template <class> class _DescriptorAllocator>
 void*   MemoryManager<_DescriptorAllocator>::extend(size_t start,size_t size,int extsize,char *realBase,bool moveData)
 {
 //	Util::printf("extend arg: start,size,extsize = %d,%d,%d\n",start,size,extsize);
@@ -484,7 +505,34 @@ TreeNode<MemoryDescriptor>* MemoryManager<_DescriptorAllocator>::findFirstLen(
     }
 	return p;
 }
-
+/**
+ * find one such has an alignment and enough space
+ */
+template<template <class> class _DescriptorAllocator>
+TreeNode<MemoryDescriptor>* MemoryManager<_DescriptorAllocator>::findFirstLenAlign(
+		TreeNode<MemoryDescriptor>* loc, size_t len,size_t &extra,size_t alignment) {
+	if(alignment==0)return NULL;
+	TreeNode<MemoryDescriptor> *p=loc->getSon();
+	if(p && p->getData().isAllocable()==false)
+	{
+		p=This::nextAllocable(p);
+	}
+	while(p )
+    {
+		size_t left= p->getData().getStart()%alignment;
+		if(left>0)
+		{
+			left=alignment - left;
+		}
+		if( p->getData().getLimit() >= len + left)
+		{
+			extra=left;
+			return p;
+		}
+        p=This::nextAllocable(p);
+    }
+	return NULL;
+}
 template<template <class> class _DescriptorAllocator>
 int MemoryManager<_DescriptorAllocator>::isNullManager() {
 	return this->getHead()==NULL;

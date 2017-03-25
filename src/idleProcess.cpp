@@ -6,6 +6,7 @@
  */
 
 #include <libx2.h>
+#include <macros/all.h>
 
 #if defined(CODE32)
 	__asm__(".code32 \n\t");

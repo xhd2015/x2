@@ -52,14 +52,6 @@ private:
 	bool tellLocation(const _Source& t,Int2Type<Locator<_Source>::IGNORE>)const;
 };
 
-//============Function Macros
-//=====class SourceLocator
-template <class _Source,int _HowStart,int _HowLength,int _HowAllocable>
-const _Source* SourceLocator<_Source,_HowStart,_HowLength,_HowAllocable>::getComparator()const
-{
-	return p;
-}
-
 
 
 #endif //Locator_h__

@@ -15,6 +15,9 @@ typedef __SIZE_TYPE__ size_t;
 			// You must be very careful about typedef
 typedef signed int ptrdiff_t;
 typedef unsigned int size_t;
+typedef unsigned int u32_t;
+typedef unsigned short u16_t;
+typedef unsigned char  u8_t;
 #endif
 
 

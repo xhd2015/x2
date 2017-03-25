@@ -15,6 +15,7 @@ public:
 //    void testMemory();
     void testIO_HDD();
     void run();
+    void testVM();
 
 //    static void dumpMemoryData(const MemoryDescriptor & data);
 //    static void dumpMemoryData(const int& data);

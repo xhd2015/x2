@@ -8,6 +8,9 @@
 #include <Descriptor.h>
 #include <libx2.h>
 
+#include <macros/libx2_macros.h>
+#include <macros/Descriptor_macros.h>
+
 //指针类型
 //#define __MXp(type,pointer,andNum,shiftNum,direction) ((*((type*)this->pointer) & (andNum) ) direction (shiftNum))
 ////直接量
