@@ -126,8 +126,8 @@ int PDEManager::prepareVisitPhysical(u32_t phyaddr, size_t size,
 	}
 //    Util::digitToStr(buf, arrsizeof(buf), (size_t)pde_p0);
 //    Util::printStr("pde_p0 is  :");Util::printStr(buf);Util::printStr(" ");
-    Util::digitToHex(buf, 10, (size_t)pte_p1);
-    Util::printStr("pte_p1 is  :");Util::printStr(buf);Util::printStr("\n");
+//    Util::digitToHex(buf, 10, (size_t)pte_p1);
+//    Util::printStr("pte_p1 is  :");Util::printStr(buf);Util::printStr("\n");
 	if(!pde_written) //write pde
 	{
 		Util::insertMark(0x2333ebb);

@@ -1,5 +1,6 @@
 [*] == done	[-] == deprecated	[]  == proposed		[+] == doing
 
+[]	in last commit(2017-03-24 21:20:59),I forgot to refer that I solved the 'circle including problem' when using function macros, by just moving those macros to another file and including them when including the corresponding headers.See folder include/macros.The general usage is that only include macros/all.h is fine to all cases.
 []	mark Util::SEG_CURRENT & enterDs,leaveDs,enterEs,leaveEs are DEPRECATED, use Util::getCurrentDs() instead.
 []	develop virtual memory to make executeables have the ability to access the whole process specified memory.By using that,new memory allocation is done more easily.
 	**remember** this problem originates from memory allocation for process,but it has also imported more complicated problems.

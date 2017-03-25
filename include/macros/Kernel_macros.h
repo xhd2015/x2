@@ -135,6 +135,10 @@ SegManager& Kernel::getIdtm()
 {
 	return this->idtm;
 }
+int Kernel::preparePhysicalMap(size_t physical,size_t size)
+{
+	return this->pdeman.prepareVisitPhysical(physical, size, this->gdtm);
+}
 
 #endif //CODE32 || CODE64
 

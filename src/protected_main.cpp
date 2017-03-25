@@ -137,6 +137,8 @@ void protectedEntryHolder()
     		PMLoader::SMM_MEM_START,PMLoader::SMM_MEM_SIZE,
 			PMLoader::KERNEL_MM_START,PMLoader::KERNEL_MM_SIZE,
 			/*PMLoader::PROCESS_MM_START*/0,PMLoader::PROCESS_MM_SIZE,
+			PMLoader::PDE0_START,PMLoader::PDE0_SIZE,
+			PMLoader::PTE0_START,PMLoader::PTE0_SIZE,
 			PMLoader::GDT_NODE_START,PMLoader::GDT_START,PMLoader::GDT_NODE_ITEMS,gused,arrsizeof(gused),
 			PMLoader::IDT_NODE_START,PMLoader::IDT_SIZE,PMLoader::IDT_NODE_ITEMS,NULL,0
     );//初始化一个新的kernel
@@ -146,21 +148,8 @@ void protectedEntryHolder()
 //    pkernel->markGdtUsed(3);
 //    pkernel->markGdtUsed(4); //They should be marked in use at first time,but unfortunately,they are not.
     stdp.putsz("after kernel done\n");
-    //=================设置PDE Managers
-    size_t npdes=PMLoader::PDE0_SIZE >> 2;
-    size_t nptes0=PMLoader::PTE0_SIZE >> 2;
-    size_t assocNodeStart = (size_t)pkernel->mnewKernel(npdes * sizeof(PDEManager::NodeType));
-    size_t asscoNodeStartForPtm0 = (size_t)pkernel->mnewKernel(nptes0 * sizeof(PTEManager::NodeType));
-    size_t ptemstart = (size_t)pkernel->mnewKernel(npdes * sizeof(PTEManager) );
-    new ((PTEManager*)ptemstart) PTEManager(asscoNodeStartForPtm0,PMLoader::PTE0_START,nptes0);
-    for(int i=0;i<nptes0;i++)
-    {
-    	((PTEManager*)ptemstart)[i].unfreeNode(i);
-    }
-    int usedPDEs[]={0};
-    PDEManager pdeman(assocNodeStart,(size_t)PMLoader::PDE0_START,ptemstart,npdes,true,usedPDEs,arrsizeof(usedPDEs));
 
-    int viIndex=pdeman.prepareVisitPhysical(4*1024*1024, 4*1024, pkernel->getGdtm());
+    int viIndex=pkernel->preparePhysicalMap(4*1024*1024, 4*1024);
 //    Util::insertMark(0x23339);
 //    Util::digitToStr(buf, arrsizeof(buf), viIndex);
 //    stdp.putsz("Gdt index is :");stdp.putsz(buf);stdp.putsz("\n");

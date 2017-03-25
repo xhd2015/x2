@@ -47,7 +47,7 @@ UNUSED_CCFLAGS := -fkeep-inline-functions -fpermissive
 # imageMacros := DRIVER SECSTART SECNUM CODESEG CODEOFF
 # imageSyms := JMPSEG JMPOFF
 #==================================================================================
-.PHONY : dump16 dump default nothing help debug start run export backup
+.PHONY : dump16 dump default nothing help debug start run export backup push
 .ONESHELL:
 .SECONDEXPANSION:
 default:
@@ -65,9 +65,9 @@ help:
 	echo	make dump16 f=main_16.bimg
 	echo	make dump opt="-m i8086" file=main_16.bimg
 dump:
-	@objdump -D $(GEN32)/main.img -m i386|less
+	@objdump -dS $(GEN32)/main.img -m i386|less
 dump16:
-	@objdump -D $(GEN16)/main.img -m i8086 | less
+	@objdump -dS $(GEN16)/main.img -m i8086 | less
 start:
 	-@cmd /C 'cd C:\Users\13774\Desktop\bochs\devel\x2^ system\tools\bochs^ run && explorer start_bochs.cmd'
 run:
@@ -80,6 +80,8 @@ export:VERSION $(SRC) $(INCLUDE) Makefile start_bochs.cmd main.bimg
 backup:$(fbackup)
 	@v=$$(cat VERSION)
 	tar --xz -cf $(BACKUP)/x2-$${v}.tar.xz $^
+push : 
+	git push https://github.com/xhd2015/x2.git $(B)
 #===================================================================================
 .PHONY : lib64 clean clean32 clean64 clean16
 lib64:$(GEN64)/lib64.a

@@ -137,7 +137,11 @@ protected:
 public:
 
 	Kernel();
-	Kernel(size_t smmStart,size_t smmLimit,size_t kmmStart,size_t kmmSize,size_t pmmStart,size_t pmmSize,
+	Kernel(size_t smmStart,size_t smmLimit,
+			size_t kmmStart,size_t kmmSize,
+			size_t pmmStart,size_t pmmSize,
+			size_t pde0_start,size_t pde0_size,
+			size_t pte0_start,size_t pte_size,
 			size_t	gdtnstart,size_t gdttstart,size_t gdtitems,int *gusedList,size_t gusedLen,
 			size_t	idtnstart,size_t idttstart,size_t idtitems,int *iusedList,size_t iusedLen
 			);//只需要指定内存管理特性
@@ -184,6 +188,11 @@ public:
 	AS_MACRO SegManager& getIdtm();
 	int newidt();
 
+	//=============virtual memory
+	AS_MACRO int preparePhysicalMap(size_t physical,size_t size);
+	INCOMPLETE void destroyPhysicalMap();
+
+
 protected:
 	/**
 	 * This should be deprecated/obsolete, AssociatedMemoryManager is better
@@ -197,7 +206,11 @@ protected:
 	InterruptsManager intm;
 	SegManager gdtm; //size = ptr
 	SegManager idtm;// size =ptr
+
 	ProcessManager	processMan;//this one relies on gdtm,kernelMM,processMM
+
+	CR3 cr3;
+	PDEManager	pdeman; //PDE manager
 
 
 };

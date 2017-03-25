@@ -275,6 +275,8 @@ Kernel::Kernel(
 		size_t smmStart,size_t smmLimit,
 		size_t kmmStart,size_t kmmSize,
 		size_t pmmStart,size_t pmmSize,
+		size_t pde0_start,size_t pde0_size,
+		size_t pte0_start,size_t pte_size,
 		size_t	gdtnstart,size_t gdttstart,size_t gdtitems,int *gusedList,size_t gusedLen,
 		size_t	idtnstart,size_t idttstart,size_t idtitems,int *iusedList,size_t iusedLen
 		):
@@ -283,9 +285,24 @@ kernelMM(&this->smm,kmmStart,kmmSize,false),
 processMM(&this->smm,pmmStart,pmmSize,false),
 gdtm(gdtnstart,gdttstart,gdtitems,true,gusedList,gusedLen),
 idtm(idtnstart,idttstart,idtitems,true,iusedList,iusedLen),
+cr3(pde0_start>>12,PageAttributes::PWT_ALWAYS_UPDATE,PageAttributes::PCD_CACHE_DISABLE),
 processMan()
 {
+	//=============[init PDE]=================
+    size_t npdes=pde0_size >> 2;
+    size_t nptes0= pte_size >> 2;
+    size_t assocNodeStart = (size_t)this->mnewKernel(npdes * sizeof(PDEManager::NodeType));
+    size_t asscoNodeStartForPTEman = (size_t)this->mnewKernel(nptes0 * sizeof(PTEManager::NodeType));
+    size_t ptemstart = (size_t)this->mnewKernel(npdes * sizeof(PTEManager) );
 
+    new ((PTEManager*)ptemstart) PTEManager(asscoNodeStartForPTEman,pte0_start,nptes0); //an array of PTE managers
+    for(int i=0;i<nptes0;i++) //set PTE managers [0] all used.
+    {
+    	((PTEManager*)ptemstart)[0].unfreeNode(i);
+    }
+    int usedPDEs[]={0};
+    new (&this->pdeman) PDEManager(assocNodeStart,pde0_start,ptemstart,npdes,true,usedPDEs,arrsizeof(usedPDEs));
+    //==========================================
 }
 size_t	 Kernel::getKernelMMBase()const
 {

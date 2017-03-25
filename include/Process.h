@@ -46,6 +46,14 @@ public:
 	typedef Process This;
 	typedef AssociatedMemoryManager<SegmentDescriptor,1> SegManager;
 	enum{
+		RESERVED_PDE_START = 0,
+		RESERVED_PDE_NUM=10,
+		RESERVED_PTE_START = (RESERVED_PDE_NUM*(sizeof(PDEManager::NodeType) + sizeof(PDEManager::TargetType)) + 4)&0xfffffffc,//it must align with 4
+		RESERVED_PTE_NUM=(PMLoader::SECSIZE - RESERVED_PTE_START)/(sizeof(PTEManager::NodeType)+sizeof(PTEManager::TargetType)),
+		RESERVED_PTE_MANAGER_START = PMLoader::SECSIZE,
+		RESERVED_PTE_MANAGER_NUM = RESERVED_PDE_NUM,
+		RESERVED_END = RESERVED_PTE_MANAGER_START + RESERVED_PTE_MANAGER_NUM * sizeof(PTEManager*),
+
 		ERROR_NO_ERROR=0,
 		ERROR_NO_ENOUGH_PROCESS_SPACE,
 		ERROR_GDT_IS_FULL,
@@ -99,8 +107,9 @@ protected:
 	int		tssSel;
 	int		ldtSel;
 	SegManager	ldtm;//size
-	PDEManager	pdeman;
 	size_t		linearBase,processBase;
+
+	PDEManager	pdeman;
 };
 
 
