@@ -155,7 +155,9 @@ class MemoryManager:public Tree<MemoryDescriptor,_DescriptorAllocator>{
 public:
 	typedef MemoryManager<_DescriptorAllocator> This;
 	typedef TreeNode<MemoryDescriptor>			NodeType;
+	typedef SimpleMemoryManager<NodeType>		SimpleAllocator;
 public:
+	MemoryManager()=default;
     MemoryManager(_DescriptorAllocator<TreeNode<MemoryDescriptor> > *smm);//done
     MemoryManager(_DescriptorAllocator<TreeNode<MemoryDescriptor> > *smm,size_t start,size_t len,bool fatherAllocable=1);
     //以典型的内存描述建立管理器,但这不是唯一的初始化方式，因为开始和结束可以由内部节点指定，实际上开始和结束可以完全没有必要在初始化中指定

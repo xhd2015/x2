@@ -44,3 +44,22 @@
 		'popl %ebx;popw %cx'
 	this will finely correct every thing.
 	cost me 5 hours.
+
+22.	for any class/struct member in a class,if not explicity constructured,its default constructor will be called.That will cause some performance lose if call another constructor by placement new in the body. But there is one way to avoid unncessary overhead when calling to default constructor,with just a constraints.The way is to use 'std=c++11' and make declaration of default ctor by 'class T{
+	T()=default;};'.The constraint is, you must remove any existing constructor that can be called seemingly without argguments but actually has default arguments.
+
+23.	Very useful : 
+	        union{
+        int c;
+        struct{
+                int a;
+                int b;
+                struct {
+                        int d;
+                };
+        };
+        }K;
+        cout <<"sizeof(K)="<<sizeof(K)<<","<< K.d<<","<<K.b<<endl;
+	//==================
+	if there is no conflicting in an anonymous struct,its members will be exposed to the outer namespace.
+	

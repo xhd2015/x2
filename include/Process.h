@@ -71,7 +71,8 @@ public:
 			unsigned int pid,
 			TSS*	ptss,int tssIndex,
 			size_t ldtNStart,size_t ldtTStart,size_t ldtNItems,int ldtIndex,
-			size_t linearBase,size_t processBase/*whole RAM!!*/,size_t codeStart,size_t codeLimit,size_t dataLimit,size_t stackLimit,
+			size_t linearBase,size_t processBase/*whole RAM!!*/,size_t codeStart,size_t bodySize,
+			size_t codeLimit,size_t dataLimit,size_t stackLimit,
 			char dpl=SegmentDescriptor::DPL_3
 	);
 	~Process();
@@ -108,6 +109,8 @@ protected:
 	int		ldtSel;
 	SegManager	ldtm;//size
 	size_t		linearBase,processBase;
+	KernelSmmWrapper<TreeNode<MemoryDescriptor> *> baseKsmm;
+	MemoryManager<KernelSmmWrapper> baseMM;
 
 	PDEManager	pdeman;
 };

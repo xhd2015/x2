@@ -2,6 +2,8 @@
 #include <Kernel.h>
 #include <Process.h>
 #include <AssociatedMemoryManager.h>
+#include <Memory.h>
+#include <List.h>
 
 #include <macros/all.h>
 
@@ -30,7 +32,8 @@ Process::Process(
 		unsigned int pid,
 		TSS*	ptss,int tssIndex,
 		size_t ldtNStart,size_t ldtTStart,size_t ldtNItems,int ldtIndex,
-		size_t linearBase,size_t processBase/*whole RAM!!*/,size_t codeStart,size_t codeLimit,size_t dataLimit,size_t stackLimit,
+		size_t linearBase,size_t processBase/*whole RAM!!*/,size_t codeStart,size_t bodySize,
+		size_t codeLimit,size_t dataLimit,size_t stackLimit,
 		char dpl
 ):
 pid(pid),
@@ -39,10 +42,16 @@ ldtm(ldtNStart,ldtTStart,ldtNItems,true),
 ptss(ptss),
 status(This::STATUS_READY),
 linearBase(linearBase),
-processBase(processBase)
+processBase(processBase),
+baseKsmm(),
+baseMM(&this->baseKsmm,linearBase+processBase,bodySize,false)
 {
-		//==============设置PDE PTE CR3
+
+
 		char *pbase=(char*)(linearBase+processBase);
+		//===============init memory manager for the process body(starts from physical base)
+
+		//==============设置PDE PTE CR3
 		Kernel *k=Kernel::getTheKernel();
 //		int kindex=k->preparePhysicalMap((size_t)pbase,dataLimit + 1);//dataLimit shoud be the biggest
 //		int ksel = Util::makeSel(kindex, SegmentDescriptor::DPL_0,0);
@@ -62,6 +71,7 @@ processBase(processBase)
 		//	1.物理地址  -- 则进程不可以访问这些数据
 		//  2. tarr为虚假数组，从不访问其内容（全是指针）  narr为真实的内容，在进程的可访问范围内。则此种情况下偏移不重要。
 
+		//如果现在不考虑进程会申请新的内存，只要能够正常访问内存即可
 
 
 		//==============init pid & ldt & tss selector

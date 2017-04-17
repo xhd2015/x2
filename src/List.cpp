@@ -74,13 +74,13 @@ errhandle(errhandle)
     }
 }
 
-template <class T>
-SimpleMemoryManager<T>::SimpleMemoryManager():
-start(-1),limit(0),data(NULL),len(0),curSize(0),lastIndex(0),errhandle(NULL)
-{
-
-
-}
+//template <class T>
+//SimpleMemoryManager<T>::SimpleMemoryManager():
+//start(-1),limit(0),data(NULL),len(0),curSize(0),lastIndex(0),errhandle(NULL)
+//{
+//
+//
+//}
 
 
 template <class T>
@@ -243,10 +243,10 @@ ListNode<T>*    ListNode<T>::getFirst()const
 }
 
 //===============class : LinkedList
-template<class T,template<class> class _Allocator>
-LinkedList<T,_Allocator >::LinkedList():
-smm(NULL),root(NULL),last(NULL)
-{}
+//template<class T,template<class> class _Allocator>
+//LinkedList<T,_Allocator >::LinkedList():
+//smm(NULL),root(NULL),last(NULL)
+//{}
 
 template<class T,template<class> class _Allocator>
 LinkedList<T,_Allocator >::LinkedList(_Allocator<ListNode<T> > *smm):
@@ -467,11 +467,6 @@ ListNode<T>*    LinkedList<T,_Allocator >::removeHead()
 
 
 //=============class : LocateableLinkedList
-template<class _Locateable,int _HowAllocated,template <class> class _Allocator >
-LocateableLinkedList<_Locateable,_HowAllocated,_Allocator>::LocateableLinkedList()
-{
-
-}
 template<class _Locateable,int _HowAllocated,template <class> class _Allocator >
 LocateableLinkedList<_Locateable,_HowAllocated,_Allocator>::LocateableLinkedList( _Allocator<ListNode<_Locateable> > *smm ):
 LinkedList<_Locateable,_Allocator >(smm)
@@ -748,10 +743,6 @@ TreeNode<T>* TreeNode<T>::getParent()const {//往previous一直遍历，直到�
 #if defined(CODE64)
 #include <cstdio>
 #endif
-template<class T,template <class> class _Allocator>
-Tree<T,_Allocator>::Tree()
-{
-}
 template<class T,template <class> class _Allocator>
 Tree<T,_Allocator>::Tree(_Allocator<TreeNode<T> >* smm,TreeNode<T>* root):
 smm(smm)
