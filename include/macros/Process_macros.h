@@ -12,7 +12,7 @@
 #include <Process.h>
 
 //==========function macros
-#if defined(CODE32)||defined(CODE64)
+#if defined(CODE32)
 
 //=====class:Process
 int	Process::getTSSSel()const

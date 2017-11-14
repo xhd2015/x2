@@ -8,6 +8,7 @@
 #include <cassert>
 #include <exception>
 #include <cstdio>
+#include <macros/all.h>
 //extern template class TreeNode<FileDescriptor>;
 //extern template class SimpleMemoryManager<TreeNode<FileDescriptor> >;
 
@@ -27,6 +28,9 @@ errno(This::ERROR_NOERR)
 {
 //	printf("in init\n");
 	this->fpimg=fopen(this->imgFile,"r+");
+
+	assert(this->fpimg!=NULL);
+
 	this->initBuffers();
 //	printf("end init buffers\n");
 	this->retriveDirSection();
@@ -208,7 +212,7 @@ void X2fsUtil::retriveLinkedInfoSection() {
 void X2fsUtil::retriveDirSection() {
 
 //	FileNode *nodebuffer=(FileNode*)this->dirbuf;
-	this->adjustDirbufOffset((int)(size_t)this->dirbuf);
+	this->adjustDirbufOffset((ptrdiff_t)this->dirbuf);
 	new (&this->dirsmm) FileNodeMM((size_t)this->dirbuf,this->dirbufLen,false,3);
 	new (&this->fileTree) FileTree(&this->dirsmm,(FileNode*)(dirbuf+sizeof(FileNode) ));
 //	printf("after init call get direct\n");
@@ -233,7 +237,7 @@ void X2fsUtil::retriveDirSection() {
 }
 
 void X2fsUtil::saveDirSection() {
-	this->adjustDirbufOffset(0 - (int)(size_t)this->dirbuf);
+	this->adjustDirbufOffset( (char*)NULL - this->dirbuf);
 //	printf("after adjusted back , save\n");
 //	FileNode *nodebuffer=(FileNode*)this->dirbuf;
 //	char *p;
@@ -306,11 +310,13 @@ bool X2fsUtil::hasFilename(FileNode * fnode,const char *name)const
 bool X2fsUtil::create(FileNode *p,char type,const char *name,size_t secSpan,int ctime)
 {
 	if(!p)return false;
+	printf("DEBUG checking file existence...\n");
 	if(this->locatePath(p, name)!=NULL)//check existence of name
 	{
 		this->seterrno(This::ERROR_FILE_ALREDY_EXIST);
 		return false;
 	}
+	printf("DEBUG file not exists\n");
 	size_t fsecStart=0;
 	size_t linkInode=0;
 	size_t namelen;
@@ -588,7 +594,9 @@ void X2fsUtil::dumpFileInfo(FileNode * fnode)
 	printf("last modified time : %d\n",fd.getLastModefiedTime());
 }
 
-
+/**
+ *
+ */
 bool X2fsUtil::createFileInRoot(const char* name, size_t secNum)
 {
 	return this->createFile((FileNode*)this->fileTree.getHead(), name, secNum);
@@ -764,6 +772,7 @@ void X2fsUtil::listNode(int argc,const char * argv[],int maxdeepth)const
 void X2fsUtil::listRoot()const
 {
 	FileNode *pfn=(FileNode *)this->fileTree.getHead();
+//	printf("DEBUG  fileTree head=%p\n",pfn);
 	printf("/:\n");
 	pfn=(FileNode *)pfn->getSon();
 	size_t nlen=0;
@@ -799,7 +808,7 @@ void X2fsUtil::initBuffers() {
 	fread(this->linkbuf,sizeof(char),this->linkbufLen,this->fpimg);
 }
 
-void X2fsUtil::adjustDirbufOffset(int off) {
+void X2fsUtil::adjustDirbufOffset(ptrdiff_t off) {
 		FileNode *nodebuffer=(FileNode*)this->dirbuf;
 //		printf("call before adjust\n");
 		//nodebuffer[2].getDirectFather();
@@ -851,6 +860,7 @@ X2fsUtil::FileNode* X2fsUtil::locatePath(FileNode* base, const char* name)const
 {
 	if(!base)return NULL;
 	FileNode *p=(FileNode *)base->getSon();
+	printf("DEBUG locate after get son\n");
 	size_t len;
 	const char *pname;
 //	printf("finding name %s\n",name);
@@ -1078,24 +1088,29 @@ void X2fsUtil::mockMkfsX2fs(void* base,size_t secNum)
 	 * set dir root,node[0] node[1] are preserved for use
 	 */
 	Node *proot = (Node*)((size_t)base+X2fsUtil::DirSection);//zero is preserved
-	proot[0].SimpleMemoryNode::unfree();
-	proot[1].SimpleMemoryNode::unfree();
-	proot[2].SimpleMemoryNode::unfree();
+//	printf("DEBUG SIZEOF(NODE)=%d\n",sizeof(*proot));
+//	proot[0].SimpleMemoryNode::NO = true; //works
+//	proot[1].SimpleMemoryNode::NO = true;
+//	proot[2].SimpleMemoryNode::NO = true;
+
+	proot[0].SimpleMemoryNode::unfree(); //for NULL
+	proot[1].SimpleMemoryNode::unfree(); //for Tree Root
+	proot[2].SimpleMemoryNode::unfree(); //for Dir Head
 	proot[1].setSon((Node*)(2*sizeof(Node)));//The first one points to the next one,the next one is root
 
 	proot[2].setData(FileDescriptor(
 			FileDescriptor::TYPE_DIR,
 			0,0,0,
 			0,0
-	));
+	));//dir
 	proot[2].setFather((Node*)sizeof(Node));//the base is the dir_section,zero is preserved
 
 	//======================================init free space section
 	//Now the managed source has changed to sec number,not sec numer multiply with secsize
 	LinearSourceDescriptor *lsdarr=(LinearSourceDescriptor*)((size_t)base+X2fsUtil::FreeSpaceSection);
 	new (lsdarr) LinearSourceDescriptor(X2fsUtil::FileAllocSection / X2fsUtil::SecSize ,
-			secNum);
-	new (lsdarr+1) LinearSourceDescriptor(0,0);//This allows it return NULL,because it is at least a FreeSpaceSectionLen
+			secNum - X2fsUtil::FileAllocSection / X2fsUtil::SecSize);//from start to the end
+	new (lsdarr+1) LinearSourceDescriptor(0,0);//This allows it returns NULL,because it is at least a FreeSpaceSectionLen
 
 	//======================================init linked info section
 	LinearSourceDescriptor *lkinfarr=(LinearSourceDescriptor*)((size_t)base+X2fsUtil::LinkedInfoSection);

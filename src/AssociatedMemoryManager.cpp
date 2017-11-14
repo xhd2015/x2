@@ -22,9 +22,6 @@ __asm__(".code32 \n\t");
 	template class AssociatedMemoryManager<SegmentDescriptor,10>;
 	template class AssociatedMemoryManager<PTE,1>;
 	template class AssociatedMemoryManager<PDE,1>;
-
-	typedef AssociatedMemoryManager<SegmentDescriptor,1> SegManager;
-	typedef AssociatedMemoryManager<PTE,1>	PTEManager;
 #endif
 
 //========== class AssociatedMemoryManager<T,MaxArrNum>

@@ -17,7 +17,8 @@ public:
     AS_MACRO void unfree();//done
     
     
-protected:
+//protected:
+public:
     /**
     *NO=false,then not using
     */
@@ -60,6 +61,10 @@ public:
 	We  should define a max-repeating error , if the same error process repeated for times such like that,we should abort/destroy the process
 	*/
 public:
+	/**
+	 *
+	 * @initSize  already used nodes
+	 */
     SimpleMemoryManager(size_t start,size_t limit,bool doInit=true,size_t initSize=0,ERROR_HANDLER errhandler=NULL);//done
     
     /**
@@ -254,7 +259,13 @@ public:
 
     AS_MACRO TreeNode<T>* setSon(TreeNode<T>* son);//done
     AS_MACRO TreeNode<T>* setFather(TreeNode<T>* father);//done
+
+//#if defined(CODE64)
+//    TreeNode<T>* getSon()const;
+//#else
     AS_MACRO TreeNode<T>* getSon()const; //done
+//#endif
+
     AS_MACRO TreeNode<T>* getDirectFather()const;//direct father,done
     		void		addSon(TreeNode<T>* son);
     AS_MACRO bool		hasSon()const;
@@ -276,6 +287,13 @@ protected:
 };
 
 //============class Tree
+/**
+ * 树的结构：  root
+ * 			head
+ * 			...
+ * 	树节点是TreeNode，意味着允许其往四个方向扩展。需要注意的一点是，树的root节点为冗余节点，这是为了支持对head节点的删除操作。root节点永不删除。
+ *	树的所占用的空间仅仅包含两个指针：root指针，smm指针
+ */
 template <class T,template <class> class _Allocator>
 class Tree{
 public:
@@ -318,6 +336,7 @@ protected:
 //
 //};
 
+/*
 //============函数宏区
 //=========class : ListNode
 template<class T>
@@ -549,6 +568,7 @@ _Allocator<TreeNode<T> >*	Tree<T,_Allocator>::getSmm()const
 	return this->smm;
 }
 
+*/
 
 
 #endif //List_h__

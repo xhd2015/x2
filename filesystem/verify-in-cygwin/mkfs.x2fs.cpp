@@ -1,13 +1,22 @@
 
 
 #include "File.h"
-#include <cstdlib>
-#include <cstdio>
+
+#if defined(CODE64)
+	#include <cstdlib>
+	#include <cstdio>
+#endif
+
 #include <List.h>
 
+#if defined(CODE64)
 
 #define HDD_FILE "hdd.img"
-#define IMG_SIZE 100*X2fsUtil::SecSize
+#define SECNUM 100
+#define IMG_SIZE SECNUM*X2fsUtil::SecSize
+/**
+ * 开辟一个内存块，格式化，然后将其保存到文件中作为磁盘。
+ */
 int main()
 {
 	char *buf=(char*)malloc(IMG_SIZE);
@@ -19,7 +28,7 @@ int main()
 		printf("\tdir section:%x ~ %x\n",X2fsUtil::DirSection, X2fsUtil::DirSectionLen+X2fsUtil::DirSection);//+ X2fsUtil::FileNameSectionLen);
 		printf("\tfree space section:%x ~ %x\n",X2fsUtil::FreeSpaceSection, X2fsUtil::FreeSpaceSection+X2fsUtil::FreeSpaceSectionLen);//+ X2fsUtil::FileNameSectionLen);
 		printf("\tfile allocation section:%x ~ %x\n",X2fsUtil::FreeSpaceSection+X2fsUtil::FreeSpaceSectionLen, IMG_SIZE);//+ X2fsUtil::FileNameSectionLen);
-	X2fsUtil::mockMkfsX2fs(buf,100);
+	X2fsUtil::mockMkfsX2fs(buf,SECNUM);
 	FILE *fp=fopen(HDD_FILE,"w+");
 	fwrite(buf,IMG_SIZE,sizeof(char),fp);
 	fflush(fp);
@@ -27,3 +36,5 @@ int main()
 
 	free(buf);
 }
+
+#endif

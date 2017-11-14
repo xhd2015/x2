@@ -109,7 +109,7 @@ public:
 	typedef TreeNode<MemoryDescriptor> 						MmNodeType;
 	typedef SimpleMemoryManager<MmNodeType>					SmmType;
 	typedef MemoryManager<SimpleMemoryManager>		 		MmType;
-	typedef AssociatedMemoryManager<SegmentDescriptor,1> SegManager;
+	typedef AssociatedMemoryManager<SegmentDescriptor,1>    SegManager;
 	enum{
 		LDT_ITEMS=10,
 		VIDEO_SEL=0x8,

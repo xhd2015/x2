@@ -11,7 +11,7 @@
 #include <Kernel.h>
 
 //===============function macros
-#if defined(CODE32)||defined(CODE64)
+#if defined(CODE32)
 //====class : KernelSmmWrapper
 template <class T>
 KernelSmmWrapper<T>::KernelSmmWrapper()
@@ -140,7 +140,7 @@ int Kernel::preparePhysicalMap(size_t physical,size_t size)
 	return this->pdeman.prepareVisitPhysical(physical, size, this->gdtm);
 }
 
-#endif //CODE32 || CODE64
+#endif //CODE32
 
 
 

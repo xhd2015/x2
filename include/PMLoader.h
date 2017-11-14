@@ -19,7 +19,7 @@ class PMLoader{
 public:
 	enum{
 		SAFE_SEG = 0x50,
-		SECSIZE = 512,
+		SECSIZE = CONST_SECSIZE,
 		PDE0_START = 0,
 		PDE0_SIZE = 1 * SECSIZE,
 		STACK_START = PDE0_START + PDE0_SIZE,/*for kernel*/

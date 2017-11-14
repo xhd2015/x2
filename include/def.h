@@ -7,11 +7,19 @@
 #define NULL 0
 #endif
 
+//====为了解决环形依赖问题而设置的常数区域
+#define CONST_SECSIZE 512
 
+// CODE64 模式下gcc编译器能够使用与系统相符的PTRDIFF_TYPE 和 SIZE_TYPE
 #if defined(CODE64)
 typedef __PTRDIFF_TYPE__ ptrdiff_t;
 typedef __SIZE_TYPE__ size_t;
-#elif defined(CODE32)||defined(CODE16)||defined(CODE64)    //in standard host enviornment,do not use these definitions.
+typedef unsigned int u32_t;
+typedef unsigned short u16_t;
+typedef unsigned char  u8_t;
+#endif
+
+#if defined(CODE32)||defined(CODE16)   //in standard host enviornment,do not use these definitions.
 			// You must be very careful about typedef
 typedef signed int ptrdiff_t;
 typedef unsigned int size_t;

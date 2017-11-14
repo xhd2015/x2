@@ -3,14 +3,15 @@ plugin_ctrl: unmapped=1, biosdev=1, speaker=1, extfpuirq=1, parallel=1, serial=1
 config_interface: win32config
 display_library: win32
 memory: host=32, guest=32
-romimage: file="C:\Program Files (x86)\Bochs-2.6.8\BIOS-bochs-latest"
-vgaromimage: file="C:\Program Files (x86)\Bochs-2.6.8\VGABIOS-lgpl-latest"
+romimage: file="D:\installed\Bochs-2.6.9\BIOS-bochs-latest"
+vgaromimage: file="D:\installed\Bochs-2.6.9\VGABIOS-lgpl-latest"
 boot:disk
 floppy_bootsig_check: disabled=0
 # no floppya
 # no floppyb
 ata0: enabled=1, ioaddr1=0x1f0, ioaddr2=0x3f0, irq=14
-ata0-master: type=disk, path="C:\Users\13774\Desktop\bochs\devel\x2 system\gen\main.bimg", mode=flat
+ata0-master: type=disk, path="C:\Users\13774\Desktop\old_desktop\bochs\devel\x2 system\gen\main.bimg", mode=flat
+#ata0-master: type=disk, path="main.bimg", mode=flat
 #ata0-master: type=disk, path="D:\VHDs\new-bochs.vhd", mode=flat
 #ata0-master: type=disk, path="hdd-raw.img", mode=flat
 ata0-slave: type=none

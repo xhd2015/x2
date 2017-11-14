@@ -19,9 +19,11 @@ AS_MACRO void* operator new[](size_t, void* __p){ return __p; };
 // Default placement versions of operator delete.
 AS_MACRO void operator delete  (void*, void*){};
 AS_MACRO void operator delete[](void*, void*){};
+
+
 #elif defined(CODE64)
 		#include <new>
-#include <cstdio>
+		#include <cstdio>
 #endif
 /**
 *   This is simple enough,and should not  be modified any longer.

@@ -8,6 +8,8 @@
 #include <AssociatedMemoryManager.h>
 #include <VirtualMemory.h>
 #include <Descriptor.h>
+#include <PMLoader.h>
+#include <after_def.h>
 
 //class Process;
 //template <class T> class KernelSmmWrapper;  //incomplete type,could only be referenced by pointer
@@ -32,25 +34,41 @@
  * Memory Allocation is done by manager,not by process
  */
 
-#if defined(CODE32)||defined(CODE64)
+
+#if defined(CODE32)
 extern "C" {
 	void idle();
 	void process1();
 	void process2();
 }
 
-class Process
+#endif
+
+//下面CODE64只需要使用enum中的常数，作为调试用，其他不需要
+#if defined(CODE32)||defined(CODE64)
+	class Process
+#endif
+#if defined(CODE32)
 		:public ErrorSaver
-{
-public:
-	typedef Process This;
+#endif
+		 {
+#if defined(CODE32) || defined(CODE64)
+		 public:
+			typedef Process This;
+#endif
+
+#if defined(CODE32)
 	typedef AssociatedMemoryManager<SegmentDescriptor,1> SegManager;
+#endif
+
+
+#if defined(CODE32)||defined(CODE64)
 	enum{
 		RESERVED_PDE_START = 0,
 		RESERVED_PDE_NUM=10,
 		RESERVED_PTE_START = (RESERVED_PDE_NUM*(sizeof(PDEManager::NodeType) + sizeof(PDEManager::TargetType)) + 4)&0xfffffffc,//it must align with 4
-		RESERVED_PTE_NUM=(PMLoader::SECSIZE - RESERVED_PTE_START)/(sizeof(PTEManager::NodeType)+sizeof(PTEManager::TargetType)),
-		RESERVED_PTE_MANAGER_START = PMLoader::SECSIZE,
+		RESERVED_PTE_NUM=(CONST_SECSIZE - RESERVED_PTE_START)/(sizeof(PTEManager::NodeType)+sizeof(PTEManager::TargetType)),
+		RESERVED_PTE_MANAGER_START = CONST_SECSIZE,
 		RESERVED_PTE_MANAGER_NUM = RESERVED_PDE_NUM,
 		RESERVED_END = RESERVED_PTE_MANAGER_START + RESERVED_PTE_MANAGER_NUM * sizeof(PTEManager*),
 
@@ -65,6 +83,10 @@ public:
 		STATUS_READY,
 		STATUS_STOPPED,
 	};
+#endif
+
+#if defined(CODE32)
+
 public:
 	Process();
 	Process(
@@ -113,11 +135,10 @@ protected:
 	MemoryManager<KernelSmmWrapper> baseMM;
 
 	PDEManager	pdeman;
+#endif
 };
 
 
-
-#endif
 
 
 

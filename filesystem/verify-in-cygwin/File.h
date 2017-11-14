@@ -53,7 +53,7 @@ protected:
  *		zero(0~3,an integer size) address in   filename should not be used,pointing to them means no name.Only root directory can do that
  *
  *	FreeSpaceSection:
- *		The recorded data is relative the 0.This is because these files does not exist in the memory,so they do not use buffer
+ *		The recorded data is relative the 0.This is because these files do not exist in the memory,so they do not use buffer
  *		0:  record the whole start & limit
  *		....
  *
@@ -112,7 +112,9 @@ public:
 	X2fsUtil(const char *file);//create a handler to the image file.
 	~X2fsUtil();
 	/**
-	 * When argc=0,it means under the root
+	 * 在root根目录下创建一个文件
+	 * @name   文件名
+	 * @secNum 文件占据的扇区大小
 	 */
 	bool createFileInRoot(const char *name,size_t secNum);//reserved number of sectors
 	DEPRECATED bool hasFilename(const char *name)const;
@@ -142,7 +144,13 @@ public:
 
 protected:
 	void initBuffers();
-	void adjustDirbufOffset(int off);//positive or negative
+
+	/**
+	 * 这真是一个bug， 因为指针偏移在64位系统下不能仅仅使用int存放，所以导致出错。
+	 * 调试了半天。。。
+	 */
+	// old version ---> void adjustDirbufOffset(int off);//positive or negative
+	void adjustDirbufOffset(ptrdiff_t off);
 
 
 	void retriveFileNameSection();

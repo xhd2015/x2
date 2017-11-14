@@ -18,6 +18,10 @@
 
 #define IMG_SIZE 100*X2fsUtil::SecSize
 typedef SimpleMemoryManager<TreeNode<FileDescriptor> >::Node FileNode;
+
+/**
+ * no argument
+ */
 int main()
 {
 	X2fsUtil xfu(HDD_FILE);

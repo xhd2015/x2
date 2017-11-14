@@ -18,13 +18,18 @@ __asm__(".code32 \n\t");
 
 //=============template ininstantiate
 #if defined(CODE32)
+
 	template class MemoryManager<SimpleMemoryManager>;
+
+
 #elif defined(CODE64)
+
 #include <cstdio>
 #include <cstring>
-#include "/home/13774/x2-devel/filesystem/verify-in-cygwin/MallocToSimple.h"
+#include <64/MallocToSimple.h>
 	template class MemoryManager<MallocToSimple>;
 	template class LinearSourceManager<LinearSourceDescriptor, MallocToSimple>;
+
 #endif
 //
 //#if defined(CODE32)

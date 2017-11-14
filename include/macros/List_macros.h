@@ -107,6 +107,7 @@ void SimpleMemoryNode::free()
 }
 void SimpleMemoryNode::unfree()
 {
+//	printf("offset of No is %x\n",(char*)&(this->NO)-(char*)this);
     this->NO=true;
 }
 void SimpleMemoryNode::setNO(bool NO)
@@ -177,13 +178,15 @@ TreeNode<T>* TreeNode<T>::setFather(TreeNode<T>* father) {
     this->father=father;
 }
 
+//#if ! defined(CODE64)
 template<class T>
 TreeNode<T>* TreeNode<T>::getSon() const{
-#if defined(CODE64)
+//#if defined(CODE64)
 //	printf("gettSon \n");
-#endif
+//#endif
 	return son;
 }
+//#endif
 
 template<class T>
 TreeNode<T>* TreeNode<T>::getDirectFather()const {//direct father

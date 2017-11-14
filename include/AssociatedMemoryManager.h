@@ -100,14 +100,16 @@ protected:
 	};
 
 	size_t len;
-	size_t lastIndex,curSize;//Synchronised
+	size_t lastIndex,curSize;//Synchronized
 protected:
 	/**
 	 * Layout:
 	 *   ___  --> start
 	 *  |	|
 	 *  |	|
-	 *  |---| --> for nodes
+	 *  |___| --> for nodes
+	 *
+	 *   ___  --> start_2
 	 *  |	|
 	 *  |	|
 	 *  |	|
@@ -118,8 +120,6 @@ protected:
 };
 
 #endif //CODE32 || CODE64
-
-
 
 
 

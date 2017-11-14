@@ -32,8 +32,8 @@
 	template class LinkedList<TreeNode<Process*>*,KernelSmmWrapper>;
 #elif defined(CODE64)
 #include <cstdio>
-	#include "/home/13774/x2-devel/filesystem/verify-in-cygwin/File.h"
-#include "/home/13774/x2-devel/filesystem/verify-in-cygwin/MallocToSimple.h"
+	#include "/home/13774/devel/x2-devel/filesystem/verify-in-cygwin/File.h"
+#include <64/MallocToSimple.h>
 	template class TreeNode<FileDescriptor>;
 	template class SimpleMemoryManager<TreeNode<FileDescriptor> >;
 	template class TreeNode<int>;
@@ -638,6 +638,17 @@ son(son)
 template<class T>
 inline TreeNode<T>::~TreeNode() {
 }
+
+//#if defined(CODE64)
+//template<class T>
+//TreeNode<T>* TreeNode<T>::getSon() const{
+//#if defined(CODE64)
+//	printf("gettSon not macro\n");
+//#endif
+//	return son;
+//}
+//#endif
+
 
 template<class T>
 void TreeNode<T>::addSon(TreeNode<T>* son)

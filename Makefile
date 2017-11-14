@@ -1,6 +1,11 @@
 
+DEBUG := false
+#Debug 用于决定gcc,g++编译器生成的二进制程序是否带有源代码的信息
+#g++的选项:
+# -g --gen-debug          generate debugging information
+
 dir = /home/Fulton Shaw/x2-devel
-#GEN contains 16,32 and 64(can be used in hosted enviorenment)
+#GEN contains 16,32 and 64(can be used in hosted environment )
 GEN := gen
 GEN16 := gen/16
 GEN32 := gen/32
@@ -13,28 +18,37 @@ INCLUDE := include
 STDC := stdc
 STDCPP := stdc++
 
-#control which files are compiled.
+
+#deciding which files are compiled.
 f16 := main libx2 PMLoader Descriptor IOProgramer
 f32 := protected_main libx2  VirtualMemory PMLoader Descriptor TSS interrupts IOProgramer Memory test List	AssociatedMemoryManager Process Kernel idleProcess Cache
 f32user := UserProcess libx2
 f64 := libx2 PMLoader Descriptor TSS Memory List Locator AssociatedMemoryManager
-
+#需要用到PMLoader中的一些常量
 
 ld16 := image_16.ld
 ld32 := image_32.ld
 
 fbackup := $(INCLUDE) $(SRC) $(ld16) $(ld32) Makefile TODO README  $(STDC) $(STDCPP) test tools filesystem deprecated from-gcc
+
+# CCFLAGS is for all, CCFLAGSXX for CODEXX
 CCFLAGS :=  -fpack-struct=1 -fno-exceptions  -nostdinc -nostdinc++ -nostdlib -Winline --no-warnings -I ./include -std=c++11
 CCFLAGS32 := -m32
 CCFLAGS16 := -m32
+
+#toolchains
+CXX = g++
+AS = as
+ifeq ($(DEBUG),true)
+	CXX += -g
+	AS += -g
+endif
 
 DDFLAGS := conv=notrunc bs=1c
 
 CCMACROS := 
 CCMACROS16 := -D CODE16
 CCMACROS32 := -D CODE32
-
-
 
 CCFLAGS64 := -m64 -I./include -std=c++11 -fpack-struct=1
 CCMACROS64 := -D CODE64
@@ -47,13 +61,15 @@ UNUSED_CCFLAGS := -fkeep-inline-functions -fpermissive
 # imageMacros := DRIVER SECSTART SECNUM CODESEG CODEOFF
 # imageSyms := JMPSEG JMPOFF
 #==================================================================================
-.PHONY : dump16 dump default nothing help debug start run export backup push
+.PHONY : dump16 dump default nothing help debug start run exportversion backup push
 .ONESHELL:
 .SECONDEXPANSION:
 default:
 	make $(GEN)/main.bimg
 nothing:
 	@
+all:
+	# nothing
 debug:
 	@echo	CCFLAGS 	'--->'		$(CCFLAGS)
 	echo	args		'--->'		$(args)
@@ -72,7 +88,7 @@ start:
 	-@cmd /C 'cd C:\Users\13774\Desktop\bochs\devel\x2^ system\tools\bochs^ run && explorer start_bochs.cmd'
 run:
 	-@cmd /C 'cd C:\Users\13774\Desktop\bochs\devel\x2^ system\tools\bochs^ run && explorer run_bochs.cmd'
-export:VERSION $(SRC) $(INCLUDE) Makefile start_bochs.cmd main.bimg
+exportversion:VERSION $(SRC) $(INCLUDE) Makefile start_bochs.cmd main.bimg
 	@v=$$(cat VERSION)
 	mkdir --parents $(EXPORTS)/$${v}
 	cp  $^ -t $(EXPORTS)/$${v}
@@ -128,21 +144,22 @@ $(GEN)/main.bimg : partitions_table $(GEN16)/main.bimg $(GEN32)/main.bimg $(GEN3
 	dd if=partitions_table of=$@  bs=1c conv=notrunc seek=$$((0x1BE)) count=$$((512  - 0x1BE)) &&\
 	dd if=$(GEN32)/main.bimg of=$@ bs=1c conv=notrunc seek=$$((512*25)) count=$$((512*100)) &&\
 	dd if=$(GEN32)/UserProcess.bimg of=$@ bs=1c conv=notrunc seek=$$((512*100 + 512*25)) count=$$((32*512))
+
 # .s --> .o
 $(GEN16)/%.o:$(GEN16)/%.s
-	as $(ASSYMS) $< -o $@
+	$(AS) $(ASSYMS) $< -o $@
 $(GEN32)/%.o:$(GEN32)/%.s
-	as $(ASSYMS) $< -o $@
-$(GEN64)/%.o:$(GEN64)/%.s
-	as $< -o $@
+	$(AS) $(ASSYMS) $< -o $@
+$(GEN64)/%.o:$(SRC)/%.cpp
+	$(CXX) $(CCFLAGS64) $(CCMACROS64) -c $< -o $@
 
 # .cpp --> .s
 $(GEN16)/%.s:$(SRC)/%.cpp
-	g++ $(CCFLAGS) $(CCFLAGS16) $(CCMACROS) $(CCMACROS16) -S $< -o $@
+	$(CXX) $(CCFLAGS) $(CCFLAGS16) $(CCMACROS) $(CCMACROS16) -S $< -o $@
 $(GEN32)/%.s:$(SRC)/%.cpp
-	g++ $(CCFLAGS) $(CCFLAGS32) $(CCMACROS) $(CCMACROS32) -S $< -o $@
-$(GEN64)/%.s:$(SRC)/%.cpp
-	g++ $(CCFLAGS64) $(CCMACROS64) -S $< -o $@
+	$(CXX) $(CCFLAGS) $(CCFLAGS32) $(CCMACROS) $(CCMACROS32) -S $< -o $@
+#$(GEN64)/%.s:$(SRC)/%.cpp
+#	$(CXX) $(CCFLAGS64) $(CCMACROS64) -S $< -o $@
 
 #.h --> .cpp
 $(SRC)/%.cpp:$(INCLUDE)/*

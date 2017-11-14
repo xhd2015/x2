@@ -31,6 +31,7 @@
 
 #endif
 
+#include <macros/all.h>
 
 template <class _Source,int _HowStart,int _HowLength,int _HowAllocable>
 SourceLocator<_Source,_HowStart,_HowLength,_HowAllocable>::SourceLocator(const _Source& t):
