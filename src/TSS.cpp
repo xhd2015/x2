@@ -1,11 +1,14 @@
 #ifdef CODE32
 __asm__(".code32 \n\t");
+#endif
 
 #include <TSS.h>
 #include <libx2.h>
 #include <def.h>
 #include <PMLoader.h>
-#include <Memory.h> //for new
+#include <MemoryManager.h> //for new
+
+#if defined(CODE32)
 TSS::TSS()
 {
 	//清零

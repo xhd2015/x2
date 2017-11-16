@@ -6,7 +6,7 @@
  */
 
 #include <AssociatedMemoryManager.h>
-#include <Memory.h>
+#include <MemoryManager.h>
 
 #include <macros/all.h>
 

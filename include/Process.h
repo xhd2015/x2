@@ -2,7 +2,7 @@
 #define Process_h
 
 #include <libx2.h>
-#include <Memory.h>
+#include <MemoryManager.h>
 #include <List.h>
 #include <TSS.h>
 #include <AssociatedMemoryManager.h>

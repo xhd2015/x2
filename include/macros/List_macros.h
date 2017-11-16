@@ -10,6 +10,10 @@
 
 #include <List.h>
 
+#if defined(CODE64)
+#include <iostream>
+#endif
+
 //============函数宏区
 //=========class : ListNode
 template<class T>
@@ -145,7 +149,7 @@ size_t SimpleMemoryManager<T>::getLimit()const
 template<class T>
 size_t  SimpleMemoryManager<T>::getNodeSize()
 {
-	return sizeof(Node);
+	return sizeof(FullNode);
 }
 
 template<class T>
@@ -159,7 +163,7 @@ void			SimpleMemoryManager<T>::setErrHandler(SimpleMemoryManager<T>::ERROR_HANDL
 	this->errhandle= errhandle;
 }
 template<class T>
-bool			SimpleMemoryManager<T>::checkIsInternal(Node *t)
+bool			SimpleMemoryManager<T>::checkIsInternal(FullNode *t)
 {
 	return this->start <= (size_t)t && (size_t)t - (size_t)this->start <= this->limit ;
 }
@@ -188,6 +192,20 @@ TreeNode<T>* TreeNode<T>::getSon() const{
 }
 //#endif
 
+
+template<class T>
+TreeNode<T>* TreeNode<T>::getNext() const{
+	TreeNode<T>* next=(TreeNode<T>*)this->ListNode<T>::getNext();//这种情况下的强制转换一定是正确的，因为TreeNode中只存储TreeNode，而不会存储ListNode
+	return next;
+}
+
+template<class T>
+TreeNode<T>* TreeNode<T>::getPrevious() const{
+	TreeNode<T>* previous=(TreeNode<T>*)this->ListNode<T>::getPrevious();
+	return previous;
+}
+
+
 template<class T>
 TreeNode<T>* TreeNode<T>::getDirectFather()const {//direct father
 #if defined(CODE64)
@@ -207,9 +225,13 @@ bool 		 TreeNode<T>::hasFather()const
 	return this->father!=NULL;
 }
 
+
 //======class Tree
 template<class T,template <class> class _Allocator>
 TreeNode<T>* Tree<T,_Allocator>::getHead()const {
+#ifdef CODE64
+//	std::cout << "tree getHead()"<<std::endl;
+#endif
 	return root->getSon();
 }
 

@@ -3,7 +3,7 @@
 #define PMLoder_h__
 
 #include <Kernel.h> //for kernel
-#include <Memory.h>  //for MemoryManager
+#include <MemoryManager.h>  //for MemoryManager
 #include <List.h>  //for SimpleMemoryManager
 
 //实模式下的 “保护模式加载器”

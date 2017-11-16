@@ -10,7 +10,7 @@
 #elif defined(CODE64)
 #include <cstdio>
 #include <List.h>
-#include <Memory.h>
+#include <MemoryManager.h>
 	template class SourceLocator<LinearSourceDescriptor,Locator<LinearSourceDescriptor>::LESS,
 			Locator<LinearSourceDescriptor>::IGNORE,Locator<LinearSourceDescriptor>::IGNORE>;
 

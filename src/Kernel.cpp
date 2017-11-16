@@ -1,5 +1,5 @@
 
-#include <Memory.h>
+#include <MemoryManager.h>
 #include <Kernel.h>
 #include <PMLoader.h>
 
@@ -9,6 +9,8 @@
 __asm__(".code32 \n\t");
 #endif
 
+
+#if defined(CODE32)
 //============class ProcessManager
 ProcessManager::ProcessManager():
 maxPID(1),lastValidPID(Process::PID_INVALID),curProcess(NULL),
@@ -335,3 +337,4 @@ void Kernel::initTheKernel(Kernel* theKernel)
 	}
 }
 
+#endif

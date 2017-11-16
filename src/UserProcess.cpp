@@ -1,3 +1,6 @@
+#if defined(CODE32)
+	__asm__(".code32 \n\t");
+#endif
 
 
 /**
@@ -6,10 +9,9 @@
 #include <def.h>
 #include <libx2.h>
 #include <macros/all.h>
-#if defined(CODE32)
-	__asm__(".code32 \n\t");
-#endif
 
+
+#if defined(CODE32)
 
 int which;
 
@@ -37,3 +39,5 @@ extern "C" __attribute__((section(".proc2"))) void process2()
 			"jmp .\n\t");
 	__asm__("mov  $0x5562,%eax \n\t");//0x556 for user process,2 for number(not pid)
 }
+
+#endif

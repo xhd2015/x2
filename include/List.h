@@ -46,10 +46,21 @@ public:
     SimpleMemoryManager()=default;//default constructor that has nothing
     //~SimpleMemoryManager(); //the only way to free all list is a call to free
 public:
+    /**
+     * 将标记放到待存储结构的末尾
+     *
+     * 希望借此隐藏标记的细节，从而只需关心数据本身，而不需关心数据怎么被附加信息存储
+     *
+     * 这里必须注意一点：只能组合两个类，并且标记类应当放置在末尾。
+     * 这种组合类使用限制：当你只使用T部分时，T的地址本身也是整个结构体的地址。这使指针可以正常运作
+     */
 	struct Freeable:public T,public SimpleMemoryNode{
 
 	};
-	typedef struct Freeable Node;
+	typedef struct Freeable FullNode;
+	typedef T DataPart;
+
+
 	typedef void (*ERROR_HANDLER)(SimpleMemoryManager *smm,int errcode);
 	enum{
 		ERR_NO_ERROR=0,
@@ -71,8 +82,8 @@ public:
      * The following methods may throw exception/may call error handler,after which it executes normally
      */
     T* getNew();//done
-    Node *getNewNode();//done
-    void withdraw(Node *t);//done
+    FullNode *getNewNode();//done
+    void withdraw(FullNode *t);//done
     void withdraw(T *t);//single free,done
 
 
@@ -85,7 +96,7 @@ public:
     AS_MACRO ERROR_HANDLER getErrHandler();
     AS_MACRO void			setErrHandler(ERROR_HANDLER errhandle);
 protected:
-    AS_MACRO bool	checkIsInternal(Node *t);
+    AS_MACRO bool	checkIsInternal(FullNode *t);
     size_t start;
     size_t limit;
     
@@ -144,11 +155,18 @@ protected:
 *      void _Allocator<T>::withdraw(T*);
 *       T*  _Allocator<T>::getNew(size_t size);
 *
+*
+*
 */
+/**
+ * @param T 存储的类型
+ * @param _Allocator 分配ListNode<T>的分配器
+ */
 template<class T,template <class> class _Allocator >
 class LinkedList{
 public:
 	LinkedList()=default;
+
 public:
     LinkedList(  _Allocator<ListNode<T> > *smm);
     ~LinkedList();
@@ -265,6 +283,8 @@ public:
 //#else
     AS_MACRO TreeNode<T>* getSon()const; //done
 //#endif
+    AS_MACRO TreeNode<T>* getNext()const;
+    AS_MACRO TreeNode<T>* getPrevious()const;
 
     AS_MACRO TreeNode<T>* getDirectFather()const;//direct father,done
     		void		addSon(TreeNode<T>* son);

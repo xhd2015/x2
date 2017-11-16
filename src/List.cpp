@@ -1,6 +1,6 @@
 
 #include <List.h>
-#include <Memory.h>
+#include <MemoryManager.h>
 
 #include <macros/all.h>
 #if defined(CODE32)
@@ -32,7 +32,7 @@
 	template class LinkedList<TreeNode<Process*>*,KernelSmmWrapper>;
 #elif defined(CODE64)
 #include <cstdio>
-	#include "/home/13774/devel/x2-devel/filesystem/verify-in-cygwin/File.h"
+#include "filesystem/verify-in-cygwin/File.h"
 #include <64/MallocToSimple.h>
 	template class TreeNode<FileDescriptor>;
 	template class SimpleMemoryManager<TreeNode<FileDescriptor> >;
@@ -90,9 +90,9 @@ T* SimpleMemoryManager<T>::getNew()
 }
 
 template <class T>
-typename SimpleMemoryManager<T>::Node *SimpleMemoryManager<T>::getNewNode()
+typename SimpleMemoryManager<T>::FullNode *SimpleMemoryManager<T>::getNewNode()
 {
-    Node *rt=NULL;
+    FullNode *rt=NULL;
     if(!isFull())
     {
         for(int i=0;i!=len;i++)
@@ -114,21 +114,21 @@ typename SimpleMemoryManager<T>::Node *SimpleMemoryManager<T>::getNewNode()
     return rt;
 }
 template <class T>
-void SimpleMemoryManager<T>::withdraw(SimpleMemoryManager<T>::Node *t)
+void SimpleMemoryManager<T>::withdraw(SimpleMemoryManager<T>::FullNode *t)
 {
-	Node* _t=(Node*)t;
+	FullNode* _t=(FullNode*)t;
     if(_t && !_t->isFree())
     {
         _t->free(); //如果被标记为可用，就用lastIndex指向之
         curSize--;
-        lastIndex = (size_t)(((size_t)_t - (size_t)start)/sizeof(Node)) % len;
+        lastIndex = (size_t)(((size_t)_t - (size_t)start)/sizeof(FullNode)) % len;
     }
 }
 
 template <class T>
 void SimpleMemoryManager<T>::withdraw(T *t)
 {
-	this->withdraw((Node*)t);
+	this->withdraw((FullNode*)t);
 }
 
 

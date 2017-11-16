@@ -2,7 +2,7 @@
 #include <Kernel.h>
 #include <Process.h>
 #include <AssociatedMemoryManager.h>
-#include <Memory.h>
+#include <MemoryManager.h>
 #include <List.h>
 
 #include <macros/all.h>
@@ -11,6 +11,9 @@
 __asm__(".code32 \n\t");
 #endif
 
+
+
+#if defined(CODE32)
 //========
 #define SELECT_SCALE(LIMIT,GSEL) ({\
 	(GSEL)=SegmentDescriptor::G_1B;\
@@ -144,4 +147,4 @@ baseMM(&this->baseKsmm,linearBase+processBase,bodySize,false)
 
 }
 
-
+#endif

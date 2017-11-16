@@ -19,6 +19,8 @@ __asm__(".code32 \n\t");
 
 #include <macros/all.h>
 
+#if defined(CODE32)
+
 extern "C" {
 	void extraVboxTest();
     void protectedEntryHolder();
@@ -327,3 +329,5 @@ void forTss1() //tss1的主要代码
     SimpleCharRotator scr(0,50,Util::MODE_COMMON|Util::MODE_FL_ON|Util::MODE_BG_BLUE);
     scr.run();
 }
+
+#endif

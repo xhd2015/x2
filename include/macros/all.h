@@ -13,7 +13,7 @@
 #include <libx2.h>
 #include <IOProgramer.h>
 #include <Locator.h>
-#include <Memory.h>
+#include <MemoryManager.h>
 #include <Process.h>
 #include <AssociatedMemoryManager.h>
 #include <Cache.h>
@@ -21,7 +21,6 @@
 #include <Descriptor.h>
 
 #include <macros/List_macros.h>
-#include <macros/Memory_macros.h>
 #include <macros/Process_macros.h>
 #include <macros/AssociatedMemoryManager_macros.h>
 #include <macros/Kernel_macros.h>
@@ -31,6 +30,7 @@
 #include <macros/IOProgramer_macros.h>
 #include <macros/Locator_macros.h>
 #include <macros/VirtualMemory_macros.h>
+#include <macros/MemoryManager_macros.h>
 
 
 

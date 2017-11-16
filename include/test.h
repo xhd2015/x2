@@ -3,7 +3,7 @@
 #define test_h__
 #include <libx2.h>
 #include <List.h>
-#include <Memory.h>
+#include <MemoryManager.h>
 
 class Test{
 public:

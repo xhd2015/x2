@@ -6,7 +6,7 @@
 #if defined(CODE64)
 #include <cstdio>
 #include <List.h>
-#include <Memory.h>
+#include <MemoryManager.h>
 	template class MallocToSimple<TreeNode<MemoryDescriptor> >;
 	template class MallocToSimple<ListNode<LinearSourceDescriptor> >;
 #endif

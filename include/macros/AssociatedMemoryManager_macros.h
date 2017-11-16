@@ -55,7 +55,7 @@ typename AssociatedMemoryManager<T, 1>::TargetType* AssociatedMemoryManager<T, 1
 template<class T>
 void AssociatedMemoryManager<T, 1>::freeNode(size_t index)
 {
-	This::NodeType*	p;
+	NodeType *p;
 	if( (p=this->getNode(index))!=NULL && !p->isFree())
 	{
 		p->free();
@@ -65,7 +65,7 @@ void AssociatedMemoryManager<T, 1>::freeNode(size_t index)
 template<class T>
 void AssociatedMemoryManager<T, 1>::unfreeNode(size_t index)
 {
-	This::NodeType *p;
+	NodeType *p;
 	if( (p=this->getNode(index))!=NULL && p->isFree())
 	{
 		p->unfree();

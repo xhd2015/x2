@@ -6,8 +6,11 @@
 #include <64/MallocToSimple.h>
 #include <def.h>
 #include <cstdio>
-#include <Memory.h>
+#include <MemoryManager.h>
 #include <List.h>
+#include <string>
+
+
 /**
 * 
 */
@@ -15,6 +18,9 @@ class FileDescriptor
 {
 public:
 	enum{ TYPE_FILE=0,TYPE_DIR=1,TYPE_EAP=2};
+	friend class X2fsUtil;
+	typedef unsigned int TimeType;
+	typedef size_t SizeType;
 public:
 	AS_MACRO FileDescriptor(char type,size_t sectionList,
 			size_t fileLen,size_t nameStart,unsigned int createdTime,unsigned int lastModefiedTime);
@@ -59,6 +65,9 @@ protected:
  *
  *	RAW Section:
  *
+ *
+ *	性能分析：因为解析路径名需要从根遍历树，很耗费时间。
+ *
  */
 class X2fsUtil{
 public:
@@ -100,7 +109,14 @@ public:
 	typedef MallocToSimple<ListNode<LinearSourceDescriptor> > LLSmm;
 	typedef MemoryManager<MallocToSimple> FileNameMM;
 	typedef SimpleMemoryManager<TreeNode<FileDescriptor> > FileNodeMM;
-	typedef FileNodeMM::Node FileNode;
+
+	//FileNode 真实类型是  SimpleMemoryManager<TreeNode<FileDescriptor> >::Node
+	//即 TreeNode<FileDescriptor>,SimpleMemoryNode的组合
+	// getHead()只返回TreeNode<FileDescriptor>,即数据部分
+	//	typedef FileNodeMM::Node FileNode;
+	typedef FileNodeMM::DataPart FileNode;
+
+
 	typedef Tree<FileDescriptor,SimpleMemoryManager> FileTree;
 	typedef LinearSourceManager<LinearSourceDescriptor,MallocToSimple> FreeSpaceMM;
 	typedef LinearSourceManager<LinearSourceDescriptor,MallocToSimple> LinkedInfoMM;
@@ -109,6 +125,7 @@ public:
 		FileNodeSize=sizeof(FileNode)
 	};
 public:
+	X2fsUtil()=delete;
 	X2fsUtil(const char *file);//create a handler to the image file.
 	~X2fsUtil();
 	/**
@@ -119,6 +136,7 @@ public:
 	bool createFileInRoot(const char *name,size_t secNum);//reserved number of sectors
 	DEPRECATED bool hasFilename(const char *name)const;
 	bool hasFilename(int argc,const char *argv[],const char *name)const;
+	bool hasFilename(FileNode * node,const std::string& name)const;
 	DEPRECATED bool mkdir(const char* name);
 	bool createFile(int argc,const char* argv[],int secSpan);
 	bool createDir(int argc,const char* argv[]);
@@ -135,42 +153,16 @@ public:
 	size_t writeToFile(const char *buf,size_t objsize, size_t nobj,int argc,const char *argv[],size_t foff=0);
 	size_t readFromFile(char *buf,size_t objsize, size_t nobj,int argc,const char *argv[],FileNode *fnode,size_t foff=0);
 
-
 	void listRoot()const;
+	void listNode(const FileNode* p)const;
 	void flush();//write the buffered content back to file
 	AS_MACRO int geterrno()const;
-	AS_MACRO static bool isDirectory(const FileNode *p);
-	AS_MACRO static bool isFile(const FileNode *p);
 
-protected:
-	void initBuffers();
+public:
+	char *getFileNameCstr(const FileDescriptor &fd,size_t &nlen)const;
+	std::string getFileName(const FileNode *p)const;
 
-	/**
-	 * 这真是一个bug， 因为指针偏移在64位系统下不能仅仅使用int存放，所以导致出错。
-	 * 调试了半天。。。
-	 */
-	// old version ---> void adjustDirbufOffset(int off);//positive or negative
-	void adjustDirbufOffset(ptrdiff_t off);
-
-
-	void retriveFileNameSection();
-	/**
-	 * This is not necessary for filename section,cause all changes had been made as direct and immediate
-	 */
-	DEPRECATED void saveFileNameSection();
-
-	void retriveFreeSpaceSection();
-	void saveFreeSpaceSection();
-
-
-	UNTESTED void retriveLinkedInfoSection();
-	DEPRECATED void saveLinkedInfoSection();/*The modifies are at-place*/
-
-	void retriveDirSection();
-	void saveDirSection();
-	char *getFileName(const FileDescriptor &fd,size_t &nlen)const;
-
-	UNTESTED void listNode(const FileNode *p)const;
+	UNTESTED void printNode(const FileNode *p)const;
 	UNTESTED void listOnNode(const FileNode *p,int maxdeepth=1)const;
 
 	bool hasFilename(FileNode * fnode,const char *name)const;
@@ -191,6 +183,10 @@ protected:
 	 *
 	 */
 	FileNode * locatePath(FileNode *base,int argc,const char *argv[],int &errorLevel)const;
+	/**
+	 *
+	 * @return NULL to indicate failure
+	 */
 	FileNode * locatePath(FileNode *base,const char *name)const;
 	FileNode * getPathParentNode(int argc,const char * argv[])const;
 	FileNode * getPathNode(int argc,const char * argv[])const;
@@ -199,10 +195,48 @@ protected:
 
 	INCOMPLETE size_t writeToFile(const char *buf,size_t objsize, size_t nobj,FileNode *fnode,size_t foff=0);
 	INCOMPLETE size_t readFromFile(char *buf,size_t objsize, size_t nobj,FileNode *fnode,size_t foff=0);
-	AS_MACRO void seterrno(int errno)const;
-	AS_MACRO void seterrno(int errno);
+	AS_MACRO void seterrno(int processErrno)const;
+	AS_MACRO void seterrno(int processErrno);
 	AS_MACRO FileNode * getRootBase()const;
 	AS_MACRO FileNode * getRootBase();
+	AS_MACRO static bool isDirectory(const FileNode *p);
+	AS_MACRO static bool isFile(const FileNode *p);
+
+
+	static void mockMkfsX2fs(void *base,size_t secNum);
+
+	template <template <class>class _Allocator>
+	INCOMPLETE static void getLinkedList(LinearSourceDescriptor *buffer,size_t i,LinkedList<LinearSourceDescriptor,_Allocator> &list,size_t maxlen);
+
+	DEPRECATED static void createFile_old(void *base,const char* name,size_t secNum);//default length=0,start=0,span=secNum
+
+	AS_MACRO FileTree getFileTree();
+protected:
+		void initBuffers();
+
+		/**
+		 * 这真是一个bug， 因为指针偏移在64位系统下不能仅仅使用int存放，所以导致出错。
+		 * 调试了半天。。。
+		 */
+		// old version ---> void adjustDirbufOffset(int off);//positive or negative
+		void adjustDirbufOffset(ptrdiff_t off);
+
+
+		void retriveFileNameSection();
+		/**
+		 * This is not necessary for filename section,cause all changes had been made as direct and immediate
+		 */
+		DEPRECATED void saveFileNameSection();
+
+		void retriveFreeSpaceSection();
+		void saveFreeSpaceSection();
+
+
+		UNTESTED void retriveLinkedInfoSection();
+		DEPRECATED void saveLinkedInfoSection();/*The modifies are at-place*/
+
+		void retriveDirSection();
+		void saveDirSection();
 
 
 protected:
@@ -224,17 +258,8 @@ protected:
 	FreeSpaceMM freemm;
 	LinkedInfoMM linkmm;
 
-	mutable int errno;/*can be used in both const & non-const method*/
+	mutable int processErrno;/*can be used in both const & non-const method*/
 
-
-
-public:
-	static void mockMkfsX2fs(void *base,size_t secNum);
-
-	template <template <class>class _Allocator>
-	INCOMPLETE static void getLinkedList(LinearSourceDescriptor *buffer,size_t i,LinkedList<LinearSourceDescriptor,_Allocator> &list,size_t maxlen);
-
-	DEPRECATED static void createFile_old(void *base,const char* name,size_t secNum);//default length=0,start=0,span=secNum
 };
 
 class PathUtil{
@@ -308,15 +333,15 @@ void	FileDescriptor::setNameOffset(size_t off)
 //=========class X2fsUtil
 int X2fsUtil::geterrno()const
 {
-	return this->errno;
+	return this->processErrno;
 }
-void X2fsUtil::seterrno(int errno)const
+void X2fsUtil::seterrno(int processErrno)const
 {
-	this->errno=errno;
+	this->processErrno=processErrno;
 }
-void X2fsUtil::seterrno(int errno)
+void X2fsUtil::seterrno(int processErrno)
 {
-	this->errno=errno;
+	this->processErrno=processErrno;
 }
 X2fsUtil::FileNode * X2fsUtil::getRootBase()const
 {
@@ -333,6 +358,10 @@ bool X2fsUtil::isDirectory(const FileNode *p)
 bool X2fsUtil::isFile(const FileNode *p)
 {
 	return p && p->getData().getType()==FileDescriptor::TYPE_FILE;
+}
+X2fsUtil::FileTree X2fsUtil::getFileTree()
+{
+	return fileTree;
 }
 
 //template<template<class > class _Allocator>

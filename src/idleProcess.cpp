@@ -12,11 +12,14 @@
 	__asm__(".code32 \n\t");
 #endif
 
+#if defined(CODE32)
 extern "C" void idle()
 {
 	Util::printStr("I am idle\n");
 	Util::jmpDie();
 }
+
+#endif
 
 
 

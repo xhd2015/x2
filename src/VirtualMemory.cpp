@@ -4,6 +4,10 @@
  *  Created on: 2017年3月24日
  *      Author: 13774
  */
+#if defined(CODE32)
+__asm__(".code32 \n\t");
+#endif
+
 
 #include <VirtualMemory.h>
 #include <Kernel.h>
@@ -14,10 +18,8 @@
 
 #include <macros/all.h>
 
-#if defined(CODE32)
-__asm__(".code32 \n\t");
-#endif
 
+#if defined(CODE32)
 
 CR3::CR3(int base, int pwt, int pcd):
 PDE_BASE(base),
@@ -163,4 +165,6 @@ int PDEManager::prepareVisitPhysical(u32_t phyaddr, size_t size,
 	}
 	return -1;
 }
+
+#endif
 

@@ -1,4 +1,4 @@
-
+#include <def.h>
 #include <cstring>
 #include <new>
 #include <List.h>
@@ -12,8 +12,8 @@
 //extern template class TreeNode<FileDescriptor>;
 //extern template class SimpleMemoryManager<TreeNode<FileDescriptor> >;
 
-
-typedef SimpleMemoryManager<TreeNode<FileDescriptor> >::Node Node;
+#if defined(CODE64)
+typedef SimpleMemoryManager<TreeNode<FileDescriptor> >::FullNode FullNode;
 /**tested**/
 
 
@@ -24,9 +24,10 @@ mmnodesmm(TMSmm()),
 filenamemm(FileNameMM(&mmnodesmm,0,namebufLen,false)),
 listnodesmm(LLSmm()),
 dirbuf(NULL),namebuf(NULL),freebuf(NULL),filebufLen(0),filebuf(NULL),linkbuf(NULL),linkarrLen(linkbufLen/sizeof(this->linkarr[0])),
-errno(This::ERROR_NOERR)
+processErrno(This::ERROR_NOERR)
 {
 //	printf("in init\n");
+	std::cout << "in init"<<std::endl;
 	this->fpimg=fopen(this->imgFile,"r+");
 
 	assert(this->fpimg!=NULL);
@@ -214,7 +215,7 @@ void X2fsUtil::retriveDirSection() {
 //	FileNode *nodebuffer=(FileNode*)this->dirbuf;
 	this->adjustDirbufOffset((ptrdiff_t)this->dirbuf);
 	new (&this->dirsmm) FileNodeMM((size_t)this->dirbuf,this->dirbufLen,false,3);
-	new (&this->fileTree) FileTree(&this->dirsmm,(FileNode*)(dirbuf+sizeof(FileNode) ));
+	new (&this->fileTree) FileTree(&this->dirsmm,(FullNode*)(dirbuf+sizeof(FullNode) ));
 //	printf("after init call get direct\n");
 //	nodebuffer[2].getDirectFather();
 //	nodebuffer[2].getDirectFather();
@@ -249,7 +250,7 @@ void X2fsUtil::saveDirSection() {
 //			p);
 }
 
-char* X2fsUtil::getFileName(const FileDescriptor& fd, size_t& nlen)const
+char* X2fsUtil::getFileNameCstr(const FileDescriptor& fd, size_t& nlen)const
 {
 	if(fd.getNameOffset()==0)return NULL;
 	char *p=(char*)((size_t)namebuf+(size_t)fd.getNameOffset());
@@ -257,12 +258,20 @@ char* X2fsUtil::getFileName(const FileDescriptor& fd, size_t& nlen)const
 	return p+1;
 }
 
-void X2fsUtil::listNode(const FileNode* p)const {
+std::string X2fsUtil::getFileName(const FileNode *p)const
+{
+	size_t nlen;
+	const FileDescriptor fd=p->getData();
+	char *ch=getFileNameCstr(fd, nlen);
+	return std::move(std::string(ch));
+}
+
+void X2fsUtil::printNode(const FileNode* p)const {
 	size_t nlen=0;
 	char *pname;
 	if(p)
 	{
-		pname=this->getFileName(p->getData(), nlen);
+		pname=getFileNameCstr(p->getData(), nlen);
 		if(This::isDirectory(p))
 		{
 			printf("Dir:%.*s\n",nlen,pname);
@@ -276,15 +285,15 @@ void X2fsUtil::listNode(const FileNode* p)const {
 void X2fsUtil::listOnNode(const FileNode* p,int maxdeepth)const
 {
 	if(maxdeepth<=0)return;
-	this->listNode(p);
+	this->printNode(p);
 	if(p  && This::isDirectory(p))
 	{
-		const FileNode * pfn=(FileNode*)p->getSon();
+		FileNode * pfn=p->getSon();
 		while(pfn)
 		{
 			printf("\t");
-			this->listNode(pfn);
-			pfn=(FileNode *)pfn->getNext();
+			this->printNode(pfn);
+			pfn=pfn->getNext();
 		}
 		pfn=(FileNode*)p->getSon();
 		while(pfn)
@@ -310,13 +319,11 @@ bool X2fsUtil::hasFilename(FileNode * fnode,const char *name)const
 bool X2fsUtil::create(FileNode *p,char type,const char *name,size_t secSpan,int ctime)
 {
 	if(!p)return false;
-	printf("DEBUG checking file existence...\n");
 	if(this->locatePath(p, name)!=NULL)//check existence of name
 	{
 		this->seterrno(This::ERROR_FILE_ALREDY_EXIST);
 		return false;
 	}
-	printf("DEBUG file not exists\n");
 	size_t fsecStart=0;
 	size_t linkInode=0;
 	size_t namelen;
@@ -431,7 +438,7 @@ void X2fsUtil::freeNode(FileNode * node)
 
 		size_t plen;
 		char *pname2;
-		pname2=this->getFileName(node->getData(), plen);
+		pname2=this->getFileNameCstr(node->getData(), plen);
 		printf("in free node : %.*s\n",plen,pname2);
 //
 //		printf("type is %d \n",node->getData().getType());
@@ -521,13 +528,13 @@ void X2fsUtil::removeNode(FileNode * node)
 
 bool  X2fsUtil::rename(FileNode *node,const char *newname)
 {
-	printf("test getNew \n");
+//	printf("test getNew \n");
 	this->linkmm.getMemoryManager()->getNew();
-	printf("test after getNew\n");
+//	printf("test after getNew\n");
 	size_t newlen=strlen(newname);
 	size_t orilen;
 	char *pori;
-	pori=this->getFileName(node->getData(),orilen);
+	pori=this->getFileNameCstr(node->getData(),orilen);
 	if(strncmp(newname,pori,newlen)==0)
 	{
 		return true;//the names have been the same
@@ -578,7 +585,7 @@ void X2fsUtil::dumpFileInfo(FileNode * fnode)
 {
 	const FileDescriptor & fd=fnode->getData();
 	size_t nlen;char *p;
-	p=this->getFileName(fd, nlen);
+	p=this->getFileNameCstr(fd, nlen);
 	printf("file name : %.*s \n",nlen,p);
 	printf("linked section list start : %d\nsections are : \n",fd.getSectionList());
 	int i=fd.getSectionList();
@@ -648,6 +655,11 @@ bool X2fsUtil::hasFilename(int argc,const char *argv[],const char *name)const
 	return this->hasFilename(this->getPathNode(argc, argv), name);
 }
 
+bool X2fsUtil::hasFilename(FileNode *fnode,const std::string& name)const
+{
+	return this->hasFilename(fnode, name.c_str());
+}
+
 bool  X2fsUtil::createFile(int argc,const char* argv[],int secSpan)
 {
 	int errlv;
@@ -666,11 +678,11 @@ bool  X2fsUtil::createFile(int argc,const char* argv[],int secSpan)
 			return false;
 		}else{
 			size_t plen;
-			printf("on node : %.*s \t",plen,this->getFileName(p->getData(), plen));
+			printf("on node : %.*s \t",plen,this->getFileNameCstr(p->getData(), plen));
 			printf("create file %s\n",argv[argc-1]);
 			bool flag=this->createFile(p, argv[argc-1], secSpan);
 
-			printf("after created, node is : %.*s ,succeed?%d, errno is %d\n",plen,this->getFileName(p->getData(), plen),flag,
+			printf("after created, node is : %.*s ,succeed?%d, errno is %d\n",plen,this->getFileNameCstr(p->getData(), plen),flag,
 					this->geterrno());
 
 			return flag;
@@ -759,7 +771,7 @@ void X2fsUtil::listNode(int argc,const char * argv[],int maxdeepth)const
 		{
 			if(This::isFile(pson))
 			{
-				this->listNode(pson);
+				this->printNode(pson);
 			}else{
 				this->listOnNode(pson,maxdeepth);
 			}
@@ -772,14 +784,34 @@ void X2fsUtil::listNode(int argc,const char * argv[],int maxdeepth)const
 void X2fsUtil::listRoot()const
 {
 	FileNode *pfn=(FileNode *)this->fileTree.getHead();
-//	printf("DEBUG  fileTree head=%p\n",pfn);
+
 	printf("/:\n");
 	pfn=(FileNode *)pfn->getSon();
 	size_t nlen=0;
 	char *pname;
 	while(pfn)
 	{
-		pname=this->getFileName(pfn->getData(), nlen);
+		pname=this->getFileNameCstr(pfn->getData(), nlen);
+		if(nlen!=0)
+		{
+//			printf("\t%.*s %x  %x\n",nlen,pname,pfn->getData().getSectionStart(),pfn->getData().getSectionSpan());
+			printf("\t%.*s %x  %x\n",nlen,pname,pfn->getData().getSectionList(),pfn->getData().getFileLen());
+		}
+		pfn=(FileNode *)pfn->getNext();
+	}
+}
+
+void X2fsUtil::listNode(const FileNode* p)const
+{
+//	std::cout << "in listNode"<<std::endl;
+	FileNode *pfn=(FileNode *)p;
+
+	pfn=(FileNode *)pfn->getSon();
+	size_t nlen=0;
+	char *pname;
+	while(pfn)
+	{
+		pname=this->getFileNameCstr(pfn->getData(), nlen);
 		if(nlen!=0)
 		{
 //			printf("\t%.*s %x  %x\n",nlen,pname,pfn->getData().getSectionStart(),pfn->getData().getSectionSpan());
@@ -809,31 +841,24 @@ void X2fsUtil::initBuffers() {
 }
 
 void X2fsUtil::adjustDirbufOffset(ptrdiff_t off) {
-		FileNode *nodebuffer=(FileNode*)this->dirbuf;
+		FileNodeMM::FullNode *nodebuffer=(FileNodeMM::FullNode*)this->dirbuf;
 //		printf("call before adjust\n");
-		//nodebuffer[2].getDirectFather();
-		(nodebuffer+2)->getDirectFather();
-		for(int i=1;i*sizeof(FileNode) <dirbufLen ; i++ )
+		for(int i=1;i*sizeof(FullNode) <dirbufLen ; i++ )
 		{
-			if(!nodebuffer[i].isFree())
+			if(!nodebuffer[i].SimpleMemoryNode::isFree())
 			{
-				nodebuffer[i].setFather((FileNode*)
+				nodebuffer[i].setFather(
 						(nodebuffer[i].getDirectFather()!=NULL?(FileNode*)((size_t)nodebuffer[i].getDirectFather() + (size_t)off ):(FileNode*)NULL));
 				nodebuffer[i].setNext(
-						(FileNode*)
 						(nodebuffer[i].getNext()!=NULL?(FileNode*)((size_t)nodebuffer[i].getNext() + (size_t)off):(FileNode*)NULL) );
 				nodebuffer[i].setPrevious(
-						(FileNode*)
 						(nodebuffer[i].getPrevious()!=NULL?(FileNode*)((size_t)nodebuffer[i].getPrevious() + (size_t)off):(FileNode*)NULL ) );
 				nodebuffer[i].setSon(
-						(FileNode*)
 						(nodebuffer[i].getSon()!=NULL?(FileNode*)((size_t)nodebuffer[i].getSon() + (size_t)off):(FileNode*)NULL) );
 //			printf("init pointer %d\n",i);
 			}
 		}
 //		printf("call in adjust\n");
-		//nodebuffer[2].getDirectFather();
-		(nodebuffer+2)->getDirectFather();
 }
 //typename
 X2fsUtil::FileNode* X2fsUtil::locatePath(FileNode* base,int argc, const char* argv[], int& errorLevel)const
@@ -860,13 +885,12 @@ X2fsUtil::FileNode* X2fsUtil::locatePath(FileNode* base, const char* name)const
 {
 	if(!base)return NULL;
 	FileNode *p=(FileNode *)base->getSon();
-	printf("DEBUG locate after get son\n");
 	size_t len;
 	const char *pname;
 //	printf("finding name %s\n",name);
 	while(p)
 	{
-		pname = this->getFileName(p->getData(), len);
+		pname = this->getFileNameCstr(p->getData(), len);
 //		printf("cmp %.*s,n is %d\n",len,pname,len);
 		if(len == strlen(name)  && strncmp(pname,name,len)==0)
 		{
@@ -1070,6 +1094,16 @@ size_t  X2fsUtil::readFromFile(char* buf, size_t objsize, size_t nobj,FileNode* 
 
 void X2fsUtil::mockMkfsX2fs(void* base,size_t secNum)
 {
+	//debug information
+	std::cout << "sizeof(FullNode)="<<sizeof(FullNode)<<std::endl;
+	std::cout << "sizeof(TreeNode<FileDescriptor>)="<<sizeof(TreeNode<FileDescriptor>)<<std::endl;
+	std::cout << "sizeof(SimpleMemoryNode)="<<sizeof(SimpleMemoryNode)<<std::endl;
+	FullNode *p=(FullNode *)sizeof(FullNode);
+	TreeNode<FileDescriptor> *p2=(TreeNode<FileDescriptor>*)p;
+	SimpleMemoryNode *p3=(SimpleMemoryNode*)p;
+	std::cout << "difference is (pfullnode - ptreenode)="<<(signed int)((char*)p - (char*)p2)<<std::endl;
+	std::cout << "pfullnode - psimple="<<(signed int)((char*)p - (char*)p3)<<std::endl;
+
 	//==================================init name section
 	/**
 	 * clear filenames in fileNameSection
@@ -1087,8 +1121,7 @@ void X2fsUtil::mockMkfsX2fs(void* base,size_t secNum)
 	/**
 	 * set dir root,node[0] node[1] are preserved for use
 	 */
-	Node *proot = (Node*)((size_t)base+X2fsUtil::DirSection);//zero is preserved
-//	printf("DEBUG SIZEOF(NODE)=%d\n",sizeof(*proot));
+	FullNode *proot = (FullNode*)((size_t)base+X2fsUtil::DirSection);//zero is preserved
 //	proot[0].SimpleMemoryNode::NO = true; //works
 //	proot[1].SimpleMemoryNode::NO = true;
 //	proot[2].SimpleMemoryNode::NO = true;
@@ -1096,14 +1129,14 @@ void X2fsUtil::mockMkfsX2fs(void* base,size_t secNum)
 	proot[0].SimpleMemoryNode::unfree(); //for NULL
 	proot[1].SimpleMemoryNode::unfree(); //for Tree Root
 	proot[2].SimpleMemoryNode::unfree(); //for Dir Head
-	proot[1].setSon((Node*)(2*sizeof(Node)));//The first one points to the next one,the next one is root
+	proot[1].setSon((FullNode*)(2*sizeof(FullNode)));//The first one points to the next one,the next one is root
 
 	proot[2].setData(FileDescriptor(
 			FileDescriptor::TYPE_DIR,
 			0,0,0,
 			0,0
-	));//dir
-	proot[2].setFather((Node*)sizeof(Node));//the base is the dir_section,zero is preserved
+	));//root dir
+	proot[2].setFather((FullNode*)sizeof(FullNode));//the base is the dir_section,zero is preserved
 
 	//======================================init free space section
 	//Now the managed source has changed to sec number,not sec numer multiply with secsize
@@ -1128,5 +1161,5 @@ void X2fsUtil::mockMkfsX2fs(void* base,size_t secNum)
 //	}
 //}
 
-
+#endif
 

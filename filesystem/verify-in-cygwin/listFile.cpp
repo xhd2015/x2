@@ -10,14 +10,18 @@
 #include <new>
 #include "File.h"
 #include <Memory.h>
+#include <iostream>
+
+#include "Reference.h"
 
 
 //suppose the disk image is :
 //		hdd.img
-#define HDD_FILE "hdd.img"
+//#define HDD_FILE "hdd.img"
+#define HDD_FILE "filesystem/verify-in-cygwin/hdd.img"
 
 #define IMG_SIZE 100*X2fsUtil::SecSize
-typedef SimpleMemoryManager<TreeNode<FileDescriptor> >::Node FileNode;
+typedef SimpleMemoryManager<TreeNode<FileDescriptor> >::FullNode FileNode;
 
 /**
  * no argument

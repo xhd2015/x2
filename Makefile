@@ -21,9 +21,9 @@ STDCPP := stdc++
 
 #deciding which files are compiled.
 f16 := main libx2 PMLoader Descriptor IOProgramer
-f32 := protected_main libx2  VirtualMemory PMLoader Descriptor TSS interrupts IOProgramer Memory test List	AssociatedMemoryManager Process Kernel idleProcess Cache
+f32 := protected_main libx2  VirtualMemory PMLoader Descriptor TSS interrupts IOProgramer MemoryManager test List	AssociatedMemoryManager Process Kernel idleProcess Cache
 f32user := UserProcess libx2
-f64 := libx2 PMLoader Descriptor TSS Memory List Locator AssociatedMemoryManager
+f64 := libx2 PMLoader Descriptor TSS MemoryManager List Locator AssociatedMemoryManager
 #需要用到PMLoader中的一些常量
 
 ld16 := image_16.ld
@@ -32,9 +32,10 @@ ld32 := image_32.ld
 fbackup := $(INCLUDE) $(SRC) $(ld16) $(ld32) Makefile TODO README  $(STDC) $(STDCPP) test tools filesystem deprecated from-gcc
 
 # CCFLAGS is for all, CCFLAGSXX for CODEXX
-CCFLAGS :=  -fpack-struct=1 -fno-exceptions  -nostdinc -nostdinc++ -nostdlib -Winline --no-warnings -I ./include -std=c++11
+CCFLAGS :=  -fno-exceptions  -nostdinc -nostdinc++ -nostdlib -Winline --no-warnings -I ./include -std=c++11
 CCFLAGS32 := -m32
 CCFLAGS16 := -m32
+DEPRECATED_CCFLAGS = -fpack-struct=1
 
 #toolchains
 CXX = g++
@@ -50,7 +51,7 @@ CCMACROS :=
 CCMACROS16 := -D CODE16
 CCMACROS32 := -D CODE32
 
-CCFLAGS64 := -m64 -I./include -std=c++11 -fpack-struct=1
+CCFLAGS64 := -m64 -I. -I./include -std=c++11
 CCMACROS64 := -D CODE64
 
 LDFLAGS :=    --print-gc-sections --no-gc-sections
@@ -61,7 +62,7 @@ UNUSED_CCFLAGS := -fkeep-inline-functions -fpermissive
 # imageMacros := DRIVER SECSTART SECNUM CODESEG CODEOFF
 # imageSyms := JMPSEG JMPOFF
 #==================================================================================
-.PHONY : dump16 dump default nothing help debug start run exportversion backup push
+.PHONY : dump16 dump default nothing help debug start run exportversion backup push all
 .ONESHELL:
 .SECONDEXPANSION:
 default:

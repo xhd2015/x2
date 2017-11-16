@@ -13,6 +13,8 @@ __asm__(".code32\n\t");
 
 #include <macros/all.h>
 
+#if defined(CODE32)
+
 Test::Test():
 dbg(Printer(5,60,15,10))
 {
@@ -262,3 +264,5 @@ void Test::run()
 //    this->testIO_HDD();
     dbg.putsz("Test hook ended\n");
 }
+
+#endif
