@@ -79,7 +79,6 @@ void int0x0()
 {
     __asm__("leave \n\t");
     JMP_DIE();
-    Util::insertMark(0x5550);
     int sel=Util::makeSel(3);
     ENTER_DS(sel,s);
     Util::printStr("int 0x0:#DE\n");
@@ -97,7 +96,6 @@ void int0x1()
 {
     __asm__("leave \n\t");
     JMP_DIE();
-    Util::insertMark(0x5551);
     int sel=Util::makeSel(3);
     ENTER_DS(sel,s);
     Util::printStr("int 0x1:Trap exception\n");
@@ -236,7 +234,6 @@ void int0xa()
     JMP_DIE();
 	__asm__("leave \n\t");
 	Util::jmpDie();
-	Util::insertMark(0x5aa);
     int sel=Util::makeSel(3);
     ENTER_DS(sel,s);
     Util::printStr("int 0xa.\n");
@@ -284,7 +281,6 @@ void int0xd()
 {
     __asm__("leave \n\t");
     JMP_DIE();
-    Util::insertMark(0x555d);//0x555 for interrupts,0xd for number
     int eax,ebx,ecx,esp;
     __asm__ __volatile__(
     "mov %%esp,%%edx \n\t"
@@ -596,7 +592,6 @@ void _int0x20()  //保护现场只能发生在堆栈框架之前，所以编写�
 {
     //CALL_INT_3(0x24,c,SEG_CURRENT,b,"int 0x20.\n",d,Util::MODE_COMMON);
 //	Util::printStr("int 0x20 start\n");
-    Util::insertMark(0x55520);
     IO_8259A p1;
     p1.sendOCW2(0,0x20);
     Kernel::getTheKernel()->switchNextProcess();
@@ -655,7 +650,7 @@ void _int0x21()
     //==fordebug
     
     
-    Util::digitToStr(save,sizeof(save),code);
+    Util::digitToStr(save,x2sizeof(save),code);
    
     if((code & 0x80) == 0)
     { 
@@ -670,7 +665,7 @@ void _int0x21()
         }else if(code==0xe0){ //还需要接受一个
             
         }
-        Util::digitToHex(save,sizeof(save),code);
+        Util::digitToHex(save,x2sizeof(save),code);
         p.putsz(save);
         p.putsz("  ");
     }
@@ -875,7 +870,6 @@ void intDefault()
     Util::enterDs(sel,temp);
     Util::printStr("Default int process called.\n");
     Util::leaveDs(sel,temp);
-    Util::insertMark(0x56789);
     Util::intReturn();
 }
 

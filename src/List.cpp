@@ -17,7 +17,6 @@
 //template class SimpleMemoryManager<ListNode<int> >;
 //template class SimpleMemoryManager<TreeNode<MemoryDescriptor> >;
 #ifdef CODE32
-#include <Process.h>
 #include <Kernel.h>
 	template class ListNode<MemoryDescriptor>;
 	template class TreeNode<MemoryDescriptor>;
@@ -30,6 +29,7 @@
 	template class TreeNode<Process*>;
 	template class Tree<Process*,KernelSmmWrapper>;
 	template class LinkedList<TreeNode<Process*>*,KernelSmmWrapper>;
+	template class Tree<MemoryDescriptor,KernelSmmWrapper>;
 #elif defined(CODE64)
 #include <cstdio>
 #include "filesystem/verify-in-cygwin/File.h"
@@ -59,19 +59,22 @@
 template <class T>
 SimpleMemoryManager<T>::SimpleMemoryManager(size_t start,size_t limit,bool doInit,size_t initSize,SimpleMemoryManager<T>::ERROR_HANDLER errhandle):
 start(start),limit(limit),
-data((Freeable*)start),len((int)(limit/sizeof(Freeable))),curSize(initSize),
+data((Freeable*)start),len(limit/x2sizeof(FullNode)),curSize(initSize),
 lastIndex(0),
 errhandle(errhandle)
 {
+//	Kernel::printer->puti("len=",len);
+	char buf[10];
     if(doInit)
     {
 
         for(int i=0;i!=len;i++)
         {
+//        	Kernel::printer->puti("i=",i);
            data[i].free();
         }
-           
     }
+//    Kernel::printer->putsz("return smm init\n");
 }
 
 //template <class T>
@@ -92,6 +95,7 @@ T* SimpleMemoryManager<T>::getNew()
 template <class T>
 typename SimpleMemoryManager<T>::FullNode *SimpleMemoryManager<T>::getNewNode()
 {
+	//Kernel::printer->putsz("in getNewNode\n");
     FullNode *rt=NULL;
     if(!isFull())
     {
@@ -777,6 +781,11 @@ smm(smm)
 }
 
 template<class T,template <class> class _Allocator>
+Tree<T,_Allocator>::Tree()
+{
+
+}
+template<class T,template <class> class _Allocator>
 Tree<T,_Allocator>::~Tree() {
 }
 
@@ -785,11 +794,12 @@ void         Tree<T,_Allocator>::free(TreeNode<T> *root)
 {
   if(root)
   {
-     TreeNode<T>* p=root->getSon();//先把所有子类free
+     TreeNode<T>* p=root->getSon();//先把所有子节点free
     while(p)
     {
+    	TreeNode<T>* next=p->getNext();
         this->free(p);
-        p =(TreeNode<T>*) p->getNext();
+        p = next;
     }//OK,all the sons are free
     smm->withdraw(root);
   }

@@ -10,6 +10,10 @@
 //====为了解决环形依赖问题而设置的常数区域
 #define CONST_SECSIZE 512
 
+//======环形依赖的信息
+//  Process.h --> Kernel.h  所有对Process.h的引用必须指向Kernel.h
+//
+
 // CODE64 模式下gcc编译器能够使用与系统相符的PTRDIFF_TYPE 和 SIZE_TYPE
 #if defined(CODE64)
 typedef __PTRDIFF_TYPE__ ptrdiff_t;
@@ -19,10 +23,25 @@ typedef unsigned short u16_t;
 typedef unsigned char  u8_t;
 #endif
 
+//===IDE模式
+#if defined(IDE_MODE)
+#define CONFIG_PROTECTED_SECNUMS 0
+#define CONFIG_REAL_SECNUMS 0
+#endif
+
+#if !defined(CONFIG_PROTECTED_SECNUMS)
+#error "please define CONFIG_PROTECTED_SECNUMS in Makefile"
+#endif
+
+#if !defined(CONFIG_REAL_SECNUMS)
+#error "please define CONFIG_REAL_SECNUMS in Makefile"
+#endif
+
 #if defined(CODE32)||defined(CODE16)   //in standard host enviornment,do not use these definitions.
 			// You must be very careful about typedef
 typedef signed int ptrdiff_t;
 typedef unsigned int size_t;
+//typedef decltype(sizeof(0)) size_t;
 typedef unsigned int u32_t;
 typedef unsigned short u16_t;
 typedef unsigned char  u8_t;
@@ -39,8 +58,12 @@ typedef unsigned char  u8_t;
 #define DEVEL_AUTHOR(author...)    /*who is the author*/
 #define DEVEL_DEP(deps...)          /*depend on what?*/
 
+//=====替换sizeof
+// IDE-ISSUE eclipse does not recoginize sizeof as type of size_t
+#define x2sizeof(x) ((size_t)sizeof(x))
+
 //===========数学宏
-#define arrsizeof(arr) (sizeof(arr)/sizeof((arr)[0]))
+#define arrsizeof(arr) (x2sizeof(arr)/x2sizeof((arr)[0]))
 
 
 //====字符串宏

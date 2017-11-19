@@ -22,7 +22,7 @@ KernelSmmWrapper<T>::~KernelSmmWrapper()
 template <class T>
 T* KernelSmmWrapper<T>::getNew()
 {
-	return (T*)Kernel::getTheKernel()->mnewKernel(sizeof(T));
+	return (T*)Kernel::getTheKernel()->mnewKernel((size_t)sizeof(T));
 }
 template <class T>
 void KernelSmmWrapper<T>::withdraw(T *t)

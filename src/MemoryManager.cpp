@@ -18,8 +18,8 @@ __asm__(".code32 \n\t");
 
 //=============template ininstantiate
 #if defined(CODE32)
-
 	template class MemoryManager<SimpleMemoryManager>;
+	template class MemoryManager<KernelSmmWrapper>;
 #elif defined(CODE64)
 
 #include <cstdio>
@@ -45,19 +45,29 @@ __asm__(".code32 \n\t");
 
 //============class : MemoryManager
 template<template <class> class _DescriptorAllocator>
-MemoryManager<_DescriptorAllocator>::MemoryManager(_DescriptorAllocator<TreeNode<MemoryDescriptor> > *smm):
+MemoryManager<_DescriptorAllocator>::MemoryManager(_DescriptorAllocator<TreeNode<MemoryDescriptor> > *smm)
+:
 Tree<MemoryDescriptor,_DescriptorAllocator>(smm) //调用父类的构造函数
 {
 
 }
 template<template <class> class _DescriptorAllocator>
-MemoryManager<_DescriptorAllocator>::MemoryManager(_DescriptorAllocator<TreeNode<MemoryDescriptor> > *smm,size_t start,size_t len,bool fatherAllocable):
-MemoryManager(smm)
+MemoryManager<_DescriptorAllocator>::MemoryManager(_DescriptorAllocator<TreeNode<MemoryDescriptor> > *smm,size_t start,size_t len,bool fatherAllocable)
+:MemoryManager(smm)
+//:dbg1("MemoryManager 1\n")
 {
 #if defined(CODE64)
 	//printf("set Head\n");
 #endif
-    this->setHead( new (smm->getNew()) TreeNode<MemoryDescriptor>(MemoryDescriptor(start,len,fatherAllocable)));
+	// root->son = new_node, 也就是head， 但是head不指向root，也就是说指针时单向的
+	//Kernel::printer->move(-40);
+
+	TreeNode<MemoryDescriptor> *head=smm->getNew();
+
+	new (head) TreeNode<MemoryDescriptor>(MemoryDescriptor(start,len,fatherAllocable));
+
+	this->setHead(head);
+
 #if defined(CODE64)
     //printf("in constructor : ");
     //getchar();

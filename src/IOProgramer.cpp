@@ -53,7 +53,6 @@ IO_8259A::~IO_8259A()
 void IO_8259A::sendICW1(int chip,int electTriggerMode,int singleChip,int requireICW4)
 {
     
-    Util::insertMark(0x7788991);
     __asm__ __volatile__(
     "outb %%al,%%dx \n\t"
     :
@@ -68,7 +67,6 @@ void IO_8259A::sendICW1(int chip,int electTriggerMode,int singleChip,int require
 void IO_8259A::sendICW2(int chip,int base)
 {
     
-    Util::insertMark(0x7788992);
         __asm__ __volatile__(
     "outb %%al,%%dx \n\t"
     :
@@ -80,7 +78,6 @@ void IO_8259A::sendICW2(int chip,int base)
 void IO_8259A::sendICW3(int chip,int linkage)
 {
     
-    Util::insertMark(0x7788993);
     __asm__ __volatile__(
     "outb %%al,%%dx \n\t"
     :
@@ -92,7 +89,6 @@ void IO_8259A::sendICW3(int chip,int linkage)
 void IO_8259A::sendICW4(int chip,int specCompNest,int buf,int autoEndEOI,int useFor80x86)
 {
     
-    Util::insertMark(0x7788994);
     __asm__ __volatile__(
     "outb %%al,%%dx \n\t"
     :
@@ -116,7 +112,6 @@ void IO_8259A::sendOCW1(int chip,int mask)
 }
 void IO_8259A::sendOCW2(int chip,int eoi)
 {
-    Util::insertMark(0x7788997);
     __asm__ __volatile__(
     "outb %%al,%%dx \n\t"
     :

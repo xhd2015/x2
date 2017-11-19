@@ -1,9 +1,9 @@
 
 #include <Kernel.h>
-#include <Process.h>
 #include <AssociatedMemoryManager.h>
 #include <MemoryManager.h>
 #include <List.h>
+#include <libx2.h>
 
 #include <macros/all.h>
 
@@ -39,8 +39,8 @@ Process::Process(
 		size_t codeLimit,size_t dataLimit,size_t stackLimit,
 		char dpl
 ):
-pid(pid),
-ErrorSaver(This::ERROR_NO_ERROR),
+		ErrorSaver(This::ERROR_NO_ERROR),
+		pid(pid),
 ldtm(ldtNStart,ldtTStart,ldtNItems,true),
 ptss(ptss),
 status(This::STATUS_READY),

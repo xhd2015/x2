@@ -29,6 +29,15 @@ include/Memory.h src/Memory.cpp describes how memory management was developed
 if one block of code is only supported by a certain length of bits,say XX,then should CODEXX be defined and encloses that block only if it is defined.
 Check the code to see if you have done this.
 
+#测试和编译工具链版本号
+这里列出一些有效的测试和编译工具版本号，它们已经成功地编译了可运行的镜像文件
+已经测试的编译环境：cygwin 2.881
+gcc 6.4.0
+g++ 6.4.0
+as  2.29.1.20171006
+ld  2.29.1.20171006
+make 4.2.1
+bochs 2.6.9
 
 
 If two classes does have less or weak or zero connection with each other,do not combine them by explicit usage

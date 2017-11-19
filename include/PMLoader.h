@@ -47,10 +47,10 @@ public:
 	    * 512*7	[		]-->GDT
 	    * 512*8 [		]-->PTE0
 	    * 	...
-	    * 512*14[		]-->theKernel,FreeHeap
-	    * 		[		]-->SMMNode*100
-	    * 		[		]-->GDT Assocaited Nodes
-	    * 		[		]-->IDT Assocaited Nodes
+	    * 512*14[		]-->theKernel,FreeHeap Start
+	    * 		[		]-->SMMNode*100 //6个扇区
+	    * 		[		]-->GDT Associated Nodes
+	    * 		[		]-->IDT Associated Nodes
 	    * 	...
 	    * 512*32[		]-->Code Start
 	    *	...
@@ -74,8 +74,12 @@ public:
 		DRIVER = 0x80,  /*valid only for real mode*/
 #endif
 		RESERVED_SECNUM = 32,
-		REAL_SECNUMS = 25,
-		PROTECTED_SECNUMS = 132,/*100 for codes,8 for process1 & process2*/
+		REAL_SECNUMS = CONFIG_REAL_SECNUMS,
+
+
+
+		PROTECTED_SECNUMS =  CONFIG_PROTECTED_SECNUMS,
+				// 132,/*100 for codes,8 for process1 & process2*/
 		TEMP_SEG = 0xa00,
 #if defined(CODE32)
 		/////////////Kernel arguments
@@ -84,23 +88,26 @@ public:
 		 * For theKernel
 		 */
 		KERNEL_START=FREE_HEAP_START,
-		KERNEL_SIZE = sizeof(Kernel),
+		KERNEL_SIZE = x2sizeof(Kernel),
 
 
 		/**
 		 * For theKernel->smm
 		 */
 		SMM_MEM_START = KERNEL_START + KERNEL_SIZE,
-		SMM_NODE_SIZE = sizeof(TreeNode<MemoryDescriptor>),
-		SMM_MAN_INIT_NODES = 400,
+		// NOTICE 不要使用TreeNode<MemoryDescriptor>,之前犯过这样的错误
+		SMM_NODE_SIZE = x2sizeof(Kernel::SmmType::FullNode), //32,
+		SMM_MAN_INIT_NODES = 100,
 		SMM_MEM_SIZE = SMM_NODE_SIZE * SMM_MAN_INIT_NODES,
+
 		/**
 		 * for idtm,gdtm
+		 * associated nodes
 		 */
 		GDT_NODE_START = SMM_MEM_START + SMM_MEM_SIZE,
-		GDT_NODE_ITEMS = GDT_SIZE / sizeof(SegmentDescriptor),
-		IDT_NODE_START = GDT_NODE_START + GDT_NODE_ITEMS * GDT_NODE_ITEMS*sizeof(SegmentDescriptor),
-		IDT_NODE_ITEMS = IDT_SIZE / sizeof(SegmentDescriptor),
+		GDT_NODE_ITEMS = GDT_SIZE / x2sizeof(SegmentDescriptor),
+		IDT_NODE_START = GDT_NODE_START +  GDT_NODE_ITEMS*x2sizeof(SegmentDescriptor),
+		IDT_NODE_ITEMS = IDT_SIZE / x2sizeof(SegmentDescriptor),
 #endif
 
 #if defined(CODE32)||defined(CODE16)

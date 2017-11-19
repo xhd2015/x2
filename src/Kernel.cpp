@@ -9,6 +9,10 @@
 __asm__(".code32 \n\t");
 #endif
 
+#if defined(CODE32)
+ template class KernelSmmWrapper<TreeNode<MemoryDescriptor> >;
+#endif
+
 
 #if defined(CODE32)
 //============class ProcessManager
@@ -62,7 +66,6 @@ void	ProcessManager::swithcNextProcess()
 	{
 		if(this->prcsQueue.isEmpty())
 		{
-			Util::insertMark(0x2333);  //this is tested
 			this->invokeProcess(idleProcess);
 		}else{
 			/**
@@ -181,15 +184,16 @@ Process* ProcessManager::createProcess(unsigned int pid,size_t prcBase,size_t pr
 	size_t	ldtsize = Kernel::SegManager::getEachSize() * LDT_ITEMS;
 	size_t	ldtnstart=(size_t)k->mnewKernel(ldtsize);
 	size_t  ldttstart=ldtnstart + sizeof(Kernel::SegManager::NodeType) * LDT_ITEMS;
-	TSS	*tss=(TSS*)k->mnewKernel(sizeof(TSS));
+	TSS	*tss=(TSS*)k->mnewKernel((size_t)sizeof(TSS));
 //	char saver[10];
 //	Util::digitToHex(saver, 10, (size_t)tss);
 //	Util::printStr("tss allocated is ");Util::printStr(saver);Util::printStr("\n"); //This is ok
-	Process *process=(Process*)k->mnewKernel(sizeof(Process));
+	Process *process=(Process*)k->mnewKernel((size_t)sizeof(Process));
 
 
 	//==========install ldt & tss into GDT   INCOMPLETE
-	int tssIndex=k->newgdt((char*)tss, sizeof(TSS)-1, SegmentDescriptor::G_1B, SegmentDescriptor::TYPE_S_TSS_32_AVL, dpl, SegmentDescriptor::S_SYSTEM,
+	int tssSz=sizeof(TSS)-1;
+	int tssIndex=k->newgdt((char*)tss, tssSz, SegmentDescriptor::G_1B, SegmentDescriptor::TYPE_S_TSS_32_AVL, dpl, SegmentDescriptor::S_SYSTEM,
 				SegmentDescriptor::RESERVED, SegmentDescriptor::P_PRESENT);
 	int ldtIndex=k->newgdt((char*)ldttstart, ldtsize - 1, SegmentDescriptor::G_1B,SegmentDescriptor::TYPE_S_LDT, dpl,SegmentDescriptor::S_SYSTEM,
 				SegmentDescriptor::RESERVED,SegmentDescriptor::P_PRESENT);
@@ -272,6 +276,7 @@ TreeNode<Process*>*		ProcessManager::getByPid(unsigned int pid)
 }
 //================class Kernel
 Kernel*		Kernel::theKernel=NULL;
+Printer* 	Kernel::printer=NULL;
 
 Kernel::Kernel(
 		size_t smmStart,size_t smmLimit,
@@ -281,21 +286,27 @@ Kernel::Kernel(
 		size_t pte0_start,size_t pte_size,
 		size_t	gdtnstart,size_t gdttstart,size_t gdtitems,int *gusedList,size_t gusedLen,
 		size_t	idtnstart,size_t idttstart,size_t idtitems,int *iusedList,size_t iusedLen
-		):
+		)
+:
 smm(smmStart,smmLimit),
-kernelMM(&this->smm,kmmStart,kmmSize,false),
-processMM(&this->smm,pmmStart,pmmSize,false),
+kernelMM(&smm,kmmStart,kmmSize,false),
+processMM(&smm,pmmStart,pmmSize,false),
 gdtm(gdtnstart,gdttstart,gdtitems,true,gusedList,gusedLen),
 idtm(idtnstart,idttstart,idtitems,true,iusedList,iusedLen),
 cr3(pde0_start>>12,PageAttributes::PWT_ALWAYS_UPDATE,PageAttributes::PCD_CACHE_DISABLE),
 processMan()
 {
+	Kernel::printer->putsz("can I print?\n");
+
 	//=============[init PDE]=================
-    size_t npdes=pde0_size >> 2;
+
+    size_t npdes = pde0_size >> 2;
     size_t nptes0= pte_size >> 2;
-    size_t assocNodeStart = (size_t)this->mnewKernel(npdes * sizeof(PDEManager::NodeType));
-    size_t asscoNodeStartForPTEman = (size_t)this->mnewKernel(nptes0 * sizeof(PTEManager::NodeType));
-    size_t ptemstart = (size_t)this->mnewKernel(npdes * sizeof(PTEManager) );
+    size_t assocNodeStart = (size_t)this->mnewKernel(npdes * x2sizeof(PDEManager::NodeType));
+    size_t asscoNodeStartForPTEman = (size_t)this->mnewKernel(nptes0 * x2sizeof(PDEManager::NodeType));
+
+    size_t ptemstart = (size_t)this->mnewKernel(npdes * (size_t)sizeof(PTEManager));
+
 
     new ((PTEManager*)ptemstart) PTEManager(asscoNodeStartForPTEman,pte0_start,nptes0); //an array of PTE managers
     for(int i=0;i<nptes0;i++) //set PTE managers [0] all used.
@@ -306,6 +317,19 @@ processMan()
     new (&this->pdeman) PDEManager(assocNodeStart,pde0_start,ptemstart,npdes,true,usedPDEs,arrsizeof(usedPDEs));
     //==========================================
 }
+//decltype(sizeof(0)) get()
+//		{
+//			return sizeof(0);
+//		}
+//
+//void set(decltype(sizeof(0)) x)
+//{
+//
+//}
+//void use()
+//{
+//	set(0);
+//}
 size_t	 Kernel::getKernelMMBase()const
 {
 	return 0;

@@ -7,6 +7,7 @@
 
 #include <libx2.h>
 #include <def.h>
+#include <Kernel.h>
 
 #include <macros/libx2_macros.h>
 
@@ -38,25 +39,25 @@ int Util::printf(const char *fmt,...)
 
 int Util::x=0;
 int Util::y=0;
-const int Util::MODE_FL_ON=0x80,
-        Util::MODE_FL_OFF=0x7f,
-        Util::MODE_BG_RED=0b0100000,
-        Util::MODE_BG_GREEN=0b0010000,
-        Util::MODE_BG_BLUE=0b0001000,
-        Util::MODE_BG_WHITE=0b0111000,
-        Util::MODE_BG_RG=0b0110000,
-        Util::MODE_BG_RB=0b0101000,
-        Util::MODE_BG_BG=0b0011000,
-        Util::MODE_BG_BLACK=0b0000000,
-        Util::MODE_FG_RED=0b0000100,
-        Util::MODE_FG_GREEN=0b0000010,
-        Util::MODE_FG_BLUE=0b0000001,
-        Util::MODE_FG_WHITE=0b0000111,
-        Util::MODE_FG_RG=0b0000110,
-        Util::MODE_FG_RB=0b0000101,
-        Util::MODE_FG_BG=0b0000011,
-        Util::MODE_FG_BLACK=0b0000000,
-        Util::MODE_COMMON=(Util::MODE_FL_OFF & Util::MODE_BG_BLACK) | Util::MODE_FG_WHITE;
+//const int Util::MODE_FL_ON=0x80,
+//        Util::MODE_FL_OFF=0x7f,
+//        Util::MODE_BG_RED=0b0100000,
+//        Util::MODE_BG_GREEN=0b0010000,
+//        Util::MODE_BG_BLUE=0b0001000,
+//        Util::MODE_BG_WHITE=0b0111000,
+//        Util::MODE_BG_RG=0b0110000,
+//        Util::MODE_BG_RB=0b0101000,
+//        Util::MODE_BG_BG=0b0011000,
+//        Util::MODE_BG_BLACK=0b0000000,
+//        Util::MODE_FG_RED=0b0000100,
+//        Util::MODE_FG_GREEN=0b0000010,
+//        Util::MODE_FG_BLUE=0b0000001,
+//        Util::MODE_FG_WHITE=0b0000111,
+//        Util::MODE_FG_RG=0b0000110,
+//        Util::MODE_FG_RB=0b0000101,
+//        Util::MODE_FG_BG=0b0000011,
+//        Util::MODE_FG_BLACK=0b0000000,
+//        Util::MODE_COMMON=(Util::MODE_FL_OFF & Util::MODE_BG_BLACK) | Util::MODE_FG_WHITE;
 const int Util::SCREEN_X=25,Util::SCREEN_Y=80;
 int		Util::strSel=0;
 
@@ -455,7 +456,6 @@ void SimpleCharRotator::run()
     {
         Util::setCursor(this->X,this->Y);
         //调用0x24中断打印字符
-        Util::insertMark(0x5561);
         CALL_INT_3(0x24,c,Util::getCurrentDs(),b,&SimpleCharRotator::rotateShapes[this->Status],d,this->Attr);
         this->Status = (this->Status*this->Direction + 3) % (sizeof(SimpleCharRotator::rotateShapes)/sizeof(char));
     }
@@ -465,7 +465,11 @@ void SimpleCharRotator::run()
 const int Printer::SCREEN_MAX_X=25,
         Printer::SCREEN_MAX_Y=80; //起始const static 也算是编译期常数，
 //This warning can be ignored because no need to assign these value
-Printer::Printer(unsigned int x0,unsigned int y0,unsigned int rows,unsigned int cols,int mode):
+Printer::Printer(unsigned int x0,
+		unsigned int y0,
+		unsigned int rows,
+		unsigned int cols,
+		int mode):
 rows(rows>Printer::SCREEN_MAX_X?Printer::SCREEN_MAX_X:rows),
 cols(cols>Printer::SCREEN_MAX_Y?Printer::SCREEN_MAX_Y:cols),
 x0(x0+this->rows>=Printer::SCREEN_MAX_X?0:x0),
@@ -539,7 +543,14 @@ void Printer::putsz(const char* str)
         p++;
     }
     Util::leaveEs(oldes);
-
+}
+void Printer::puti(const char *str,int i)
+{
+	char buf[10];
+	Util::digitToStr(buf, arrsizeof(buf), i);
+	putsz(str);
+	putsz(buf);
+	putsz("\n");
 }
 void Printer::putsn(const char *str,int n)
 {
@@ -642,6 +653,14 @@ Printer  Printer::getSubPrinter(unsigned int x0,unsigned int y0,unsigned int row
     return *target;
 
     //no return target, avoid copying on return
+}
+
+ClassDebug::ClassDebug(const char *msg)
+{
+#if defined(CODE32)
+//	if(Kernel::printer!=NULL)
+//		Kernel::printer->putsz(msg);
+#endif
 }
 
 #endif //SimpleCharRotator,Printer ,ErrorSaverin CODE32

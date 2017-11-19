@@ -8,8 +8,9 @@
 #include <AssociatedMemoryManager.h>
 #include <VirtualMemory.h>
 #include <Descriptor.h>
-#include <PMLoader.h>
+//#include <PMLoader.h>
 #include <after_def.h>
+#include <Kernel.h>
 
 //class Process;
 //template <class T> class KernelSmmWrapper;  //incomplete type,could only be referenced by pointer
@@ -51,8 +52,9 @@ extern "C" {
 #if defined(CODE32)
 		:public ErrorSaver
 #endif
-		 {
+
 #if defined(CODE32) || defined(CODE64)
+		 {
 		 public:
 			typedef Process This;
 #endif
@@ -131,12 +133,16 @@ protected:
 	int		ldtSel;
 	SegManager	ldtm;//size
 	size_t		linearBase,processBase;
-	KernelSmmWrapper<TreeNode<MemoryDescriptor> *> baseKsmm;
+	KernelSmmWrapper<TreeNode<MemoryDescriptor> > baseKsmm;
 	MemoryManager<KernelSmmWrapper> baseMM;
 
 	PDEManager	pdeman;
-#endif
+#endif //CODE32
+
+#if defined(CODE32) || defined(CODE64)
 };
+#endif
+
 
 
 

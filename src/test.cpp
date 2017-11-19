@@ -8,7 +8,7 @@ __asm__(".code32\n\t");
 #include <test.h>
 #include <List.h>
 #include <PMLoader.h>       //使用常数
-#include <Memory.h>
+#include <MemoryManager.h>
 #include <IOProgramer.h>
 
 #include <macros/all.h>
@@ -260,6 +260,9 @@ void Test::run()
     //testQueue();
     //testList();
     dbg.putsz("Test hook started.\n");
+    char buf[10];
+    Util::digitToStr(buf, (size_t)arrsizeof(buf), PMLoader::SMM_NODE_SIZE);
+    dbg.putsz("SMM_NODE_SIZE :");dbg.putsz(buf);dbg.putsz("\n");
    // testMemory();
 //    this->testIO_HDD();
     dbg.putsz("Test hook ended\n");

@@ -80,7 +80,6 @@ PDEManager::~PDEManager() {
  */
 int PDEManager::prepareVisitPhysical(u32_t phyaddr, size_t size,
 		SegManager& segman) {
-	char buf[10];
 	//==ask for a PTE in an existing PDE
 	if(size==0 || segman.isEmpty())return -1;
 	PTE *pte_p1=NULL;
@@ -89,8 +88,6 @@ int PDEManager::prepareVisitPhysical(u32_t phyaddr, size_t size,
 	size_t nptes=size/(4*1024);
 	size_t nbytes=size%(4*1024);
 	if(nbytes>0)nptes++;
-    Util::digitToStr(buf, arrsizeof(buf), (size_t)nptes);
-//    Util::printStr("pte number is  :");Util::printStr(buf);Util::printStr(" ");
 
 	for(size_t i=0;i<this->len;i++)//find for existing pdes with enough ptes
 	{
@@ -114,10 +111,10 @@ int PDEManager::prepareVisitPhysical(u32_t phyaddr, size_t size,
 		pde_p0=this->getNew(index);
 		if(index!=-1)
 		{
-			size_t ptenstart=(size_t)Kernel::getTheKernel()->mnewKernel(nptes  * sizeof(PTEManager::NodeType));
-			size_t ptetstart=(size_t)Kernel::getTheKernel()->mnewKernelAlign(nptes  * sizeof(PTEManager::TargetType),4);
+			size_t ptenstart=(size_t)Kernel::getTheKernel()->mnewKernel(nptes  * x2sizeof(PTEManager::NodeType));
+			size_t ptetstart=(size_t)Kernel::getTheKernel()->mnewKernelAlign(nptes  * x2sizeof(PTEManager::TargetType),4);
 			this->ptemans[index] = (PTEManager*)
-					Kernel::getTheKernel()->mnewKernel(sizeof(PTEManager));
+					Kernel::getTheKernel()->mnewKernel(x2sizeof(PTEManager));
 			if(this->ptemans[index]!=NULL && ptenstart!=0 && ptetstart!=0)
 			{
 				new (this->ptemans[index]) PTEManager(ptenstart,ptetstart,nptes);
@@ -132,7 +129,6 @@ int PDEManager::prepareVisitPhysical(u32_t phyaddr, size_t size,
 //    Util::printStr("pte_p1 is  :");Util::printStr(buf);Util::printStr("\n");
 	if(!pde_written) //write pde
 	{
-		Util::insertMark(0x2333ebb);
 		/**
 		 * bug : PTE does not align with multiple of 4
 		 */

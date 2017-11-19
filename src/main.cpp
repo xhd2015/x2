@@ -1,11 +1,6 @@
-#ifdef CODE16
-__asm__(
-		".code16gcc \n\t"
-".text \n\t"
-"STARTSEG = 0x7c0 \n\t"
-"STACKSIZE = 512*2 \n\t"
-"TEMP_SEG = 0xa00 \n\t"
-);
+#if defined(CODE32) && defined(CODE16) // IDE-ISSUE eclipse cdt kept saying I have defined CODE16,but I have just defined CODE32,so do this
+#undef CODE16
+#endif
 //extern int READSEG[];//use _READSEG in other file
 
 #include <libx2.h>
@@ -14,6 +9,17 @@ __asm__(
 #include <Descriptor.h>
 #include <def.h>
 
+#if defined(CODE16)
+__asm__(
+		".code16gcc \n\t"
+".text \n\t"
+"STARTSEG = 0x7c0 \n\t"
+"STACKSIZE = 512*2 \n\t"
+"TEMP_SEG = 0xa00 \n\t"
+);
+#endif
+
+#if defined(CODE16)
 //开始引导
 __asm__(
 "ljmp $STARTSEG,$HERE \n\t"
@@ -75,7 +81,6 @@ __attribute__((section(".test_section"))) void theEntry() //this is placed in .t
     //===========Util Test Start============
     int readBase=PMLoader::TEMP_SEG*16;
     Util::memcopy(PMLoader::TEMP_SEG,512,PMLoader::TEMP_SEG,0,512);//将第一个扇区清空
-    Util::insertMark(0x555);
     if(Util::readSectors(PMLoader::TEMP_SEG,0,0x80,0,1))//at lower is ok
     {
         Util::printStr("Load Tested.\n");

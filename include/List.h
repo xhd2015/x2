@@ -5,6 +5,7 @@
 #include <def.h>
 #include <loki/Int2Type.h>
 #include <Locator.h>
+#include <libx2.h>
 
 class SimpleMemoryNode{
 public:
@@ -313,11 +314,15 @@ protected:
  * 			...
  * 	树节点是TreeNode，意味着允许其往四个方向扩展。需要注意的一点是，树的root节点为冗余节点，这是为了支持对head节点的删除操作。root节点永不删除。
  *	树的所占用的空间仅仅包含两个指针：root指针，smm指针
+ *
+ *	@param T			节点存储的数据类型
+ *	@param _Allocator  分配TreeNode的分配器类型
  */
 template <class T,template <class> class _Allocator>
 class Tree{
 public:
-	Tree()=default;
+//	Tree()=default;
+	Tree();
 public:
     Tree(_Allocator<TreeNode<T> > *smm,TreeNode<T>* root=NULL);//If give root=NULL,then assign root by smm,else by root.
     ~Tree();

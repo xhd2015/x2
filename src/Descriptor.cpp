@@ -78,7 +78,7 @@ bool SegmentDescriptor::equals(SegmentDescriptor &sd2)
 #if defined(CODE32)||defined(CODE16)
 void SegmentDescriptor::writeToMemory(int seg,char* addr)
 {
-		Util::memcopy(Util::SEG_CURRENT, (int)(size_t)this,seg, (int)(size_t)addr, sizeof(*this));
+		Util::memcopy(Util::SEG_CURRENT, (int)(size_t)this,seg, (int)(size_t)addr, x2sizeof(*this));
 
 //====DEPRECATED
 //    char *dst;
@@ -139,7 +139,7 @@ void SegmentDescriptor::writeToMemory(int seg,char* addr)
 //}
 void SegmentDescriptor::fromMemory(SegmentDescriptor *sd,int seg,char* addr)
 {
-	  Util::memcopy(seg,(int)(size_t)addr, Util::SEG_CURRENT, (int)(size_t)sd, sizeof(*sd));
+	  Util::memcopy(seg,(int)(size_t)addr, Util::SEG_CURRENT, (int)(size_t)sd, x2sizeof(*sd));
 //=======DEPRECATED
 //    char *dst=(char*)sd->Limit;
 //    char *src=addr;
@@ -255,11 +255,11 @@ void SelectorDescriptor::init(int sel,int offset,int type,int dpl,int p,int segS
 #if defined(CODE32)||defined(CODE16)
 void SelectorDescriptor::writeToMemory(int seg,int off)
 {
-    Util::memcopy(Util::SEG_CURRENT,(int)this->I0,seg,off,this->I3  - this->I0 + 2);
+    Util::memcopy(Util::SEG_CURRENT,(int)this->I0,seg,off,(int)(this->I3  - this->I0 + 2));
 }
 void SelectorDescriptor::fromMemory(SelectorDescriptor &self,int seg,int off)
 {
-    Util::memcopy(seg,off,Util::SEG_CURRENT,(int)self.I0,self.I3-self.I0+2);
+    Util::memcopy(seg,off,Util::SEG_CURRENT,(int)self.I0,(int)(self.I3-self.I0+2));
 }
 #elif defined(CODE64)
 #include <cstring>

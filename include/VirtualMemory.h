@@ -129,6 +129,9 @@ public:
 	AS_MACRO static u32_t getHighBase(u32_t phyaddr);
 	AS_MACRO static CR3 getCr3();
 //	AS_MACRO static int igetCr3();
+	/**
+	 * 设置CR3寄存器的内容
+	 */
 	AS_MACRO static void writeCr3(const CR3& cr3);
 	AS_MACRO static void enablePaging();
 public:

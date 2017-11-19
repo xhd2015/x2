@@ -15,7 +15,26 @@ public:
     static int x,y;
     //ON用 |
     //OFF用 &
-    const static int MODE_COMMON,MODE_FL_ON,MODE_FL_OFF,MODE_BG_RED,MODE_BG_GREEN,MODE_BG_BLUE,MODE_BG_WHITE,MODE_BG_RG,MODE_BG_RB,MODE_BG_BG,MODE_BG_BLACK,MODE_FG_RED,MODE_FG_GREEN,MODE_FG_BLUE,MODE_FG_WHITE,MODE_FG_RG,MODE_FG_RB,MODE_FG_BG,MODE_FG_BLACK;
+    enum {	MODE_FL_ON=0x80,
+            MODE_FL_OFF=0x7f,
+            MODE_BG_RED=0b0100000,
+            MODE_BG_GREEN=0b0010000,
+            MODE_BG_BLUE=0b0001000,
+            MODE_BG_WHITE=0b0111000,
+            MODE_BG_RG=0b0110000,
+            MODE_BG_RB=0b0101000,
+            MODE_BG_BG=0b0011000,
+            MODE_BG_BLACK=0b0000000,
+            MODE_FG_RED=0b0000100,
+            MODE_FG_GREEN=0b0000010,
+            MODE_FG_BLUE=0b0000001,
+            MODE_FG_WHITE=0b0000111,
+            MODE_FG_RG=0b0000110,
+            MODE_FG_RB=0b0000101,
+            MODE_FG_BG=0b0000011,
+            MODE_FG_BLACK=0b0000000,
+            MODE_COMMON=(MODE_FL_OFF & MODE_BG_BLACK) | MODE_FG_WHITE
+    };
     const static int SCREEN_X,SCREEN_Y;
     enum{SEG_CURRENT=0x10000};
 //    static int videoSelector;
@@ -187,6 +206,7 @@ public:
     ~Printer();
     
     void putc(int chr);
+    void puti(const char* str,int i);
     void putsz(const char* str);
     void putsn(const char *str,int n);
     void setPos(int x,int y);
@@ -236,6 +256,12 @@ private:
     void __putc(int chr);
 };
 
+/**
+ * 通用的出错状态实现。
+ *
+ * 一次执行某种状态改变的函数之后，可能产生某些错误情况，可以从这里获取
+ * 子类需要继承ErrorSaver，然后提供enum以ERROR_开头的定义，其中一项是ERROR_NOERR
+ */
 class ErrorSaver{
 public:
 	AS_MACRO ErrorSaver(int errno=0);
@@ -244,9 +270,21 @@ protected:
 	AS_MACRO void setErrno(int errno);
 	int errno;
 };
+
+/**
+ *  to insert a print information on class init
+ */
+class ClassDebug{
+public:
+	ClassDebug()=default;
+	ClassDebug(const char *msg);
+};
 #endif //CODE32
 
+
+
 #if defined(CODE32)||defined(CODE64)
+
 //===============class :String
 class String{
 public:

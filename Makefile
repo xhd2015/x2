@@ -9,6 +9,7 @@ dir = /home/Fulton Shaw/x2-devel
 GEN := gen
 GEN16 := gen/16
 GEN32 := gen/32
+#GEN32USER := gen/32user
 GEN64 := gen/64
 SRC := src
 KERNEL_SRC := $(SRC)/kernel
@@ -37,6 +38,11 @@ CCFLAGS32 := -m32
 CCFLAGS16 := -m32
 DEPRECATED_CCFLAGS = -fpack-struct=1
 
+# config sec numbers here
+CONFIG_REAL_SECNUMS := 25
+CONFIG_PROTECTED_SECNUMS := 400 #应当比2048小，因为CODE_LIMIT=0xfffff，恰好是2048个扇区
+CONFIG_USER_PROCESS_SECNUMS := 35
+
 #toolchains
 CXX = g++
 AS = as
@@ -47,9 +53,10 @@ endif
 
 DDFLAGS := conv=notrunc bs=1c
 
-CCMACROS := 
+CCMACROS := -D CONFIG_PROTECTED_SECNUMS=$(CONFIG_PROTECTED_SECNUMS) -D CONFIG_REAL_SECNUMS=$(CONFIG_REAL_SECNUMS)
 CCMACROS16 := -D CODE16
 CCMACROS32 := -D CODE32
+#CCMACROS32USER := -D CODE32USER
 
 CCFLAGS64 := -m64 -I. -I./include -std=c++11
 CCMACROS64 := -D CODE64
@@ -136,15 +143,16 @@ $(GEN32)/UserProcess.bimg:$(GEN32)/UserProcess1.bimg $(GEN32)/UserProcess2.bimg
 	dd if=$(GEN32)/UserProcess1.bimg of=$@	bs=1c count=$$((16*512))	conv=notrunc &&\
 	dd if=$(GEN32)/UserProcess2.bimg of=$@	seek=$$((512*16)) bs=1c count=$$((16*512))	conv=notrunc
 	
-$(GEN)/main.bimg : partitions_table $(GEN16)/main.bimg $(GEN32)/main.bimg $(GEN32)/UserProcess.bimg
+$(GEN)/main.bimg:partitions_table $(GEN16)/main.bimg $(GEN32)/main.bimg $(GEN32)/UserProcess.bimg
 	if [ ! -f $@ ];then 
-	cmd /C 'cd C:\Users\13774\Desktop\bochs\devel\x2^ system\tools\bochs^ run && explorer create_main_image.cmd'
+	cmd /C 'cd C:\Users\13774\Desktop\old_desktop\bochs\devel\x2^ system\tools\bochs^ run && explorer create_main_image.cmd'
 	fi
 	while [ ! -f $@ ];do :;done  #wait until that image file is created
-	dd if=$(GEN16)/main.bimg of=$@ bs=1c count=$$((512*25)) conv=notrunc &&\
+	dd if=$(GEN16)/main.bimg of=$@ bs=1c count=$$(( 512 * $(CONFIG_REAL_SECNUMS))) conv=notrunc &&\
 	dd if=partitions_table of=$@  bs=1c conv=notrunc seek=$$((0x1BE)) count=$$((512  - 0x1BE)) &&\
-	dd if=$(GEN32)/main.bimg of=$@ bs=1c conv=notrunc seek=$$((512*25)) count=$$((512*100)) &&\
-	dd if=$(GEN32)/UserProcess.bimg of=$@ bs=1c conv=notrunc seek=$$((512*100 + 512*25)) count=$$((32*512))
+	dd if=$(GEN32)/main.bimg of=$@ bs=1c conv=notrunc seek=$$((512  *  $(CONFIG_REAL_SECNUMS))) count=$$(( 512  * $(CONFIG_PROTECTED_SECNUMS))) \
+	&&\
+	dd if=$(GEN32)/UserProcess.bimg of=$@ bs=1c conv=notrunc seek=$$((512*$(CONFIG_PROTECTED_SECNUMS) + 512*$(CONFIG_REAL_SECNUMS))) count=$$((512 * $(CONFIG_USER_PROCESS_SECNUMS)))
 
 # .s --> .o
 $(GEN16)/%.o:$(GEN16)/%.s

@@ -9,7 +9,6 @@
 #include <loki/Int2Type.h>
 #include <Descriptor.h>
 #include <AssociatedMemoryManager.h>
-#include <Process.h>
 
 #if defined(CODE32)||defined(CODE64)
 /**
@@ -35,6 +34,9 @@ public:
     AS_MACRO T* getNew();
     AS_MACRO void withdraw(T *t);
 };
+
+
+#include <Process.h> // implementation here
 
 class ProcessManager{
 public:
@@ -128,7 +130,9 @@ public:
 protected://static statement
 	//reserve a space for theKernel
 	static Kernel *theKernel;
+
 public:
+	static Printer *printer;
 	static void initTheKernel(Kernel *theKernel);
 	AS_MACRO static Kernel* getTheKernel();
 
@@ -189,11 +193,18 @@ public:
 	int newidt();
 
 	//=============virtual memory
+	/**
+	 * prepare to visit physical address,that is absolute address
+	 *
+	 * @param  physical
+	 * @param  size
+	 */
 	AS_MACRO int preparePhysicalMap(size_t physical,size_t size);
 	INCOMPLETE void destroyPhysicalMap();
 
 
-protected:
+//protected:
+public:
 	/**
 	 * This should be deprecated/obsolete, AssociatedMemoryManager is better
 	 *
@@ -211,6 +222,8 @@ protected:
 
 	CR3 cr3;
 	PDEManager	pdeman; //PDE manager
+
+
 
 
 };

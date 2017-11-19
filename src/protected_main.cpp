@@ -57,6 +57,7 @@ __asm__(
 void protectedEntryHolder()
 {
 	//=================设置PDE0，PTE， 进入虚拟内存管理模式
+	//Util::printStr("in protectedEntryHolder");
 	*(int*)PMLoader::PDE0_START= ((0x1u<<12)|0b11011);
 	int *pte=(int*)PMLoader::PTE0_START;
 	size_t n=(PMLoader::DATA_LIMIT+1)/4096;
@@ -90,15 +91,17 @@ void protectedEntryHolder()
 //    Util::jmpDie();  //vbox wrong
     Printer stdp(3,30,15,40,Util::MODE_COMMON);//系统的标准打印器
 //    Util::jmpDie(); //vbox wrong
+    Kernel::printer=&stdp;
     stdp.clr();
 //    Util::jmpDie(); //vbox wrong
     stdp.putsz("Entered Protected Mode.\n");
+
     //=======================读取剩余的扇区
     stdp.putsz("Reading left sectors...\n");
 //    Util::jmpDie(); //vbox wrong
     int nleft=*(int*)PMLoader::FREE_HEAP_START;
     char buf[10];
-    Util::digitToStr(buf, arrsizeof(buf), nleft);
+    Util::digitToStr(buf, (size_t)arrsizeof(buf), nleft);
     stdp.putsz("Left sector number is :");stdp.putsz(buf);stdp.putsz("\n");
     if(nleft > 0)
     {
@@ -133,7 +136,11 @@ void protectedEntryHolder()
      *
      */
     Kernel::initTheKernel(pkernel);
-    stdp.putsz("after init kernel\n");
+//    stdp.putsz("after init kernel\n");
+
+    Kernel::printer->clr();
+    Kernel::printer->putsz("by kernel printer\n");
+
     int gused[]={0,1,2,3,4,5};
     new (pkernel) Kernel(
     		PMLoader::SMM_MEM_START,PMLoader::SMM_MEM_SIZE,
@@ -144,25 +151,22 @@ void protectedEntryHolder()
 			PMLoader::GDT_NODE_START,PMLoader::GDT_START,PMLoader::GDT_NODE_ITEMS,gused,arrsizeof(gused),
 			PMLoader::IDT_NODE_START,PMLoader::IDT_SIZE,PMLoader::IDT_NODE_ITEMS,NULL,0
     );//初始化一个新的kernel
-//    pkernel->markGdtUsed(0);
-//    pkernel->markGdtUsed(1);
-//    pkernel->markGdtUsed(2);
-//    pkernel->markGdtUsed(3);
-//    pkernel->markGdtUsed(4); //They should be marked in use at first time,but unfortunately,they are not.
+    pkernel->markGdtUsed(0);
+    pkernel->markGdtUsed(1);
+    pkernel->markGdtUsed(2);
+    pkernel->markGdtUsed(3);
+    pkernel->markGdtUsed(4); //They should be marked in use at the first time,but unfortunately,they are not.
     stdp.putsz("after kernel done\n");
 
+    //访问绝对地址4MB处的4个字节，该怎么做？
+    //在gdt中先新建一项选择子，这个选择子指向了实际地址，并有长度限制
     int viIndex=pkernel->preparePhysicalMap(4*1024*1024, 4*1024);
-//    Util::insertMark(0x23339);
-//    Util::digitToStr(buf, arrsizeof(buf), viIndex);
-//    stdp.putsz("Gdt index is :");stdp.putsz(buf);stdp.putsz("\n");
     Util::setl(Util::makeSel(viIndex, 0, 0), 0, 0xaa55);
-
     //=========================test using virtual memory to build new process
     //===test visiting (1MB,4096B)
     //need 1 PTE
     //LinearAddress [0][767][0]=5MB
     //save PTE[676],set,visit,save back
-    Util::insertMark(0x2333b);
     int pte_index=767;
     int pde_index=0;
     int savedPTE=pte[pte_index];
@@ -170,7 +174,6 @@ void protectedEntryHolder()
     int byte_index=(1*1024*1024) & 0xfff;
 
     char *target_addr=(char*) ((pde_index<<22)|(pte_index<<12)|byte_index); //没有超过当前ds的限制
-    Util::insertMark(0x2333d);
     target_addr[0]='x';
     target_addr[1]='h';
     target_addr[2]='d';
@@ -178,7 +181,7 @@ void protectedEntryHolder()
     stdp.putsz(target_addr);
 
     pte[767]=savedPTE;
-    Util::jmpDie();//wait to see output after paging enabled. OK.
+//  Util::jmpDie();//wait to see output after paging enabled. OK.
 
 //    //do some adjustment so that the allocated space will not be corrupted
 //
@@ -215,12 +218,11 @@ void protectedEntryHolder()
     Process *proc1=wp->getData();
     //根据proc1.LBase 构造一个新的ds选择子，基地址指向proc1的基地址
     int pdeIndex_proc1=1;
-    int *newpte0=(int*)pkernel->mnewKernel(3*sizeof(int));//24个扇区，共需3个PTE项
+    int *newpte0=(int*)pkernel->mnewKernel((size_t)(3*sizeof(int)));//24个扇区，共需3个PTE项
     int newpte0Index=((size_t)newpte0) >> 12;
     ((int*)(PMLoader::PDE0_START))[1]=0;
 
     //copy code&data the process space
-    Util::insertMark(0x23336);
     Util::memcopy(Util::getCurrentDs(),132*512,Util::makeSel(5, 0, 0),proc1->getProcessBase()+proc1->getCodeStart(),16*512);/*copy code to allocated process space*/
     TreeNode<Process*>*	wp2=pkernel->addNewProcess(24*512,24*512, 4*512, 3);
     Process *proc2=wp2->getData();
@@ -257,8 +259,7 @@ void protectedEntryHolder()
 //    tss0_descr.writeToMemory(Util::SEG_CURRENT,(char*)PMLoader::GDT_START+5*8);//TSS0描述符所处的位置
 //    Util::ltr(Util::makeSel(5));// load task register
     
-    
-    Util::insertMark(0x12345);
+
     CALL_INT_3(0x24,c,Util::getCurrentDs(),b,"int 0x24 by CPL0.\n",d,Util::MODE_COMMON);
     
     //===========对8259A两片外部芯片接口编程
@@ -304,7 +305,6 @@ void protectedEntryHolder()
     
     
     //允许中断
-    Util::insertMark(0x2333a);
     Util::sti();
     //========================利用iret切换到特权级3，此后此任务运行在特权级3
 //    stdp.putsz("Changing CPL to 3.\n");
@@ -320,7 +320,6 @@ void afterCPL3() //tss0的CPL=3主要代码
     "popw %ds \n\t"
     );
     CALL_INT_3(0x24,c,Util::SEG_CURRENT,b,"int 0x24 by CPL3.\n",d,Util::MODE_COMMON);//int n
-    Util::insertMark(0x55678);
     SimpleCharRotator scr(0,40);//一个简单的task
     scr.run();   
 }
