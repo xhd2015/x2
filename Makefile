@@ -4,7 +4,11 @@ DEBUG := false
 #g++的选项:
 # -g --gen-debug          generate debugging information
 
-dir = /home/Fulton Shaw/x2-devel
+HOST := windows
+#may be windows,linux
+HOSTROOTDIR := C:\Users\13774\Desktop\old_desktop\bochs\devel\x2^ system
+TOOLSDIR := tools/bochs run
+
 #GEN contains 16,32 and 64(can be used in hosted environment )
 GEN := gen
 GEN16 := gen/16
@@ -18,6 +22,7 @@ BACKUP := backups
 INCLUDE := include
 STDC := stdc
 STDCPP := stdc++
+
 
 
 #deciding which files are compiled.
@@ -69,7 +74,7 @@ UNUSED_CCFLAGS := -fkeep-inline-functions -fpermissive
 # imageMacros := DRIVER SECSTART SECNUM CODESEG CODEOFF
 # imageSyms := JMPSEG JMPOFF
 #==================================================================================
-.PHONY : dump16 dump default nothing help debug start run exportversion backup push all
+.PHONY : dump16 dump default nothing help debug start run exportversion backup push all update-host-tools start_norc
 .ONESHELL:
 .SECONDEXPANSION:
 default:
@@ -92,10 +97,24 @@ dump:
 	@objdump -dS $(GEN32)/main.img -m i386|less
 dump16:
 	@objdump -dS $(GEN16)/main.img -m i8086 | less
+
+update-host-tools:
+ifeq ($(HOST),windows)
+	mkdir -p '$(TOOLSDIR)/windows'
+	echo 'cd $(HOSTROOTDIR)\tools\bochs^ run && c: && bochs -q -f bochs2.6.9.bxrc' > '$(TOOLSDIR)/windows/run_bochs.cmd'
+	echo 'cd $(HOSTROOTDIR)\tools\bochs^ run && c: && bochsdbg -q -f bochs2.6.9.bxrc -rc debugger.rc' > '$(TOOLSDIR)/windows/start_bochs.cmd'
+	echo 'cd $(HOSTROOTDIR)\tools\bochs^ run && c: && bochsdbg -q -f bochs2.6.9.bxrc' > '$(TOOLSDIR)/windows/start_bochs_norc.cmd'
+endif
+
+ifeq ($(HOST),windows)
 start:
-	-@cmd /C 'cd C:\Users\13774\Desktop\bochs\devel\x2^ system\tools\bochs^ run && explorer start_bochs.cmd'
+	-cmd /C 'cd $(HOSTROOTDIR)\tools\bochs^ run && C: && explorer windows\start_bochs.cmd'
 run:
-	-@cmd /C 'cd C:\Users\13774\Desktop\bochs\devel\x2^ system\tools\bochs^ run && explorer run_bochs.cmd'
+	-cmd /C 'cd $(HOSTROOTDIR)\tools\bochs^ run && C: && explorer windows\run_bochs.cmd'
+start_norc:
+	-cmd /C 'cd $(HOSTROOTDIR)\tools\bochs^ run && C: && explorer windows\start_bochs_norc.cmd'
+endif
+
 exportversion:VERSION $(SRC) $(INCLUDE) Makefile start_bochs.cmd main.bimg
 	@v=$$(cat VERSION)
 	mkdir --parents $(EXPORTS)/$${v}
@@ -143,11 +162,16 @@ $(GEN32)/UserProcess.bimg:$(GEN32)/UserProcess1.bimg $(GEN32)/UserProcess2.bimg
 	dd if=$(GEN32)/UserProcess1.bimg of=$@	bs=1c count=$$((16*512))	conv=notrunc &&\
 	dd if=$(GEN32)/UserProcess2.bimg of=$@	seek=$$((512*16)) bs=1c count=$$((16*512))	conv=notrunc
 	
+#$(GEN)/main.bimg:partitions_table $(GEN16)/main.bimg $(GEN32)/main.bimg $(GEN32)/UserProcess.bimg
+#if [ ! -f $@ ];then 
+#cmd /C 'cd C:\Users\13774\Desktop\old_desktop\bochs\devel\x2^ system\tools\bochs^ run && explorer create_main_image.cmd'
+#fi
+#while [ ! -f $@ ];do :;done  #wait until that image file is created
+##########DEPRECATED##################
+# a host specific Makefile is not good Makefile
+	
 $(GEN)/main.bimg:partitions_table $(GEN16)/main.bimg $(GEN32)/main.bimg $(GEN32)/UserProcess.bimg
-	if [ ! -f $@ ];then 
-	cmd /C 'cd C:\Users\13774\Desktop\old_desktop\bochs\devel\x2^ system\tools\bochs^ run && explorer create_main_image.cmd'
-	fi
-	while [ ! -f $@ ];do :;done  #wait until that image file is created
+	cp 'tools/bochs run/main.bimg.clean' gen/main.bimg
 	dd if=$(GEN16)/main.bimg of=$@ bs=1c count=$$(( 512 * $(CONFIG_REAL_SECNUMS))) conv=notrunc &&\
 	dd if=partitions_table of=$@  bs=1c conv=notrunc seek=$$((0x1BE)) count=$$((512  - 0x1BE)) &&\
 	dd if=$(GEN32)/main.bimg of=$@ bs=1c conv=notrunc seek=$$((512  *  $(CONFIG_REAL_SECNUMS))) count=$$(( 512  * $(CONFIG_PROTECTED_SECNUMS))) \

@@ -9,11 +9,10 @@ ignore/*
 
 #a pattern like DIR/ will explicitly exclude everything even those starting with !
 #but a pattern like DIR/* will do that but keep !
-gen/*
-!gen/main_16.img
-!gen/main_32.img
+#gen/*
+#!gen/main_16.img
+#!gen/main_32.img
+
 gcc-src/
 bochsout.txt
-.project
-.cproject
 *.swp

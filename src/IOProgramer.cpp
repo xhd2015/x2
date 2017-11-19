@@ -1,15 +1,15 @@
-#ifdef CODE32
-__asm__(".code32 \n\t");
-#elif defined(CODE16)
-__asm__(".code16gcc \n\t");
-#endif
 
 #include <IOProgramer.h>
 #include <libx2.h>
 #include <def.h>
 
-#include <macros/libx2_macros.h>
-#include <macros/IOProgramer_macros.h>
+#include <macros/all.h>
+
+#ifdef CODE32
+__asm__(".code32 \n\t");
+#elif defined(CODE16)
+__asm__(".code16gcc \n\t");
+#endif
 
 #if defined(CODE32)
 #ifdef __I_REALLY_NEED_THIS

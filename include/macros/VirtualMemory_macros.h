@@ -10,6 +10,7 @@
 
 #include <VirtualMemory.h>
 
+#if defined(CODE32) || defined(CODE64)
 //=============function macros
 CR3::CR3(u32_t cr3)
 {
@@ -65,6 +66,6 @@ void VirtualManager::enablePaging()
 	);
 }
 
-
+#endif //CODE32 CODE64
 
 #endif /* INCLUDE_MACROS_VIRTUALMEMORY_MACROS_H_ */
