@@ -6,14 +6,19 @@ DEBUG := false
 
 HOST := windows
 #may be windows,linux
-HOSTROOTDIR := C:\Users\13774\Desktop\old_desktop\bochs\devel\x2^ system
-TOOLSDIR := tools/bochs run
+
+#if HOST=windows, then cygwin is assumed as the toolchain
+#if HOST=linux, then linux itself is assumed as the toolchain
+
+#注意，dir中不能含有空格
+HOSTROOTDIR := C:\Users\13774\Desktop\old_desktop\bochs\devel\x2-system
+TOOLSDIR := tools/bochs-run
 
 #GEN contains 16,32 and 64(can be used in hosted environment )
 GEN := gen
 GEN16 := gen/16
 GEN32 := gen/32
-#GEN32USER := gen/32user
+GEN32USER := gen/32user
 GEN64 := gen/64
 SRC := src
 KERNEL_SRC := $(SRC)/kernel
@@ -74,7 +79,7 @@ UNUSED_CCFLAGS := -fkeep-inline-functions -fpermissive
 # imageMacros := DRIVER SECSTART SECNUM CODESEG CODEOFF
 # imageSyms := JMPSEG JMPOFF
 #==================================================================================
-.PHONY : dump16 dump default nothing help debug start run exportversion backup push all update-host-tools start_norc
+.PHONY : dump16 dump default nothing help debug exportversion backup push all update-host-tools console
 .ONESHELL:
 .SECONDEXPANSION:
 default:
@@ -101,18 +106,31 @@ dump16:
 update-host-tools:
 ifeq ($(HOST),windows)
 	mkdir -p '$(TOOLSDIR)/windows'
-	echo 'cd $(HOSTROOTDIR)\tools\bochs^ run && c: && bochs -q -f bochs2.6.9.bxrc' > '$(TOOLSDIR)/windows/run_bochs.cmd'
-	echo 'cd $(HOSTROOTDIR)\tools\bochs^ run && c: && bochsdbg -q -f bochs2.6.9.bxrc -rc debugger.rc' > '$(TOOLSDIR)/windows/start_bochs.cmd'
-	echo 'cd $(HOSTROOTDIR)\tools\bochs^ run && c: && bochsdbg -q -f bochs2.6.9.bxrc' > '$(TOOLSDIR)/windows/start_bochs_norc.cmd'
+	echo 'cd $(HOSTROOTDIR)\tools\bochs-run && c: && bochs -q -f bochs2.6.9.bxrc' > '$(TOOLSDIR)/windows/run_bochs.cmd'
+	echo 'cd $(HOSTROOTDIR)\tools\bochs-run && c: && bochsdbg -q -f bochs2.6.9.bxrc -rc debugger.rc' > '$(TOOLSDIR)/windows/start_bochs.cmd'
+	echo 'cd $(HOSTROOTDIR)\tools\bochs-run && c: && bochsdbg -q -f bochs2.6.9.bxrc' > '$(TOOLSDIR)/windows/start_bochs_norc.cmd'
 endif
 
+
+#只有实现了make的非等待异步返回才能成功
+#不知为何，只有bash --login才能成功， 只有 mintty & 后面的命令执行久一点才能成功，我不知为何。
+console:
 ifeq ($(HOST),windows)
-start:
-	-cmd /C 'cd $(HOSTROOTDIR)\tools\bochs^ run && C: && explorer windows\start_bochs.cmd'
-run:
-	-cmd /C 'cd $(HOSTROOTDIR)\tools\bochs^ run && C: && explorer windows\run_bochs.cmd'
-start_norc:
-	-cmd /C 'cd $(HOSTROOTDIR)\tools\bochs^ run && C: && explorer windows\start_bochs_norc.cmd'
+	mintty -i -e bash --login -c 'cd $$(cygpath -p "$(HOSTROOTDIR)") ; mintty & i=20;while [ $$i != 0 ] ;do echo $$((i--));done '  #and then input ee
+	#mintty -i -e bash --login -c 'cd devel;mintty & sleep 10'  #and then input ee
+endif
+
+
+#====================HOST  specific tools=================
+#注意：你只有先cd到某个目录，才能执行explorer，explorer 路径不能成功。
+ifeq ($(HOST),windows)
+.PHONY: bochs_debug bochs_debug_rc bochs_run
+bochs_debug_rc:
+	-cmd /C 'cd $(HOSTROOTDIR)\tools\bochs-run && C: && explorer windows\start_bochs.cmd'
+bochs_run:
+	-cmd /C 'cd $(HOSTROOTDIR)\tools\bochs-run && C: && explorer windows\run_bochs.cmd'
+bochs_debug:
+	-cmd /C 'cd $(HOSTROOTDIR)\tools\bochs-run && C: && explorer windows\start_bochs_norc.cmd'
 endif
 
 exportversion:VERSION $(SRC) $(INCLUDE) Makefile start_bochs.cmd main.bimg
@@ -171,7 +189,7 @@ $(GEN32)/UserProcess.bimg:$(GEN32)/UserProcess1.bimg $(GEN32)/UserProcess2.bimg
 # a host specific Makefile is not good Makefile
 	
 $(GEN)/main.bimg:partitions_table $(GEN16)/main.bimg $(GEN32)/main.bimg $(GEN32)/UserProcess.bimg
-	cp 'tools/bochs run/main.bimg.clean' gen/main.bimg
+	cp $(TOOLSDIR)/main.bimg.clean gen/main.bimg
 	dd if=$(GEN16)/main.bimg of=$@ bs=1c count=$$(( 512 * $(CONFIG_REAL_SECNUMS))) conv=notrunc &&\
 	dd if=partitions_table of=$@  bs=1c conv=notrunc seek=$$((0x1BE)) count=$$((512  - 0x1BE)) &&\
 	dd if=$(GEN32)/main.bimg of=$@ bs=1c conv=notrunc seek=$$((512  *  $(CONFIG_REAL_SECNUMS))) count=$$(( 512  * $(CONFIG_PROTECTED_SECNUMS))) \
