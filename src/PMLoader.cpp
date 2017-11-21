@@ -1,37 +1,21 @@
+
+
+#include <PMLoader.h>
+#include <libx2.h>
+#include <Descriptor.h>
+#include <IOProgramer.h> //for IO_HDD
+#include <def.h>
+
+#include <macros/IOProgramer_macros.h>
+
 #ifdef CODE16
 __asm__(".code16gcc \n\t");
 #elif defined(CODE32)
 __asm__(".code32 \n\t");
 #endif
 
-#include <PMLoader.h>
-#include <libx2.h>
-#include <Descriptor.h>
-#include <IOProgramer.h> //for IO_HDD
-#include <macros/IOProgramer_macros.h>
-// /*****************They have been DEPRECATED************************
-//const int PMLoader::SAFE_SEG=0x50;
-//const int PMLoader::SECSIZE=512;
-//const int PMLoader::STACK_START=0,
-//           PMLoader::STACK_SIZE=PMLoader::SECSIZE*4,
-//           PMLoader::IDT_START=PMLoader::STACK_START+PMLoader::STACK_SIZE,
-//           PMLoader::IDT_SIZE=PMLoader::SECSIZE*1,
-//           PMLoader::GDT_START=PMLoader::IDT_START+PMLoader::IDT_SIZE,
-//           PMLoader::GDT_SIZE=PMLoader::SECSIZE*2,
-//           PMLoader::TSS_AREA_SIZE=PMLoader::SECSIZE*2,
-//           PMLoader::TSS_AREA_START=PMLoader::GDT_START+PMLoader::GDT_SIZE,
-//           PMLoader::TSS_MIN_SIZE=104,
-//           PMLoader::FREE_HEAP_SIZE=PMLoader::SECSIZE*5,
-//           PMLoader::FREE_HEAP_START=PMLoader::TSS_AREA_START+PMLoader::TSS_AREA_SIZE,
-//           PMLoader::CODE_START=PMLoader::FREE_HEAP_START+PMLoader::FREE_HEAP_SIZE,
-//           PMLoader::CODE_SEG = 0,
-//           PMLoader::CODE_LIMIT = 0xfffff;
-//const int   PMLoader::JMPSEG = 0x10,
-//            PMLoader::DRIVER=0x80,
-//            PMLoader::REAL_SECNUMS=16,
-//            PMLoader::PROTECTED_SECNUMS=66,// (int)(PMLoader::TEMP_SEG*16 - PMLoader::CODE_START)/PMLoader::SECSIZE,This is the biggest allowed number.If this is exceeded,then the real-code will be covered.*/
-//            PMLoader::TEMP_SEG=0xa00;
-///*************************************************************************
+
+//#define CODE16
 #if defined(CODE16)
 PMLoader::PMLoader()
 {
@@ -89,20 +73,41 @@ void PMLoader::enterProtected()
     );
 }
 //UNTESTED
+//保护模式代码，前面32个扇区是不用读取的,CODE_START正好指向有效数据的开始，0x4000
+//0xa000正好有80个扇区
+//由于BIOS有数据，0x500开始处才能写内存数据,0x500只有2.5个扇区
+//如果32个扇区
+//当然，一般情况下保护模式需要读入的代码都在0x500之后(都要多于2.5个扇区)
+//此次能读入的是 32到80之间的扇区，也就是80-32=48个
 void PMLoader::adjustProtectedCode()
 {
-	int left;
+	size_t left;//必须考虑到left必须以4个字节来存放，16位下可能是2个字节。但这无关紧要了。
+
+	//从磁盘的REAL_SECNUMS个扇区处开始读，放到0:CODE_START处，数量待定
 	IO_HDD iohd(0,PMLoader::REAL_SECNUMS,0,0,PMLoader::CODE_START);
-	left=(PMLoader::CODE_START + PMLoader::PROTECTED_SECNUMS * PMLoader::SECSIZE - PMLoader::TEMP_SEG * 16)/PMLoader::SECSIZE;
+
+
+	size_t alreadyReadSize = PMLoader::CODE_START;
+	size_t wholeNumber = PMLoader::PROTECTED_SECNUMS + PMLoader::PROCESS_SECNUMS;
+	size_t wholeSize= wholeNumber * PMLoader::SECSIZE;
+	size_t mostCanReadSizeThisTime = PMLoader::TEMP_SEG*16 - alreadyReadSize;
+
+
+	left=(wholeSize - mostCanReadSizeThisTime)/PMLoader::SECSIZE;
 	if(left>0)
 	{
 //		Util::printStr("Kernel code size exceeds reserved size,the extra sectors will be read after entering protected mode\n");
 	}else{
 		left=0;//enough
 	}
+
 	/*need to set the left sectors unread to FREE_HEAP_START*/
     if(PMLoader::CODE_START < PMLoader::SAFE_SEG*16) //may overlap the BIOS data or programs
     {
+    	Util::printStr("Kernel reserved code size too small,make it larger than PMLoader::SAFE_SEG:0\n");
+    	Util::printStr("Kernel shutdown \n");
+    	Util::jmpDie();
+
 //    	Util::printStr("Kernel code start at lower than BIOS data segment\n");
         left += (PMLoader::SAFE_SEG*16 + PMLoader::PROTECTED_SECNUMS*PMLoader::SECSIZE - PMLoader::TEMP_SEG*16)/PMLoader::SECSIZE;
 //	    Util::readSectors(PMLoader::SAFE_SEG,0,PMLoader::DRIVER,PMLoader::REAL_SECNUMS,PMLoader::PROTECTED_SECNUMS - left);
@@ -117,9 +122,10 @@ void PMLoader::adjustProtectedCode()
 //    	Util::digitToStr(buf,10,left);
 //    	Util::printStr("left is :");Util::printStr(buf);Util::printStr("\n");
 //        Util::readSectors(0,PMLoader::CODE_START,PMLoader::DRIVER,PMLoader::REAL_SECNUMS,PMLoader::PROTECTED_SECNUMS - left);
-    	iohd.setSecNumber(PMLoader::PROTECTED_SECNUMS - left);
+    	iohd.setSecNumber(wholeNumber - left);
     	iohd.read();
     }
+
     Util::printStr("leaving adjust\n");
     Util::setl(0, PMLoader::FREE_HEAP_START,left);
 }

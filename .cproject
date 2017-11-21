@@ -34,8 +34,8 @@
 								<option id="gnu.cpp.compiler.cygwin.exe.debug.option.optimization.level.98118476" name="Optimization Level" superClass="gnu.cpp.compiler.cygwin.exe.debug.option.optimization.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.optimization.level.none" valueType="enumerated"/>
 								<option id="gnu.cpp.compiler.cygwin.exe.debug.option.debugging.level.98938309" name="Debug Level" superClass="gnu.cpp.compiler.cygwin.exe.debug.option.debugging.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.debugging.level.max" valueType="enumerated"/>
 								<option id="gnu.cpp.compiler.option.preprocessor.def.655956195" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" useByScannerDiscovery="false" valueType="definedSymbols">
-									<listOptionValue builtIn="false" value="CODE32"/>
 									<listOptionValue builtIn="false" value="IDE_MODE"/>
+									<listOptionValue builtIn="false" value="CODE32"/>
 								</option>
 								<option id="gnu.cpp.compiler.option.include.paths.1111626379" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/x2/include}&quot;"/>
@@ -59,6 +59,7 @@
 							</tool>
 						</toolChain>
 					</folderInfo>
+					<fileInfo id="cdt.managedbuild.config.gnu.cygwin.exe.debug.1445724410.72280423" name="libx2.h" rcbsApplicability="disable" resourcePath="include/libx2.h" toolsToInvoke=""/>
 					<sourceEntries>
 						<entry excluding="stdc|ignore|test|backups|exports|deprecated|tools|stdc++" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
@@ -143,6 +144,7 @@
 		<buildTargets>
 			<target name="lib64" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
+				<buildArguments>-j4</buildArguments>
 				<buildTarget>lib64 DEBUG=true</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -150,6 +152,7 @@
 			</target>
 			<target name="clean64" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
+				<buildArguments>-j4</buildArguments>
 				<buildTarget>clean64</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -197,7 +200,6 @@
 			</target>
 			<target name="main.bimg" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
-				<buildArguments/>
 				<buildTarget>gen/main.bimg</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -205,7 +207,6 @@
 			</target>
 			<target name="clean" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
-				<buildArguments/>
 				<buildTarget>clean</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -213,7 +214,6 @@
 			</target>
 			<target name="clean32" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
-				<buildArguments/>
 				<buildTarget>clean32</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -221,7 +221,6 @@
 			</target>
 			<target name="bochs_run" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
-				<buildArguments/>
 				<buildTarget>bochs_run</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -229,7 +228,6 @@
 			</target>
 			<target name="bochs_debug" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
-				<buildArguments/>
 				<buildTarget>bochs_debug</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -237,7 +235,6 @@
 			</target>
 			<target name="bochs_debug_rc" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
-				<buildArguments/>
 				<buildTarget>bochs_debug_rc</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -245,15 +242,24 @@
 			</target>
 			<target name="update-host-tools" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
+				<buildArguments>-j4</buildArguments>
 				<buildTarget>update-host-tools</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
 				<runAllBuilders>true</runAllBuilders>
 			</target>
-			<target name="console" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+			<target name="console_open" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
-				<buildArguments/>
-				<buildTarget>console</buildTarget>
+				<buildArguments>-j4</buildArguments>
+				<buildTarget>console CONSOLE_CMD=</buildTarget>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>true</useDefaultCommand>
+				<runAllBuilders>true</runAllBuilders>
+			</target>
+			<target name="console_make_dump" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>make</buildCommand>
+				<buildArguments>-j4</buildArguments>
+				<buildTarget>console CONSOLE_CMD='make dump'</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
 				<runAllBuilders>true</runAllBuilders>

@@ -16,6 +16,9 @@ private:
 };
 //多于一个字节的用数组类型，其他用直接量
 //10个属性 = 8直接属性 + 2指针属性
+/**
+ * Limit指的是
+ */
 #pragma pack(push,1)
 class SegmentDescriptor:public Descriptor{
 public:
@@ -101,44 +104,8 @@ public:
     AS_MACRO void	setLimit(int limit);
 
 
-//	DEPRECATED
-//    char   BaseAddr[4];//4 bytes
-//    union{
-//        char Granularity;//if set,the unit is 4KB
-//        char G;
-//    };
-//    union{ //always be 1 for 32-bit code and data
-//        char DefaultOperationSize;//0=16 1=32
-//        char D;//for Code Segment,it is
-//
-//        char LittleUpperBound;//for stack(expand down),it is 0xffff(64K),else is 0xffffffff(4G)
-//        char B;
-//    };
-//    union{
-//        char Is64Segment;//only for IA-32e.For IA-32,L=0
-//        char L;
-//    };
-//    union{
-//        char Available;
-//        char AVL;
-//    };
-//    char Limit[3];
-//    union{
-//        char Present;
-//        char P;
-//    };
-//    char DPL;
-//    union{
-//        char System;//0=system
-//        char S;
-//    };
-//    union{
-//        char Type;//4位
-//        char DEWA;//=0,data Normal/Expand-down ;Read Only/Writeable;Accessed
-//        char CCRA;//=1,code /Conforming ; Execute Only/Readable ; Accessed
-//    };
-    
-    SegmentDescriptor(char* baseaddr=0,int limit=0,char g=0,char type=TYPE_U_DATA,char dpl=DPL_0,char s=1,char b=1,char p=1);
+    SegmentDescriptor(char* baseaddr=0,int limit=0,char g=G_1B,char type=TYPE_U_DATA,
+    		char dpl=DPL_0,char s=S_USER,char b=B_UPPER_BOUND32,char p=P_PRESENT);
     ~SegmentDescriptor();
 
     /**

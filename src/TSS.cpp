@@ -53,5 +53,22 @@ void TSS::fromMemory(TSS &self,int seg,int off)
 	new (&self) TSS;
     Util::memcopy(seg,off,Util::SEG_CURRENT,(int)self.I0,PMLoader::TSS_MIN_SIZE);
 }
+void TSS::dumpInfo(Printer *p)
+{
+	if(p!=NULL)
+	{
+		p->putsz("TSS{");
+		p->putx("LDTSEL:",this->LDTSEL,",");
+		p->putx("CR3:",this->CR3,",");
+		p->putx("CS:",this->CS,",");
+		p->putx("EIP:",this->EIP,",");
+		p->putx("DS:",this->DS,",");
+		p->putx("SS0:",this->SS0,",");
+		p->putx("ESP0:",this->ESP0,",");
+		p->putx("SS(3):",this->SS,",");
+		p->putx("ESP(3):",this->ESP,",");
+		p->putsz("}");
+	}
+}
 
 #endif //CODE32

@@ -4,6 +4,7 @@
 #include <MemoryManager.h>
 #include <List.h>
 #include <libx2.h>
+#include <PMLoader.h>
 
 #include <macros/all.h>
 
@@ -35,7 +36,7 @@ Process::Process(
 		unsigned int pid,
 		TSS*	ptss,int tssIndex,
 		size_t ldtNStart,size_t ldtTStart,size_t ldtNItems,int ldtIndex,
-		size_t linearBase,size_t processBase/*whole RAM!!*/,size_t codeStart,size_t bodySize,
+		size_t absBase,size_t thisPrcBase/*whole RAM!!*/,size_t codeStart,size_t bodySize,
 		size_t codeLimit,size_t dataLimit,size_t stackLimit,
 		char dpl
 ):
@@ -44,14 +45,24 @@ Process::Process(
 ldtm(ldtNStart,ldtTStart,ldtNItems,true),
 ptss(ptss),
 status(This::STATUS_READY),
-linearBase(linearBase),
-processBase(processBase),
+absBase(absBase),
+processBase(thisPrcBase),
 baseKsmm(),
-baseMM(&this->baseKsmm,linearBase+processBase,bodySize,false)
+baseMM(&this->baseKsmm,absBase+processBase,bodySize,false) ,//用于管理 linearBase+processBase的起始地址
+genLinearAddr(0)
 {
 
+	Kernel::printer->clr();
+//		char *absPhyStartAddr =
+		char *absPhyStartAddr=(char*)(absBase+processBase);
+		if((int)absPhyStartAddr % 4 !=0)
+		{
+			Kernel::printer->putsz("Sorry,you do no have a 4-byte-alignment process.Kernel Panic\n");
+			Util::jmpDie();
+		}else{
+			Kernel::printer->putsz("Process address align to 4\n");
+		}
 
-		char *pbase=(char*)(linearBase+processBase);
 		//===============init memory manager for the process body(starts from physical base)
 
 		//==============设置PDE PTE CR3
@@ -82,49 +93,123 @@ baseMM(&this->baseKsmm,linearBase+processBase,bodySize,false)
 		this->ldtSel = Util::makeSel(ldtIndex, dpl, 0);
 		this->tssSel = Util::makeSel(tssIndex, dpl, 0);
 
-		//==============init LDT
+		//==============init LDT====
 		/**
-		 *  1 		2 		3
-		 *  code	data	stack
+		 *  0		1 		2 		3		4			5
+		 *  NULL	code	data	stack	sysStack	kernelds
 		 */
-		this->ldtm.unfreeNode(0); //---> 0 is not used also
-		this->ldtm.unfreeNode(1);
-		this->ldtm.unfreeNode(2);
-		this->ldtm.unfreeNode(3);
-		this->ldtm.unfreeNode(4);
+		ldtm.allocNode(0);//---> 0 is not used also
+		ldtm.allocNode(1);
+		ldtm.allocNode(2);
+		ldtm.allocNode(3);
+		ldtm.allocNode(4);
+		ldtm.allocNode(5);
 
 
+		int pdePhyAddr=(int)absPhyStartAddr;//
+		int pte1PhyAddr=pdePhyAddr + PDE_NUMS * x2sizeof(PDE);
+		int startLineAddrOfProcess=VirtualManager::getLinearAddress(pdePhyAddr+x2sizeof(PDE),
+				pte1PhyAddr, (int)absPhyStartAddr);
+
+
+		//set the value of pde0 to point to system pde0.pte0
+
+		Kernel::printer->putsz("setting process pde&pte data\n");
+		Kernel::printer->putx("lineAddr=",startLineAddrOfProcess);
+//		Kernel::printer->putx("stackLimit=",stackLimit);
+//		int temp;
+
+//		Util::enterDs(Util::makeSel(5, 0,0), temp);
+		bool needExtraVisit= ( (size_t)absPhyStartAddr >= PMLoader::CODE_LIMIT );
+		int selIndex = -1;
+		int madeSeg;
+		if(needExtraVisit)
+		{
+			// TODO 修正prepare这个函数
+			selIndex= k->preparePhysicalMap((size_t)absPhyStartAddr, 512);
+//			selIndex = 5;
+			if(selIndex == -1)
+			{
+				Kernel::printer->putsz("prepare visiting failed.Kernel Panic\n");
+				Util::jmpDie();
+			}
+			madeSeg = Util::makeSel(selIndex, 0, 0);
+			Kernel::printer->putx("made sel inex=",selIndex);
+		}
+
+		if(needExtraVisit)
+		{
+			int data=*(int*)0;
+			Util::insertMark(0xe138e138);
+			Util::setl(madeSeg,0,data);
+		}else
+			*(int*)pdePhyAddr = *(int*)0; //从系统的pde0复制
+//		Util::leaveDs(0, temp);
+
+		ptss->CR3 = Kernel::makeCR3(pdePhyAddr);
+
+
+		//设置PDE1
+
+		int madePDE1=Kernel::makePDE(pte1PhyAddr);
+		if (dpl == 3)
+			madePDE1 |= 0b100;
+		if(needExtraVisit)
+		{
+			Util::insertMark(0xe154e154);
+			Util::setl(madeSeg,1*x2sizeof(PDE), madePDE1);
+			Util::insertMark(0xe156e156);
+		}else
+			*((int*)pdePhyAddr+1) = madePDE1;
+
+		//设置PDE1. PTE[0~2]
+		for(int i=0;i<3;++i)
+		{
+			int madePte= Kernel::makePTE((int)absPhyStartAddr + i*4*1024);
+			if(dpl==3)
+				madePte |= 0b100;
+			if(needExtraVisit)
+			{
+				Util::setl(madeSeg,PDE_NUMS*x2sizeof(PDE)+ x2sizeof(PTE)*i, madePte);
+			}else
+				*((int*)pte1PhyAddr+i)=madePte;
+		}
+		Kernel::printer->putsz("setting end\n");
+
+		// TODO param 2 也许是错误的，要设置pte的值，但我不知道怎么验证
+		int startLineAddrOfKernel = VirtualManager::getLinearAddress(pdePhyAddr,*(int*)0 , 0);
 
 		char GSEL;
 
-
+		//创建各个LDT项
 		SELECT_SCALE(codeLimit,GSEL);
-		new (this->ldtm.getTarget(1)) SegmentDescriptor(pbase,codeLimit, GSEL,
+		new (this->ldtm.getTarget(1)) SegmentDescriptor((char*)startLineAddrOfProcess,codeLimit, GSEL,
 				SegmentDescriptor::TYPE_U_CODE_NONCONFORMING,
-				/*SegmentDescriptor::DPL_3*/dpl,
+				dpl,
 				SegmentDescriptor::S_USER,
 				SegmentDescriptor::B_UPPER_BOUND32,
 				SegmentDescriptor::P_PRESENT
 		);
 		SELECT_SCALE(dataLimit,GSEL);
-		new (this->ldtm.getTarget(2)) SegmentDescriptor(pbase,dataLimit, GSEL,
+		new (this->ldtm.getTarget(2)) SegmentDescriptor((char*)startLineAddrOfProcess,dataLimit, GSEL,
 				SegmentDescriptor::TYPE_U_DATA,
-				/*SegmentDescriptor::DPL_3*/dpl,
+				dpl,
 				SegmentDescriptor::S_USER,
 				SegmentDescriptor::B_UPPER_BOUND32,
 				SegmentDescriptor::P_PRESENT
 		);
 		SELECT_SCALE(stackLimit,GSEL);
-		new (this->ldtm.getTarget(3)) SegmentDescriptor(pbase,stackLimit, GSEL,
+		new (this->ldtm.getTarget(3)) SegmentDescriptor((char*)startLineAddrOfProcess,stackLimit, GSEL,
 				SegmentDescriptor::TYPE_U_STACK,
-				/*SegmentDescriptor::DPL_3*/dpl,
+				dpl,
 				SegmentDescriptor::S_USER,
 				SegmentDescriptor::D_OPSIZE32,
 				SegmentDescriptor::P_PRESENT
 		);
-		size_t sysStack=stackLimit/2;
-		SELECT_SCALE(sysStack,GSEL);
-		new (this->ldtm.getTarget(4)) SegmentDescriptor(pbase,sysStack, GSEL,
+		size_t sysStackLimit=stackLimit/2;
+		SELECT_SCALE(sysStackLimit,GSEL);
+
+		new (this->ldtm.getTarget(4)) SegmentDescriptor((char*)startLineAddrOfProcess,sysStackLimit, GSEL,
 				SegmentDescriptor::TYPE_U_STACK,
 				0,
 				SegmentDescriptor::S_USER,
@@ -132,18 +217,41 @@ baseMM(&this->baseKsmm,linearBase+processBase,bodySize,false)
 				SegmentDescriptor::P_PRESENT
 		);
 
+		size_t kerSpaceLimit = PMLoader::CODE_LIMIT;
+		SELECT_SCALE(kerSpaceLimit,GSEL);
+		new (this->ldtm.getTarget(5)) SegmentDescriptor((char*)startLineAddrOfKernel,kerSpaceLimit, GSEL,
+				SegmentDescriptor::TYPE_U_DATA,
+				0,
+				SegmentDescriptor::S_USER,
+				SegmentDescriptor::B_UPPER_BOUND32,
+				SegmentDescriptor::P_PRESENT
+		);
+
+		genLinearAddr = startLineAddrOfProcess;
+
 		//=================init TSS
 		ptss->CS = Util::makeSel(1, /*SegmentDescriptor::DPL_3*/dpl,1);
 		ptss->EIP = codeStart;
 		ptss->DS = Util::makeSel(2,/* SegmentDescriptor::DPL_3*/dpl, 1);
 		ptss->SS = Util::makeSel(3, /*SegmentDescriptor::DPL_3*/dpl, 1);
 		ptss->SS0 = Util::makeSel(4, /*SegmentDescriptor::DPL_3*/0, 1);
-		ptss->ESP = stackLimit - 4;
-		ptss->ESP0 = sysStack - 4;
+		ptss->ESP = stackLimit;
+		ptss->ESP0 = sysStackLimit ;
 		ptss->LDT = this->ldtSel;
-		ptss->EFLAGS = 0x246;//0x246;
-		CR3 tempcr3(((int)pbase)>>12,PageAttributes::PWT_ALWAYS_UPDATE);
-		ptss->CR3 = *(u32_t*)&tempcr3;
+		ptss->EFLAGS = 0x246 & 0xfffffdff;//eflags[9]=IF=0
+
+//		dump(Kernel::printer);
+//		Util::jmpDie();
+
+}
+
+void	Process::dump(Printer * printer)const
+{
+	printer->putsz("Process{");
+	this->ptss->dumpInfo(printer);
+	printer->putsz(",");
+	printer->putx("genLineAddr:",genLinearAddr,",");
+	printer->putsz("}");
 
 }
 

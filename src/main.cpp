@@ -1,6 +1,3 @@
-#if defined(CODE32) && defined(CODE16) // IDE-ISSUE eclipse cdt kept saying I have defined CODE16,but I have just defined CODE32,so do this
-#undef CODE16
-#endif
 //extern int READSEG[];//use _READSEG in other file
 
 #include <libx2.h>

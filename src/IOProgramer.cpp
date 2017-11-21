@@ -240,8 +240,8 @@ void IO_HDD::readData()
 	__asm__ __volatile__(
 			"cld;rep;insw\n\t"
 			:
-			:"d"(This::PORT_DATA),"D"(this->dstOff),"c"(this->secNumber * 512/2)
-			 :
+			:"d"(PORT_DATA),"D"(this->dstOff),"c"(this->secNumber * 512/2)
+			:
 	);
 	Util::leaveEs(temp);
 }

@@ -11,6 +11,7 @@ SECTIONS {
 
 	}
 	*/ /*This is discarded by objcopy even said -j .stack*/
+	/*最终数据被放在了0处，但是偏移仍然是32个扇区*/
 	.data 512*32: {
 		*(.rdata .data .bss)
 	}

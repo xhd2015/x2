@@ -8,11 +8,13 @@ class Util{
 
 public:
 	static int printf(const char *fmt,...);
-#if defined(CODE16) || defined(CODE32)
     Util();
     ~Util();
+
+#if defined(CODE16) || defined(CODE32) || defined(CODE32USER)
     //*****兼容：16位，32位*******
     static int x,y;
+#endif
     //ON用 |
     //OFF用 &
     enum {	MODE_FL_ON=0x80,
@@ -35,21 +37,33 @@ public:
             MODE_FG_BLACK=0b0000000,
             MODE_COMMON=(MODE_FL_OFF & MODE_BG_BLACK) | MODE_FG_WHITE
     };
-    const static int SCREEN_X,SCREEN_Y;
-    enum{SEG_CURRENT=0x10000};
-//    static int videoSelector;
+#if defined(CODE16)||defined(CODE32) || defined(CODE32USER)
+//    const static int SCREEN_X,SCREEN_Y;
     enum{
-    	videoSelector=
-#if defined(CODE16)
-    0xb800,
-#elif defined(CODE32)
-    0x8, //指向videoSelector
-#endif
-		END_ENUM
+    	SCREEN_X = 25,
+		SCREEN_Y = 80
     };
+#endif
+
+    enum{SEG_CURRENT = 0x10000};
+#if defined(CODE16) || defined(CODE32) //只有实模式，保护模式内核态才有全局选择子
+    	enum{
+			videoSelector=
+#if defined(CODE16)
+						0xb800
+#elif defined(CODE32)
+						0x8 //指向videoSelector
+#endif
+		//,END_ENUM
+};
+#endif
+#if defined(CODE16)||defined(CODE32)
+    // 指向选择子
     static int strSel;
     AS_MACRO static void	setStrSel(int sel);
     AS_MACRO static int  getStrSel();
+#endif
+
     static void printStr(const char* str_addr,int mode=MODE_COMMON);
     static void printChar(char ch,int mode=MODE_COMMON);//0x7:White_Black_NoFlash
     static void setCursor(int x,int y); //25 * 80
@@ -58,7 +72,14 @@ public:
  
     static int get(int seg,int off);//seg=0x10000指向当前ds
     static void setb(int seg,int off,int byte);
+
+    /**
+     *  set 2 bytes
+     */
     static void setw(int seg,int off,int halfWord);
+    /**
+     *   set 4 bytes
+     */
     static void setl(int seg,int off,int word);
     static void clr();
     AS_MACRO static void jmpDie();
@@ -69,6 +90,8 @@ public:
     void test();
     /**
      * copy by byte
+     *
+     * from srcSeg:srcOff --> dstSeg:dstOff
      */
     static void memcopy(int srcSeg,int srcOff,int dstSeg,int dstOff,int len);
 
@@ -98,7 +121,13 @@ public:
     DEPRECATED AS_MACRO static void pusha();//这些宏通常用于中断处理，但是由于在堆栈框架之内的任何栈操作都是错误的，因此将它们标记为过时的
     DEPRECATED AS_MACRO static void popa();
     
-    
+    /**
+     * 创建一个指向LDT或者GDT的选择子
+     *
+     * @param index		表项的下标
+     * @param dpl		权限
+     * @param from		指向的表，0=GDT 1=LDT
+     */
     static short makeSel(int index,int dpl=0b00,int from=0);
     
     static void changeCPL(int eip,int cs,int eflags,int esp,int ss);
@@ -106,9 +135,8 @@ public:
     static char getCPL();
     static char getDPL(int sel);
 #endif //CODE32
-#endif //CODE32 && CODE16
 
-#if defined(CODE32)||defined(CODE64)||defined(CODE16)
+#if defined(CODE32)||defined(CODE64)||defined(CODE16)||defined(CODE32USER)
     //如果某些功能暂时不能由某个类实现，就在这里实现它们。
 
     /**
@@ -124,7 +152,7 @@ public:
     
     //math related
     static int sign(int n);
-#endif //CODE32 || CODE64
+#endif //CODE32 || CODE64 || CODE16 ||CODE32USER
 
 #if defined(CODE32)
     //========与调用相关的宏
@@ -178,7 +206,7 @@ public:
     
 };
 
-#if defined(CODE32)
+#if defined(CODE32) || defined(CODE32USER)
 class SimpleCharRotator{
 public:
     const static char rotateShapes[12];
@@ -206,7 +234,12 @@ public:
     ~Printer();
     
     void putc(int chr);
-    void puti(const char* str,int i);
+#if defined(CODE32) || defined(CODE32USER)
+    void puti(const char* str,int i,const char* strAfter="\n");
+    void putx(const char* str,int i,const char* strAfter="\n");
+    void puti(const char* str,void * i,const char* strAfter="\n");
+    void putx(const char* str,void * i,const char* strAfter="\n");
+#endif
     void putsz(const char* str);
     void putsn(const char *str,int n);
     void setPos(int x,int y);
@@ -279,11 +312,11 @@ public:
 	ClassDebug()=default;
 	ClassDebug(const char *msg);
 };
-#endif //CODE32
+#endif //CODE32 || CODE32USER
 
 
 
-#if defined(CODE32)||defined(CODE64)
+#if defined(CODE32)||defined(CODE64)||defined(CODE32USER)
 
 //===============class :String
 class String{
@@ -318,7 +351,7 @@ protected:
     unsigned int curLen;
     int indexAdd,indexRemove;
 };
-#endif //CODE32 || CODE64
+#endif //CODE32 || CODE64 || CODE32USER
 
 
 

@@ -1,8 +1,5 @@
-#ifdef CODE16
-    __asm__(".code16gcc \n\t");
-#elif defined CODE32
-    __asm__(".code32 \n\t");
-#endif
+
+
 
 
 #include <libx2.h>
@@ -11,13 +8,19 @@
 
 #include <macros/libx2_macros.h>
 
+#ifdef CODE16
+    __asm__(".code16gcc \n\t");
+#elif defined(CODE32) || defined(CODE32USER)
+    __asm__(".code32 \n\t");
+#endif
+
 #if defined(CODE64)
 #include <cstdio>
 #include <cstdarg>
 #endif
 //==============模板实例化
 //===在此声明实例化
-#ifdef CODE32
+#if defined(CODE32)
     template class Queue<unsigned char>;
 #endif
 
@@ -29,37 +32,21 @@ int Util::printf(const char *fmt,...)
 	int n=vprintf(fmt,ap);
 	va_end(ap);
 	return n;
-#elif defined(CODE32) || defined(CODE16)
+#elif defined(CODE32) || defined(CODE16) || defined(CODE32USER)
 	//I don't know what todo
 	Util::printStr(fmt);
 #endif
 }
 
-#if defined(CODE32)||defined(CODE16)
+#if defined(CODE32)||defined(CODE16) || defined(CODE32USER)
 
 int Util::x=0;
 int Util::y=0;
-//const int Util::MODE_FL_ON=0x80,
-//        Util::MODE_FL_OFF=0x7f,
-//        Util::MODE_BG_RED=0b0100000,
-//        Util::MODE_BG_GREEN=0b0010000,
-//        Util::MODE_BG_BLUE=0b0001000,
-//        Util::MODE_BG_WHITE=0b0111000,
-//        Util::MODE_BG_RG=0b0110000,
-//        Util::MODE_BG_RB=0b0101000,
-//        Util::MODE_BG_BG=0b0011000,
-//        Util::MODE_BG_BLACK=0b0000000,
-//        Util::MODE_FG_RED=0b0000100,
-//        Util::MODE_FG_GREEN=0b0000010,
-//        Util::MODE_FG_BLUE=0b0000001,
-//        Util::MODE_FG_WHITE=0b0000111,
-//        Util::MODE_FG_RG=0b0000110,
-//        Util::MODE_FG_RB=0b0000101,
-//        Util::MODE_FG_BG=0b0000011,
-//        Util::MODE_FG_BLACK=0b0000000,
-//        Util::MODE_COMMON=(Util::MODE_FL_OFF & Util::MODE_BG_BLACK) | Util::MODE_FG_WHITE;
-const int Util::SCREEN_X=25,Util::SCREEN_Y=80;
+//const int Util::SCREEN_X=25,Util::SCREEN_Y=80;
+
+#if defined(CODE32)||defined(CODE16)
 int		Util::strSel=0;
+#endif
 
 //const int Util::SEG_CURRENT =    0x10000;//运行期常数，有时我需要一个编译期常数,那就在g++的命令行中定义之-D
 //int Util::videoSelector=
@@ -99,12 +86,14 @@ void Util::printStr(const char* str_addr,int mode)
 //	 );
 //	Util::jmpDie(); //Very OK
 #endif
+#if defined(CODE32) || defined(CODE16)
 	if(str_addr==NULL)return;
 	char ch;
     while( (ch=(char)Util::get(Util::strSel,(int)str_addr++))!=0 )
     {
         Util::printChar(ch,mode);
     }
+#endif
 }
 void Util::printChar(char ch,int mode)
 {
@@ -138,6 +127,7 @@ void Util::printChar(char ch,int mode)
     {
         Util::newLine();
     }
+#if defined(CODE16)||defined(CODE32)
     int Lpos = Util::x * 80*2 + Util::y*2;//25 * 80
     __asm__ __volatile__(
     "push %%es\n\t"
@@ -152,6 +142,9 @@ void Util::printChar(char ch,int mode)
     );
 
     Util::y ++;
+#elif defined(CODE32USER)
+
+#endif
     
 }
 void Util::newLine()
@@ -163,6 +156,7 @@ void Util::newLine()
 
  int Util::get(int seg,int off)
  {
+#if defined(CODE32)||defined(CODE16)
      ENTER_DS(seg,s);
      int rt;
      __asm__ __volatile__(
@@ -173,9 +167,13 @@ void Util::newLine()
      );
     LEAVE_DS(seg,s);
      return rt;
+#elif defined(CODE32USER)
+     return 0;
+#endif
  }
 void Util::setb(int seg,int off,int byte)
 {
+#if defined(CODE32)||defined(CODE16)
     ENTER_DS(seg,s);
     __asm__ __volatile__(
         "movl 4+4*2(%%ebp),%%ebx \n\t"
@@ -186,9 +184,12 @@ void Util::setb(int seg,int off,int byte)
         :"ebx","eax","memory"
     );
     LEAVE_DS(seg,s);
+#elif defined(CODE32USER)
+#endif
 }
 void Util::setw(int seg,int off,int halfWorld)
 {
+#if defined(CODE32)||defined(CODE16)
     ENTER_DS(seg,s);
     __asm__ __volatile__(
         "movl 4+4*2(%%ebp),%%ebx \n\t"
@@ -199,6 +200,9 @@ void Util::setw(int seg,int off,int halfWorld)
         :"ebx","eax","memory"
     );
     LEAVE_DS(seg,s);
+#elif defined(CODE32USER)
+
+#endif
 }
 void Util::setl(int seg,int off,int word)
 {
@@ -215,6 +219,7 @@ void Util::setl(int seg,int off,int word)
 
 void Util::memcopy(int srcSeg,int srcOff,int dstSeg,int dstOff,int len)
 {   
+#if defined(CODE32)||defined(CODE16)
     ENTER_ES(dstSeg,s2);
     ENTER_DS(srcSeg,s1);
 
@@ -232,6 +237,9 @@ void Util::memcopy(int srcSeg,int srcOff,int dstSeg,int dstOff,int len)
     
     LEAVE_DS(srcSeg,s1);
     LEAVE_ES(dstSeg,s2);
+#elif defined(CODE32USER)
+
+#endif
 }
 
 void Util::clr()
@@ -544,14 +552,38 @@ void Printer::putsz(const char* str)
     }
     Util::leaveEs(oldes);
 }
-void Printer::puti(const char *str,int i)
+
+#if defined(CODE32) || defined(CODE32USER)
+void Printer::puti(const char *str,int i,const char* strAfter)
 {
 	char buf[10];
 	Util::digitToStr(buf, arrsizeof(buf), i);
 	putsz(str);
 	putsz(buf);
-	putsz("\n");
+	if(strAfter)
+		putsz(strAfter);
 }
+
+
+void Printer::putx(const char* str,int i,const char* strAfter)
+{
+	char buf[10];
+	Util::digitToHex(buf, arrsizeof(buf), i);
+	putsz(str);
+	putsz(buf);
+	if(strAfter)
+		putsz(strAfter);
+}
+void Printer::puti(const char* str,void * i,const char* strAfter)
+{
+	puti(str,(int)i,strAfter);
+}
+void Printer::putx(const char* str,void * i,const char* strAfter)
+{
+	putx(str,(int)i,strAfter);
+}
+#endif
+
 void Printer::putsn(const char *str,int n)
 {
     int oldes;

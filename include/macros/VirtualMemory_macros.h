@@ -28,6 +28,40 @@ PTE::PTE(u32_t pte)
 }
 
 //===class VirtualManager
+ int VirtualManager::getL3(int targetPhyAddr)
+ {
+	 return targetPhyAddr & 0xfff;
+ }
+ int VirtualManager::getL2(int ptePhyAddr)
+ {
+	 return (ptePhyAddr & 0xfff) >> 2;
+ }
+ int VirtualManager::getL1(int pdePhyAddr)
+ {
+	 return (pdePhyAddr & 0xfff) >> 2;
+ }
+ int VirtualManager::getLinearAddress(int pdePhyAddr,int ptePhyAddr,int targetPhyAddr)
+ {
+	 int l1 = getL1(pdePhyAddr) << 22;
+	 int l2 = getL2(ptePhyAddr) << 12;
+	 int l3 = getL3(targetPhyAddr);
+
+//	 Kernel::printer->putx("pdePhyAddr=", pdePhyAddr);
+//	 Kernel::printer->putx("l1=", l1);
+//	 Kernel::printer->putx("ptePhyAddr=", ptePhyAddr);
+//	 Kernel::printer->putx("l2=", l2);
+//	 Kernel::printer->putx("targetPhyAddr=", targetPhyAddr);
+//	 Kernel::printer->putx("l3=", l3);
+
+	 return l1 | l2 | l3;
+ }
+ void VirtualManager::setVirtualAddress(int pdePhyAddr,int ptePhyAddr,int targetPhyAddr)
+ {
+	 //set CR3
+	 //writeCr3(Kernel::makeCR3(pdePhyAddr));
+	 *(int*)pdePhyAddr = Kernel::makePDE(ptePhyAddr);
+	 *(int*)ptePhyAddr = Kernel::makePTE(targetPhyAddr);
+ }
 u32_t VirtualManager::getIndex(u32_t phyaddr, u32_t reg) {
 	return ((phyaddr - (reg & 0xfffff000))>>2);
 }

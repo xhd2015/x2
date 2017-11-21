@@ -45,6 +45,11 @@ extern "C" {
 
 #endif
 
+/**
+ * 进程描述体
+ *
+ * 进程主要包括
+ */
 //下面CODE64只需要使用enum中的常数，作为调试用，其他不需要
 #if defined(CODE32)||defined(CODE64)
 	class Process
@@ -84,6 +89,10 @@ extern "C" {
 		STAUTS_RUNNING,
 		STATUS_READY,
 		STATUS_STOPPED,
+
+
+		PDE_NUMS=10,
+		PTE0_NUMS=20
 	};
 #endif
 
@@ -91,11 +100,34 @@ extern "C" {
 
 public:
 	Process();
+	/**
+	 * 初始化进程
+	 *
+	 * @param pid				进程id
+	 * @param ptss				指向对应于该进程的TSS结构
+	 * @param tssIndex			TSS结构在内核管理的TSS数组中的下标
+	 * @param ldtNStart			LDT协同管理器的Node数组地址，见 {@link AssociatedMemoryManager}
+	 * @param ldtTStart			LDT表的地址
+	 * @param ldrNItems			LDT的项数
+	 * @param ldtIndex			LDT选择子在GDT中的下标
+	 * @param absBase			进程空间的绝对起始地址
+	 * @param thisPrcBase		本进程的相对于进程空间的地址。absBase+thisPrcBase 构成了进程的绝对地址
+	 * @param codeStart			进程代码的相对起始地址(以进程体开始为0计算), 一般假定stackLimit为codeStart的值，即栈区之后就是代码区
+	 * @param bodySize			进程体的整体大小
+	 * @param codeLimit			cs段大小
+	 * @param dataLimit			ds段大小
+	 * @param stackLimit		ss段大小
+	 * @param dpl				权限
+	 *
+	 * 注意：一般认为，processBodySize=codeLimit=dataLimit
+	 * 					codeStart=stackLimit
+	 *
+	 */
 	Process(
 			unsigned int pid,
 			TSS*	ptss,int tssIndex,
 			size_t ldtNStart,size_t ldtTStart,size_t ldtNItems,int ldtIndex,
-			size_t linearBase,size_t processBase/*whole RAM!!*/,size_t codeStart,size_t bodySize,
+			size_t absBase,size_t thisPrcBase/*whole RAM!!*/,size_t codeStart,size_t bodySize,
 			size_t codeLimit,size_t dataLimit,size_t stackLimit,
 			char dpl=SegmentDescriptor::DPL_3
 	);
@@ -119,6 +151,7 @@ public:
 	AS_MACRO void	setStatus(int status);
 	AS_MACRO int	getStatus()const;
 	AS_MACRO size_t getProcessBase()const;
+	void	dump(Printer * printer)const;
 
 
 protected:
@@ -128,15 +161,54 @@ protected:
 	 */
 	unsigned int pid;
 	int			status;
-	TSS *ptss;
+	/**
+	 * TSS结构的内存地址
+	 */
+	TSS 	*ptss;
+
+	/**
+	 *  tss选择子
+	 */
 	int		tssSel;
+
+	/**
+	 * ldt选择子
+	 */
 	int		ldtSel;
+
 	SegManager	ldtm;//size
-	size_t		linearBase,processBase;
+
+	/**
+	 *  进程空间的绝对起始地址
+	 */
+	size_t		absBase;
+	/**
+	 *  该进程相对进程空间的偏移
+	 */
+	size_t		processBase;
+
+	/**
+	 * 用于baseMM的一般内存分配器
+	 */
 	KernelSmmWrapper<TreeNode<MemoryDescriptor> > baseKsmm;
+
+	/**
+	 *
+	 */
 	MemoryManager<KernelSmmWrapper> baseMM;
 
+	/**
+	 * 管理PDE项
+	 *
+	 * 因为进程有自己的CR3值...
+	 */
 	PDEManager	pdeman;
+
+	/**
+	 * 进程建立过程中设置的线性基地址
+	 * 用于调试
+	 */
+	int			genLinearAddr;
 #endif //CODE32
 
 #if defined(CODE32) || defined(CODE64)

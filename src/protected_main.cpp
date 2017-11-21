@@ -1,10 +1,3 @@
-#ifdef CODE32 //we are now at Protected Mode
-__asm__(".code32 \n\t");
-#endif
-
-
-
-
 #include <Kernel.h>
 #include <libx2.h>
 #include <Descriptor.h>
@@ -18,6 +11,11 @@ __asm__(".code32 \n\t");
 
 
 #include <macros/all.h>
+
+#if defined(CODE32) //we are now at Protected Mode
+__asm__(".code32 \n\t");
+#endif
+
 
 #if defined(CODE32)
 
@@ -58,7 +56,7 @@ void protectedEntryHolder()
 {
 	//=================设置PDE0，PTE， 进入虚拟内存管理模式
 	//Util::printStr("in protectedEntryHolder");
-	*(int*)PMLoader::PDE0_START= ((0x1u<<12)|0b11011);
+	*(int*)PMLoader::PDE0_START= Kernel::makePDE(0x1000,0b11011);
 	int *pte=(int*)PMLoader::PTE0_START;
 	size_t n=(PMLoader::DATA_LIMIT+1)/4096;
 	//0: Global,not dirty,
@@ -67,9 +65,9 @@ void protectedEntryHolder()
 	//set all just global,not dirty
 	for(size_t i=0;i<n;i++)
 	{
-		pte[i]= (i<<12)|0b100011011;
+		pte[i]= Kernel::makePTE(i<<12,0b100011011);
 	}
-	VirtualManager::writeCr3(CR3(0,PageAttributes::PWT_ALWAYS_UPDATE,PageAttributes::PCD_CACHE_DISABLE));
+	VirtualManager::writeCr3(Kernel::makeCR3(0));
 	VirtualManager::enablePaging();
 //	__asm__ __volatile__(
 //		"mov $0x18,%%eax \n\t"
@@ -89,25 +87,29 @@ void protectedEntryHolder()
     Util::clr();
     Util::setStrSel(Util::getCurrentDs());
 //    Util::jmpDie();  //vbox wrong
-    Printer stdp(3,30,15,40,Util::MODE_COMMON);//系统的标准打印器
+//    Printer stdp(3,30,15,40,Util::MODE_COMMON);//系统的标准打印器
+    Printer stdp(0,0,Util::SCREEN_X,Util::SCREEN_Y,Util::MODE_COMMON);//系统的标准打印器
 //    Util::jmpDie(); //vbox wrong
     Kernel::printer=&stdp;
-    stdp.clr();
+//    stdp.clr();
 //    Util::jmpDie(); //vbox wrong
     stdp.putsz("Entered Protected Mode.\n");
 
     //=======================读取剩余的扇区
     stdp.putsz("Reading left sectors...\n");
 //    Util::jmpDie(); //vbox wrong
-    int nleft=*(int*)PMLoader::FREE_HEAP_START;
-    char buf[10];
-    Util::digitToStr(buf, (size_t)arrsizeof(buf), nleft);
-    stdp.putsz("Left sector number is :");stdp.putsz(buf);stdp.putsz("\n");
+    size_t nleft=*(unsigned short*)PMLoader::FREE_HEAP_START;//2个字节
+
+    stdp.puti("Left sector number is :",nleft);
     if(nleft > 0)
     {
-    	IO_HDD iohd(0,(unsigned char)(PMLoader::REAL_SECNUMS + PMLoader::PROTECTED_SECNUMS - nleft),(size_t)nleft,Util::getCurrentDs(),(size_t)PMLoader::TEMP_SEG*16);
+    	IO_HDD iohd(0,
+    			PMLoader::REAL_SECNUMS + PMLoader::PROTECTED_SECNUMS+PMLoader::PROCESS_SECNUMS - nleft,
+				nleft,
+				Util::getCurrentDs(),
+				PMLoader::TEMP_SEG*16);
     	iohd.read();
-    }
+    }//正确读入250个扇区
 
     //===================从这里插入test的hook
     stdp.putsz("Running Test.\n");
@@ -120,6 +122,7 @@ void protectedEntryHolder()
     {
         reuse_sel.init(0x10,intAddresses[i],SelectorDescriptor::TYPE_INT,SegmentDescriptor::DPL_3);
         reuse_sel.writeToMemory(Util::SEG_CURRENT,PMLoader::IDT_START+8*i);
+
     }
     reuse_sel.init(0x10,(int)&int0x20,SelectorDescriptor::TYPE_INT,SegmentDescriptor::DPL_3);//重新设置int0x20
     reuse_sel.writeToMemory(Util::SEG_CURRENT,PMLoader::IDT_START+0x20*8);
@@ -138,8 +141,8 @@ void protectedEntryHolder()
     Kernel::initTheKernel(pkernel);
 //    stdp.putsz("after init kernel\n");
 
-    Kernel::printer->clr();
-    Kernel::printer->putsz("by kernel printer\n");
+//    Kernel::printer->clr();
+//    Kernel::printer->putsz("by kernel printer\n");
 
     int gused[]={0,1,2,3,4,5};
     new (pkernel) Kernel(
@@ -151,36 +154,44 @@ void protectedEntryHolder()
 			PMLoader::GDT_NODE_START,PMLoader::GDT_START,PMLoader::GDT_NODE_ITEMS,gused,arrsizeof(gused),
 			PMLoader::IDT_NODE_START,PMLoader::IDT_SIZE,PMLoader::IDT_NODE_ITEMS,NULL,0
     );//初始化一个新的kernel
-    pkernel->markGdtUsed(0);
-    pkernel->markGdtUsed(1);
-    pkernel->markGdtUsed(2);
-    pkernel->markGdtUsed(3);
-    pkernel->markGdtUsed(4); //They should be marked in use at the first time,but unfortunately,they are not.
     stdp.putsz("after kernel done\n");
+
+
+
 
     //访问绝对地址4MB处的4个字节，该怎么做？
     //在gdt中先新建一项选择子，这个选择子指向了实际地址，并有长度限制
+    Kernel::printer->clr();
     int viIndex=pkernel->preparePhysicalMap(4*1024*1024, 4*1024);
+    pkernel->printer->puti("viIndex=", viIndex);
+
     Util::setl(Util::makeSel(viIndex, 0, 0), 0, 0xaa55);
     //=========================test using virtual memory to build new process
     //===test visiting (1MB,4096B)
     //need 1 PTE
     //LinearAddress [0][767][0]=5MB
     //save PTE[676],set,visit,save back
-    int pte_index=767;
-    int pde_index=0;
-    int savedPTE=pte[pte_index];
-    pte[pte_index]=(1*1024*1024 & 0x3ff000)|0b100011011;
-    int byte_index=(1*1024*1024) & 0xfff;
 
-    char *target_addr=(char*) ((pde_index<<22)|(pte_index<<12)|byte_index); //没有超过当前ds的限制
-    target_addr[0]='x';
-    target_addr[1]='h';
-    target_addr[2]='d';
-    target_addr[3]=0;
-    stdp.putsz(target_addr);
 
-    pte[767]=savedPTE;
+    /**
+     * 手动设置线性地址
+     */
+//    int pte_index=767;
+//    int pde_index=0;
+//    int savedPTE=pte[pte_index];
+//    pte[pte_index]=(1*1024*1024 & 0x3ff000)|0b100011011;
+//    int byte_index=(1*1024*1024) & 0xfff;
+//
+//    char *target_addr=(char*) ((pde_index<<22)|(pte_index<<12)|byte_index); //没有超过当前ds的限制
+//    target_addr[0]='x';
+//    target_addr[1]='h';
+//    target_addr[2]='d';
+//    target_addr[3]=0;
+//    stdp.putsz(target_addr);
+//
+//    pte[767]=savedPTE;//恢复之前的设置
+
+
 //  Util::jmpDie();//wait to see output after paging enabled. OK.
 
 //    //do some adjustment so that the allocated space will not be corrupted
@@ -211,24 +222,71 @@ void protectedEntryHolder()
 
     /**
      * Let's try to create a new process
-     * 	I know process1 is in(memory address) (100+14 (protected sector number + reserved sector number),4) and another one is the next 4 sectors
-     * 	next to it.
      */
-    TreeNode<Process*>* wp=pkernel->addNewProcess(24*512, 24*512,4*512, 3);
+    //Process的地址 :
+    //	PMLoader::PROTECTED_SECNUMS + PMLoader::REAL_SECNUMS
+    //	大小:16
+    //	布局：0~4:  其他内容+栈（1扇区）
+    //		  4~16: 代码
+
+    //新建一个dpl=3的进程,申请24*512大小的空间
+    TreeNode<Process*>* wp=pkernel->addNewProcess(24*512 - 1, 24*512 - 1,4*512 - 1, 3);
+    pkernel->printer->putx("new process is ", (int)wp);
+
     Process *proc1=wp->getData();
-    //根据proc1.LBase 构造一个新的ds选择子，基地址指向proc1的基地址
+    //根据proc1的线性地址构造一个新的ds选择子，基地址指向proc1的基地址
     int pdeIndex_proc1=1;
-    int *newpte0=(int*)pkernel->mnewKernel((size_t)(3*sizeof(int)));//24个扇区，共需3个PTE项
-    int newpte0Index=((size_t)newpte0) >> 12;
-    ((int*)(PMLoader::PDE0_START))[1]=0;
 
-    //copy code&data the process space
-    Util::memcopy(Util::getCurrentDs(),132*512,Util::makeSel(5, 0, 0),proc1->getProcessBase()+proc1->getCodeStart(),16*512);/*copy code to allocated process space*/
-    TreeNode<Process*>*	wp2=pkernel->addNewProcess(24*512,24*512, 4*512, 3);
+    // NOTE 这里一定要使用Align版本的new，因为pte，pde都必须是4的倍数
+      PTE *newpte0=(PTE*)pkernel->mnewKernelAlign(3*x2sizeof(PTE),4);//24个扇区，共需3个PTE项
+      stdp.putx("newpte 0 address=",(int)newpte0);
+      ((int*)(PMLoader::PDE0_START))[1] = Kernel::makePDE((int)newpte0);
+      newpte0[0] = Kernel::makePTE(PMLoader::PROCESS_MM_START);
+      newpte0[1] = Kernel::makePTE(PMLoader::PROCESS_MM_START+4*1024);
+      newpte0[2] = Kernel::makePTE(PMLoader::PROCESS_MM_START+8*1024);
+      int lineAddr = VirtualManager::getLinearAddress((int) 0x4, (int)newpte0, PMLoader::PROCESS_MM_START);
+      stdp.putx("lineAddr=",lineAddr);
+      int limit = 24*512-1;//24个扇区
+
+      int gdtAllocIndex =
+      		pkernel->newgdt(
+      				(char*)lineAddr,
+      				limit/SegmentDescriptor::G_4KB_SCALE,
+      				SegmentDescriptor::G_4KB,
+      				SegmentDescriptor::TYPE_U_DATA,
+      				0);
+
+      pkernel->printer->puti("gdtAllocIndex=",gdtAllocIndex);
+  //    pkernel->printer->puti("seg address=",(int)pseg);
+  //    pkernel->printer->puti("sizeof(SegmentDescriptor)=",x2sizeof(SegmentDescriptor));
+
+      //copy code&data the process space
+      //将进程的所有扇区复制到
+  //    short sel=Util::makeSel(pkernel->preparePhysicalMap(PMLoader::PROCESS_MM_START, PMLoader::PROCESS_EACH_SECNUMS*512), 0, 0);
+      short sel=Util::makeSel(gdtAllocIndex, 0, 0);
+
+
+    pkernel->printer->putsz("before memcopy\n");
+    int processCodeImgAddress = (PMLoader::PROTECTED_SECNUMS+PMLoader::RESERVED_SECNUM)*PMLoader::SECSIZE;
+    Util::insertMark(0xDEDEDE);
+    Util::memcopy(Util::getCurrentDs(),processCodeImgAddress,
+    		sel,
+			proc1->getProcessBase()+proc1->getCodeStart(),//进程空间+代码起始
+			PMLoader::PROCESS_EACH_SECNUMS*512);/*copy code to allocated process space*/
+    pkernel->printer->putsz("process1 copied\n");
+//    CALL_INT_3(0x24,c,Util::getCurrentDs(),b,"int 0x24 by CPL0.\n",d,Util::MODE_COMMON);
+    pkernel->switchNextProcess();
+    Util::jmpDie();
+
+    TreeNode<Process*>*	wp2=pkernel->addNewProcess(24*512 - 1,24*512 - 1, 4*512 - 1, SegmentDescriptor::DPL_3);
     Process *proc2=wp2->getData();
-    Util::memcopy(Util::getCurrentDs(),148*512,Util::makeSel(5, 0, 0), proc2->getProcessBase()+proc2->getCodeStart(),16*512);
-    //    pkernel->switchNextProcess();//jump to the target
-
+    Util::memcopy(Util::getCurrentDs(),
+    		((PMLoader::PROTECTED_SECNUMS+PMLoader::REAL_SECNUMS+PMLoader::PROCESS_EACH_SECNUMS))*512,
+			Util::makeSel(5, 0, 0),
+			proc2->getProcessBase()+proc2->getCodeStart(),
+			PMLoader::PROCESS_EACH_SECNUMS*512);
+    pkernel->switchNextProcess();//jump to the target
+    Util::jmpDie();
 //    TSS *ptss=(TSS*)Kernel::getTheKernel()->mnewKernel(PMLoader::TSS_MIN_SIZE*2);
 //    stdp.putsz("after new tss\n");//this is never reached
 

@@ -22,12 +22,12 @@ KernelSmmWrapper<T>::~KernelSmmWrapper()
 template <class T>
 T* KernelSmmWrapper<T>::getNew()
 {
-	return (T*)Kernel::getTheKernel()->mnewKernel((size_t)sizeof(T));
+	return (T*)Kernel::getTheKernel()->mnewKernel(x2sizeof(T));
 }
 template <class T>
 void KernelSmmWrapper<T>::withdraw(T *t)
 {
-	Kernel::getTheKernel()->mdeleteKernel(t, sizeof(T));
+	Kernel::getTheKernel()->mdeleteKernel(t, x2sizeof(T));
 }
 //====class:ProcessManager
 TreeNode<Process*>*	ProcessManager::createProcessWrapper(Process* p)
@@ -50,6 +50,21 @@ TreeNode<Process*>*	ProcessManager::getFatherProcess(TreeNode<Process*> *p)
 Kernel* Kernel::getTheKernel()
 {
 	return This::theKernel;
+}
+int		Kernel::makeCR3(int pdePhyAddr,int controlWord_L12)
+{
+	return (pdePhyAddr  &  0xfffff000)|
+			(controlWord_L12 & 0xfff);
+}
+int		Kernel::makePDE(int ptePhyAddr,int controlWord_L12)
+{
+	return (ptePhyAddr  &  0xfffff000)|
+			(controlWord_L12 & 0xfff);
+}
+int		Kernel::makePTE(int targetPhyAddr,int controlWord_L12)
+{
+	return (targetPhyAddr  &  0xfffff000)|
+			(controlWord_L12 & 0xfff);
 }
 void* Kernel::mnewKernel(size_t mmStart, size_t mmSize)
 {
@@ -134,6 +149,10 @@ SegManager& Kernel::getGdtm()
 SegManager& Kernel::getIdtm()
 {
 	return this->idtm;
+}
+int		Kernel::getCR3()
+{
+	return *(int*)&cr3;
 }
 int Kernel::preparePhysicalMap(size_t physical,size_t size)
 {

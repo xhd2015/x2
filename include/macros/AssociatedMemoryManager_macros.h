@@ -23,12 +23,12 @@ size_t	AssociatedMemoryManager<T,MaxArrNum>::getArrNum()
 template<class T>
 bool AssociatedMemoryManager<T,1>::isFull()const
 {
-    return this->curSize==this->len;
+    return this->curAllocedSize==this->len;
 }
 template<class T>
 bool AssociatedMemoryManager<T,1>::isEmpty()const
 {
-    return this->curSize==0;
+    return this->curAllocedSize==0;
 }
 template<class T>
 size_t AssociatedMemoryManager<T,1>::getLen()const
@@ -38,12 +38,12 @@ size_t AssociatedMemoryManager<T,1>::getLen()const
 template<class T>
 size_t AssociatedMemoryManager<T,1>::getLeft()const
 {
-	return this->len - this->curSize;
+	return this->len - this->curAllocedSize;
 }
 template<class T>
 size_t AssociatedMemoryManager<T,1>::getCurSize()const
 {
-    return this->curSize;
+    return this->curAllocedSize;
 }
 
 template<class T>
@@ -59,7 +59,7 @@ void AssociatedMemoryManager<T, 1>::freeNode(size_t index)
 	if( (p=this->getNode(index))!=NULL && !p->isFree())
 	{
 		p->free();
-		this->curSize--;
+		this->curAllocedSize--;
 	}
 }
 template<class T>
@@ -69,7 +69,7 @@ void AssociatedMemoryManager<T, 1>::unfreeNode(size_t index)
 	if( (p=this->getNode(index))!=NULL && p->isFree())
 	{
 		p->unfree();
-		this->curSize++;
+		this->curAllocedSize++;
 	}
 }
 
@@ -87,7 +87,7 @@ template<class T>
 size_t AssociatedMemoryManager<T, 1>::getTargetIndex(TargetType* t)const
 {
 //	ptrdiff_t diff=((char*)t - (char*)this->tarr)/sizeof(*t);
-	ptrdiff_t diff=t-this->tarr;
+	ptrdiff_t diff=t - this->tarr;
 	return (t==NULL || diff<0||diff >= this->len) ?(this->len +1 ):(size_t)diff;
 
 }

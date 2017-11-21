@@ -1,0 +1,12 @@
+#ifndef __{Class}__
+#define __{Class}__
+class {Class}{{
+public:
+    {Class}();
+    ~{Class}();
+protected:
+
+private:
+
+}};
+#endif

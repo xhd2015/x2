@@ -56,7 +56,8 @@ SegmentDescriptor::~SegmentDescriptor()
 {
 
 }
-SegmentDescriptor::SegmentDescriptor(char* baseaddr,int limit,char g,char type,char dpl,char s,char b,char p):AVL(0),G(g),D(b),P(p),S(s),L(0),DPL(dpl),type(type)
+SegmentDescriptor::SegmentDescriptor(char* baseaddr,int limit,char g,char type,char dpl,char s,char b,char p)
+:AVL(0),G(g),D(b),P(p),S(s),L(0),DPL(dpl),type(type)
 {
 	this->setBaseAddr((int)(size_t)baseaddr);
 	this->setLimit(limit);

@@ -12,6 +12,10 @@
 
 #if defined(CODE32)||defined(CODE64)
 /**
+ * 一个符合内存分配器标准的分配器，只能用于内核。
+ *
+ * 它是对内核内存管理函数的包装，主要满足的是Tree等结构对内存分配器的要求
+ *
  * Problem1:
  * 	How to generate a process ID?
  * 		algorithm 1: sort & find the smallest
@@ -46,15 +50,31 @@ public:
 public:
 	ProcessManager();
 	~ProcessManager();
+	/**
+	 * 根据进程的大小建立进程
+	 *
+	 * @param codeLimit
+	 * @param dataLimit
+	 * @param stackLimit
+	 * @param dpl
+	 *
+	 * 进程空间会被分配，各个内核相关的管理项会被建立，如TSS，LDT，GDT等
+	 */
 	Process *createProcess(size_t codeLimit,size_t dataLimit,size_t stackLimit,
 			char dpl=SegmentDescriptor::DPL_3);//It will allocate : a TSS area,
 							// It will ask for the kernel to allocate a GDT entry for process LDT,
 							// assign the
+	/**
+	 * 建立一个指向Process*的TreeNode<Process*>
+	 */
 	AS_MACRO TreeNode<Process*>*	createProcessWrapper(Process* p);
 	void	setFatherProcess(TreeNode<Process*> *p,TreeNode<Process*> *father);
 	AS_MACRO TreeNode<Process*> *	getFatherProcess(TreeNode<Process*> *p);
 	TreeNode<Process*>*	getCurrentProcess()const;
 	void				swithcNextProcess();
+	/**
+	 * 分配进程结构并且将其加入进程树和进程调度队列
+	 */
 	TreeNode<Process*>*	addNewProcess(size_t codeLimit,size_t dataLimit,size_t stackLimit,
 			char dpl=SegmentDescriptor::DPL_3);
 	/**
@@ -74,6 +94,20 @@ protected:
 	 */
 	unsigned int getNewPid();
 	void		releasePid(unsigned int pid);
+	/**
+	 * 根据参数建立进程
+	 *
+	 * @param pid			进程的pid
+	 * @param prcBase		进程空间的起始地址
+	 * @param prcStart		此次分配的进程应当开始的相对地址，prcStart+prcBase构成了进程的决定地址
+	 * @param codeLimit		cs段的大小
+	 * @param dataLimit		ds段的大小
+	 * @param stackLimit	ss段的大小
+	 * @param dpl			级别，默认是3，也就是用户空间
+	 *
+	 *
+	 * 建立进程后，进程处于就绪状态
+	 */
 	Process*	createProcess(unsigned int pid,size_t prcBase,size_t prcStart,size_t codeLimit,size_t dataLimit,size_t stackLimit,
 			char dpl=SegmentDescriptor::DPL_3);
 	void		createIdleProcess();
@@ -104,6 +138,11 @@ protected:
  * Design Spirit： Everything done in the kernel and everything in the kernel
 *	A kernel is logically a universal computer resource manager
 *	This kernel is designed to be very basic,meaning that it will only contain the minimal collection of interfaces.
+*
+*	内核将内存看成两个部分：
+*		内核空间和进程空间
+*	内核空间用于内核的各种数据结构存储和分配
+*	进程空间用于载入进程
 */
 class Kernel{
 public:
@@ -135,6 +174,17 @@ public:
 	static Printer *printer;
 	static void initTheKernel(Kernel *theKernel);
 	AS_MACRO static Kernel* getTheKernel();
+	AS_MACRO static int		makeCR3(int pdePhyAddr,int controlWord_L12=0b11000);
+	/**
+	 * @param pteLineAddr		pte线性地址
+	 * @param controlWord_L12	控制字的低12位
+	 */
+	AS_MACRO static int		makePDE(int ptePhyAddr,int controlWord_L12=0b11011);
+
+	/**
+	 *
+	 */
+	AS_MACRO static int		makePTE(int targetPhyAddr,int controlWord_L12=0b100011011);
 
 protected:
 	~Kernel(); // not allowed building up a kernel in stack
@@ -151,13 +201,25 @@ public:
 			);//只需要指定内存管理特性
 
 	//related to memory allocation
+	/**
+	 * 在内核空间分配内存
+	 */
 	AS_MACRO void* mnewKernel(size_t mmStart,size_t mmSize);
+	/**
+	 * 在内核空间分配内存
+	 */
 	AS_MACRO void* mnewKernel(size_t mmSize);//进程本身必须有一个用于储存已经有分配的节点的空间，回收的时候，进程只回收已经分配的空间。 这个空间只能够用于kernel访问
+	/**
+	 * 在内核空间分配内存，按参数对齐
+	 */
 	AS_MACRO void* mnewKernelAlign(size_t mmSize,size_t alignment=1);
 	AS_MACRO void  mdeleteKernel(void *p,size_t mmSize);
 	AS_MACRO void mdeleteKernel(void* p);
 
 	AS_MACRO void* mnewProcess(size_t mmStart,size_t mmSize);
+	/**
+	 * 在进程空间分配内存
+	 */
 	AS_MACRO void* mnewProcess(size_t mmSize);
 	AS_MACRO void* mnewProcessAlign(size_t mmSize,size_t alignment=1);
 	AS_MACRO void mdeleteProcess(void *p,size_t mmSize);
@@ -175,21 +237,35 @@ public:
 	void killProcess(TreeNode<Process*>* wp);
 
 	//==========get arguments
+	/**
+	 *  内核空间的起始地址，一般是0
+	 */
 	size_t	getKernelMMBase()const;
+	/**
+	 * 	进程空间的起始地址，一般在内核结束处
+	 */
 	size_t getProcessMMBase()const;
 
 	//===========
 	/**
 	 * -1 means no free space
+	 *
+	 *  // TODO newgdt没有正常工作
 	 */
-	int newgdt(char* baseaddr=0,int limit=0,char g=SegmentDescriptor::G_1B,char type=SegmentDescriptor::TYPE_U_DATA,char dpl=SegmentDescriptor::DPL_0,
-				char s=SegmentDescriptor::S_SYSTEM,char b=SegmentDescriptor::B_UPPER_BOUND32,char p=SegmentDescriptor::P_PRESENT);
+	DEPRECATED int newgdt(
+				char* baseaddr=0,
+				int limit=0,
+				char g=SegmentDescriptor::G_1B,
+				char type=SegmentDescriptor::TYPE_U_DATA,
+				char dpl=SegmentDescriptor::DPL_0,
+				char s=SegmentDescriptor::S_USER,char b=SegmentDescriptor::B_UPPER_BOUND32,char p=SegmentDescriptor::P_PRESENT);
 	AS_MACRO void markGdtUsed(int index);
 	AS_MACRO void markGdtUnused(int index);
 	AS_MACRO void markIdtUsed(int index);
 	AS_MACRO void markIdtUnused(int index);
 	AS_MACRO SegManager& getGdtm();
 	AS_MACRO SegManager& getIdtm();
+	AS_MACRO int		getCR3();
 	int newidt();
 
 	//=============virtual memory
@@ -203,8 +279,8 @@ public:
 	INCOMPLETE void destroyPhysicalMap();
 
 
-//protected:
-public:
+protected:
+//public:
 	/**
 	 * This should be deprecated/obsolete, AssociatedMemoryManager is better
 	 *
@@ -220,7 +296,7 @@ public:
 
 	ProcessManager	processMan;//this one relies on gdtm,kernelMM,processMM
 
-	CR3 cr3;
+	CR3			 cr3;
 	PDEManager	pdeman; //PDE manager
 
 

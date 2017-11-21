@@ -1,5 +1,7 @@
 SECTIONS {
-	.text 512*4: { /*1 sectors for stack*/
+	/*3 sectors for kernel data */
+	/*1 sectors for stack*/
+	.text 512*4: { 
 		*(".proc1" .text)
 	}
 	.data  : {

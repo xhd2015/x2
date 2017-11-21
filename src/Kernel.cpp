@@ -24,7 +24,9 @@ prcsQueue(&this->lksmm),
 prcsTree(&this->tksmm)
 {
 //	Util::printStr("Have I been called?\n"); //Of course you are called
-	this->createIdleProcess();
+
+	// TODO 探讨下面这行代码是否有必要
+//	this->createIdleProcess();
 
 }
 ProcessManager::~ProcessManager()
@@ -44,9 +46,11 @@ Process* ProcessManager::createProcess(size_t codeLimit,size_t dataLimit,size_t 
 	if(dataLimit>maxLimit)maxLimit=dataLimit;
 	if(stackLimit>maxLimit)maxLimit=stackLimit;
 
+	size_t allocedProcessSpace=(size_t)Kernel::getTheKernel()->mnewProcess(maxLimit+1);
 	return this->createProcess(
 			this->getNewPid(),
-			Kernel::getTheKernel()->getProcessMMBase(),(size_t)Kernel::getTheKernel()->mnewProcess(maxLimit),
+			Kernel::getTheKernel()->getProcessMMBase(),
+			allocedProcessSpace,
 			codeLimit, dataLimit, stackLimit, dpl);
 }
 
@@ -59,13 +63,15 @@ void	ProcessManager::setFatherProcess(TreeNode<Process*> *p,TreeNode<Process*> *
 }
 void	ProcessManager::swithcNextProcess()
 {
-	char saver[10];
-	__asm__("cli \n\t");
+	Util::cli();
 	ListNode<TreeNode<Process*>* >* lnode;
 	if(this->curProcess==NULL)
 	{
+		Kernel::printer->putsz("curProcess is NULL\n");
 		if(this->prcsQueue.isEmpty())
 		{
+
+			Kernel::printer->putsz("processQueue is empty\n");
 			this->invokeProcess(idleProcess);
 		}else{
 			/**
@@ -122,8 +128,8 @@ TreeNode<Process*>* ProcessManager::addNewProcess(size_t codeLimit, size_t dataL
 	{
 		TreeNode<Process*> *newprcs=this->createProcessWrapper(p);
 		bool tEmp=this->prcsTree.isEmpty();
-		bool cNull=(this->curProcess==NULL);
-		if(!cNull)
+		bool curNull=(this->curProcess==NULL);
+		if(!curNull)
 		{
 			this->curProcess->addSon(newprcs);
 			if(tEmp) //empty,current is not in tree,add it
@@ -140,8 +146,9 @@ TreeNode<Process*>* ProcessManager::addNewProcess(size_t codeLimit, size_t dataL
 //		Util::printStr("size now is ");Util::printStr(saver);Util::printStr("\n");
 //		Util::printStr("after append\n");
 		return newprcs;
+	}else{
+		return NULL;
 	}
-	return NULL;
 }
 //bool ProcessManager::pidComparator(unsigned int p1,unsigned int p2)
 //{
@@ -183,27 +190,38 @@ Process* ProcessManager::createProcess(unsigned int pid,size_t prcBase,size_t pr
 	//=========allocate for tss & ldt
 	size_t	ldtsize = Kernel::SegManager::getEachSize() * LDT_ITEMS;
 	size_t	ldtnstart=(size_t)k->mnewKernel(ldtsize);
-	size_t  ldttstart=ldtnstart + sizeof(Kernel::SegManager::NodeType) * LDT_ITEMS;
-	TSS	*tss=(TSS*)k->mnewKernel((size_t)sizeof(TSS));
+	size_t  ldttstart=ldtnstart + x2sizeof(Kernel::SegManager::NodeType) * LDT_ITEMS;
+	TSS	*tss=(TSS*)k->mnewKernel(x2sizeof(TSS));
 //	char saver[10];
 //	Util::digitToHex(saver, 10, (size_t)tss);
 //	Util::printStr("tss allocated is ");Util::printStr(saver);Util::printStr("\n"); //This is ok
-	Process *process=(Process*)k->mnewKernel((size_t)sizeof(Process));
+
+	//在内核中先申请一个Process结构
+	Process *process=(Process*)k->mnewKernel(x2sizeof(Process));
 
 
 	//==========install ldt & tss into GDT   INCOMPLETE
-	int tssSz=sizeof(TSS)-1;
+	//在内核GDT表中申请两项，一项用于tss，一项用于ldt
+	int tssSz=x2sizeof(TSS)-1;
 	int tssIndex=k->newgdt((char*)tss, tssSz, SegmentDescriptor::G_1B, SegmentDescriptor::TYPE_S_TSS_32_AVL, dpl, SegmentDescriptor::S_SYSTEM,
 				SegmentDescriptor::RESERVED, SegmentDescriptor::P_PRESENT);
 	int ldtIndex=k->newgdt((char*)ldttstart, ldtsize - 1, SegmentDescriptor::G_1B,SegmentDescriptor::TYPE_S_LDT, dpl,SegmentDescriptor::S_SYSTEM,
 				SegmentDescriptor::RESERVED,SegmentDescriptor::P_PRESENT);
+	Kernel::printer->putx("process id=",pid);
+	Kernel::printer->putx("process tss index=", tssIndex);
+	Kernel::printer->putx("process ldt index=", ldtIndex);
+
 
 	//==========init Process
+	// EFF 为了更加确定地表现每个参数的作用
+	size_t processBodySize = dataLimit + 1;
+	size_t processCodeStart = stackLimit + 1;
 	new (process) Process(
 			pid,
 			tss,tssIndex,
 			ldtnstart,ldttstart, LDT_ITEMS, ldtIndex,
-			prcBase,prcStart,stackLimit,codeLimit,dataLimit,stackLimit,
+			prcBase,prcStart,processCodeStart,processBodySize,
+			codeLimit,dataLimit,stackLimit,
 			dpl
 	);
 	process->setStatus(Process::STATUS_READY);
@@ -225,15 +243,19 @@ void	ProcessManager::createIdleProcess()
  */
 void	ProcessManager::invokeProcess(Process* p)
 {
-//	Util::printStr("in invoke ");
+	Util::printStr("in invoke ");
 	if(!p){
-//		Util::printStr("p is NULL  ");
+		Util::printStr("p is NULL  ");
 		return;
 	}
 	if(p->getStatus()==Process::STATUS_READY) //use long jmp
 	{
 //		Util::printStr("before ljmp  ");
+		Kernel::printer->putsz("before jmp\n");
 		p->setStatus(Process::STAUTS_RUNNING);
+		p->dump(Kernel::printer);
+
+		Util::insertMark(0xe249e249);
 		__asm__ __volatile__(
 		"#int $0x3\n\t  #this is just normal \n\t"
 		"pushw %%cx \n\t"
@@ -293,28 +315,48 @@ kernelMM(&smm,kmmStart,kmmSize,false),
 processMM(&smm,pmmStart,pmmSize,false),
 gdtm(gdtnstart,gdttstart,gdtitems,true,gusedList,gusedLen),
 idtm(idtnstart,idttstart,idtitems,true,iusedList,iusedLen),
-cr3(pde0_start>>12,PageAttributes::PWT_ALWAYS_UPDATE,PageAttributes::PCD_CACHE_DISABLE),
+cr3(makeCR3(pde0_start)),
 processMan()
 {
-	Kernel::printer->putsz("can I print?\n");
-
 	//=============[init PDE]=================
 
     size_t npdes = pde0_size >> 2;
+
     size_t nptes0= pte_size >> 2;
+
     size_t assocNodeStart = (size_t)this->mnewKernel(npdes * x2sizeof(PDEManager::NodeType));
-    size_t asscoNodeStartForPTEman = (size_t)this->mnewKernel(nptes0 * x2sizeof(PDEManager::NodeType));
+    size_t asscoNodeStartForPTEman = (size_t)this->mnewKernel(nptes0 * x2sizeof(PTEManager::NodeType));
 
-    size_t ptemstart = (size_t)this->mnewKernel(npdes * (size_t)sizeof(PTEManager));
+    // 初始化PTEManager[]数组
+    size_t ptemstart = (size_t)this->mnewKernel(npdes * x2sizeof(PTEManager));
+    //PTEManager的二级指针
+    size_t pptem = (size_t)this->mnewKernel(npdes * x2sizeof(PTEManager*));
 
 
-    new ((PTEManager*)ptemstart) PTEManager(asscoNodeStartForPTEman,pte0_start,nptes0); //an array of PTE managers
+    // TODO 使内核分配足够多的PTEManager，现在仅仅一个
+    //内核分配 第3项PTEManager不为空
+    size_t npte3_0 = 20;//分配20个PTE给PDE3,PTE0
+    size_t addedIndex = 3;
+    size_t pte3_0start = (size_t)this->mnewKernelAlign(npte3_0 * x2sizeof(PTE),x2sizeof(PTE));//pte3_0的起始地址
+    size_t assoscNodeStartPTE3_0 = (size_t)this->mnewKernel(npte3_0 * x2sizeof(PTEManager::NodeType)) ;
+    new ((PTEManager*)ptemstart+addedIndex) PTEManager(assoscNodeStartPTE3_0,pte3_0start,npte3_0,true);//全部都未使用
+    *((PDE*)PMLoader::PDE0_START + addedIndex) = Kernel::makePDE(pte3_0start); //向PDE3写入内容
+
+    //内核最初仅仅初始化了一个PTEManager,并且全部的项都是已经使用了的。
+    new ((PTEManager*)ptemstart) PTEManager(asscoNodeStartForPTEman,pte0_start,nptes0,true);
     for(int i=0;i<nptes0;i++) //set PTE managers [0] all used.
     {
-    	((PTEManager*)ptemstart)[0].unfreeNode(i);
+    	((PTEManager*)ptemstart)[0].allocNode(i);
     }
-    int usedPDEs[]={0};
-    new (&this->pdeman) PDEManager(assocNodeStart,pde0_start,ptemstart,npdes,true,usedPDEs,arrsizeof(usedPDEs));
+    int usedPDEs[]={0,addedIndex};
+    new (&this->pdeman) PDEManager(assocNodeStart,pde0_start,pptem,npdes,true,usedPDEs,arrsizeof(usedPDEs));
+
+    // set pointers
+    *(PTEManager**)pptem = (PTEManager*)ptemstart;
+    *((PTEManager**)pptem + addedIndex) = (PTEManager*)ptemstart + addedIndex;
+
+
+
     //==========================================
 }
 //decltype(sizeof(0)) get()
@@ -340,11 +382,18 @@ size_t Kernel:: getProcessMMBase()const
 }
 
 
+// TODO newgdt 调用错误
+//        pkernel->newgdt((char*)lineAddr,
+//					limit/SegmentDescriptor::G_4KB_SCALE,
+//					SegmentDescriptor::G_4KB,
+//					SegmentDescriptor::TYPE_U_DATA,
+//				0); 结果有错误，但是使用new (ptr) SegmentDescriptor(....)能够成功
 int Kernel::newgdt(char* baseaddr, int limit, char g,char type, char dpl, char s,
 		char b, char p)
 {
 	int index;
-	SegManager::TargetType* pmm=this->gdtm.getNew(index);
+	SegManager::TargetType* pmm = gdtm.getNew(index);
+
 	if(pmm)
 	{
 		new (pmm) SegmentDescriptor(baseaddr,limit,g,

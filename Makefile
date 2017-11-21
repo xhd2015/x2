@@ -6,7 +6,6 @@ DEBUG := false
 
 HOST := windows
 #may be windows,linux
-
 #if HOST=windows, then cygwin is assumed as the toolchain
 #if HOST=linux, then linux itself is assumed as the toolchain
 
@@ -15,11 +14,13 @@ HOSTROOTDIR := C:\Users\13774\Desktop\old_desktop\bochs\devel\x2-system
 TOOLSDIR := tools/bochs-run
 
 #GEN contains 16,32 and 64(can be used in hosted environment )
+#通过目录来区分不同的构建目标
 GEN := gen
 GEN16 := gen/16
 GEN32 := gen/32
 GEN32USER := gen/32user
 GEN64 := gen/64
+
 SRC := src
 KERNEL_SRC := $(SRC)/kernel
 EXPORTS := exports
@@ -40,18 +41,27 @@ f64 := libx2 PMLoader Descriptor TSS MemoryManager List Locator AssociatedMemory
 ld16 := image_16.ld
 ld32 := image_32.ld
 
-fbackup := $(INCLUDE) $(SRC) $(ld16) $(ld32) Makefile TODO README  $(STDC) $(STDCPP) test tools filesystem deprecated from-gcc
+fbackup := $(INCLUDE) $(GEN) $(SRC) $(ld16) $(ld32) Makefile TODO README.md  $(STDC) $(STDCPP) test tools filesystem deprecated from-gcc
 
 # CCFLAGS is for all, CCFLAGSXX for CODEXX
 CCFLAGS :=  -fno-exceptions  -nostdinc -nostdinc++ -nostdlib -Winline --no-warnings -I ./include -std=c++11
 CCFLAGS32 := -m32
 CCFLAGS16 := -m32
+CCFLAGS32USER := -m32
 DEPRECATED_CCFLAGS = -fpack-struct=1
 
 # config sec numbers here
 CONFIG_REAL_SECNUMS := 25
-CONFIG_PROTECTED_SECNUMS := 400 #应当比2048小，因为CODE_LIMIT=0xfffff，恰好是2048个扇区
+
+#应当比2048小，因为CODE_LIMIT=0xfffff，恰好是2048个扇区
+CONFIG_PROTECTED_SECNUMS := 250
+#>= 300 有错误
+#250目前是正确的
+
 CONFIG_USER_PROCESS_SECNUMS := 35
+
+#每个进程占用空间16个
+CONFIG_USER_PROCESS_EACH_SECNUMS := 16
 
 #toolchains
 CXX = g++
@@ -63,10 +73,12 @@ endif
 
 DDFLAGS := conv=notrunc bs=1c
 
-CCMACROS := -D CONFIG_PROTECTED_SECNUMS=$(CONFIG_PROTECTED_SECNUMS) -D CONFIG_REAL_SECNUMS=$(CONFIG_REAL_SECNUMS)
+CCMACROS := -D CONFIG_PROTECTED_SECNUMS=$(CONFIG_PROTECTED_SECNUMS) -D CONFIG_REAL_SECNUMS=$(CONFIG_REAL_SECNUMS) \
+			-D CONFIG_USER_PROCESS_EACH_SECNUMS=$(CONFIG_USER_PROCESS_EACH_SECNUMS) \
+			-D CONFIG_USER_PROCESS_SECNUMS=$(CONFIG_USER_PROCESS_SECNUMS)
 CCMACROS16 := -D CODE16
 CCMACROS32 := -D CODE32
-#CCMACROS32USER := -D CODE32USER
+CCMACROS32USER := -D CODE32USER
 
 CCFLAGS64 := -m64 -I. -I./include -std=c++11
 CCMACROS64 := -D CODE64
@@ -114,10 +126,12 @@ endif
 
 #只有实现了make的非等待异步返回才能成功
 #不知为何，只有bash --login才能成功， 只有 mintty & 后面的命令执行久一点才能成功，我不知为何。
+#############
+#usage:  make console [CONSOLE_CMD=?]   打开一个新的cygwin窗口并执行相应的命令
 console:
 ifeq ($(HOST),windows)
-	mintty -i -e bash --login -c 'cd $$(cygpath -p "$(HOSTROOTDIR)") ; mintty & i=20;while [ $$i != 0 ] ;do echo $$((i--));done '  #and then input ee
-	#mintty -i -e bash --login -c 'cd devel;mintty & sleep 10'  #and then input ee
+	mintty -i -e bash --login -c 'cd $$(cygpath -p "$(HOSTROOTDIR)") ; mintty $(CONSOLE_CMD)  & i=60;while [ $$i != 0 ] ;do echo $$((i--));done '  #and then input ee
+	#mintty -i -e bash --login -c 'cd devel;mintty & sleep 10'  #这个也能成功，只是后台窗口要暂停一会儿
 endif
 
 
@@ -133,6 +147,8 @@ bochs_debug:
 	-cmd /C 'cd $(HOSTROOTDIR)\tools\bochs-run && C: && explorer windows\start_bochs_norc.cmd'
 endif
 
+
+#========================Universe Tools====================
 exportversion:VERSION $(SRC) $(INCLUDE) Makefile start_bochs.cmd main.bimg
 	@v=$$(cat VERSION)
 	mkdir --parents $(EXPORTS)/$${v}
@@ -150,6 +166,7 @@ lib64:$(GEN64)/lib64.a
 	
 $(GEN64)/lib64.a:$(patsubst %,$(GEN64)/%.o,$(f64))
 	ar -rs $@ $^	
+
 $(GEN32)/main.img:$(patsubst %,$(GEN32)/%.o,$(f32))
 	ld -Timage_32.ld $(LDFLAGS) $^ -o $@
 $(GEN16)/main.img:$(patsubst %,$(GEN16)/%.o,$(f16))
@@ -161,24 +178,24 @@ $(GEN32)/main.bimg: $(GEN32)/main.img
 	objcopy -g -j .text -j .data -O binary $< $@
 	
 
-$(GEN32)/UserProcess2.img:$(patsubst %,$(GEN32)/%.o,$(f32user))
+$(GEN32USER)/UserProcess2.img:$(patsubst %,$(GEN32USER)/%.o,$(f32user))
 	ld -Timage_32_proc2.ld	$(LDFLAGS) $^ -o $@
-$(GEN32)/UserProcess1.img:$(patsubst %,$(GEN32)/%.o,$(f32user))
+$(GEN32USER)/UserProcess1.img:$(patsubst %,$(GEN32USER)/%.o,$(f32user))
 	ld -Timage_32_proc1.ld	$(LDFLAGS) $^ -o $@
 	
-$(GEN32)/UserProcess1.bimg:$(GEN32)/UserProcess1.img
+$(GEN32USER)/UserProcess1.bimg:$(GEN32USER)/UserProcess1.img
 	objcopy -g -j .text -j .data -O binary $< $@
-$(GEN32)/UserProcess2.bimg:$(GEN32)/UserProcess2.img
+$(GEN32USER)/UserProcess2.bimg:$(GEN32USER)/UserProcess2.img
 	objcopy -g -j .text -j .data -O binary $< $@
 
 #16 sectors for each process code/data
-$(GEN32)/UserProcess.bimg:$(GEN32)/UserProcess1.bimg $(GEN32)/UserProcess2.bimg
+$(GEN32USER)/UserProcess.bimg:$(GEN32USER)/UserProcess1.bimg $(GEN32USER)/UserProcess2.bimg
 	if [ ! -f $@ ];then
 		touch $@
 	fi
 	while [ ! -f $@ ];do :;done
-	dd if=$(GEN32)/UserProcess1.bimg of=$@	bs=1c count=$$((16*512))	conv=notrunc &&\
-	dd if=$(GEN32)/UserProcess2.bimg of=$@	seek=$$((512*16)) bs=1c count=$$((16*512))	conv=notrunc
+	dd if=$(GEN32USER)/UserProcess1.bimg of=$@	bs=1c count=$$(( $(CONFIG_USER_PROCESS_EACH_SECNUMS) * 512))	conv=notrunc &&\
+	dd if=$(GEN32USER)/UserProcess2.bimg of=$@	seek=$$(($(CONFIG_USER_PROCESS_EACH_SECNUMS) * 512)) bs=1c count=$$(( $(CONFIG_USER_PROCESS_EACH_SECNUMS) *512))	conv=notrunc
 	
 #$(GEN)/main.bimg:partitions_table $(GEN16)/main.bimg $(GEN32)/main.bimg $(GEN32)/UserProcess.bimg
 #if [ ! -f $@ ];then 
@@ -188,18 +205,20 @@ $(GEN32)/UserProcess.bimg:$(GEN32)/UserProcess1.bimg $(GEN32)/UserProcess2.bimg
 ##########DEPRECATED##################
 # a host specific Makefile is not good Makefile
 	
-$(GEN)/main.bimg:partitions_table $(GEN16)/main.bimg $(GEN32)/main.bimg $(GEN32)/UserProcess.bimg
+$(GEN)/main.bimg:partitions_table $(GEN16)/main.bimg $(GEN32)/main.bimg $(GEN32USER)/UserProcess.bimg
 	cp $(TOOLSDIR)/main.bimg.clean gen/main.bimg
 	dd if=$(GEN16)/main.bimg of=$@ bs=1c count=$$(( 512 * $(CONFIG_REAL_SECNUMS))) conv=notrunc &&\
 	dd if=partitions_table of=$@  bs=1c conv=notrunc seek=$$((0x1BE)) count=$$((512  - 0x1BE)) &&\
 	dd if=$(GEN32)/main.bimg of=$@ bs=1c conv=notrunc seek=$$((512  *  $(CONFIG_REAL_SECNUMS))) count=$$(( 512  * $(CONFIG_PROTECTED_SECNUMS))) \
 	&&\
-	dd if=$(GEN32)/UserProcess.bimg of=$@ bs=1c conv=notrunc seek=$$((512*$(CONFIG_PROTECTED_SECNUMS) + 512*$(CONFIG_REAL_SECNUMS))) count=$$((512 * $(CONFIG_USER_PROCESS_SECNUMS)))
+	dd if=$(GEN32USER)/UserProcess.bimg of=$@ bs=1c conv=notrunc seek=$$((512*$(CONFIG_PROTECTED_SECNUMS) + 512*$(CONFIG_REAL_SECNUMS))) count=$$((512 * $(CONFIG_USER_PROCESS_SECNUMS)))
 
 # .s --> .o
 $(GEN16)/%.o:$(GEN16)/%.s
 	$(AS) $(ASSYMS) $< -o $@
 $(GEN32)/%.o:$(GEN32)/%.s
+	$(AS) $(ASSYMS) $< -o $@
+$(GEN32USER)/%.o:$(GEN32USER)/%.s
 	$(AS) $(ASSYMS) $< -o $@
 $(GEN64)/%.o:$(SRC)/%.cpp
 	$(CXX) $(CCFLAGS64) $(CCMACROS64) -c $< -o $@
@@ -209,6 +228,8 @@ $(GEN16)/%.s:$(SRC)/%.cpp
 	$(CXX) $(CCFLAGS) $(CCFLAGS16) $(CCMACROS) $(CCMACROS16) -S $< -o $@
 $(GEN32)/%.s:$(SRC)/%.cpp
 	$(CXX) $(CCFLAGS) $(CCFLAGS32) $(CCMACROS) $(CCMACROS32) -S $< -o $@
+$(GEN32USER)/%.s:$(SRC)/%.cpp
+	$(CXX) $(CCFLAGS) $(CCFLAGS32USER) $(CCMACROS) $(CCMACROS32USER) -S $< -o $@
 #$(GEN64)/%.s:$(SRC)/%.cpp
 #	$(CXX) $(CCFLAGS64) $(CCMACROS64) -S $< -o $@
 
@@ -221,10 +242,12 @@ $(SRC)/%.cpp:$(INCLUDE)/*
 
 #Keep the directory structure
 clean:clean16 clean32 clean64
+	-rm -rf $(GEN)/main.bimg.lock
 	#clean all
 clean16:
 	-rm -rf $(GEN16)/*
 clean32:
 	-rm -rf $(GEN32)/*
+	-rm -rf $(GEN32USER)/*
 clean64:
 	-rm -rf $(GEN64)/*

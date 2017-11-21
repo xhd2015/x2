@@ -7,6 +7,7 @@
 
 #include <AssociatedMemoryManager.h>
 #include <MemoryManager.h>
+#include <def.h>
 
 #include <macros/all.h>
 
@@ -77,15 +78,15 @@ void			AssociatedMemoryManager<T,MaxArrNum>::setMan(size_t index,size_t nstart,s
 //============class  AssociatedMemoryManager<T,1>
 template<class T>
 AssociatedMemoryManager<T, 1>::AssociatedMemoryManager():
-nstart(0),tstart(0),len(0),curSize(0),lastIndex(0)
+nstart(0),tstart(0),len(0),curAllocedSize(0),lastIndex(0)
 {
 }
 template<class T>
-AssociatedMemoryManager<T, 1>::AssociatedMemoryManager(size_t nstart,size_t tstart,size_t len,bool doinit,int *usedList,size_t usedLen):
+AssociatedMemoryManager<T, 1>::AssociatedMemoryManager(size_t nstart,size_t tstart,size_t len,bool nodeArrInit,int *usedList,size_t usedLen):
 nstart(nstart),tstart(tstart),len(len),
-curSize(usedLen),lastIndex(0)
+curAllocedSize(usedLen),lastIndex(0)
 {
-	if(doinit)
+	if(nodeArrInit)
 	{
 		for(int i=0;i<this->len;i++)
 		{
@@ -115,9 +116,9 @@ typename AssociatedMemoryManager<T,1>::TargetType *AssociatedMemoryManager<T,1>:
         {
             if(this->narr[this->lastIndex].isFree())
             {
-                rt=&this->tarr[this->lastIndex];
-                (this->narr[this->lastIndex]).unfree();
-                this->curSize++;
+                rt=&tarr[lastIndex];
+                (narr[lastIndex]).unfree();
+                this->curAllocedSize++;
                 this->lastIndex = (this->lastIndex + 1 ) % this->len;
                 break;
             }
@@ -148,31 +149,57 @@ void AssociatedMemoryManager<T,1>::withdraw(TargetType *t)
     if(index < this->len && (n=this->getNode(index))&&!n->isFree())
     {
         n->free(); //如果被标记为可用，就用lastIndex指向之
-        this->curSize--;
+        this->curAllocedSize--;
         this->lastIndex = index;
     }
 }
 
+// EFF 这个算法有重复
 template<class T>
-int AssociatedMemoryManager<T, 1>::findContinuousFree(size_t n) const
+int AssociatedMemoryManager<T, 1>::allocContinuousFree(size_t n)
 {
-	const size_t len=this->len;
-	if(len - this->curSize < n)return -1;
-	size_t curCon=0;
+	if(len - curAllocedSize < n || n==0 )return -1; //如果剩余数量少于n，直接返回-1
 
-	for(int i=0;len -i >= (int)n;i++)
+	//从0到 len - n,因为当i=len-n时，剩余恰好n个，再往上查找没有意义
+	for(size_t i=0; i<=len-n;i++)
 	{
 		if(this->narr[i].isFree())
 		{
-			while(len - i >= (int)(n - curCon) && this->narr[i++].isFree())curCon++;
-			if(curCon==n)
+			size_t curCon=0;
+			for(size_t j=0;j<n;j++)
 			{
-				return i - curCon;
-			}else{
-				i--;
-				curCon=0;
+				if(narr[i+j].isFree())curCon++;
+				else break;
+			}
+			if(curCon == n)
+			{
+				for(size_t j=0;j<n;j++)
+					allocNode(i+j);
+				return i;
 			}
 		}
 	}
+
 	return -1;
+}
+
+template<class T>
+void AssociatedMemoryManager<T, 1>::allocNode(size_t index)
+{
+	NodeType *p;
+	if( (p=this->getNode(index))!=NULL && !p->isAlloced())
+	{
+		p->setAlloced(true);
+		this->curAllocedSize++;
+	}
+}
+template<class T>
+void AssociatedMemoryManager<T, 1>::withdrawNode(size_t index)
+{
+	NodeType *p;
+	if( (p=this->getNode(index))!=NULL && p->isAlloced())
+	{
+		p->setAlloced(false);
+		this->curAllocedSize--;
+	}
 }

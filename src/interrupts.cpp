@@ -280,7 +280,7 @@ void int0xc()
 void int0xd()
 {
     __asm__("leave \n\t");
-    JMP_DIE();
+    Util::jmpDie();
     int eax,ebx,ecx,esp;
     __asm__ __volatile__(
     "mov %%esp,%%edx \n\t"

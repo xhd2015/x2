@@ -21,7 +21,7 @@ public:
 		SAFE_SEG = 0x50,
 		SECSIZE = CONST_SECSIZE,
 		PDE0_START = 0,
-		PDE0_SIZE = 1 * SECSIZE,
+		PDE0_SIZE = 1 * SECSIZE, /* PDE占用1个扇区*/
 		STACK_START = PDE0_START + PDE0_SIZE,/*for kernel*/
 	   STACK_SIZE = 4 * SECSIZE,
 	   IDT_START = STACK_START + STACK_SIZE,
@@ -29,7 +29,7 @@ public:
 	   GDT_START = IDT_START + IDT_SIZE,
 	   GDT_SIZE = 2 * SECSIZE,
 	   PTE0_START = GDT_START + GDT_SIZE,
-	   PTE0_SIZE = 6 * SECSIZE,
+	   PTE0_SIZE = 6 * SECSIZE,/*PTE 占用6个扇区*/
 	   /**
 	    * TSS_AREA_XXX is deprecated because  TSS will be allocated dynamically
 	    */
@@ -80,6 +80,8 @@ public:
 
 		PROTECTED_SECNUMS =  CONFIG_PROTECTED_SECNUMS,
 				// 132,/*100 for codes,8 for process1 & process2*/
+		PROCESS_SECNUMS = CONFIG_USER_PROCESS_SECNUMS,
+		PROCESS_EACH_SECNUMS = CONFIG_USER_PROCESS_EACH_SECNUMS,
 		TEMP_SEG = 0xa00,
 #if defined(CODE32)
 		/////////////Kernel arguments

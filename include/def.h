@@ -27,6 +27,8 @@ typedef unsigned char  u8_t;
 #if defined(IDE_MODE)
 #define CONFIG_PROTECTED_SECNUMS 0
 #define CONFIG_REAL_SECNUMS 0
+#define CONFIG_USER_PROCESS_EACH_SECNUMS 0
+#define CONFIG_USER_PROCESS_SECNUMS 0
 #endif
 
 #if !defined(CONFIG_PROTECTED_SECNUMS)
@@ -37,7 +39,15 @@ typedef unsigned char  u8_t;
 #error "please define CONFIG_REAL_SECNUMS in Makefile"
 #endif
 
-#if defined(CODE32)||defined(CODE16)   //in standard host enviornment,do not use these definitions.
+#if !defined(CONFIG_USER_PROCESS_EACH_SECNUMS)
+#error "please define CONFIG_USER_PROCESS_EACH_SECNUMS in Makefile"
+#endif
+
+
+#if !defined(CONFIG_USER_PROCESS_SECNUMS)
+#error "please define CONFIG_USER_PROCESS_SECNUMS in Makefile"
+#endif
+#if defined(CODE32)||defined(CODE16) || defined(CODE32USER)   //in standard host enviornment,do not use these definitions.
 			// You must be very careful about typedef
 typedef signed int ptrdiff_t;
 typedef unsigned int size_t;
@@ -45,6 +55,11 @@ typedef unsigned int size_t;
 typedef unsigned int u32_t;
 typedef unsigned short u16_t;
 typedef unsigned char  u8_t;
+#endif
+
+// IDE-ISSUE CODE16总是显示已经定义，而我定义的是CODE32等
+#if defined(CODE16) && ( defined(CODE32) || defined(CODE32USER) || defined(CODE64))
+#undef CODE16
 #endif
 
 
@@ -143,6 +158,7 @@ typedef unsigned char  u8_t;
 /**
 *涉及堆栈平衡，不可能由非内联函数来实现。
 */
+
 #define ENTER_DS(seg,saver) \
     int saver;\
     if(seg!=Util::SEG_CURRENT){\
@@ -183,6 +199,7 @@ typedef unsigned char  u8_t;
 })
 #define LEAVE_ES(seg,saver) ({__asm__ __volatile__("mov %%ax,%%es \n\t"::"a"(saver):);})
 
+
 //=============延时
 #define IO_BLOCK() __asm__(\
     "nop \n\t"\
@@ -190,16 +207,5 @@ typedef unsigned char  u8_t;
     "nop \n\t"\
     "nop \n\t"\
     );
-
-
-//=============仅32位===========
-#ifdef CODE32
-
-#endif
-//=============仅16位=============
-#ifdef CODE16
-
-#endif
-
 
 #endif

@@ -11,19 +11,25 @@ class SimpleMemoryNode{
 public:
     AS_MACRO SimpleMemoryNode(bool NO=false);//done
  
-    AS_MACRO bool getNO();//done
-    AS_MACRO void setNO(bool NO);//done
-    AS_MACRO bool isFree();//done
-    AS_MACRO void free();//done
-    AS_MACRO void unfree();//done
+    DEPRECATED AS_MACRO bool getNO();//done
+    DEPRECATED AS_MACRO void setNO(bool NO);//done
+    //含义不明
+    DEPRECATED AS_MACRO bool isFree();//done
+
+    AS_MACRO bool isAlloced();
+    AS_MACRO void setAlloced(bool alloced);
+
+    DEPRECATED AS_MACRO void free();//done
+    DEPRECATED AS_MACRO void unfree();//done
     
     
 //protected:
 public:
     /**
-    *NO=false,then not using
+    *  alloced=true  		已分配
+    *		   false		未分配
     */
-    bool NO;
+    bool alloced;
 };
 
 /**

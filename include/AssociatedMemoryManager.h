@@ -8,6 +8,9 @@
 #ifndef INCLUDE_ASSOCIATEDMEMORYMANAGER_H_
 #define INCLUDE_ASSOCIATEDMEMORYMANAGER_H_
 #include <List.h>
+#include <def.h>
+
+
 
 
 #if defined(CODE32)||defined(CODE64)
@@ -49,7 +52,15 @@ protected:
 };
 
 /**
- * partial
+ * 关联内存管理
+ *
+ * @param T 要管理的类型
+ *
+ * 很多情况下，我们需要对一些固定的数组进行管理，但是在原数组的基础上又不能进行任何操作
+ * 关联管理的思想是，再新建一个同样大小的以SimpleMemoryNode来标记的数组，通过管理这个简单的数组来间接
+ * 管理目标数组
+ * 这里指出Node和Target的概念：Node是指SimpleMemoryNode， Target是指要管理的目标类型
+ * 可以认为，管理器中包括两个数组：Node数组和Target数组
  */
 template <class T>
 class AssociatedMemoryManager<T,1>{
@@ -59,7 +70,16 @@ public:
 	typedef	AssociatedMemoryManager<T,1> This;
 public:
 	AssociatedMemoryManager();
-	AssociatedMemoryManager(size_t nstart,size_t tstart,size_t len,bool doinit=true,int *usedList=NULL,size_t usedLen=0);
+	/**
+	 *
+	 * @param nstart	Node的开始地址
+	 * @param tstart	Target的开始地址
+	 * @param len		总数组长度
+	 * @param nodeArrInit	是否对Node数组进行初始化
+	 * @param usedList		用于单独确定哪些已经被使用
+	 * @param usedLen		usedList的长度
+	 */
+	AssociatedMemoryManager(size_t nstart,size_t tstart,size_t len,bool nodeArrInit=true,int *usedList=NULL,size_t usedLen=0);
 	~AssociatedMemoryManager();
 
     TargetType* getNew();
@@ -68,8 +88,13 @@ public:
      */
 	TargetType* getNew(int &index);
     void withdraw(TargetType *t);
-    int findContinuousFree(size_t n)const;
-
+    /**
+     * 查找连续n个free的节点
+     * @param n 目标长度
+     * @return 找到返回起始下标
+     * 			没有找到返回-1
+     */
+    int allocContinuousFree(size_t n);
 
     AS_MACRO bool isFull()const;
     AS_MACRO bool isEmpty()const;
@@ -83,8 +108,10 @@ public:
      * AS_MACRO void			setErrHandler(ERROR_HANDLER errhandle);
      */
 	AS_MACRO	TargetType*	getTarget(size_t index);
-	AS_MACRO	void		freeNode(size_t index);
-	AS_MACRO	void		unfreeNode(size_t index);
+	DEPRECATED AS_MACRO	void		freeNode(size_t index);//DEPRECATED因为含义不清楚
+				void		allocNode(size_t index);
+				void		withdrawNode(size_t index);
+	DEPRECATED AS_MACRO	void		unfreeNode(size_t index);
     AS_MACRO	size_t		getTargetIndex(TargetType* t)const;
 	AS_MACRO	size_t		getNodeIndex(NodeType* n)const;
 	AS_MACRO	static	size_t getEachSize();
@@ -100,7 +127,12 @@ protected:
 	};
 
 	size_t len;
-	size_t lastIndex,curSize;//Synchronized
+
+	//最后一个被分配的下标
+	size_t lastIndex;
+
+	//当前已分配的节点数
+	size_t curAllocedSize;//Synchronized
 protected:
 	/**
 	 * Layout:

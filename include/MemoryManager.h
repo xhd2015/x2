@@ -150,9 +150,9 @@ protected:
 *   change log：
 *       2017-02-26 03:11:12： 分配的管理器只有在其上调用了alloc/new函数之后，才会向下复制自己并把alloc标志位置为1，在此基础上进行分配。下级的节点不关心上级的状态。因此添加“分配时复制”函数
 *
-*  @param _DescriptorAllocator  必须提供下面的方法
-*  	T*	getNew()	用于分配
-*  	void withdraw(T *) 用于回收
+*  @param _DescriptorAllocator  节点分配器，必须提供下面的方法
+*  			T*	getNew()	用于分配
+* 		 	void withdraw(T *) 用于回收
 */
 
 template <template <class> class _DescriptorAllocator>
@@ -164,6 +164,13 @@ public:
 public:
 	MemoryManager()=default;
     MemoryManager(_DescriptorAllocator<TreeNode<MemoryDescriptor> > *smm);//done
+    /**
+     * @param smm				节点分配器
+     * @param start				开始地址
+     * @param len				总长度
+     * @param fatherAllocable	- // TODO 完善参数含义注释
+     *
+     */
     MemoryManager(_DescriptorAllocator<TreeNode<MemoryDescriptor> > *smm,size_t start,size_t len,bool fatherAllocable=true);
     //以典型的内存描述建立管理器,但这不是唯一的初始化方式，因为开始和结束可以由内部节点指定，实际上开始和结束可以完全没有必要在初始化中指定
 

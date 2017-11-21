@@ -1,8 +1,3 @@
-#if defined(CODE32)
-	__asm__(".code32 \n\t");
-#endif
-
-
 /**
  * There is nothing you can include from kernel,except def.h which does not produce any code
  */
@@ -11,12 +6,23 @@
 #include <macros/all.h>
 
 
-#if defined(CODE32)
+#if defined(CODE32USER)
+	__asm__(".code32 \n\t");
+#endif
+
+
+
+#if defined(CODE32USER)
 
 int which;
+//_process1
 
+__asm__(".section .proc1\n\t"
+		"jmp .\n\t");
 extern "C" __attribute__((section(".proc1"))) void process1()
 {
+	Util::jmpDie();
+	Util::insertMark(0xCCCC);
 	which=1;
 	int curds=Util::getCurrentDs();
     while(1)

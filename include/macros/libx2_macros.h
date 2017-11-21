@@ -10,7 +10,7 @@
 
 #include <libx2.h>
 //================函数宏区：使用 __attribute__((always_inline))===============
-#if defined(CODE32)||defined(CODE16)
+#if defined(CODE32)||defined(CODE16)||CODE32USER
 void Util::reboot()
 {
 
@@ -25,6 +25,10 @@ void Util::reboot()
     :"eax"
     );
 }
+#endif
+
+
+#if defined(CODE32) || defined(CODE16)
 void	Util::setStrSel(int sel)
 {
 	Util::strSel=sel;
@@ -33,6 +37,9 @@ int  Util::getStrSel()
 {
 	return Util::strSel;
 }
+#endif
+
+#if defined(CODE32) || defined(CODE16) || defined(CODE32USER)
 void Util::insertMark(int marker)
 {
     __asm__(
@@ -149,7 +156,7 @@ void Util::popa()
 */
 #endif
 
-#if defined(CODE32)
+#if defined(CODE32) || defined(CODE32USER)
 int Printer::getX()
 {
     return this->x;
@@ -211,6 +218,8 @@ void Util::setCurrentDs(int ds)
 			 :
 			 );
 }
+
+#if defined(CODE32)
 void Util::intReturn()
 {
     __asm__(
@@ -218,6 +227,7 @@ void Util::intReturn()
     "iret \n\t"
     );
 }
+#endif
 /**this originally works
 void Util::initTarget(void *&target)
 {
@@ -233,7 +243,7 @@ __asm__ __volatile__("":"=c"(*(char**)target)::);
 #endif
 
 
-#if defined(CODE32)||defined(CODE64)
+#if defined(CODE32)||defined(CODE64)||defined(CODE32USER)
 //=======class : Queue 宏
 template <typename T>
 int Queue<T>::empty()

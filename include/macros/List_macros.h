@@ -93,30 +93,38 @@ _Allocator<ListNode<T> > *LinkedList<T,_Allocator>::getMemoryManager()const
 
 //=====class: SimpleMemoryNode
 SimpleMemoryNode::SimpleMemoryNode(bool NO):
-NO(NO)
+alloced(NO)
 {
 
 }
 bool SimpleMemoryNode::getNO()
 {
-    return this->NO;
+    return this->alloced;
 }
 bool SimpleMemoryNode::isFree()
 {
-    return this->NO==false;
+    return this->alloced==false;
+}
+bool SimpleMemoryNode::isAlloced()
+{
+	return alloced;
+}
+void SimpleMemoryNode::setAlloced(bool alloced)
+{
+	this->alloced=alloced;
 }
 void SimpleMemoryNode::free()
 {
-    this->NO=false;
+    this->alloced=false;
 }
 void SimpleMemoryNode::unfree()
 {
 //	printf("offset of No is %x\n",(char*)&(this->NO)-(char*)this);
-    this->NO=true;
+    this->alloced=true;
 }
 void SimpleMemoryNode::setNO(bool NO)
 {
-    this->NO = NO;
+    this->alloced = NO;
 }
 
 //=====class:SimpleMemoryManager

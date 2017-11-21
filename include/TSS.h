@@ -1,6 +1,9 @@
 #ifndef __TSS__
 #define __TSS__
 #include <def.h>
+
+class Printer;
+
 #pragma pack(push,1)
 class TSS{//size = 104 + others,所有类型均用指针 // This is tested,standard size is 104
 public:
@@ -42,6 +45,8 @@ public:
     DEPRECATED void ensureReservedZero();
     static void fromMemory(TSS &self,int seg,int off);
     
+    void dumpInfo(Printer *p);//=Kernel::printer
+
 protected:
     
 private:
