@@ -41,6 +41,8 @@ __asm__(
 "DIE: \n\t"
 "jmp DIE \n\t"
 );
+Kernel::InputBufferType inputBuffer[CONFIG_INPUT_BUFFER_SIZE];
+
 
  void extraVboxTest()
 {
@@ -154,6 +156,7 @@ void protectedEntryHolder()
 			PMLoader::GDT_NODE_START,PMLoader::GDT_START,PMLoader::GDT_NODE_ITEMS,gused,arrsizeof(gused),
 			PMLoader::IDT_NODE_START,PMLoader::IDT_SIZE,PMLoader::IDT_NODE_ITEMS,NULL,0
     );//初始化一个新的kernel
+    pkernel->setInputBuffer(inputBuffer, arrsizeof(inputBuffer));
     stdp.putsz("after kernel done\n");
 
 
@@ -203,22 +206,6 @@ void protectedEntryHolder()
 //    Kernel::getTheKernel()->createProcess();//task 2
 
 
-    //=============after inited kernel,create the first process & make it await
-    //...i am doing this,but need to test functions above work normally.It's time goto :bed:.
-    /**
-     * Let's try to invoke idle process
-     */
-//    Util::ltr(Util::makeSel(5, 0, 0));
-//    Util::lldt(Util::makeSel(6, 0, 0));
-
-//    Util::printStr("ltr & ldtr before switch succeed\n");
-//    __asm__ __volatile__(
-//    		"jmp *%%edx \n\t"
-//    		:
-//    		:"d"(idle)
-//			:
-//    );
-//    pkernel->switchNextProcess();
 
     /**
      * Let's try to create a new process
@@ -275,18 +262,18 @@ void protectedEntryHolder()
 			PMLoader::PROCESS_EACH_SECNUMS*512);/*copy code to allocated process space*/
     pkernel->printer->putsz("process1 copied\n");
 //    CALL_INT_3(0x24,c,Util::getCurrentDs(),b,"int 0x24 by CPL0.\n",d,Util::MODE_COMMON);
-    pkernel->switchNextProcess();
-    Util::jmpDie();
+//    pkernel->switchNextProcess();
+//    Util::jmpDie();
 
-    TreeNode<Process*>*	wp2=pkernel->addNewProcess(24*512 - 1,24*512 - 1, 4*512 - 1, SegmentDescriptor::DPL_3);
-    Process *proc2=wp2->getData();
-    Util::memcopy(Util::getCurrentDs(),
-    		((PMLoader::PROTECTED_SECNUMS+PMLoader::REAL_SECNUMS+PMLoader::PROCESS_EACH_SECNUMS))*512,
-			Util::makeSel(5, 0, 0),
-			proc2->getProcessBase()+proc2->getCodeStart(),
-			PMLoader::PROCESS_EACH_SECNUMS*512);
-    pkernel->switchNextProcess();//jump to the target
-    Util::jmpDie();
+//    TreeNode<Process*>*	wp2=pkernel->addNewProcess(24*512 - 1,24*512 - 1, 4*512 - 1, SegmentDescriptor::DPL_3);
+//    Process *proc2=wp2->getData();
+//    Util::memcopy(Util::getCurrentDs(),
+//    		((PMLoader::PROTECTED_SECNUMS+PMLoader::REAL_SECNUMS+PMLoader::PROCESS_EACH_SECNUMS))*512,
+//			Util::makeSel(5, 0, 0),
+//			proc2->getProcessBase()+proc2->getCodeStart(),
+//			PMLoader::PROCESS_EACH_SECNUMS*512);
+//    pkernel->switchNextProcess();//jump to the target
+//    Util::jmpDie();
 //    TSS *ptss=(TSS*)Kernel::getTheKernel()->mnewKernel(PMLoader::TSS_MIN_SIZE*2);
 //    stdp.putsz("after new tss\n");//this is never reached
 
@@ -318,7 +305,7 @@ void protectedEntryHolder()
 //    Util::ltr(Util::makeSel(5));// load task register
     
 
-    CALL_INT_3(0x24,c,Util::getCurrentDs(),b,"int 0x24 by CPL0.\n",d,Util::MODE_COMMON);
+//    CALL_INT_3(0x24,c,Util::getCurrentDs(),b,"int 0x24 by CPL0.\n",d,Util::MODE_COMMON);
     
     //===========对8259A两片外部芯片接口编程
     IO_8259A p1;
@@ -330,13 +317,19 @@ void protectedEntryHolder()
     p1.sendICW3(1,0x2);
     p1.sendICW4(0,0,0,0,1);
     p1.sendICW4(1,0,0,0,1); //普通全嵌套，非缓冲，非自动结束，用于80x86
-    p1.sendOCW1(0,0xfc);//屏蔽一些中断,允许定时中断，键盘中断
+
+    p1.sendOCW1(0, 0xfd);//仅仅允许键盘中断响应
+    // TODO 去掉注释，定时中断
+//    p1.sendOCW1(0,0xfc);//屏蔽一些中断,允许 定时中断，键盘中断
+
     p1.sendOCW1(1,0xff);
     
     //对8253编程
-    IO_8253 p2;//间隔10ms都很难等待
-    p2.setTimeMicro(0,10);//设置通道0，间隔：n微秒
     
+    // TODO 去掉下面的注释，以允许定时中断
+//    IO_8253 p2;//间隔10ms都很难等待
+//    p2.setTimeMicro(0,10);//设置通道0，间隔：n微秒
+
 //    //===============设置CPL=3的描述符
 //    SegmentDescriptor cs3(0,0xfffff,SegmentDescriptor::G_1B,SegmentDescriptor::TYPE_U_CODE_CONFORMING,0);
 //    SegmentDescriptor ds3(0,0xffff,SegmentDescriptor::G_1B,SegmentDescriptor::TYPE_U_DATA,3);
@@ -362,11 +355,23 @@ void protectedEntryHolder()
 //    tss1_sel.writeToMemory(Util::SEG_CURRENT,(char*)PMLoader::GDT_START+9*8);
     
     
+    Kernel::printer->putsz("before sti\n");
+    Kernel::printer->clr();
     //允许中断
     Util::sti();
     //========================利用iret切换到特权级3，此后此任务运行在特权级3
 //    stdp.putsz("Changing CPL to 3.\n");
 //    Util::changeCPL((int)afterCPL3,0x33,Util::getEflags(),4*512-4,0x43);
+    while(true)
+    {
+    	int readChar=pkernel->getChar();
+    	if(readChar!=Kernel::EOF)
+    	{
+    		pkernel->printer->putc(readChar);
+//    		pkernel->printer->putx("",readChar," ");
+
+    	}
+    }
     Util::jmpDie();//wait until time interrupts
     
 }

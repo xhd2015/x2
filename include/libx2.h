@@ -334,17 +334,20 @@ protected:
     
 };
 //==============class :Queue
+// EFF 考虑Queue存放其他结构时，最好使用const T&,存放简单结构时，使用T
 template <typename T>
 class Queue{
 public:
-    Queue(T p[],unsigned int len);//掌管指针
+	Queue()=default;//可能需要使用replacement new来重新初始化
+    Queue(T p[],size_t len);//掌管指针
     ~Queue();
     
     T remove();
-    int add(T t);
+    int put(T t);
+
     AS_MACRO unsigned int size();
-    AS_MACRO int empty();
-    AS_MACRO int full();
+    AS_MACRO bool isEmpty();
+    AS_MACRO bool isFull();
 protected:
     T *p;
     unsigned int len;

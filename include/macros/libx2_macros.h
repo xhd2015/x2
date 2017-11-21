@@ -246,12 +246,12 @@ __asm__ __volatile__("":"=c"(*(char**)target)::);
 #if defined(CODE32)||defined(CODE64)||defined(CODE32USER)
 //=======class : Queue 宏
 template <typename T>
-int Queue<T>::empty()
+bool Queue<T>::isEmpty()
 {
     return curLen==0;
 }
 template <typename T>
-int Queue<T>::full()
+bool Queue<T>::isFull()
 {
     return curLen==len;
 }

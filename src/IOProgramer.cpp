@@ -162,21 +162,71 @@ void IO_8253::sendControlByte(int tunel,int writeOrder,int workingMode,int BCDMo
 }
 
 //=========class: Keyboard
-const int Keyboard::PORT_DATA=0x60,
-            Keyboard::PORT_CONTROL=0x64,
-            Keyboard::PORT_PPI=0x61;
-const int Keyboard::NO_DATA_ERROR=0x10000;
 
+//规则： 1个字符的为可切换的字符，shift可以施加作用
+//			即 s[1]=0 则为单字符
+//		2个字符以上为控制字符
+// 长度至少为1
 const char* Keyboard::KEY_MAP_STD[]={
-    "UNUSED","ESC","1","2","3","4","5","6","7","8","9","0","_","=","BS","TAB","q","w","e","r","t",
-    "y","u","i","o","p","[","]","Enter","CNTL","a","s","d","f","g","h","j","k","l",";","'","`","LSHFT",
-    "\\","z","x","c","v","b","n","m",",",".","/","RSHFT","*","ALT"," ","CAP","F1","F2","F3","F4","F5","F6",
+    "UNUSED","ESC",
+	"1",		"2",			"3",      "4",   "5",  "6",  "7",       "8",    "9",   "0",
+	"-",		"=",			"BS",     "TAB", "q",  "w",  "e",       "r",    "t",    "y",
+	"u",		"i",			"o",      "p",  "[",  "]",  "Enter",   "CTRL", "a",    "s",
+	"d",		"f",			"g",       "h",  "j",  "k",  "l",       ";",    "'",    "`",
+	"LSHFT",	"\\",			"z",  	  "x",  "c",  "v",  "b",       "n",    "m",    ",",
+	".",      "/",  "RSHFT","*","ALT"," ","CAP","F1","F2","F3","F4","F5","F6",
     "F7","F8","F9","F10","NUML","CtrlBreak","Home","Up","PgUp","-","Left","Center","Right","+","End","Down","PgDn",
-	"Ins","Del","Unknown","Unknown","Unknown","F11","F12","Unkown","Unknown","Windows","Unknown","Menu"
+	"Ins","Del","Unknown","Unknown","Unknown","F11","F12","Unkown","Unknown","Windows","Unknown","Menu",
+	"RESERVED","RESERVED", "RESERVED","RESERVED","RESERVED",
+	"RESERVED","RESERVED","RESERVED","RESERVED","RESERVED" ,//10RESERVED
+	"RightALT","RigthCTRL"
 };
+const char  Keyboard::KEY_MAP_SHIFT[]={
+	    '\0','\0',
+		'!',		'@',			'#',      '$',   '%', '^','&','*','(',')',
+		'_',		'+',			'0',     '0', 'Q',  'W',  'E',       'R',    'T',    'Y',
+		'U',		'I',			'O',      'P',  '{',  '}',  '\0',   '\0', 'A', 'S',
+		'D',		'F',			'G',     'H',  'J',  'K',  'L',       ':',    '"',    '~',
+		'\0',	'|',			'Z',  'X', 'C',  'V',  'B',       'N',    'M',    '<',
+		'>',      '?',  '\0','\0'/* 为*，但是找不到 */,'\0',' ','\0','\0','\0','\0','\0','\0','\0',
+	    '\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0',
+		'\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0',
+		'\0','\0', '\0','\0','\0',
+		'\0','\0','\0','\0','\0' ,//10RESERVED
+		'\0','\0'
+};
+
+
+
+/**
+ *   for(int i=0;i<KEY_MAP_STD_LEN;++i)
+ *      cout << i << ":"<< KEY_MAP_STD[i] << endl;
+ *   打印查看每个元素的下标
+ */
 //e0 x e0 x -- up down left right  _  表示需要接受两个e0
 //长按无用
 const int Keyboard::KEY_MAP_STD_LEN=sizeof(Keyboard::KEY_MAP_STD)/sizeof(char*);
+const int
+				Keyboard::ENTER_INDEX=28,
+				Keyboard::BACKSPACE_INDEX=14,
+				Keyboard::TAB_INDEX=15,
+				Keyboard::DEL_INDEX=83,
+				Keyboard::UP_INDEX=72,
+				Keyboard::DOWN_INDEX=80,
+				Keyboard::LEFT_INDEX=75,
+				Keyboard::RIGHT_INDEX=77,
+
+
+				Keyboard::LEFT_SHIFT_INDEX = 42,
+				Keyboard::LEFT_CTRL_INDEX = 29,
+				Keyboard::LEFT_ALT_INDEX = 56 ,
+				Keyboard::RIGHT_SHITF_INDEX = 54,
+				Keyboard::RIGHT_CTRL_INDEX = KEY_MAP_STD_LEN - 1,
+				Keyboard::RIGHT_ALT_INDEX = KEY_MAP_STD_LEN - 2,
+				Keyboard::CAP_INDEX=58,
+				Keyboard::NUM_INDEX=69
+				;
+
 Keyboard::Keyboard()
 {
     
@@ -196,6 +246,86 @@ const char* Keyboard::getAsciiChar(unsigned char code)
         return Keyboard::KEY_MAP_STD[code];
     else
         return "Exceed.";
+}
+/**
+ * 你看到一个非常Lisp的表达式，
+ */
+int Keyboard::getCodeTypeBit(u8_t  code)
+{
+#define selectEqual(which,i,another) ((code)==(which) ? (i):(another))
+
+	return selectEqual(LEFT_SHIFT_INDEX,0,
+				selectEqual(LEFT_CTRL_INDEX,1,
+					selectEqual(LEFT_ALT_INDEX,2,
+							selectEqual(RIGHT_SHITF_INDEX,3,
+									selectEqual(RIGHT_CTRL_INDEX,4,
+											selectEqual(RIGHT_ALT_INDEX,5,
+													selectEqual(CAP_INDEX,6,
+															selectEqual(NUM_INDEX,7,-1))))))));
+}
+int Keyboard::interpretCharData(u16_t data)
+{
+	bool hasCtrl = data & (CONTROL_LCTRL | CONTROL_RCTRL);
+	bool hasShift = data & (CONTROL_LSHIFT | CONTROL_RSHIFT);
+	bool hasCap = data & CONTROL_CAP;
+	enum{
+		TYPE_ALPHA,TYPE_NUM,TYPE_PUNCT,TYPE_POS,TYPE_CANNOT_HANDLE,
+	};
+	int type = TYPE_CANNOT_HANDLE;
+	u8_t code=(u8_t)data;
+
+	const char *chstr=KEY_MAP_STD[code];
+
+	char ch;
+	if(*(chstr+1)=='\0')//是单个字符
+	{
+		ch=chstr[0];
+		if(ch >= 'a' && ch <='z')
+			type=TYPE_ALPHA;
+		else if(ch >= '0' && ch <='9')
+			type=TYPE_NUM;
+		else
+			type=TYPE_PUNCT;
+	}else if(code == ENTER_INDEX){
+		ch='\n';
+		type=TYPE_POS;
+	}
+	else if(code==BACKSPACE_INDEX){
+		ch='\b';
+		type=TYPE_POS;
+	}
+	else if(code == TAB_INDEX){
+		ch='\t';
+		type=TYPE_POS;
+	}
+	else
+		type=TYPE_CANNOT_HANDLE;
+//	int x=Kernel::printer->getX();
+//	int y=Kernel::printer->getY();
+//	Kernel::printer->putsz("\n");
+//	Kernel::printer->puti("hasCap=",hasCap,",");
+//	Kernel::printer->puti("hasCtrl=",hasCtrl,",");
+//	Kernel::printer->puti("ch=",ch,",");
+//	Kernel::printer->puti("type=",type,",");
+//	Kernel::printer->putsz("\n");
+//	Kernel::printer->setPos(x, y);
+	if(type == TYPE_ALPHA)
+	{
+		if( ((!hasShift) && hasCap)||
+				(hasShift && (!hasCap))  )
+		{
+			ch += 'A'-'a';
+		}
+		return ch;
+	}else if(type==TYPE_NUM || type==TYPE_PUNCT)
+	{
+		if(!hasShift)return ch;
+		else	return KEY_MAP_SHIFT[code];
+	}
+	else if(type==TYPE_POS)
+		return ch;
+	else
+		return Kernel::EOF;
 }
 
 #endif //CODE32

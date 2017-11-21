@@ -158,6 +158,14 @@ int Kernel::preparePhysicalMap(size_t physical,size_t size)
 {
 	return this->pdeman.prepareVisitPhysical(physical, size, this->gdtm);
 }
+void Kernel::setInputBuffer(InputBufferType *p,size_t len)
+{
+	new (&inputBuffer) Queue<InputBufferType>(p,len);
+}
+Queue<Kernel::InputBufferType>& Kernel::getInputBuffer()
+{
+	return inputBuffer;
+}
 
 #endif //CODE32
 

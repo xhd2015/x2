@@ -34,6 +34,7 @@ void Keyboard::disable()
     int a=Util::inb(Keyboard::PORT_PPI);
     Util::outb(Keyboard::PORT_PPI,a | 0x80);
 }
+
 #endif //CODE32
 
 

@@ -6,6 +6,12 @@
 #include <libx2.h>
 
 #ifdef CODE32
+/**
+ *
+ * 8259A可编程芯片
+ *
+ * 主片：
+ */
 class IO_8259A{
 public:
     //电平模式=1，边沿触发=0
@@ -81,12 +87,60 @@ public:
 
 
 };
+// EFF 下标值定义为enum常数比较适合
 class Keyboard{
 public:
-    const static int PORT_DATA,PORT_CONTROL,PORT_PPI;
-    const static int NO_DATA_ERROR;//0x10000
-    const static int KEY_MAP_STD_LEN;
     const static char* KEY_MAP_STD[];
+    const static int KEY_MAP_STD_LEN;
+
+    /**
+     * shift按下时产生的单个字符
+     */
+    const static char  KEY_MAP_SHIFT[];
+
+    const static int
+					//方位控制键
+					ENTER_INDEX,
+					BACKSPACE_INDEX,
+					TAB_INDEX,
+					DEL_INDEX,
+					UP_INDEX,
+					DOWN_INDEX,
+					LEFT_INDEX,
+					RIGHT_INDEX,
+
+					// 为什么要区分状态键和非状态键？ 因为状态键能够改变输入的含义，而非状态键不能
+					//输入状态控制键 (L,R)*(SHIFT,CTRL,ALT) + CAP + NUM = 8个控制键，刚好占用一个字节
+					// 0~7依次是 LSHIFT LCTRL LALT RSHIFT RCTRL RALT CAP NUM
+					LEFT_SHIFT_INDEX,
+					LEFT_CTRL_INDEX,
+					LEFT_ALT_INDEX,
+					RIGHT_SHITF_INDEX,
+					RIGHT_CTRL_INDEX,
+					RIGHT_ALT_INDEX,
+					CAP_INDEX,
+					NUM_INDEX
+					;
+    enum{
+    	 CONTROL_LSHIFT	= 1 << (0 + 8),
+    	 CONTROL_LCTRL 	= 1 << (1+8),
+    	 CONTROL_LALT 	= 1 << (2+8),
+    	 CONTROL_RSHIFT = 1 << (3+8),
+    	 CONTROL_RCTRL 	= 1 << (4+8),
+    	 CONTROL_RALT 	= 1 << (5+8),
+    	 CONTROL_CAP 	= 1 << (6+8),
+    	 CONTROL_NUM 	= 1 << (7+8),
+    };
+
+    enum{
+    	PORT_DATA = 0x60,
+		PORT_CONTROL = 0x64,
+		PORT_PPI = 0x61,
+
+
+		NO_DATA_ERROR = 0x10000,
+    };
+
     /**
     *在此处定义标准键盘 把键盘线性化、连续化以便处理.需要标准化的键指那些不必依赖其他键就能产生输出的键
     *那些控制键不包括在内，控制键是 ctrl,shift,alt,caps lock,num lock
@@ -123,6 +177,7 @@ public:
     */
     AS_MACRO int readScanCode();
 
+
     /**
     *禁止/允许键盘工作
     *通过 0x61位1来设置
@@ -135,6 +190,20 @@ public:
     void waitToWrite();
 
     const char* getAsciiChar(unsigned char code);
+
+    /**
+     * 返回一个特殊code在控制字中的下标，0~7
+     *
+     * @return -1  不是特殊code
+     */
+    static int getCodeTypeBit(u8_t  code);
+
+    /**
+     * 对含有控制位的字符进行解释
+     *
+     * @return 一个处理过特殊输入的字符,如果不能处理，返回EOF
+     */
+    static int interpretCharData(u16_t data);
 
 
 protected:

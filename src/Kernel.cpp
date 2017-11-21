@@ -2,6 +2,7 @@
 #include <MemoryManager.h>
 #include <Kernel.h>
 #include <PMLoader.h>
+#include <IOProgramer.h>
 
 #include <macros/all.h>
 
@@ -382,12 +383,6 @@ size_t Kernel:: getProcessMMBase()const
 }
 
 
-// TODO newgdt 调用错误
-//        pkernel->newgdt((char*)lineAddr,
-//					limit/SegmentDescriptor::G_4KB_SCALE,
-//					SegmentDescriptor::G_4KB,
-//					SegmentDescriptor::TYPE_U_DATA,
-//				0); 结果有错误，但是使用new (ptr) SegmentDescriptor(....)能够成功
 int Kernel::newgdt(char* baseaddr, int limit, char g,char type, char dpl, char s,
 		char b, char p)
 {
@@ -400,6 +395,18 @@ int Kernel::newgdt(char* baseaddr, int limit, char g,char type, char dpl, char s
 					type,dpl,s,b,p);
 	}
 	return index;
+}
+int	Kernel::getChar()
+{
+	if(inputBuffer.isEmpty())return EOF;
+
+	InputBufferType data=inputBuffer.remove();
+	return Keyboard::interpretCharData(data);
+}
+int Kernel::getRawChar()
+{
+	if(inputBuffer.isEmpty())return EOF;
+	return inputBuffer.remove();
 }
 
 void Kernel::initTheKernel(Kernel* theKernel)

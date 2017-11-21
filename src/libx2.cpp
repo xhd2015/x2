@@ -22,6 +22,7 @@
 //===在此声明实例化
 #if defined(CODE32)
     template class Queue<unsigned char>;
+    template class Queue<u16_t>;
 #endif
 
 int Util::printf(const char *fmt,...)
@@ -729,7 +730,7 @@ String String::valueOf(int n)
 
 //============class : Queue<T>
 template<typename T>
-Queue<T>::Queue(T p[],unsigned int len):p(p),len(len),curLen(0),indexRemove(0),indexAdd(0)
+Queue<T>::Queue(T p[],size_t len):p(p),len(len),curLen(0),indexRemove(0),indexAdd(0)
 {
     
 }
@@ -750,7 +751,7 @@ template<typename T>
 T Queue<T>::remove()
 {
     T rt;
-    if(this->empty())
+    if(this->isEmpty())
     {
         return 0;
     }else{
@@ -762,9 +763,9 @@ T Queue<T>::remove()
     return rt;
 }
 template <typename T>
-int Queue<T>::add(T t)
+int Queue<T>::put(T t)
 {
-    if(this->full())
+    if(this->isFull())
     {
         return 0;
     }else{

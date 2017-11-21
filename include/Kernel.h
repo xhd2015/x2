@@ -143,6 +143,9 @@ protected:
 *		内核空间和进程空间
 *	内核空间用于内核的各种数据结构存储和分配
 *	进程空间用于载入进程
+*
+*	内核应当仅仅包含那些最基础最常用的结构或功能，其他的以模块的形式提供
+*	凡是最基础最常用的结构或功能，必须放到内核中
 */
 class Kernel{
 public:
@@ -151,6 +154,11 @@ public:
 	typedef SimpleMemoryManager<MmNodeType>					SmmType;
 	typedef MemoryManager<SimpleMemoryManager>		 		MmType;
 	typedef AssociatedMemoryManager<SegmentDescriptor,1>    SegManager;
+	/**
+	 * 键盘缓冲区的存储数据类型
+	 * 低8位为键盘的输入码，高8位的信息参见IOProgrammer::Keyboard的定义和说明
+	 */
+	typedef u16_t											InputBufferType;
 	enum{
 		LDT_ITEMS=10,
 		VIDEO_SEL=0x8,
@@ -165,6 +173,9 @@ public:
 	enum{
 		GPUI_MEM_NEW=0,
 		GPUI_MEM_DELETE=1
+	};
+	enum{
+		EOF=0xffffffff,/*8位，16位通用的EOF*/
 	};
 protected://static statement
 	//reserve a space for theKernel
@@ -250,9 +261,9 @@ public:
 	/**
 	 * -1 means no free space
 	 *
-	 *  // TODO newgdt没有正常工作
+	 *
 	 */
-	DEPRECATED int newgdt(
+	int newgdt(
 				char* baseaddr=0,
 				int limit=0,
 				char g=SegmentDescriptor::G_1B,
@@ -276,9 +287,22 @@ public:
 	 * @param  size
 	 */
 	AS_MACRO int preparePhysicalMap(size_t physical,size_t size);
+
+	// TODO 完成这个函数，与preparePhysicalMap配合使用
 	INCOMPLETE void destroyPhysicalMap();
 
+	AS_MACRO void setInputBuffer(InputBufferType *p,size_t len);
+	AS_MACRO Queue<InputBufferType>& getInputBuffer();
+	/**
+	 * 从缓冲区读取一个字符，非阻塞状态；
+	 * 当缓冲区没有内容时，返回一个EOF
+	 */
+	int	getChar();
 
+	/**
+	 * 返回一个未经解释的原始输入char类型
+	 */
+	int getRawChar();
 protected:
 //public:
 	/**
@@ -299,9 +323,8 @@ protected:
 	CR3			 cr3;
 	PDEManager	pdeman; //PDE manager
 
-
-
-
+	//输入缓冲区
+	Queue<InputBufferType> inputBuffer;
 };
 
 #endif

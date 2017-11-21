@@ -568,6 +568,9 @@ void int0x1f()
 //=============================================
 
 //=================中断处理程序: 32=========
+/**
+ * 定时中断
+ */
 namespace Int_0x20{
     int current=0;
     //GDT[5] -- task0
@@ -619,56 +622,147 @@ void _int0x20()  //保护现场只能发生在堆栈框架之前，所以编写�
 *键盘中断,直到发送EOI，键盘中断都不会再响应，在这之前处理是安全的。
 *
 */
+
+
 __asm__(
 ".text \n\t"  //如果是第一个函数，就要将其汇编进入.text中
-".global _int0x21 \n\t"
+".global _int0x21 \n\t" //声明符号_int0x21, 将其放到输出符号表中
 "_int0x21:\n\t "
-"pusha \n\t"
+"pusha \n\t"  // 保护所有的寄存器
 );
 void _int0x21()
 {
     static int times=0;
     static int lastx=0,lasty=0;
-    static char save[10]={0};
-    static unsigned char lasts[4];
     static unsigned int index=-1;
+
+
+    static int status=0;
+    static u16_t currentStatus=0x0;
+
+
     Keyboard k;
-    
+    Queue<Kernel::InputBufferType> &buffer=Kernel::getTheKernel()->getInputBuffer();
     
     Printer p(10,0,8,80);
     p.setPos(lastx,lasty);
-    /*
-    times++;
-    p.putsz("int 0x21:");
-    Util::digitToStr(save,sizeof(save),times);
-    p.putsz(save);
-    p.putc('\n');
-    */
-    
+
     unsigned char code=k.readScanCode();
     
-    //==fordebug
-    
-    
-    Util::digitToStr(save,x2sizeof(save),code);
-   
-    if((code & 0x80) == 0)
-    { 
-        p.putsz(save);
-        p.putsz("->");
-        p.putsz(k.getAsciiChar(code));
-        p.putsz("  ");
-    }else{
-        if(code == 0xe1) //还需要接受两个，然后合成一个
-        {
-            
-        }else if(code==0xe0){ //还需要接受一个
-            
-        }
-        Util::digitToHex(save,x2sizeof(save),code);
-        p.putsz(save);
-        p.putsz("  ");
+
+    //视P键为普通键的代名词
+    enum{
+    	STATUS_NORMAL,//该状态下P键按下，则产生字符；P键释放不管
+		STATUS_E0,
+    };
+
+    u8_t   codeIndex;
+    int		bitIndex = -1;//-1 nothing
+    enum{
+    	OP_NOT_SET,
+		OP_SET,OP_CLEAR,OP_DO_NOTHING
+    };
+    int		op=OP_NOT_SET;
+    switch(status)
+    {
+		case STATUS_NORMAL:
+			if( code == 0xe0 )
+			{
+				status=STATUS_E0;
+				op=OP_DO_NOTHING;
+			}else if( (code & 0x80) == 0)//接通码
+			{
+//				p.putsz(k.getAsciiChar(code));p.putsz("-->");p.puti("",code," ");
+				codeIndex = code;
+				bitIndex = Keyboard::getCodeTypeBit(codeIndex);
+				if(bitIndex==-1)
+				{
+					buffer.put(currentStatus | code);
+					op = OP_DO_NOTHING;
+				}else
+					op = OP_NOT_SET;
+			}else{//断开码需要取消状态
+				codeIndex = code & 0x7f;
+				bitIndex = Keyboard::getCodeTypeBit(codeIndex);
+				if(bitIndex == -1 || bitIndex == 6 || bitIndex == 7)//其他的,CAP,NUM
+					op=OP_DO_NOTHING;
+				else
+					op=OP_CLEAR;
+			}
+			break;
+		case STATUS_E0:
+			if( code == 0x1d)//右ctrl 按下
+			{
+				codeIndex = Keyboard::RIGHT_CTRL_INDEX;
+				op = OP_SET;
+			}
+			else if( code== 0x38) // 右alt按下
+			{
+				codeIndex = Keyboard::RIGHT_ALT_INDEX;
+				op = OP_SET;
+			}else if( code == 0x9d)//右ctrl 松开
+			{
+				codeIndex = Keyboard::RIGHT_CTRL_INDEX;
+				op =OP_CLEAR;
+			}else if(code == 0xb8)//右alt 松开
+			{
+				codeIndex = Keyboard::RIGHT_ALT_INDEX;
+				op=OP_CLEAR;
+			}else{
+				op=OP_DO_NOTHING;
+			}
+			bitIndex = Keyboard::getCodeTypeBit(codeIndex);
+			status=STATUS_NORMAL;
+			break;
     }
+
+
+//    Kernel::printer->puti("op=",op,",");
+//    Kernel::printer->puti("codeIndex=",codeIndex,",");
+//    Kernel::printer->puti("bitIndex=",bitIndex,",");
+    if(op!=OP_DO_NOTHING)
+    {
+    	u16_t madeIndex = (1 << (bitIndex + 8));
+    	if(op==OP_NOT_SET)
+    	{
+    		if(bitIndex < 6 ||
+    				((currentStatus & madeIndex)==0))
+					op=OP_SET;
+    		else
+    			op = OP_CLEAR;
+    	}
+//    	Kernel::printer->puti("ENTERED op=",op,",");
+    	if(op == OP_SET)
+    		currentStatus |= madeIndex;
+    	else
+    		currentStatus &= (!madeIndex);
+//        Kernel::printer->putx("current status=",currentStatus);
+    }
+//    Kernel::printer->putsz("\n");
+
+
+
+   
+    /**
+     * 高位为0 接通码
+     *		为1	断开码
+     */
+//    if((code & 0b10000000) == 0)
+//    {
+//        p.putx("",code,"->");
+//        p.putsz(k.getAsciiChar(code));
+//        p.putsz("  ");
+//    }else{
+//        if(code == 0xe1) //还需要接受两个，然后合成一个
+//        {
+//
+//        }else if(code==0xe0){ //还需要接受一个
+//
+//        }
+//        p.putx("",code," ");
+//    }
+
+
     
    
     
@@ -676,10 +770,14 @@ void _int0x21()
     
     lastx=p.getX();
     lasty=p.getY();
-    //允许键盘工作
+
+
+    //允许键盘工作  先禁止，再允许
     k.disable();
-    k.enable(); //先禁止，再允许
+    k.enable();
     
+
+    //允许8259A继续产生其他中断
     IO_8259A p1;
     p1.sendOCW2(0,0x20);
     __asm__(

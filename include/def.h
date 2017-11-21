@@ -29,6 +29,7 @@ typedef unsigned char  u8_t;
 #define CONFIG_REAL_SECNUMS 0
 #define CONFIG_USER_PROCESS_EACH_SECNUMS 0
 #define CONFIG_USER_PROCESS_SECNUMS 0
+#define CONFIG_INPUT_BUFFER_SIZE 0
 #endif
 
 #if !defined(CONFIG_PROTECTED_SECNUMS)
@@ -47,6 +48,12 @@ typedef unsigned char  u8_t;
 #if !defined(CONFIG_USER_PROCESS_SECNUMS)
 #error "please define CONFIG_USER_PROCESS_SECNUMS in Makefile"
 #endif
+
+
+#if !defined(CONFIG_INPUT_BUFFER_SIZE)
+#error "please define CCONFIG_INPUT_BUFFER_SIZE in Makefile"
+#endif
+
 #if defined(CODE32)||defined(CODE16) || defined(CODE32USER)   //in standard host enviornment,do not use these definitions.
 			// You must be very careful about typedef
 typedef signed int ptrdiff_t;
