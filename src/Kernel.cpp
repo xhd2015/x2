@@ -3,6 +3,7 @@
 #include <Kernel.h>
 #include <PMLoader.h>
 #include <IOProgramer.h>
+#include <KernelMemoryConfig.h>
 
 #include <macros/all.h>
 
@@ -21,9 +22,11 @@ ProcessManager::ProcessManager():
 maxPID(1),lastValidPID(Process::PID_INVALID),curProcess(NULL),
 lksmm(),
 tksmm(),
+
 prcsQueue(&this->lksmm),
 prcsTree(&this->tksmm)
 {
+//	Kernel::printer->putsz("in ProcessManager init\n\t");
 //	Util::printStr("Have I been called?\n"); //Of course you are called
 
 	// TODO 探讨下面这行代码是否有必要
@@ -47,10 +50,15 @@ Process* ProcessManager::createProcess(size_t codeLimit,size_t dataLimit,size_t 
 	if(dataLimit>maxLimit)maxLimit=dataLimit;
 	if(stackLimit>maxLimit)maxLimit=stackLimit;
 
-	size_t allocedProcessSpace=(size_t)Kernel::getTheKernel()->mnewProcess(maxLimit+1);
+//	Kernel::printer->putsz("before alloc space\n");
+//	Kernel::getTheKernel()->dumpInfo();
+	size_t prcMMBase = Kernel::getTheKernel()->getProcessMMBase();
+	size_t allocedProcessSpace=(size_t)Kernel::getTheKernel()->mnewProcess(maxLimit+1) - prcMMBase;
+//	Kernel::printer->putx("processMMBase=",Kernel::getTheKernel()->getProcessMMBase(),", ");
+//	Kernel::printer->putx("allocedProcessSpace=",allocedProcessSpace,"\n");
 	return this->createProcess(
 			this->getNewPid(),
-			Kernel::getTheKernel()->getProcessMMBase(),
+			prcMMBase,
 			allocedProcessSpace,
 			codeLimit, dataLimit, stackLimit, dpl);
 }
@@ -189,9 +197,8 @@ Process* ProcessManager::createProcess(unsigned int pid,size_t prcBase,size_t pr
 	Kernel *k=Kernel::getTheKernel();
 
 	//=========allocate for tss & ldt
-	size_t	ldtsize = Kernel::SegManager::getEachSize() * LDT_ITEMS;
-	size_t	ldtnstart=(size_t)k->mnewKernel(ldtsize);
-	size_t  ldttstart=ldtnstart + x2sizeof(Kernel::SegManager::NodeType) * LDT_ITEMS;
+	size_t	ldttstart=(size_t)k->mnewKernelAlign(x2sizeof(SegmentDescriptor) * LDT_ITEMS,x2sizeof(SegmentDescriptor)); //必须是8的倍数
+	size_t  ldtnstart=(size_t)k->mnewKernel( x2sizeof(Kernel::SegManager::NodeType) * LDT_ITEMS );
 	TSS	*tss=(TSS*)k->mnewKernel(x2sizeof(TSS));
 //	char saver[10];
 //	Util::digitToHex(saver, 10, (size_t)tss);
@@ -206,17 +213,18 @@ Process* ProcessManager::createProcess(unsigned int pid,size_t prcBase,size_t pr
 	int tssSz=x2sizeof(TSS)-1;
 	int tssIndex=k->newgdt((char*)tss, tssSz, SegmentDescriptor::G_1B, SegmentDescriptor::TYPE_S_TSS_32_AVL, dpl, SegmentDescriptor::S_SYSTEM,
 				SegmentDescriptor::RESERVED, SegmentDescriptor::P_PRESENT);
-	int ldtIndex=k->newgdt((char*)ldttstart, ldtsize - 1, SegmentDescriptor::G_1B,SegmentDescriptor::TYPE_S_LDT, dpl,SegmentDescriptor::S_SYSTEM,
+	int ldtIndex=k->newgdt((char*)ldttstart, x2sizeof(SegmentDescriptor) * LDT_ITEMS - 1, SegmentDescriptor::G_1B,SegmentDescriptor::TYPE_S_LDT, dpl,SegmentDescriptor::S_SYSTEM,
 				SegmentDescriptor::RESERVED,SegmentDescriptor::P_PRESENT);
 	Kernel::printer->putx("process id=",pid);
 	Kernel::printer->putx("process tss index=", tssIndex);
 	Kernel::printer->putx("process ldt index=", ldtIndex);
-
+	Kernel::getTheKernel()->dumpInfo();
 
 	//==========init Process
 	// EFF 为了更加确定地表现每个参数的作用
 	size_t processBodySize = dataLimit + 1;
 	size_t processCodeStart = stackLimit + 1;
+	Util::insertMark(0x225225);
 	new (process) Process(
 			pid,
 			tss,tssIndex,
@@ -303,7 +311,7 @@ Printer* 	Kernel::printer=NULL;
 
 Kernel::Kernel(
 		size_t smmStart,size_t smmLimit,
-		size_t kmmStart,size_t kmmSize,
+		size_t kmmStart,size_t kmmSize,size_t usedList[][2],size_t usedLen,
 		size_t pmmStart,size_t pmmSize,
 		size_t pde0_start,size_t pde0_size,
 		size_t pte0_start,size_t pte_size,
@@ -312,54 +320,72 @@ Kernel::Kernel(
 		)
 :
 smm(smmStart,smmLimit),
-kernelMM(&smm,kmmStart,kmmSize,false),
+kernelMM(&smm,kmmStart,kmmSize,usedList,usedLen,false),
 processMM(&smm,pmmStart,pmmSize,false),
 gdtm(gdtnstart,gdttstart,gdtitems,true,gusedList,gusedLen),
 idtm(idtnstart,idttstart,idtitems,true,iusedList,iusedLen),
 cr3(makeCR3(pde0_start)),
 processMan()
 {
+	// 主要做的事情：初始化PDE管理器
 	//=============[init PDE]=================
+//    size_t npdes = pde0_size >> 2;
+//
+//    size_t nptes0= pte_size >> 2;
+	printer->putsz("start init \n");
+	dumpInfo();
 
-    size_t npdes = pde0_size >> 2;
+//	kernelMM.dumpInfo(printer);printer->putsz("\n");
+    size_t assocNodeStart = (size_t)this->mnewKernel(pde0_size * x2sizeof(PDEManager::NodeType));
+//    printer->putsz("init 1\n");
+//	kernelMM.dumpInfo(printer);printer->putsz("\n");
 
-    size_t nptes0= pte_size >> 2;
+    size_t asscoNodeStartForPTEman0 = (size_t)this->mnewKernel(pte_size * x2sizeof(PTEManager::NodeType));
+//    printer->putsz("init 2\n");
+//    kernelMM.dumpInfo(printer);printer->putsz("\n");
 
-    size_t assocNodeStart = (size_t)this->mnewKernel(npdes * x2sizeof(PDEManager::NodeType));
-    size_t asscoNodeStartForPTEman = (size_t)this->mnewKernel(nptes0 * x2sizeof(PTEManager::NodeType));
+    size_t asscoNodeStartForPTEman1 = (size_t)this->mnewKernel(KernelMemoryConfig::PTE_1_NUM * x2sizeof(PTEManager::NodeType));
+//    printer->putsz("init 3\n");
+//    kernelMM.dumpInfo(printer);printer->putsz("\n");
 
     // 初始化PTEManager[]数组
-    size_t ptemstart = (size_t)this->mnewKernel(npdes * x2sizeof(PTEManager));
+    size_t ptemstart = (size_t)this->mnewKernel(2 * x2sizeof(PTEManager));// 0 1
     //PTEManager的二级指针
-    size_t pptem = (size_t)this->mnewKernel(npdes * x2sizeof(PTEManager*));
+    size_t pptem = (size_t)this->mnewKernel(pde0_size * x2sizeof(PTEManager*));
+
+//    printer->putsz("alloced\n");
+    // TODO 增加pde1的参数传递
 
 
+    // TODO 必须检查PTE
     // TODO 使内核分配足够多的PTEManager，现在仅仅一个
     //内核分配 第3项PTEManager不为空
-    size_t npte3_0 = 20;//分配20个PTE给PDE3,PTE0
-    size_t addedIndex = 3;
-    size_t pte3_0start = (size_t)this->mnewKernelAlign(npte3_0 * x2sizeof(PTE),x2sizeof(PTE));//pte3_0的起始地址
-    size_t assoscNodeStartPTE3_0 = (size_t)this->mnewKernel(npte3_0 * x2sizeof(PTEManager::NodeType)) ;
-    new ((PTEManager*)ptemstart+addedIndex) PTEManager(assoscNodeStartPTE3_0,pte3_0start,npte3_0,true);//全部都未使用
-    *((PDE*)PMLoader::PDE0_START + addedIndex) = Kernel::makePDE(pte3_0start); //向PDE3写入内容
+//    size_t npte3_0 = 20;//分配20个PTE给PDE3,PTE0
+//    size_t addedIndex = 3;
+//    size_t pte3_0start = (size_t)this->mnewKernelAlign(npte3_0 * x2sizeof(PTE),x2sizeof(PTE));//pte3_0的起始地址
+//    size_t assoscNodeStartPTE3_0 = (size_t)this->mnewKernel(npte3_0 * x2sizeof(PTEManager::NodeType)) ;
+//    new ((PTEManager*)ptemstart+addedIndex) PTEManager(assoscNodeStartPTE3_0,pte3_0start,npte3_0,true);//全部都未使用
+//    *((PDE*)PMLoader::PDE0_START + addedIndex) = Kernel::makePDE(pte3_0start); //向PDE3写入内容
 
     //内核最初仅仅初始化了一个PTEManager,并且全部的项都是已经使用了的。
-    new ((PTEManager*)ptemstart) PTEManager(asscoNodeStartForPTEman,pte0_start,nptes0,true);
-    for(int i=0;i<nptes0;i++) //set PTE managers [0] all used.
+    new ((PTEManager*)ptemstart) PTEManager(asscoNodeStartForPTEman0,pte0_start,pte_size,true);
+    new ((PTEManager*)ptemstart+1) PTEManager(asscoNodeStartForPTEman1,(size_t)KernelMemoryConfig::mmPTE_1,KernelMemoryConfig::PTE_1_NUM,true);
+    for(int i=0;i<pte_size;i++) //set PTE managers [0] all used.
     {
     	((PTEManager*)ptemstart)[0].allocNode(i);
     }
-    int usedPDEs[]={0,addedIndex};
-    new (&this->pdeman) PDEManager(assocNodeStart,pde0_start,pptem,npdes,true,usedPDEs,arrsizeof(usedPDEs));
+    int usedPDEs[]={0}; //System PDE
+    new (&pdeman) PDEManager(assocNodeStart,pde0_start,pptem,pde0_size,true,usedPDEs,arrsizeof(usedPDEs));
 
+    // 写入PTE地址到PDE1
+    *((int*)KernelMemoryConfig::mmPDE+1)=Kernel::makePDE((int)KernelMemoryConfig::mmPTE_1);
+
+//    printer->putsz("before set ref\n");
     // set pointers
-    *(PTEManager**)pptem = (PTEManager*)ptemstart;
-    *((PTEManager**)pptem + addedIndex) = (PTEManager*)ptemstart + addedIndex;
-
-
-
-    //==========================================
+    pdeman.setPTEManagerRef(0, (PTEManager*)ptemstart);
+    pdeman.setPTEManagerRef(1, (PTEManager*)ptemstart+1);
 }
+
 //decltype(sizeof(0)) get()
 //		{
 //			return sizeof(0);
@@ -379,7 +405,7 @@ size_t	 Kernel::getKernelMMBase()const
 }
 size_t Kernel:: getProcessMMBase()const
 {
-	return PMLoader::PROCESS_MM_START;
+	return CONFIG_KERNEL_CODE_SIZE + CONFIG_KERNEL_FREE_MEM_SIZE;
 }
 
 
@@ -400,13 +426,24 @@ int	Kernel::getChar()
 {
 	if(inputBuffer.isEmpty())return EOF;
 
-	InputBufferType data=inputBuffer.remove();
+	InputBufferDataType data=inputBuffer.remove();
 	return Keyboard::interpretCharData(data);
 }
 int Kernel::getRawChar()
 {
 	if(inputBuffer.isEmpty())return EOF;
 	return inputBuffer.remove();
+}
+void Kernel::dumpInfoInner()const
+{
+	printer->putsz("Kernel{");
+	kernelMM.dumpInfo(printer);
+	printer->putsz("}");
+}
+void Kernel::dumpInfo()const
+{
+	dumpInfoInner();
+	printer->putsz("\n");
 }
 
 void Kernel::initTheKernel(Kernel* theKernel)

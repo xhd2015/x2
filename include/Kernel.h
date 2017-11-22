@@ -152,13 +152,14 @@ public:
 	typedef	Kernel											This;
 	typedef TreeNode<MemoryDescriptor> 						MmNodeType;
 	typedef SimpleMemoryManager<MmNodeType>					SmmType;
+	typedef SmmType::FullNode								FullMMNodeType; //使用这个结构来计算占用空间的大小
 	typedef MemoryManager<SimpleMemoryManager>		 		MmType;
 	typedef AssociatedMemoryManager<SegmentDescriptor,1>    SegManager;
 	/**
 	 * 键盘缓冲区的存储数据类型
 	 * 低8位为键盘的输入码，高8位的信息参见IOProgrammer::Keyboard的定义和说明
 	 */
-	typedef u16_t											InputBufferType;
+	typedef u16_t											InputBufferDataType;
 	enum{
 		LDT_ITEMS=10,
 		VIDEO_SEL=0x8,
@@ -202,8 +203,13 @@ protected:
 public:
 
 	Kernel();
+	/**
+	 *
+	 * @param pde0_start	PDE0的起始地址
+	 * @param pde0_size		PDE的项数
+	 */
 	Kernel(size_t smmStart,size_t smmLimit,
-			size_t kmmStart,size_t kmmSize,
+			size_t kmmStart,size_t kmmSize,size_t usedList[][2],size_t usedLen,
 			size_t pmmStart,size_t pmmSize,
 			size_t pde0_start,size_t pde0_size,
 			size_t pte0_start,size_t pte_size,
@@ -278,6 +284,11 @@ public:
 	AS_MACRO SegManager& getIdtm();
 	AS_MACRO int		getCR3();
 	int newidt();
+	AS_MACRO int	allocPDE(size_t n_pte);
+	/**
+	 * @param i 下标，如果是系统下标则不回收(比如0);
+	 */
+	AS_MACRO void  withdrawPDE(size_t i);
 
 	//=============virtual memory
 	/**
@@ -291,8 +302,8 @@ public:
 	// TODO 完成这个函数，与preparePhysicalMap配合使用
 	INCOMPLETE void destroyPhysicalMap();
 
-	AS_MACRO void setInputBuffer(InputBufferType *p,size_t len);
-	AS_MACRO Queue<InputBufferType>& getInputBuffer();
+	AS_MACRO void setInputBuffer(InputBufferDataType *p,size_t len);
+	AS_MACRO Queue<InputBufferDataType>& getInputBuffer();
 	/**
 	 * 从缓冲区读取一个字符，非阻塞状态；
 	 * 当缓冲区没有内容时，返回一个EOF
@@ -303,6 +314,9 @@ public:
 	 * 返回一个未经解释的原始输入char类型
 	 */
 	int getRawChar();
+
+	void dumpInfoInner()const;
+	void dumpInfo()const;
 protected:
 //public:
 	/**
@@ -324,7 +338,7 @@ protected:
 	PDEManager	pdeman; //PDE manager
 
 	//输入缓冲区
-	Queue<InputBufferType> inputBuffer;
+	Queue<InputBufferDataType> inputBuffer;
 };
 
 #endif

@@ -219,6 +219,39 @@ void Util::setCurrentDs(int ds)
 			 );
 }
 
+int	Util::getCurrentSs()
+{
+	int temp;
+	__asm__ __volatile__(
+	"push %%ss \n\t"
+	"pop %%eax \n\t"
+	:"=a"(temp)
+	:
+	:
+	);
+	return temp;
+}
+void Util::setCurrentSs(int ss)
+{
+	__asm__ __volatile__(
+			"mov %%eax,%%ss \n\t"
+			:
+			:"a"(ss)
+			 :
+			 );
+}
+void Util::ljmp(int newcs,int neweip)
+{
+	__asm__ __volatile__(
+			"pushw %%cx \n\t"
+			"push  %%ebx \n\t"
+			"ljmp *(%%esp) \n\t"
+			:
+			:"c"(newcs),"b"(neweip)
+			 :
+		);
+}
+
 #if defined(CODE32)
 void Util::intReturn()
 {

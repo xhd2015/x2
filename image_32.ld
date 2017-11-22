@@ -12,12 +12,22 @@ SECTIONS {
 	}
 	*/ /*This is discarded by objcopy even said -j .stack*/
 	/*最终数据被放在了0处，但是偏移仍然是32个扇区*/
-	.data 512*32: {
-		*(.rdata .data .bss)
+	/**=====DEPRECATED
+	* .data 512*32: {
+	*	*(.rdata .data .bss)
+	* }
+	*/
+	/*.data_prefix名称超长，截止为.data_pr*/
+	.data_pr :{
+		gen/32/KernelMemoryConfig.o(.rdata .data .bss)
 	}
-	.text 512*(32+10): { 
+	.text : { 
 		 /*PROVIDE( _CODE_START = ABSOLUTE(.) );*/
 		*(.text)
+	}
+	
+	.data :{
+		*(.rdata .data .bss)
 	}
 	
 	/DISCARD/ : {

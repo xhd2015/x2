@@ -90,7 +90,8 @@ void Util::printStr(const char* str_addr,int mode)
 #if defined(CODE32) || defined(CODE16)
 	if(str_addr==NULL)return;
 	char ch;
-    while( (ch=(char)Util::get(Util::strSel,(int)str_addr++))!=0 )
+//    while( (ch=(char)Util::get(Util::strSel,(int)str_addr++))!=0 )
+	while( (ch=*str_addr++) != '\0')
     {
         Util::printChar(ch,mode);
     }
@@ -130,16 +131,17 @@ void Util::printChar(char ch,int mode)
     }
 #if defined(CODE16)||defined(CODE32)
     int Lpos = Util::x * 80*2 + Util::y*2;//25 * 80
+    Util::insertMark(0x21342134);
     __asm__ __volatile__(
-    "push %%es\n\t"
-    "mov %%dx,%%es\n\t" //视频缓冲区
-    "movb %%al,%%es:(%%bx) \n\t"
-    "inc %%ebx \n\t"
-    "movb %%cl,%%es:(%%bx) \n\t"
-    "pop %%es \n\t"
-    :
-    :"a"(ch),"b"(Lpos),"c"(mode),"d"(Util::videoSelector)
-    :"memory"
+		"push %%es\n\t"
+		"mov %%dx,%%es\n\t" //视频缓冲区
+		"movb %%al,%%es:(%%bx) \n\t"
+		"inc %%ebx \n\t"
+		"movb %%cl,%%es:(%%bx) \n\t"
+		"pop %%es \n\t"
+		:
+		:"a"(ch),"b"(Lpos),"c"(mode),"d"(Util::videoSelector)
+		:"memory"
     );
 
     Util::y ++;
@@ -619,6 +621,7 @@ int Printer::specailCharProcessor(int chr)
     switch(chr)
     {
         case '\n':
+        	Util::insertMark(0x624624);
             this->x = (this->x + 1) % this->rows;
             this->y = 0;
             break;

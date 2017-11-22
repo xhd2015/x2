@@ -642,7 +642,7 @@ void _int0x21()
 
 
     Keyboard k;
-    Queue<Kernel::InputBufferType> &buffer=Kernel::getTheKernel()->getInputBuffer();
+    Queue<Kernel::InputBufferDataType> &buffer=Kernel::getTheKernel()->getInputBuffer();
     
     Printer p(10,0,8,80);
     p.setPos(lastx,lasty);

@@ -6,7 +6,7 @@
 #include <IOProgramer.h> //for IO_HDD
 #include <def.h>
 
-#include <macros/IOProgramer_macros.h>
+#include <macros/all.h>
 
 #ifdef CODE16
 __asm__(".code16gcc \n\t");
@@ -17,6 +17,49 @@ __asm__(".code32 \n\t");
 
 //#define CODE16
 #if defined(CODE16)
+
+void realModeTest() //this is placed in .test_section,which is placed at 0x7c0:0x400
+{
+    //===========Class Test Start============
+//    Test t;//c++的默认构造函数不能加括号，否则可能被看成是函数声明
+    Util::printStr("Hello World!");//测试默认参数
+    //堆栈不足以支持这么多函数，因此需要适时扩张堆栈
+
+    //测试类的构造、析构、成员函数
+    Util t;
+    t.test();
+    //===========Class Test End============
+
+    //===========Util Test Start============
+    int readBase=PMLoader::TEMP_SEG*16;
+    Util::memcopy(PMLoader::TEMP_SEG,512,PMLoader::TEMP_SEG,0,512);//将第一个扇区清空
+    if(Util::readSectors(PMLoader::TEMP_SEG,0,0x80,0,1))//at lower is ok
+    {
+        Util::printStr("Load Tested.\n");
+    }
+    SegmentDescriptor sd1((char*)readBase,1024);
+    char saver[8];
+    sd1.writeToMemory(Util::SEG_CURRENT,saver);
+    SegmentDescriptor sd2;
+    SegmentDescriptor::fromMemory(&sd2,Util::SEG_CURRENT,saver);
+    char saver2[8];
+    sd2.writeToMemory(Util::SEG_CURRENT,saver2);
+    if(sd1.equals(sd2))
+    {
+        Util::printStr("SegmentDescriptor Right!!!\n");
+    }
+    Util::printStr("Util The End.\n");
+//    Util::jmpDie();
+
+    //===========Util Test End============
+
+//    Util::jmpDie();
+    //使用PMLoader的主过程加载
+    //加载配置在编译期已经配置好
+    PMLoader::mainProcess();
+
+}
+
 PMLoader::PMLoader()
 {
     
@@ -62,16 +105,15 @@ void PMLoader::enterProtected()
     "mov %%cr0,%%eax \n\t" //100b
     "or $0x1,%%eax \n\t"
     "mov %%eax,%%cr0 \n\t"
-//    "movw __ZN8PMLoader6JMPSEGE,%cx \n\t"
-//    "movw __ZN8PMLoader10CODE_STARTE,%bx \n\t"
     "pushw %%cx \n\t"  //JMPSEG:CODE_START
     "pushw %%bx \n\t"
     "ljmp *(%%esp) \n\t"
 	:
-	:"c"(PMLoader::JMPSEG),"b"(PMLoader::JMPOFF)
+	:"c"(PMLoader::JMPSEG),"b"(CONFIG_PREFIX_SIZE)
 	 :
     );
 }
+// NOTE DEPRECATED  下面的说明是针对老代码的
 //UNTESTED
 //保护模式代码，前面32个扇区是不用读取的,CODE_START正好指向有效数据的开始，0x4000
 //0xa000正好有80个扇区
@@ -79,83 +121,104 @@ void PMLoader::enterProtected()
 //如果32个扇区
 //当然，一般情况下保护模式需要读入的代码都在0x500之后(都要多于2.5个扇区)
 //此次能读入的是 32到80之间的扇区，也就是80-32=48个
+
 void PMLoader::adjustProtectedCode()
 {
-	size_t left;//必须考虑到left必须以4个字节来存放，16位下可能是2个字节。但这无关紧要了。
+	// NOTE 这是简化设计后的加载代码
+	// 硬盘0的某个扇区开始读到0:CONFIG_PREFIX_SIZE处，正好是代码开始
+	IO_HDD iohd(0,CONFIG_REAL_SECNUMS,CONFIG_REAL_LOAD_PROTECTED_SECNUM,
+			0,CONFIG_PREFIX_SIZE);
+	iohd.read();
 
-	//从磁盘的REAL_SECNUMS个扇区处开始读，放到0:CODE_START处，数量待定
-	IO_HDD iohd(0,PMLoader::REAL_SECNUMS,0,0,PMLoader::CODE_START);
-
-
-	size_t alreadyReadSize = PMLoader::CODE_START;
-	size_t wholeNumber = PMLoader::PROTECTED_SECNUMS + PMLoader::PROCESS_SECNUMS;
-	size_t wholeSize= wholeNumber * PMLoader::SECSIZE;
-	size_t mostCanReadSizeThisTime = PMLoader::TEMP_SEG*16 - alreadyReadSize;
-
-
-	left=(wholeSize - mostCanReadSizeThisTime)/PMLoader::SECSIZE;
-	if(left>0)
-	{
-//		Util::printStr("Kernel code size exceeds reserved size,the extra sectors will be read after entering protected mode\n");
-	}else{
-		left=0;//enough
-	}
-
-	/*need to set the left sectors unread to FREE_HEAP_START*/
-    if(PMLoader::CODE_START < PMLoader::SAFE_SEG*16) //may overlap the BIOS data or programs
-    {
-    	Util::printStr("Kernel reserved code size too small,make it larger than PMLoader::SAFE_SEG:0\n");
-    	Util::printStr("Kernel shutdown \n");
-    	Util::jmpDie();
-
-//    	Util::printStr("Kernel code start at lower than BIOS data segment\n");
-        left += (PMLoader::SAFE_SEG*16 + PMLoader::PROTECTED_SECNUMS*PMLoader::SECSIZE - PMLoader::TEMP_SEG*16)/PMLoader::SECSIZE;
-//	    Util::readSectors(PMLoader::SAFE_SEG,0,PMLoader::DRIVER,PMLoader::REAL_SECNUMS,PMLoader::PROTECTED_SECNUMS - left);
-        iohd.setDstSeg(PMLoader::SAFE_SEG);
-        iohd.setDstOff(0);
-        iohd.setSecNumber(PMLoader::PROTECTED_SECNUMS - left);
-        iohd.read();
-	    Util::memcopy(PMLoader::SAFE_SEG,0,0,PMLoader::CODE_START,(PMLoader::PROTECTED_SECNUMS -left) * PMLoader::SECSIZE);
-
-    }else{
-//    	char buf[10];
-//    	Util::digitToStr(buf,10,left);
-//    	Util::printStr("left is :");Util::printStr(buf);Util::printStr("\n");
-//        Util::readSectors(0,PMLoader::CODE_START,PMLoader::DRIVER,PMLoader::REAL_SECNUMS,PMLoader::PROTECTED_SECNUMS - left);
-    	iohd.setSecNumber(wholeNumber - left);
-    	iohd.read();
-    }
-
-    Util::printStr("leaving adjust\n");
-    Util::setl(0, PMLoader::FREE_HEAP_START,left);
+	// NOTE 下面这些代码全都过时了，因为现在简化了内核的设计，强化了某些限制
+//	size_t left;//必须考虑到left必须以4个字节来存放，16位下可能是2个字节。但这无关紧要了。
+//
+//	//从磁盘的REAL_SECNUMS个扇区处开始读，放到0:CODE_START处，数量待定
+//	IO_HDD iohd(0,PMLoader::REAL_SECNUMS,0,0,PMLoader::CODE_START);
+//
+//
+//	size_t alreadyReadSize = PMLoader::CODE_START;
+//	size_t wholeNumber = PMLoader::PROTECTED_SECNUMS + PMLoader::PROCESS_SECNUMS;
+//	size_t wholeSize= wholeNumber * PMLoader::SECSIZE;
+//	size_t mostCanReadSizeThisTime = PMLoader::TEMP_SEG*16 - alreadyReadSize;
+//
+//
+//	left=(wholeSize - mostCanReadSizeThisTime)/PMLoader::SECSIZE;
+//	if(left>0)
+//	{
+////		Util::printStr("Kernel code size exceeds reserved size,the extra sectors will be read after entering protected mode\n");
+//	}else{
+//		left=0;//enough
+//	}
+//
+//	/*need to set the left sectors unread to FREE_HEAP_START*/
+//    if(PMLoader::CODE_START < PMLoader::SAFE_SEG*16) //may overlap the BIOS data or programs
+//    {
+//    	Util::printStr("Kernel reserved code size too small,make it larger than PMLoader::SAFE_SEG:0\n");
+//    	Util::printStr("Kernel shutdown \n");
+//    	Util::jmpDie();
+//
+////    	Util::printStr("Kernel code start at lower than BIOS data segment\n");
+//        left += (PMLoader::SAFE_SEG*16 + PMLoader::PROTECTED_SECNUMS*PMLoader::SECSIZE - PMLoader::TEMP_SEG*16)/PMLoader::SECSIZE;
+////	    Util::readSectors(PMLoader::SAFE_SEG,0,PMLoader::DRIVER,PMLoader::REAL_SECNUMS,PMLoader::PROTECTED_SECNUMS - left);
+//        iohd.setDstSeg(PMLoader::SAFE_SEG);
+//        iohd.setDstOff(0);
+//        iohd.setSecNumber(PMLoader::PROTECTED_SECNUMS - left);
+//        iohd.read();
+//	    Util::memcopy(PMLoader::SAFE_SEG,0,0,PMLoader::CODE_START,(PMLoader::PROTECTED_SECNUMS -left) * PMLoader::SECSIZE);
+//
+//    }else{
+////    	char buf[10];
+////    	Util::digitToStr(buf,10,left);
+////    	Util::printStr("left is :");Util::printStr(buf);Util::printStr("\n");
+////        Util::readSectors(0,PMLoader::CODE_START,PMLoader::DRIVER,PMLoader::REAL_SECNUMS,PMLoader::PROTECTED_SECNUMS - left);
+//    	iohd.setSecNumber(wholeNumber - left);
+//    	iohd.read();
+//    }
+//
+//    Util::printStr("leaving adjust\n");
+//    Util::setl(0, PMLoader::FREE_HEAP_START,left);
 }
 void PMLoader::mainProcess() //仅16位
 {
     //===========PMLoader Start==========
     //1.读取指定起始扇区、指定数目的扇区到指定的段、偏移
+	//只需要读取 CONFIG_REAL_LOAD_PROTECTED_SECNUM 个扇区就可以，并且保证不会超过限制
     PMLoader::adjustProtectedCode();
     
     SegmentDescriptor nullSeg,
-                        loaderSegCode(0,PMLoader::CODE_LIMIT,SegmentDescriptor::G_1B,SegmentDescriptor::TYPE_U_CODE_NONCONFORMING,0),
-                        loaderSegData(0,PMLoader::DATA_LIMIT/SegmentDescriptor::G_4KB_SCALE,SegmentDescriptor::G_4KB,SegmentDescriptor::TYPE_U_DATA,0),
-                        loaderSegStack(0,PMLoader::STACK_LIMIT,SegmentDescriptor::G_1B,SegmentDescriptor::TYPE_U_STACK,0),
+                        loaderSegCode(0,CONFIG_KERNEL_CODE_SIZE - 1,SegmentDescriptor::G_1B,SegmentDescriptor::TYPE_U_CODE_NONCONFORMING,0),
+                        loaderSegData(0,(CONFIG_KERNEL_CODE_SIZE + CONFIG_KERNEL_FREE_MEM_SIZE-1)/SegmentDescriptor::G_4KB_SCALE,SegmentDescriptor::G_4KB,SegmentDescriptor::TYPE_U_DATA,0),
+                        loaderSegStack(0,CONFIG_INIT_STACK_SIZE - 1,SegmentDescriptor::G_1B,SegmentDescriptor::TYPE_U_STACK,0),
                         videoSeg((char*)0xb8000,
                         		25*80*2-1,
 								SegmentDescriptor::G_1B,
 								SegmentDescriptor::TYPE_U_DATA,0),
-						processSeg((char*)PMLoader::PROCESS_MM_START,
-								(PMLoader::PROCESS_MM_SIZE-1)/SegmentDescriptor::G_4KB_SCALE,
+						processSeg((char*)(CONFIG_KERNEL_CODE_SIZE  + CONFIG_KERNEL_FREE_MEM_SIZE),
+								(CONFIG_PROCESS_MEM_SIZE-1)/SegmentDescriptor::G_4KB_SCALE,
 								SegmentDescriptor::G_4KB,
 								SegmentDescriptor::TYPE_U_DATA,0);
     nullSeg={0};//not really all zeros.
+
+    int gdtAddr = CONFIG_INIT_STACK_SIZE%8==0?CONFIG_INIT_STACK_SIZE:(CONFIG_INIT_STACK_SIZE/8*8 + 8);//对其到8字节
+    int idtAddr = gdtAddr + 8*CONFIG_GDT_ITEM_NUM;
  
-    //2.初始化GDT表
-    nullSeg.writeToMemory(0,(char*)PMLoader::GDT_START);
-    videoSeg.writeToMemory(0,(char*)PMLoader::GDT_START+1*8);
-    loaderSegCode.writeToMemory(0,(char*)PMLoader::GDT_START+2*8);
-    loaderSegData.writeToMemory(0,(char*)PMLoader::GDT_START+3*8);
-    loaderSegStack.writeToMemory(0,(char*)PMLoader::GDT_START+4*8);//B set 4GB
-    processSeg.writeToMemory(0,(char*)PMLoader::GDT_START + 5*8); // index=5
+    //2.初始化GDT表  需要知道具体的GDT，IDE表的绝对位置
+//    nullSeg.writeToMemory(0,(char*)PMLoader::GDT_START);
+//    videoSeg.writeToMemory(0,(char*)PMLoader::GDT_START+1*8);
+//    loaderSegCode.writeToMemory(0,(char*)PMLoader::GDT_START+2*8);
+//    loaderSegData.writeToMemory(0,(char*)PMLoader::GDT_START+3*8);
+//    loaderSegStack.writeToMemory(0,(char*)PMLoader::GDT_START+4*8);//B set 4GB
+//    processSeg.writeToMemory(0,(char*)PMLoader::GDT_START + 5*8); // index=5
+
+        nullSeg.writeToMemory(0,(char*)gdtAddr);
+        videoSeg.writeToMemory(0,(char*)gdtAddr+1*8);
+        loaderSegCode.writeToMemory(0,(char*)gdtAddr+2*8);
+        loaderSegData.writeToMemory(0,(char*)gdtAddr+3*8);
+        loaderSegStack.writeToMemory(0,(char*)gdtAddr+4*8);//B set 4GB
+        processSeg.writeToMemory(0,(char*)gdtAddr + 5*8); // index=5
+
+
 
     //3.启用A20
     Util::printStr("enable a20...\n");
@@ -163,9 +226,9 @@ void PMLoader::mainProcess() //仅16位
     //===BUG with int 0x13
     
     //4.设置idt，gdt表
-    PMLoader::setidtr(PMLoader::IDT_SIZE-1,PMLoader::IDT_START);
+    PMLoader::setidtr(CONFIG_IDT_ITEM_NUM*8 - 1,idtAddr);
     //===BUG
-    PMLoader::setgdtr(PMLoader::GDT_SIZE-1,PMLoader::GDT_START);
+    PMLoader::setgdtr(CONFIG_GDT_ITEM_NUM*8 - 1,gdtAddr);
     //===BUG
     
     //5.设置cr0，进入保护模式

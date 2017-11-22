@@ -62,17 +62,28 @@ MemoryManager<_DescriptorAllocator>::MemoryManager(_DescriptorAllocator<TreeNode
 	// root->son = new_node, 也就是head， 但是head不指向root，也就是说指针时单向的
 	//Kernel::printer->move(-40);
 
+
 	TreeNode<MemoryDescriptor> *head=smm->getNew();
 
 	new (head) TreeNode<MemoryDescriptor>(MemoryDescriptor(start,len,fatherAllocable));
 
 	this->setHead(head);
 
+	//===分配内存
+
+
 #if defined(CODE64)
     //printf("in constructor : ");
     //getchar();
     //printf("%x ~ %x\n",this->getHead()->getData().getStart(),this->getHead()->getData().getLimit());
 #endif
+}
+template<template <class> class _DescriptorAllocator>
+MemoryManager<_DescriptorAllocator>::MemoryManager(_DescriptorAllocator<TreeNode<MemoryDescriptor> > *smm,size_t start,size_t len,
+		size_t usedList[][2],size_t usedLen,bool fatherAllocable):MemoryManager(smm,start,len,fatherAllocable)
+{
+	for(size_t i=0;i<usedLen;i++)
+		mnew(usedList[i][0], usedList[i][1]);
 }
 
 template<template <class> class _DescriptorAllocator>
@@ -150,7 +161,9 @@ TreeNode<MemoryDescriptor> * MemoryManager<_DescriptorAllocator>::allocOutNode(T
         if(len1>0)//前面有剩余,需要插入新的点
         {
             avlNode->getData().setLimit(len1);
-            newnode= new (this->smm->getNew()) TreeNode<MemoryDescriptor>(MemoryDescriptor(start,len,false));//新建一个node，不可用于分配
+            newnode = this->smm->getNew();
+            newnode->initToNull();
+             new (newnode) TreeNode<MemoryDescriptor>(MemoryDescriptor(start,len,false));//新建一个node，不可用于分配
                                             //将这个节点加入以这个点为根的树中
             avlNode->insertNext(newnode);//中间的节点，已经分配
         }else{//直接取代前面的点
@@ -166,6 +179,8 @@ TreeNode<MemoryDescriptor> * MemoryManager<_DescriptorAllocator>::allocOutNode(T
         {
 //        	Util::printf("before smm new\n");
         	TreeNode<MemoryDescriptor> *newnodeEnd=this->smm->getNew();
+        	newnodeEnd->initToNull();
+
 //        	Util::printf("after smm new \n");
             new (newnodeEnd) TreeNode<MemoryDescriptor>(MemoryDescriptor(start+len,len2));
 //            Util::printf("newnodeend is %x,%x,%d\n",newnodeEnd->getData().getStart(),newnodeEnd->getData().getLimit(),newnodeEnd->getData().isAllocable());
@@ -485,7 +500,7 @@ TreeNode<MemoryDescriptor>* MemoryManager<_DescriptorAllocator>::findFirstStart(
 	Util::digitToStr(saver, 50, start);
 	Util::printStr(saver);Util::printStr("\n");
 	*/
-	if(p && p->getData().isAllocable()==false)
+	if(p && !p->getData().isAllocable())
 	{
 		p=This::nextAllocable(p);
 	}
@@ -556,6 +571,31 @@ void  MemoryManager<_DescriptorAllocator>::setNull()
 {
     this->setHead(NULL);
 }
+#if defined(CODE32)
+template<template <class> class _DescriptorAllocator>
+void MemoryManager<_DescriptorAllocator>::dumpInfo(Printer *p)const
+{
+	if(p!=NULL)
+	{
+		p->putsz("MemoryManager{");
+		p->putsz("super:");Father::dumpInfo(p);p->putsz(", ");
+		p->putx("base:",getBase(),", ");
+		p->putx("limit:",getLimit(),", ");
+		p->putsz("alloc_info:[");
+		NodeType *node=Father::getHead()->getSon();
+		while(node!=NULL)
+		{
+			p->putsz("(");
+			p->putx("",node->getData().getStart(),",");
+			p->putx("",node->getData().getLimit(),",");
+			p->putx("",node->getData().isAllocable(),"), ");
+			node=node->getNext();
+		}
+		p->putsz("]");
+		p->putsz("}");
+	}
+}
+#endif
 
 //确保这条线段是位于两个分割点的缝隙之间，如果不是，返回NULL
 template<template <class> class _DescriptorAllocator>
@@ -654,7 +694,9 @@ TreeNode<MemoryDescriptor>* MemoryManager<_DescriptorAllocator>::copyOnAllocatio
         //Util::printStr("copyOnAllocation -- ");
         //**********
 
-        TreeNode<MemoryDescriptor> *newnode=new (this->smm->getNew()) TreeNode<MemoryDescriptor>(MemoryDescriptor(data.getStart(),data.getLimit(),!data.isAllocable()));
+        TreeNode<MemoryDescriptor> *newnode=this->smm->getNew();
+        newnode->initToNull();
+        new (newnode) TreeNode<MemoryDescriptor>(MemoryDescriptor(data.getStart(),data.getLimit(),!data.isAllocable()));
 
         newnode->setFather(head);
         head->setSon(newnode);
@@ -692,7 +734,9 @@ LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator >::LinearSourceManage
 LocateableLinkedList<_LinearSourceDescriptor,Locator<_LinearSourceDescriptor>::DISCARD, _NodeAllocator >(smm),
 space(_LinearSourceDescriptor(start,size))
 {
-	this->appendHead(new (smm->getNew()) ListNode<_LinearSourceDescriptor>(space));
+	auto node=smm->getNew();
+	node->initToNull();
+	this->appendHead( new(node) ListNode<_LinearSourceDescriptor>(space));
 }
 
 template <class _LinearSourceDescriptor,template <class> class _NodeAllocator>

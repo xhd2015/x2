@@ -48,11 +48,13 @@ status(This::STATUS_READY),
 absBase(absBase),
 processBase(thisPrcBase),
 baseKsmm(),
-baseMM(&this->baseKsmm,absBase+processBase,bodySize,false) ,//用于管理 linearBase+processBase的起始地址
+// TODO 恢复下面注释的代码
+//baseMM(&this->baseKsmm,absBase+processBase,bodySize,false) ,//用于管理 linearBase+processBase的起始地址
+baseMM(),
 genLinearAddr(0)
 {
-
-	Kernel::printer->clr();
+		Kernel::printer->clr();
+		Kernel::printer->putsz("in porcess init\n");
 //		char *absPhyStartAddr =
 		char *absPhyStartAddr=(char*)(absBase+processBase);
 		if((int)absPhyStartAddr % 4 !=0)

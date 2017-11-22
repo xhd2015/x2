@@ -154,15 +154,24 @@ int		Kernel::getCR3()
 {
 	return *(int*)&cr3;
 }
+int	Kernel::allocPDE(size_t n_pte)
+{
+	return pdeman.allocPDE(n_pte);
+}
+void Kernel::withdrawPDE(size_t i)
+{
+	if(i!=0)pdeman.withdrawPDE(i);
+}
+
 int Kernel::preparePhysicalMap(size_t physical,size_t size)
 {
 	return this->pdeman.prepareVisitPhysical(physical, size, this->gdtm);
 }
-void Kernel::setInputBuffer(InputBufferType *p,size_t len)
+void Kernel::setInputBuffer(InputBufferDataType *p,size_t len)
 {
-	new (&inputBuffer) Queue<InputBufferType>(p,len);
+	new (&inputBuffer) Queue<InputBufferDataType>(p,len);
 }
-Queue<Kernel::InputBufferType>& Kernel::getInputBuffer()
+Queue<Kernel::InputBufferDataType>& Kernel::getInputBuffer()
 {
 	return inputBuffer;
 }

@@ -80,13 +80,16 @@ public:
 	*/
 public:
 	/**
-	 *
-	 * @initSize  already used nodes
+	 * @param start		起始地址
+	 * @param limit		长度限制，注意这里的limit语义不同，它不是最后一个可以访问的字节，而是总得内存长度
+	 * @param initSize  already used nodes
 	 */
     SimpleMemoryManager(size_t start,size_t limit,bool doInit=true,size_t initSize=0,ERROR_HANDLER errhandler=NULL);//done
     
     /**
      * The following methods may throw exception/may call error handler,after which it executes normally
+     *
+     * @return 必须对返回的node实行初始化函数
      */
     T* getNew();//done
     FullNode *getNewNode();//done
@@ -139,6 +142,7 @@ public:
      * @new method since 2017-03-18 21:23:10
      */
     void		adjustOffset(ptrdiff_t diff);
+    void		initToNull();
 
 
     ListNode<T>*    getLast()const;//done
@@ -303,6 +307,7 @@ public:
     TreeNode<T>*	removeSon();
 	TreeNode<T>*	removeFather();
 	void 			adjustOffset(ptrdiff_t diff);
+	void			initToNull();
 
 
     TreeNode<T>* getParent()const;//往previous一直遍历，直到是根，然后返回根的father,done
@@ -340,6 +345,9 @@ public:
     AS_MACRO	_Allocator<TreeNode<T> >*	getSmm()const;
     void         free(TreeNode<T> *root);//将root自身和所有子节点都释放掉，== withdraw all nodes recursively  done
 
+#if defined(CODE32)
+    void		dumpInfo(Printer* p)const;
+#endif
 protected:
     _Allocator<TreeNode<T> > *smm;
     // 0

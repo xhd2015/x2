@@ -103,6 +103,13 @@ size_t		AssociatedMemoryManager<T, 1>::getEachSize()
 {
 	return sizeof(TargetType)+sizeof(NodeType);
 }
+
+template<class T>
+typename AssociatedMemoryManager<T,1>::NodeType*		AssociatedMemoryManager<T, 1>::getNodeAddress()
+{
+	return narr;
+}
+
 #endif //CODE32 | CODE64
 
 

@@ -15,6 +15,10 @@
 //  设置 gdtr,idtr
 //  进入保护模式
 
+#if defined(CODE16)
+	extern "C" void realModeTest();
+#endif
+
 class PMLoader{
 public:
 	enum{
@@ -64,7 +68,7 @@ public:
 	   FREE_HEAP_START = PTE0_START + PTE0_SIZE,
 	   CODE_START = FREE_HEAP_START + FREE_HEAP_SIZE,
 /* CODE_SEG must be 0 ******DEPRECATED****	   CODE_SEG = 0, *******/
-	   CODE_LIMIT = 0xfffff,
+	   CODE_LIMIT = 0xfffff,//1MB为代码，2MB为内核空间
 	   DATA_LIMIT = 0x2fffff,
 	   STACK_LIMIT = IDT_START - 1,/*Limit is the biggest address that can be achieved */
 	   CODE_SIZE = CODE_LIMIT - CODE_START + 1,
@@ -167,6 +171,7 @@ public:
     *指定gdt,idt,
     */
     static void mainProcess();
+
 #endif
     
 };

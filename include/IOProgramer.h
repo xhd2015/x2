@@ -98,29 +98,37 @@ public:
      */
     const static char  KEY_MAP_SHIFT[];
 
-    const static int
-					//方位控制键
-					ENTER_INDEX,
-					BACKSPACE_INDEX,
-					TAB_INDEX,
-					DEL_INDEX,
-					UP_INDEX,
-					DOWN_INDEX,
-					LEFT_INDEX,
-					RIGHT_INDEX,
+    //=================定义键位常数=================================
+	enum{			//方位控制键
+					ENTER_INDEX=28,
+					BACKSPACE_INDEX=14,
+					TAB_INDEX=15,
+					DEL_INDEX=83,
+					UP_INDEX=72,
+					DOWN_INDEX=80,
+					LEFT_INDEX=75,
+					RIGHT_INDEX=77,
 
 					// 为什么要区分状态键和非状态键？ 因为状态键能够改变输入的含义，而非状态键不能
 					//输入状态控制键 (L,R)*(SHIFT,CTRL,ALT) + CAP + NUM = 8个控制键，刚好占用一个字节
 					// 0~7依次是 LSHIFT LCTRL LALT RSHIFT RCTRL RALT CAP NUM
-					LEFT_SHIFT_INDEX,
-					LEFT_CTRL_INDEX,
-					LEFT_ALT_INDEX,
-					RIGHT_SHITF_INDEX,
+					LEFT_SHIFT_INDEX = 42,
+					LEFT_CTRL_INDEX = 29,
+					LEFT_ALT_INDEX = 56 ,
+					RIGHT_SHITF_INDEX = 54,
+
+	};
+	const static int
 					RIGHT_CTRL_INDEX,
-					RIGHT_ALT_INDEX,
-					CAP_INDEX,
-					NUM_INDEX
-					;
+					RIGHT_ALT_INDEX; //这两个数与MAP的长度有关
+	enum{
+					CAP_INDEX=58,
+					NUM_INDEX=69,
+	};
+	//==================================================================
+
+
+
     enum{
     	 CONTROL_LSHIFT	= 1 << (0 + 8),
     	 CONTROL_LCTRL 	= 1 << (1+8),

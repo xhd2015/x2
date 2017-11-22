@@ -110,6 +110,10 @@ public:
     AS_MACRO static void lldt(int sel);
     AS_MACRO static int	getCurrentDs();
     AS_MACRO static void setCurrentDs(int ds);
+    AS_MACRO static int	getCurrentSs();
+    AS_MACRO static void setCurrentSs(int ss);
+    AS_MACRO static void ljmp(int newcs,int neweip);
+
 
     //==================仅32位
 public:

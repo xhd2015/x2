@@ -59,19 +59,18 @@
 template <class T>
 SimpleMemoryManager<T>::SimpleMemoryManager(size_t start,size_t limit,bool doInit,size_t initSize,SimpleMemoryManager<T>::ERROR_HANDLER errhandle):
 start(start),limit(limit),
-data((Freeable*)start),len(limit/x2sizeof(FullNode)),curSize(initSize),
+data((FullNode*)start),len(limit/x2sizeof(FullNode)),curSize(initSize),
 lastIndex(0),
 errhandle(errhandle)
 {
-//	Kernel::printer->puti("len=",len);
-	char buf[10];
+	Kernel::printer->puti("len=",len);
     if(doInit)
     {
 
         for(int i=0;i!=len;i++)
         {
 //        	Kernel::printer->puti("i=",i);
-           data[i].free();
+           data[i].SimpleMemoryNode::setAlloced(false);
         }
     }
 //    Kernel::printer->putsz("return smm init\n");
@@ -101,10 +100,10 @@ typename SimpleMemoryManager<T>::FullNode *SimpleMemoryManager<T>::getNewNode()
     {
         for(int i=0;i!=len;i++)
         {
-            if(data[lastIndex].isFree())
+            if(data[lastIndex].isAlloced()==false)
             {
                 rt=&data[lastIndex];
-                rt->unfree();
+                rt->setAlloced(true);
                 curSize++;
                 lastIndex = (lastIndex + 1 ) % len;
                 break;
@@ -224,6 +223,11 @@ void   ListNode<T>::adjustOffset(ptrdiff_t diff)
 		this->previous = (ListNode<T>*)((char*)this->previous + diff);
 }
 template<class T>
+void   ListNode<T>::initToNull()
+{
+	next = previous = NULL;
+}
+template<class T>
 ListNode<T>*   ListNode<T>::getLast()const
 {
 //	Util::printStr("in ListNode getLast\n");
@@ -256,9 +260,23 @@ template<class T,template<class> class _Allocator>
 LinkedList<T,_Allocator >::LinkedList(_Allocator<ListNode<T> > *smm):
 smm(smm)
 {
+//	Kernel::printer->putsz("in LinkedList init\n");
+//	Kernel::printer->putx("sizeof(ListNode<T>)=",x2sizeof(ListNode<T>));
+//	Kernel::getTheKernel()->dumpInfo();
     char temp[sizeof(T)];
-    this->root = new (smm->getNew()) ListNode<T>(*(T*)temp,NULL,NULL);
-    this->last = new (smm->getNew()) ListNode<T>(*(T*)temp,NULL,NULL);
+    ListNode<T> *node1=smm->getNew();
+//    Kernel::printer->putx("node1=",(int)node1);
+//	Kernel::getTheKernel()->dumpInfo();
+
+    ListNode<T> *node2=smm->getNew();
+//    Kernel::printer->putx("node2=",(int)node2);
+//	Kernel::getTheKernel()->dumpInfo();
+
+//	Util::insertMark(0x270270);
+    this->root = new (node1) ListNode<T>(*(T*)temp,NULL,NULL);
+    this->last = new (node2) ListNode<T>(*(T*)temp,NULL,NULL);
+//	Kernel::printer->putsz("in LinkedList init return\n");
+//	Util::jmpDie();
 }
 
 template<class T,template<class> class _Allocator>
@@ -731,6 +749,12 @@ void 			TreeNode<T>::adjustOffset(ptrdiff_t diff)
 	if(this->son!=NULL)
 		this->son = (TreeNode<T>*)((char*)this->son + diff);
 }
+template<class T>
+void 			TreeNode<T>::initToNull()
+{
+	ListNode<T>::initToNull();
+	father=son=NULL;
+}
 
 template<class T>
 TreeNode<T>* TreeNode<T>::removeFather() {
@@ -762,7 +786,23 @@ template<class T,template <class> class _Allocator>
 Tree<T,_Allocator>::Tree(_Allocator<TreeNode<T> >* smm,TreeNode<T>* root):
 smm(smm)
 {
-	this->root=(root==NULL?smm->getNew():root);
+
+	Kernel::printer->putsz("in Tree init.");
+	Kernel::printer->putsz("in Tree init2");
+	Kernel::printer->putsz("in Tree init3");
+	Kernel::printer->putsz("\n");
+	Kernel::printer->putsz("in Tree init4");
+	Util::insertMark(0x785785); // 0013417
+
+	// TODO 恢复下面的代码
+	TreeNode<T> *node=smm->getNew();
+//	Kernel::getTheKernel()->dumpInfo();
+//	TreeNode<T> *node=(TreeNode<T>*)Kernel::getTheKernel()->mnewKernel(x2sizeof(TreeNode<T>));
+	node->initToNull();
+	this->root=(root==NULL?node:root);
+
+
+	Kernel::printer->putsz("in Tree init return\n");
 	//char saver[sizeof(T)];
 	//new (this->root) TreeNode<T>(*(T*)saver);//root must be very carefully initiated,but if you don't do that,it is fine.Do be very
 	//careful about the actual type at a position.Because that's really important.
@@ -779,6 +819,19 @@ smm(smm)
 //	}
 #endif
 }
+
+#if defined(CODE32)
+template<class T,template <class> class _Allocator>
+void Tree<T,_Allocator>::dumpInfo(Printer* p)const
+{
+	if(p!=NULL)
+	{
+		p->putsz("Tree{");
+
+		p->putsz("}");
+	}
+}
+#endif
 
 template<class T,template <class> class _Allocator>
 Tree<T,_Allocator>::Tree()

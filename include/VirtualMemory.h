@@ -117,11 +117,32 @@ public:
 			int *usedList=NULL,size_t usedLen=0);
 	~PDEManager();
 
+
 #ifdef CODE32
 	/**
 	 * return index
 	 */
 	int	prepareVisitPhysical(u32_t phyaddr,size_t size,SegManager &segman);
+
+	AS_MACRO PTEManager*	getPTEManagerRef(int i);
+	AS_MACRO void			setPTEManagerRef(int i,PTEManager * pteman);
+	/**
+	 * 分配一个项PDE, 并分配足够的pte项，且这些pte项不越界(以4096整数倍开始）
+	 *
+	 * @param n_pte	需要的连续pte项
+	 * @return 返回PDE的下标，-1则失败
+	 */
+	int	allocPDE(size_t n_pte);
+
+	/**
+	 * 回收一个已经分配的项
+	 *
+	 * 包括回收分配的所有内存，以及是否占用状态
+	 *
+	 * @param i	pde项下标
+	 */
+	void withdrawPDE(size_t i);
+protected:
 #endif
 
 protected:

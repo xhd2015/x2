@@ -111,11 +111,18 @@ int PDEManager::prepareVisitPhysical(u32_t phyaddr, size_t size,
 
 	for(size_t i=0;i<len;i++)//find for existing pdes with enough ptes
 	{
-		if(!narr[i].isFree() && ptemans[i]!=NULL)//exist a PDE
+		if(i<=3)
 		{
-			Kernel::printer->putx("i=",i," ");
-			Kernel::printer->putx("left=",ptemans[i]->getLeft()," \n");
+			Kernel::printer->putx("i=",i,",");
+			Kernel::printer->putx("ptemans[i]=",ptemans[i],",");
+			Kernel::printer->putx("left=",ptemans[i]->getLeft(),",");
+			Kernel::printer->putx("alloced=",narr[i].isAlloced()," \n");
+		}
 
+		if(!narr[i].isAlloced() && ptemans[i]!=NULL)//exist a PDE
+		{
+//			Kernel::printer->putx("i=",i," ");
+//			Kernel::printer->putx("left=",ptemans[i]->getLeft()," \n");
 			if(ptemans[i]->getLeft()>=nptes)
 			{
 				int istart=ptemans[i]->allocContinuousFree(nptes);
@@ -126,6 +133,7 @@ int PDEManager::prepareVisitPhysical(u32_t phyaddr, size_t size,
 					pde_p0=getTarget(i);
 					pte_p1=ptemans[i]->getTarget(istart);
 					pde_written=true;//如果一个PTEManager不为NULL，那么肯定保证了它的PDE已经指向了第一个PTE
+					break;
 				}
 			}
 		}
@@ -166,7 +174,6 @@ int PDEManager::prepareVisitPhysical(u32_t phyaddr, size_t size,
 	}
 
 	//write pte
-	int phybase=(phyaddr & 0xfffff000)>>12;
 	for(int i=0;i<nptes;i++)
 	{
 //		 new (pte_p1 + i) PTE(phybase + i,PageAttributes::PWT_ALWAYS_UPDATE);
@@ -204,6 +211,53 @@ int PDEManager::prepareVisitPhysical(u32_t phyaddr, size_t size,
 		return selIndex;
 	}
 	return -1;
+}
+
+
+int	PDEManager::allocPDE(size_t n_pte)
+{
+	if(curAllocedSize == len || ptemans == NULL )return -1;
+	int index;
+	PDEManager::TargetType* targetPDE=getNew(index);//alloced
+
+	if(index!=-1) // alloc ptes
+	{
+		PTEManager *pteman =(PTEManager *) Kernel::getTheKernel()->mnewKernel(x2sizeof(PTEManager));
+		// EFF 4*1024,这个要求似乎有点高
+		PTE*		ptes = (PTE*)Kernel::getTheKernel()->mnewKernelAlign(x2sizeof(PTE)*n_pte, 4*1024); //对齐到4KB区开始
+		PTEManager::NodeType*	ptesAssocNodes =(PTEManager::NodeType*) Kernel::getTheKernel()->mnewKernel(x2sizeof(PTEManager::NodeType) * n_pte);
+		if(pteman == NULL || ptes == NULL || ptesAssocNodes==NULL)
+			goto Failed;
+
+		new (pteman) PTEManager((int)ptesAssocNodes,(int)ptes, n_pte);
+
+		setPTEManagerRef(index, pteman); //设置相应的指针
+		return index;
+
+		Failed:
+			withdraw(targetPDE);
+			if(pteman!=NULL) Kernel::getTheKernel()->mdeleteKernel(pteman, x2sizeof(pteman));
+			if(ptes != NULL) Kernel::getTheKernel()->mdeleteKernel(ptes,x2sizeof(PTE)*n_pte);
+			if(ptesAssocNodes == NULL) Kernel::getTheKernel()->mdeleteKernel(ptesAssocNodes,x2sizeof(PTEManager::NodeType)*n_pte);
+			return -1;
+	}else
+		return -1;
+}
+
+
+void PDEManager::withdrawPDE(size_t i)
+{
+	if(curAllocedSize==0 || i>=len || getPTEManagerRef(i)==NULL)return;
+
+	PTEManager *pteman=getPTEManagerRef(i);
+
+	size_t n=pteman->getLen();
+	if(n==0)return;
+	PTEManager::NodeType* allocedNodes=pteman->getNodeAddress();
+	PTEManager::TargetType* allocedTargets=pteman->getTarget(0);
+	Kernel::getTheKernel()->mdeleteKernel(allocedTargets, n*x2sizeof(PTEManager::TargetType));
+	Kernel::getTheKernel()->mdeleteKernel(allocedNodes, n*x2sizeof(PTEManager::NodeType));
+	Kernel::getTheKernel()->mdeleteKernel(pteman, x2sizeof(PTEManager));
 }
 
 #endif

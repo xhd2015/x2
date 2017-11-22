@@ -115,6 +115,7 @@ public:
     AS_MACRO	size_t		getTargetIndex(TargetType* t)const;
 	AS_MACRO	size_t		getNodeIndex(NodeType* n)const;
 	AS_MACRO	static	size_t getEachSize();
+	AS_MACRO	NodeType*	getNodeAddress();
 protected:
 	AS_MACRO	NodeType*	getNode(size_t index);
 	union{

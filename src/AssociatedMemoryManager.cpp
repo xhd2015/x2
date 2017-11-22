@@ -86,21 +86,20 @@ AssociatedMemoryManager<T, 1>::AssociatedMemoryManager(size_t nstart,size_t tsta
 nstart(nstart),tstart(tstart),len(len),
 curAllocedSize(usedLen),lastIndex(0)
 {
+//	Kernel::printer->putsz("in AssociatedMemoryManager init\n");
 	if(nodeArrInit)
 	{
 		for(int i=0;i<this->len;i++)
 		{
-			narr[i].free();
+			narr[i].setAlloced(false);
 		}
 	}
-	if(usedList)
+	for(size_t i=0;i<usedLen;i++)
 	{
-		for(size_t i=0;i<usedLen;i++)
-		{
-			this->narr[usedList[i]].unfree();
-		}
+		narr[usedList[i]].setAlloced(true);
 	}
 
+//	Kernel::printer->putsz("in AssociatedMemoryManager init return\n");
 }
 template<class T>
 AssociatedMemoryManager<T, 1>::~AssociatedMemoryManager()

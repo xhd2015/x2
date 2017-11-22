@@ -153,12 +153,18 @@ protected:
 *  @param _DescriptorAllocator  节点分配器，必须提供下面的方法
 *  			T*	getNew()	用于分配
 * 		 	void withdraw(T *) 用于回收
+*
+* 	对于某一层来说 ，    head						head存储原始的base,limit
+* 						|
+* 						|
+* 					  son-->next-->next---> ....  此层就是所有的分配节点信息
 */
 
 template <template <class> class _DescriptorAllocator>
 class MemoryManager:public Tree<MemoryDescriptor,_DescriptorAllocator>{
 public:
 	typedef MemoryManager<_DescriptorAllocator> This;
+	typedef Tree<MemoryDescriptor,_DescriptorAllocator> Father;
 	typedef TreeNode<MemoryDescriptor>			NodeType;
 	typedef SimpleMemoryManager<NodeType>		SimpleAllocator;
 public:
@@ -173,6 +179,13 @@ public:
      */
     MemoryManager(_DescriptorAllocator<TreeNode<MemoryDescriptor> > *smm,size_t start,size_t len,bool fatherAllocable=true);
     //以典型的内存描述建立管理器,但这不是唯一的初始化方式，因为开始和结束可以由内部节点指定，实际上开始和结束可以完全没有必要在初始化中指定
+
+
+    /**
+     * 建立初始管理器，并确定其中已经被分配的片段
+     */
+    MemoryManager(_DescriptorAllocator<TreeNode<MemoryDescriptor> > *smm,size_t start,size_t len,
+    		size_t usedList[][2],size_t usedLen,bool fatherAllocable=true);
 
     ~MemoryManager(); 
     
@@ -224,6 +237,10 @@ public:
 
     int isNullManager();//done
     void setNull();//done
+
+#if defined(CODE32)
+    void dumpInfo(Printer *p)const;
+#endif
 protected:
     TreeNode<MemoryDescriptor> * allocOutNode(TreeNode<MemoryDescriptor> *avlNode,size_t start,size_t len);//done
     void withdrawNode(TreeNode<MemoryDescriptor> *exactNode);//done

@@ -22,6 +22,18 @@ PDE::PDE(u32_t pde)
 	*(u32_t*)this=pde;
 }
 
+PTEManager*	PDEManager::getPTEManagerRef(int i)
+{
+	return ptemans[i];
+}
+void	PDEManager::setPTEManagerRef(int i,PTEManager * pteman)
+{
+	if(i>=0 && ((size_t)i) < len)
+	{
+		ptemans[i]=pteman;
+	}
+}
+
 PTE::PTE(u32_t pte)
 {
 	*(u32_t*)this=pte;

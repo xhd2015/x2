@@ -206,25 +206,8 @@ const char  Keyboard::KEY_MAP_SHIFT[]={
 //e0 x e0 x -- up down left right  _  表示需要接受两个e0
 //长按无用
 const int Keyboard::KEY_MAP_STD_LEN=sizeof(Keyboard::KEY_MAP_STD)/sizeof(char*);
-const int
-				Keyboard::ENTER_INDEX=28,
-				Keyboard::BACKSPACE_INDEX=14,
-				Keyboard::TAB_INDEX=15,
-				Keyboard::DEL_INDEX=83,
-				Keyboard::UP_INDEX=72,
-				Keyboard::DOWN_INDEX=80,
-				Keyboard::LEFT_INDEX=75,
-				Keyboard::RIGHT_INDEX=77,
-
-
-				Keyboard::LEFT_SHIFT_INDEX = 42,
-				Keyboard::LEFT_CTRL_INDEX = 29,
-				Keyboard::LEFT_ALT_INDEX = 56 ,
-				Keyboard::RIGHT_SHITF_INDEX = 54,
-				Keyboard::RIGHT_CTRL_INDEX = KEY_MAP_STD_LEN - 1,
-				Keyboard::RIGHT_ALT_INDEX = KEY_MAP_STD_LEN - 2,
-				Keyboard::CAP_INDEX=58,
-				Keyboard::NUM_INDEX=69
+const int		Keyboard::RIGHT_CTRL_INDEX = KEY_MAP_STD_LEN - 1,
+				Keyboard::RIGHT_ALT_INDEX = KEY_MAP_STD_LEN - 2
 				;
 
 Keyboard::Keyboard()

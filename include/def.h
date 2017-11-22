@@ -23,36 +23,7 @@ typedef unsigned short u16_t;
 typedef unsigned char  u8_t;
 #endif
 
-//===IDE模式
-#if defined(IDE_MODE)
-#define CONFIG_PROTECTED_SECNUMS 0
-#define CONFIG_REAL_SECNUMS 0
-#define CONFIG_USER_PROCESS_EACH_SECNUMS 0
-#define CONFIG_USER_PROCESS_SECNUMS 0
-#define CONFIG_INPUT_BUFFER_SIZE 0
-#endif
-
-#if !defined(CONFIG_PROTECTED_SECNUMS)
-#error "please define CONFIG_PROTECTED_SECNUMS in Makefile"
-#endif
-
-#if !defined(CONFIG_REAL_SECNUMS)
-#error "please define CONFIG_REAL_SECNUMS in Makefile"
-#endif
-
-#if !defined(CONFIG_USER_PROCESS_EACH_SECNUMS)
-#error "please define CONFIG_USER_PROCESS_EACH_SECNUMS in Makefile"
-#endif
-
-
-#if !defined(CONFIG_USER_PROCESS_SECNUMS)
-#error "please define CONFIG_USER_PROCESS_SECNUMS in Makefile"
-#endif
-
-
-#if !defined(CONFIG_INPUT_BUFFER_SIZE)
-#error "please define CCONFIG_INPUT_BUFFER_SIZE in Makefile"
-#endif
+#include <config.h>
 
 #if defined(CODE32)||defined(CODE16) || defined(CODE32USER)   //in standard host enviornment,do not use these definitions.
 			// You must be very careful about typedef
@@ -98,6 +69,7 @@ typedef unsigned char  u8_t;
 #define AS_MACRO inline __attribute__((always_inline))
 #define DEPRECATED __attribute__((deprecated))
 #define NORETURN __attribute__((noreturn))
+#define ATTRIBUTE_ALIGNED(n)  __attribute__ ((aligned (n)))
 
 
 //定义如果一个功能还没有完全实现，就不要使用
