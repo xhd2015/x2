@@ -8,7 +8,7 @@ SECTIONS {
 	.secmbr :{
 		gen/16/main.o(.text)
 	}
-	.secmain 1024:{
+	.secmain :{
 		*(.data) *(.rdata)	*(.bss)	*(.text)
 	}
 	/DISCARD/ : {

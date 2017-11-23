@@ -11,6 +11,7 @@
 #define  CONFIG_REAL_LOAD_PROTECTED_SECNUM 0
 #define  CONFIG_KERNEL_CODE_SIZE 0
 #define  CONFIG_IDT_ITEM_NUM 0
+#define  CONFIG_REAL_INIT_STACK_SIZE 0
 #define  CONFIG_PROTECTED_SECNUMS 0
 #define  CONFIG_KERNEL_PTE_0_NUM 0
 #define  CONFIG_KERNEL_PTE_1_NUM 0
@@ -55,6 +56,10 @@
 
 #if !defined(CONFIG_IDT_ITEM_NUM)
 #error "Please define CONFIG_IDT_ITEM_NUM in Config.makefile"
+#endif
+
+#if !defined(CONFIG_REAL_INIT_STACK_SIZE)
+#error "Please define CONFIG_REAL_INIT_STACK_SIZE in Config.makefile"
 #endif
 
 #if !defined(CONFIG_PROTECTED_SECNUMS)

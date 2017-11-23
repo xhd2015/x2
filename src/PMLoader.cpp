@@ -186,6 +186,15 @@ void PMLoader::mainProcess() //仅16位
 	//只需要读取 CONFIG_REAL_LOAD_PROTECTED_SECNUM 个扇区就可以，并且保证不会超过限制
     PMLoader::adjustProtectedCode();
     
+    //1.5  将栈区结束到prefixsize的地方初始化为0
+    //  现在不再需要中断
+    Util::insertMark(0x191191);
+    short *p=(short*)CONFIG_INIT_STACK_SIZE;
+    short *prefixEnd=(short*)(CONFIG_PREFIX_SIZE >= 0x7c00?0x7c00:CONFIG_PREFIX_SIZE); //一定不要超过当前起始处
+    while(p!=prefixEnd)*p++=0;
+
+
+    //2.初始化GDT表  需要知道具体的GDT，IDE表的绝对位置
     SegmentDescriptor nullSeg,
                         loaderSegCode(0,CONFIG_KERNEL_CODE_SIZE - 1,SegmentDescriptor::G_1B,SegmentDescriptor::TYPE_U_CODE_NONCONFORMING,0),
                         loaderSegData(0,(CONFIG_KERNEL_CODE_SIZE + CONFIG_KERNEL_FREE_MEM_SIZE-1)/SegmentDescriptor::G_4KB_SCALE,SegmentDescriptor::G_4KB,SegmentDescriptor::TYPE_U_DATA,0),
@@ -203,7 +212,6 @@ void PMLoader::mainProcess() //仅16位
     int gdtAddr = CONFIG_INIT_STACK_SIZE%8==0?CONFIG_INIT_STACK_SIZE:(CONFIG_INIT_STACK_SIZE/8*8 + 8);//对其到8字节
     int idtAddr = gdtAddr + 8*CONFIG_GDT_ITEM_NUM;
  
-    //2.初始化GDT表  需要知道具体的GDT，IDE表的绝对位置
 //    nullSeg.writeToMemory(0,(char*)PMLoader::GDT_START);
 //    videoSeg.writeToMemory(0,(char*)PMLoader::GDT_START+1*8);
 //    loaderSegCode.writeToMemory(0,(char*)PMLoader::GDT_START+2*8);

@@ -28,7 +28,7 @@ __asm__(
 "mov %ax,%fs \n\t"
 "mov $0b100000,%ax \n\t"
 "movw %ax,%ss \n\t" //ss选择子
-"mov  $512*20 - 1,%esp \n\t"  // TODO 检查CONFIG_INIT_STACK_SIZE改变时，这里必须也变为相同的数值
+"mov  $CONFIG_INIT_STACK_SIZE - 1,%esp \n\t"
 "call _extraVboxTest\n\t"
 "call _protectedEntryHolder \n\t"
 "DIE: \n\t"

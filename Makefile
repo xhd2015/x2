@@ -33,6 +33,9 @@ STDCPP := stdc++
 include Config.makefile
 CCMACROS_EVAL := $(foreach macro,$(CONFIG_ARGS),-D $(macro)=$$($(macro)))
 $(eval CCMACROS := $(CCMACROS_EVAL))
+# 将符号传递到as
+ASYMS_EVAL := $(foreach macro,$(CONFIG_ARGS),--defsym $(macro)=$$($(macro)))
+$(eval ASSYMS := $(ASYMS_EVAL))
 #CCMACROS := -D CONFIG_PROTECTED_SECNUMS=$(CONFIG_PROTECTED_SECNUMS) -D CONFIG_REAL_SECNUMS=$(CONFIG_REAL_SECNUMS) \
 #			-D CONFIG_USER_PROCESS_EACH_SECNUMS=$(CONFIG_USER_PROCESS_EACH_SECNUMS) \
 #			-D CONFIG_USER_PROCESS_SECNUMS=$(CONFIG_USER_PROCESS_SECNUMS) \
@@ -40,6 +43,7 @@ $(eval CCMACROS := $(CCMACROS_EVAL))
 CCMACROS16 := -D CODE16
 CCMACROS32 := -D CODE32
 CCMACROS32USER := -D CODE32USER
+
 
 
 
@@ -107,12 +111,12 @@ all:
 debug:
 	@echo	CCFLAGS 	'--->'		$(CCFLAGS)
 	echo	args		'--->'		$(args)
-	echo	CCMACROS	'--->'		$(CCMACROS)
 	echo	imageMacros	'--->'		$(imageMacros)
 	echo	ldfiles		'--->'		$(ld32) $(ld16)
 	echo	CONFIG_ARGS	'--->'		'$(CONFIG_ARGS)'
 	echo	CCMACROS_EVAL	'--->'	'$(CCMACROS_EVAL)'
 	echo	CCMACROS	'--->'		'$(CCMACROS)'
+	echo	ASSYMS		'--->'		'$(ASSYMS)'
 	echo	finclude	'--->'		'$(finclude)'
 help:
 	@echo You can specify the args to make a PMLoader.@see PMLoader.h and main.cpp
@@ -167,7 +171,7 @@ backup:$(fbackup)
 	tar --xz -cf $(BACKUP)/x2-$${v}.tar.xz $^
 push : 
 	git push https://github.com/xhd2015/x2.git $(B)
-#===================================================================================
+#=========================Compilations of Files===================================================
 .PHONY : lib64 clean clean32 clean64 clean16
 lib64:$(GEN64)/lib64.a
 	@echo Generated for host 64.
@@ -177,13 +181,13 @@ $(GEN64)/lib64.a:$(patsubst %,$(GEN64)/%.o,$(f64))
 
 
 $(GEN32)/main.img:$(patsubst %,$(GEN32)/%.o,$(f32))
-	ld -Timage_32.ld $(LDFLAGS) $^ -o $@
+	ld -Timage_32.ld $^ -o $@ $(LDFLAGS) $(ASSYMS)
 
 #16位镜像文件的生成依赖prefix的size
 
 
 $(GEN16)/main.img:$(patsubst %,$(GEN16)/%.o,$(f16))
-	ld -Timage_16.ld $(LDFLAGS) $^ -o $@
+	ld -Timage_16.ld $^ -o $@ $(LDFLAGS) $(ASSYMS)
 	
 $(GEN16)/main.bimg: $(GEN16)/main.img
 	objcopy -g -j .secmbr -j .secmain -O binary $< $@
@@ -192,9 +196,9 @@ $(GEN32)/main.bimg: $(GEN32)/main.img
 	
 
 $(GEN32USER)/UserProcess2.img:$(patsubst %,$(GEN32USER)/%.o,$(f32user))
-	ld -Timage_32_proc2.ld	$(LDFLAGS) $^ -o $@
+	ld -Timage_32_proc2.ld	$^ -o $@ $(LDFLAGS) $(ASSYMS)
 $(GEN32USER)/UserProcess1.img:$(patsubst %,$(GEN32USER)/%.o,$(f32user))
-	ld -Timage_32_proc1.ld	$(LDFLAGS) $^ -o $@
+	ld -Timage_32_proc1.ld	$^ -o $@ $(LDFLAGS) $(ASSYMS)
 	
 $(GEN32USER)/UserProcess1.bimg:$(GEN32USER)/UserProcess1.img
 	objcopy -g -j .text -j .data -O binary $< $@
@@ -228,21 +232,21 @@ $(GEN)/main.bimg:partitions_table $(GEN16)/main.bimg $(GEN32)/main.bimg $(GEN32U
 
 # .s --> .o
 $(GEN16)/%.o:$(GEN16)/%.s
-	$(AS) $(ASSYMS) $< -o $@
+	$(AS) $< -o $@ $(ASSYMS) 
 $(GEN32)/%.o:$(GEN32)/%.s
-	$(AS) $(ASSYMS) $< -o $@
+	$(AS) $< -o $@ $(ASSYMS) 
 $(GEN32USER)/%.o:$(GEN32USER)/%.s
-	$(AS) $(ASSYMS) $< -o $@
+	$(AS) $< -o $@ $(ASSYMS) 
 $(GEN64)/%.o:$(SRC)/%.cpp
-	$(CXX) $(CCFLAGS64) $(CCMACROS64) -c $< -o $@
+	$(CXX) -c $< -o $@ $(CCFLAGS64) $(CCMACROS64)
 
 # .cpp --> .s
 $(GEN16)/%.s:$(SRC)/%.cpp
-	$(CXX) $(CCFLAGS) $(CCFLAGS16) $(CCMACROS) $(CCMACROS16) -S $< -o $@
+	$(CXX) -S $< -o $@ $(CCFLAGS) $(CCFLAGS16) $(CCMACROS) $(CCMACROS16)
 $(GEN32)/%.s:$(SRC)/%.cpp
-	$(CXX) $(CCFLAGS) $(CCFLAGS32) $(CCMACROS) $(CCMACROS32) -S $< -o $@
+	$(CXX) -S $< -o $@ $(CCFLAGS) $(CCFLAGS32) $(CCMACROS) $(CCMACROS32)
 $(GEN32USER)/%.s:$(SRC)/%.cpp
-	$(CXX) $(CCFLAGS) $(CCFLAGS32USER) $(CCMACROS) $(CCMACROS32USER) -S $< -o $@
+	$(CXX) -S $< -o $@ $(CCFLAGS) $(CCFLAGS32USER) $(CCMACROS) $(CCMACROS32USER)
 #$(GEN64)/%.s:$(SRC)/%.cpp
 #	$(CXX) $(CCFLAGS64) $(CCMACROS64) -S $< -o $@
 

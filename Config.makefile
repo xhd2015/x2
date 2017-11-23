@@ -27,12 +27,16 @@ CONFIG_INPUT_BUFFER_SIZE := 512
 # 注：当你修改此参数时，应当同时修改protected_main文件的首部
 CONFIG_INIT_STACK_SIZE := $(shell echo $$((20*512)))
 
+# 实模式下初始栈的大小，相对于0x7c0段而言
+# 注：当你修改此变量时，必须对image_16.ld文件进行同步
+CONFIG_REAL_INIT_STACK_SIZE := $(shell echo $$((2*512)))
+
 # 下面两项分别设置了内核代码的大小和可用内存的大小，加起来刚好4MB，形成一个PDE
 # 它们之后就是进程空间
 CONFIG_KERNEL_CODE_SIZE := $(shell echo $$((1*1024*1024)))
 CONFIG_KERNEL_FREE_MEM_SIZE = $(shell echo $$((3*1024*1024)))
 
-CONFIG_PROCESS_MEM_SIZE = 20*1024*1024
+CONFIG_PROCESS_MEM_SIZE = $(shell echo $$((20*1024*1024)))
 
 
 # PDE的项数
@@ -61,9 +65,11 @@ CONFIG_KERNEL_MMNODE_NUM := 200
 # 注意：必须在下面定义的常数的扇区内将第二次加载的代码加载进来
 # 注意：这个值不能超过0x7c00,也就是保护模式的开始
 # 一般设置为代码开始处到0x7c00的最大长度
-CONFIG_REAL_LOAD_PROTECTED_SECNUM := $(shell echo $$(( (0x7c00-$(CONFIG_PREFIX_SIZE))/512 )))
-
-
+ifeq ($(CONFIG_PREFIX_SIZE),)
+CONFIG_REAL_LOAD_PROTECTED_SECNUM := 40
+else
+CONFIG_REAL_LOAD_PROTECTED_SECNUM := $(shell echo $$((  (0x7c00-$(CONFIG_PREFIX_SIZE))/512  )))
+endif
 
 
 ########=========It should be the end of this file=======#################
