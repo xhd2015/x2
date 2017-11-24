@@ -144,6 +144,71 @@ short Util::inw(short port)
     );
     return temp;
 }
+
+void Util::ljmp(int newcs,int neweip)
+{
+	__asm__ __volatile__(
+			"pushw %%cx \n\t"
+#if defined(CODE16)
+			"pushw %%bx \n\t"
+#elif defined(CODE32) || defined(CODE32USER)
+			"push %%ebx \n\t"
+#endif
+			"ljmp *(%esp) \n\t"
+			:
+			:"c"(newcs),"b"(neweip)
+			:"memory"
+	);
+}
+
+void Util::replaceCs(int newcs)
+{
+	__asm__ __volatile__(
+			"pushw  %%cx\n\t"
+			"push  	$1f \n\t"
+			"ljmp *(%esp) \n\t"
+			"1:\n\t"
+			:
+			:"c"(newcs)
+			:"memory"
+	);
+}
+
+#if defined(CODE16)
+int Util::readSectorsCHSInline(int dstSeg,int dstOff,int driver,int cylinder,int head,int startSec,int numSecs)
+{
+	   int isCarried;
+	    __asm__ __volatile__(
+	    "push %%es\n\t"
+	    "// mov 4+4*1(%%ebp),%%eax \n\t" // ax由输入参数设置
+	    "movw %%ax,%%es\n\t"
+	    "// movw 4+4*2(%%ebp),%%bx\n\t" // bx 由输入参数设置
+	    "// movb 4+4*3(%%ebp),%%dl \n\t"
+	    "// movb 4+4*5(%%ebp),%%dh \n\t" // dl由输入参数设置，但是dh只能由head的值来设定
+	    "   movb %[head],%%dh \n\t"
+	    "// movw 4+4*4(%%ebp),%%cx \n\t" // cx由输入参数设定
+	    "shl   $6,%%cx \n\t"
+	    "addb %[startSec],%%cl \n\t"
+	    "movb $0x02,%%ah \n\t"
+	    "movb %[numSecs],%%al \n\t"
+	    "int $0x13 \n\t"
+	    "pop %%es \n\t"
+	    "xor %%eax,%%eax \n\t"
+	    "jc 1f \n\t"
+	    "mov $1,%%eax \n\t"
+	    "1:\n\t"
+	    :"=a"(isCarried)
+	    :"a"(dstSeg),"b"(dstOff),"d"(driver),"c"(cylinder),
+		 	 [head]"m"(head),[startSec]"m"(startSec),[numSecs]"m"(numSecs)
+	    :"memory","cc"
+	    );
+	    return isCarried;
+}
+int Util::readSectorsInline(int dstSeg,int dstOff,int driver,int LBAStart,int numSecs)
+{
+	 return Util::readSectorsCHSInline(dstSeg,dstOff,driver,LBAStart/36,(LBAStart - LBAStart/36*36)/18,(LBAStart%18) + 1,numSecs);
+}
+#endif
 /*
 void Util::pusha()
 {
@@ -239,17 +304,6 @@ void Util::setCurrentSs(int ss)
 			:"a"(ss)
 			 :
 			 );
-}
-void Util::ljmp(int newcs,int neweip)
-{
-	__asm__ __volatile__(
-			"pushw %%cx \n\t"
-			"push  %%ebx \n\t"
-			"ljmp *(%%esp) \n\t"
-			:
-			:"c"(newcs),"b"(neweip)
-			 :
-		);
 }
 
 #if defined(CODE32)

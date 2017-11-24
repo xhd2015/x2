@@ -113,7 +113,16 @@ public:
     AS_MACRO static int	getCurrentSs();
     AS_MACRO static void setCurrentSs(int ss);
     AS_MACRO static void ljmp(int newcs,int neweip);
-
+    /**
+     *  使用ljmp来跳转，eip照常增加
+     *  只是相当于改变cs的内容，但是cs指向的地址不变
+     *  用在32位模式下的虚拟内存映射
+     *
+     *  相当于:
+     *  		ljmp %cs:$HERE
+     *  		HERE:
+     */
+    AS_MACRO static void replaceCs(int newcs);
 
     //==================仅32位
 public:
@@ -201,10 +210,26 @@ public:
      *
      *
     */
-private:
+//private:
+public:
     static int readSectorsCHS(int dstSeg,int dstOff,int driver,int cylinder,int head,int startSec,int numSecs);
+    AS_MACRO static int readSectorsCHSInline(int dstSeg,int dstOff,int driver,int cylinder,int head,int startSec,int numSecs);
 public:
     static int readSectors(int dstSeg,int dstOff,int driver,int LBAStart,int numSecs);
+    /**
+     * 调用该函数总是会生成一个宏，代码总会被插入到那里
+     * 这主要用于16位模式的加载，调用int 0x13
+     * @param dstSeg	目的段
+     * @param dstOff	目的偏移
+     * @param driver	存储器
+     * 			0,1  floppy(0,1)
+     * 			0x80,0x81 hard disk(0,1)
+     * @param LBAStart  28位LBA其实地址
+     * @param numSecs	读取扇区的个数
+     *
+     * 	注意：这个函数作为宏实现,为了节省空间，你可以使用readSectors()替代
+     */
+    AS_MACRO static int readSectorsInline(int dstSeg,int dstOff,int driver,int LBAStart,int numSecs);
 #endif
 
     

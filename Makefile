@@ -48,7 +48,8 @@ CCMACROS32USER := -D CODE32USER
 
 
 #deciding which files are compiled.
-f16 := main libx2 PMLoader Descriptor IOProgramer
+f16mbr := MBRmain libx2 PMLoader Descriptor IOProgramer
+f16vbr := VBRmain libx2
 
 # 顺序问题：IOProgrammer必须被放到首部protected_main之后，因为需要调用磁盘读写
 f32 := KernelMemoryConfig protected_main IOProgramer libx2  VirtualMemory PMLoader Descriptor \
@@ -65,10 +66,12 @@ finclude += $(INCLUDE)/config.h
 
 #需要用到PMLoader中的一些常量
 
-ld16 := image_16.ld
-ld32 := image_32.ld
+ldmbr := image_mbr.ld
+ldvbr := image_vbr.ld
+ldkernel := image_kernel.ld
 
-fbackup := $(INCLUDE) $(GEN) $(SRC) $(ld16) $(ld32) Makefile TODO README.md  $(STDC) $(STDCPP) test tools filesystem deprecated from-gcc
+fbackup := $(INCLUDE) $(GEN) $(SRC) $(ldvbr) $(ldkernel) $(ldmbr) \
+	Makefile TODO README.md  $(STDC) $(STDCPP) test tools filesystem deprecated from-gcc
 
 # CCFLAGS is for all, CCFLAGSXX for CODEXX
 CCFLAGS :=  -fno-exceptions  -nostdinc -nostdinc++ -nostdlib -Winline --no-warnings -I ./include -std=c++11
@@ -146,6 +149,24 @@ ifeq ($(HOST),windows)
 	#mintty -i -e bash --login -c 'cd devel;mintty & sleep 10'  #这个也能成功，只是后台窗口要暂停一会儿
 endif
 
+#.PHONY : compile
+## 格式 make compile TOOL=g++ FILE=src/main.cpp GENDIR=gen
+#compile:
+#	@
+#	tool=$(TOOL)
+#	file=$(FILE)
+#	if [[ $$tool = '' || $$FILE = '' ];then
+#		echo 'You must define tool and file'
+#		exit -1
+#	fi
+#	filebase=$$(basename $$file .cpp)
+#	gendir=$${$(GENDIR):-gen}
+#	
+#	case $(tool) in
+#		$(CXX))
+#			$(CXX) -o $$(gendir)/$$(filebase)
+#			;;
+#		
 
 #====================HOST  specific tools=================
 #注意：你只有先cd到某个目录，才能执行explorer，explorer 路径不能成功。
@@ -181,15 +202,15 @@ $(GEN64)/lib64.a:$(patsubst %,$(GEN64)/%.o,$(f64))
 
 
 $(GEN32)/main.img:$(patsubst %,$(GEN32)/%.o,$(f32))
-	ld -Timage_32.ld $^ -o $@ $(LDFLAGS) $(ASSYMS)
+	ld -T$(ldkernel) $^ -o $@ $(LDFLAGS) $(ASSYMS)
 
 #16位镜像文件的生成依赖prefix的size
 
 
-$(GEN16)/main.img:$(patsubst %,$(GEN16)/%.o,$(f16))
-	ld -Timage_16.ld $^ -o $@ $(LDFLAGS) $(ASSYMS)
+$(GEN16)/MBRmain.img:$(patsubst %,$(GEN16)/%.o,$(f16mbr))
+	ld -T$(ldmbr) $^ -o $@ $(LDFLAGS) $(ASSYMS)
 	
-$(GEN16)/main.bimg: $(GEN16)/main.img
+$(GEN16)/MBRmain.bimg: $(GEN16)/MBRmain.img
 	objcopy -g -j .secmbr -j .secmain -O binary $< $@
 $(GEN32)/main.bimg: $(GEN32)/main.img
 	objcopy -g -j .text -j .data -O binary $< $@
@@ -222,10 +243,10 @@ $(GEN32USER)/UserProcess.bimg:$(GEN32USER)/UserProcess1.bimg $(GEN32USER)/UserPr
 ##########DEPRECATED##################
 # a host specific Makefile is not good Makefile
 	
-$(GEN)/main.bimg:partitions_table $(GEN16)/main.bimg $(GEN32)/main.bimg $(GEN32USER)/UserProcess.bimg
+$(GEN)/main.bimg:partitions_table $(GEN16)/MBRmain.bimg $(GEN32)/main.bimg $(GEN32USER)/UserProcess.bimg
 	cp $(TOOLSDIR)/main.bimg.clean gen/main.bimg
-	dd if=$(GEN16)/main.bimg of=$@ bs=512c count=$(CONFIG_REAL_SECNUMS) conv=notrunc &&\
-	dd if=partitions_table of=$@  bs=1c conv=notrunc seek=$$((0x1BE)) count=$$((512  - 0x1BE)) &&\
+	dd if=$(GEN16)/MBRmain.bimg of=$@ bs=512c count=$(CONFIG_REAL_SECNUMS) conv=notrunc &&\
+	dd if=partitions_table of=$@  bs=1c conv=notrunc seek=$(CONFIG_MBR_PARTITION_START) count=$$((512  - $(CONFIG_MBR_PARTITION_START) )) &&\
 	dd if=$(GEN32)/main.bimg of=$@ bs=512c conv=notrunc seek=$(CONFIG_REAL_SECNUMS) count=$(CONFIG_PROTECTED_SECNUMS) \
 	&&\
 	dd if=$(GEN32USER)/UserProcess.bimg of=$@ bs=512c conv=notrunc seek=$$(( $(CONFIG_PROTECTED_SECNUMS) + $(CONFIG_REAL_SECNUMS) )) count=$(CONFIG_USER_PROCESS_SECNUMS)

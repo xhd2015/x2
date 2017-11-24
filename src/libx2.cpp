@@ -792,33 +792,10 @@ int Queue<T>::put(T t)
 //ebp + 4*n : n>0,第n个参数
 int Util::readSectorsCHS(int dstSeg,int dstOff,int driver,int cylinder,int head,int startSec,int numSecs)
 {
-    int isCarried;
-    __asm__ __volatile__(
-    "push %%es\n\t"
-    "mov 4+4*1(%%ebp),%%eax \n\t"
-    "movw %%ax,%%es\n\t"
-    "movw 4+4*2(%%ebp),%%bx\n\t"
-    "movb 4+4*3(%%ebp),%%dl \n\t"
-    "movb 4+4*5(%%ebp),%%dh \n\t"
-    "movw 4+4*4(%%ebp),%%cx \n\t"
-    "shl   $6,%%cx \n\t"
-    "addb 4+4*6(%%ebp),%%cl \n\t"
-    "movb $0x02,%%ah \n\t"
-    "movb 4+4*7(%%ebp),%%al \n\t"
-    "int $0x13 \n\t"
-    "pop %%es \n\t"
-    "xor %%eax,%%eax \n\t"
-    "jc error \n\t"
-    "mov $1,%%eax \n\t"
-    "error:\n\t"
-    :"=a"(isCarried)
-    :
-    :"memory","cc"
-    );
-    return isCarried;
+	return Util::readSectorsCHSInline(dstSeg, dstOff, driver, cylinder, head, startSec, numSecs);
 }
 int Util::readSectors(int dstSeg,int dstOff,int driver,int LBAStart,int numSecs)
 {
-    return Util::readSectorsCHS(dstSeg,dstOff,driver,LBAStart/36,(LBAStart - LBAStart/36*36)/18,(LBAStart%18) + 1,numSecs);
+   return Util::readSectorsInline(dstSeg, dstOff, driver, LBAStart, numSecs);
 }
 #endif

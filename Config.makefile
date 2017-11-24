@@ -10,10 +10,12 @@ include gen/32/Config.prefixsize.makefile
 # config sec numbers here
 CONFIG_REAL_SECNUMS := 25
 
+# MBR扇区的分区表起始位置
+CONFIG_MBR_PARTITION_START := $(shell echo $$((0x1BE)))
+
 #应当比2048小，因为CODE_LIMIT=0xfffff，恰好是2048个扇区
-CONFIG_PROTECTED_SECNUMS := 250
-#>= 300 有错误
 #250目前是正确的
+CONFIG_PROTECTED_SECNUMS := 250
 
 CONFIG_USER_PROCESS_SECNUMS := 35
 
@@ -24,8 +26,8 @@ CONFIG_USER_PROCESS_EACH_SECNUMS := 16
 CONFIG_INPUT_BUFFER_SIZE := 512
 
 # 注：初始栈的大小至少是4个扇区，小于此则可能发生错误
-# 注：当你修改此参数时，应当同时修改protected_main文件的首部
-CONFIG_INIT_STACK_SIZE := $(shell echo $$((20*512)))
+# 注：依据经验，目前设置成10个会不够用（溢出）
+CONFIG_INIT_STACK_SIZE := $(shell echo $$((15*512)))
 
 # 实模式下初始栈的大小，相对于0x7c0段而言
 # 注：当你修改此变量时，必须对image_16.ld文件进行同步

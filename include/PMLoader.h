@@ -155,8 +155,8 @@ public:
     *at paddr: .word(length) .long(baseaddr).  baseaddr在高地址
     *相对于栈来说，较后面的参数在栈高地址
     */
-    static void setidtr(short len,int address);
-    static void setgdtr(short len,int address);
+    static void setidtr(int len,int address);
+    static void setgdtr(int len,int address);
     /**
     * 必须提供PROTECTED_SEL,PROTECTED_ENTRY的值
     * 或者必须将保护模式代码置于 0b10000:0 处开始

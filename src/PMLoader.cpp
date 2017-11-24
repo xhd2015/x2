@@ -31,23 +31,23 @@ void realModeTest() //this is placed in .test_section,which is placed at 0x7c0:0
     //===========Class Test End============
 
     //===========Util Test Start============
-    int readBase=PMLoader::TEMP_SEG*16;
-    Util::memcopy(PMLoader::TEMP_SEG,512,PMLoader::TEMP_SEG,0,512);//将第一个扇区清空
-    if(Util::readSectors(PMLoader::TEMP_SEG,0,0x80,0,1))//at lower is ok
-    {
-        Util::printStr("Load Tested.\n");
-    }
-    SegmentDescriptor sd1((char*)readBase,1024);
-    char saver[8];
-    sd1.writeToMemory(Util::SEG_CURRENT,saver);
-    SegmentDescriptor sd2;
-    SegmentDescriptor::fromMemory(&sd2,Util::SEG_CURRENT,saver);
-    char saver2[8];
-    sd2.writeToMemory(Util::SEG_CURRENT,saver2);
-    if(sd1.equals(sd2))
-    {
-        Util::printStr("SegmentDescriptor Right!!!\n");
-    }
+//    int readBase=PMLoader::TEMP_SEG*16;
+//    Util::memcopy(PMLoader::TEMP_SEG,512,PMLoader::TEMP_SEG,0,512);//将第一个扇区清空
+//    if(Util::readSectors(PMLoader::TEMP_SEG,0,0x80,0,1))//at lower is ok
+//    {
+//        Util::printStr("Load Tested.\n");
+//    }
+//    SegmentDescriptor sd1((char*)readBase,1024);
+//    char saver[8];
+//    sd1.writeToMemory(Util::SEG_CURRENT,saver);
+//    SegmentDescriptor sd2;
+//    SegmentDescriptor::fromMemory(&sd2,Util::SEG_CURRENT,saver);
+//    char saver2[8];
+//    sd2.writeToMemory(Util::SEG_CURRENT,saver2);
+//    if(sd1.equals(sd2))
+//    {
+//        Util::printStr("SegmentDescriptor Right!!!\n");
+//    }
     Util::printStr("Util The End.\n");
 //    Util::jmpDie();
 
@@ -82,22 +82,58 @@ void PMLoader::enableA20()
        "outb %al,$0x92 \n\t"
     );
 }
-void PMLoader::setidtr(short len,int address)
-{
 
-    __asm__(
-        "movw 4+4*1(%ebp),%ax \n\t"
-        "movw %ax,4+4*1+2(%ebp) \n\t"
-        "lidt 4+4*1+2(%ebp) \n\t"
-    );
-}
-void PMLoader::setgdtr(short len,int address)
+// 注意：此函数依赖堆栈框架，所以请不要将其作为宏实现
+//	一旦作为宏，堆栈的假设就不成立，即len的位置不在address之前，就错误
+void PMLoader::setidtr(int len,int address)
 {
-    __asm__(
-        "movw 4+4*1(%ebp),%ax \n\t"
-        "movw %ax,4+4*1+2(%ebp) \n\t"
-        "lgdt 4+4*1+2(%ebp) \n\t"
+	// NOTE 当使用宏实现时，不能依赖于栈参数
+	// EFF 探讨是否可以不用复制两个字节
+    __asm__ __volatile__(
+        "movw 4+4*1(%%ebp),%%ax \n\t" //len参数前两字节
+        "movw %%ax,4+4*1+2(%%ebp) \n\t" //len参数的高两字节
+        "lidt 4+4*1+2(%%ebp) \n\t"
+    		:
+    		:
+			:
     );
+	// 按照32位堆栈传递时，内存如下
+	// [address] 4字节
+	// [len]2字节  [未设置]2字节
+	// 这是为了32位对齐
+	// 操作时，先将len往高位上复制两个字节，然后载入那个地址的内容
+//	    __asm__ __volatile__(
+//	    		"lea %[idtr_addr_high],%%eax \n\t"
+//	    		"sub  $2,%%eax \n\t"
+//	    		"movw %%ss:-2(%%eax), %%bx \n\t"
+//	    		"movw %%bx,%%ss:(%%eax) \n\t"
+//	    		"lidt %%ss:(%%eax) \n\t"
+//	    		:
+//	    		:[idtr_addr_high]"m"(address) //address的地址就是idtr_addr的地址+2
+//				:"ebx"
+//	    );
+}
+void PMLoader::setgdtr(int len,int address)
+{
+    __asm__ __volatile__(
+        "movw 4+4*1(%%ebp),%%ax \n\t"
+        "movw %%ax,4+4*1+2(%%ebp) \n\t"
+        "lgdt 4+4*1+2(%%ebp) \n\t"
+    		:
+    		:
+			:
+    );
+//	// 参见setidtr
+//    __asm__ __volatile__(
+//    		"lea %[ldtr_addr_high],%%eax \n\t"
+//    		"sub  $2,%%eax \n\t"
+//    		"movw %%ss:-2(%%eax), %%bx \n\t"
+//    		"movw %%bx,%%ss:(%%eax) \n\t"
+//    		"lidt %%ss:(%%eax) \n\t"
+//    		:
+//    		:[ldtr_addr_high]"m"(address) //address的地址就是idtr_addr的地址+2
+//			:"ebx"
+//    );
 }
 void PMLoader::enterProtected()
 {
@@ -191,7 +227,11 @@ void PMLoader::mainProcess() //仅16位
     Util::insertMark(0x191191);
     short *p=(short*)CONFIG_INIT_STACK_SIZE;
     short *prefixEnd=(short*)(CONFIG_PREFIX_SIZE >= 0x7c00?0x7c00:CONFIG_PREFIX_SIZE); //一定不要超过当前起始处
-    while(p!=prefixEnd)*p++=0;
+    int temp;
+    Util::enterDs(0x0, temp); //强制使ds为0
+    while(p!=prefixEnd)
+    	*p++=0;
+    Util::leaveDs(0x0, temp);
 
 
     //2.初始化GDT表  需要知道具体的GDT，IDE表的绝对位置

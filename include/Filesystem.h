@@ -2,6 +2,8 @@
 #ifndef Filesystem_h
 #define Filesystem_h
 
+#include <def.h>
+
 /**
 *using policy designate
 *
@@ -47,6 +49,32 @@ class FATFileSystem{
 *		as it is simple filesystem,most kernel can use it with as few modifications as possible
 */
 
+
+#pragma pack(push,1)
+class MBRPartitionEntry{
+public:
+	char	activeFlag;
+	char	chsStart[3];
+	char	chsEnd[3];
+	char	paritionType;
+	u32_t	lbaStart;
+	u32_t	sectorNum;
+};
+
+class MBRTable{
+public:
+	MBRTable()=default;
+	~MBRTable();
+public:
+
+	MBRPartitionEntry	table[4];
+
+	int		findFirstActive();
+
+
+};
+
+#pragma pack(pop)
 
 
 
