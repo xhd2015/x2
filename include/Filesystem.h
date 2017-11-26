@@ -53,10 +53,14 @@ class FATFileSystem{
 #pragma pack(push,1)
 class MBRPartitionEntry{
 public:
-	char	activeFlag;
-	char	chsStart[3];
-	char	chsEnd[3];
-	char	paritionType;
+	enum{
+		FLAG_ACTIVE=0x80u,
+		FLAG_NON_ACTIVE=0x0u
+	};
+	u8_t	activeFlag;
+	u8_t	chsStart[3];
+	u8_t	chsEnd[3];
+	u8_t	paritionType;
 	u32_t	lbaStart;
 	u32_t	sectorNum;
 };
@@ -69,7 +73,7 @@ public:
 
 	MBRPartitionEntry	table[4];
 
-	int		findFirstActive();
+	AS_MACRO int		findFirstActiveInline();
 
 
 };

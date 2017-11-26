@@ -12,7 +12,7 @@ __asm__(".code32 \n\t");
 TSS::TSS()
 {
 	//清零
-	int i;
+	size_t i;
 	for(i=0;i * sizeof(int) < sizeof(*this);i++)//fast
 	{
 		*((int*)this + i)=0;

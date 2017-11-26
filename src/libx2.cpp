@@ -36,6 +36,7 @@ int Util::printf(const char *fmt,...)
 #elif defined(CODE32) || defined(CODE16) || defined(CODE32USER)
 	//I don't know what todo
 	Util::printStr(fmt);
+	return 0;
 #endif
 }
 
@@ -222,27 +223,7 @@ void Util::setl(int seg,int off,int word)
 
 void Util::memcopy(int srcSeg,int srcOff,int dstSeg,int dstOff,int len)
 {   
-#if defined(CODE32)||defined(CODE16)
-    ENTER_ES(dstSeg,s2);
-    ENTER_DS(srcSeg,s1);
-
-    __asm__( //ds:si --> es:di
-    "push %esi \n\t"
-    "push %edi \n\t"
-    "mov 4+4*2(%ebp),%esi \n\t"
-    "mov 4+4*4(%ebp),%edi \n\t"
-    "mov 4+4*5(%ebp),%ecx \n\t"
-    "cld \n\t"
-    "rep movsb \n\t"
-    "pop %edi \n\t"
-    "pop %esi \n\t"
-    );
-    
-    LEAVE_DS(srcSeg,s1);
-    LEAVE_ES(dstSeg,s2);
-#elif defined(CODE32USER)
-
-#endif
+	Util::memcopyInlineable(srcSeg, srcOff, dstSeg, dstOff, len);
 }
 
 void Util::clr()
@@ -487,7 +468,7 @@ x0(x0+this->rows>=Printer::SCREEN_MAX_X?0:x0),
 y0(y0+this->cols>=Printer::SCREEN_MAX_Y?0:y0),
 x(0),y(0),
 mode(mode),
-sonSize(0),father(NULL)
+father(NULL),sonSize(0)
 {
      
 }
@@ -508,11 +489,11 @@ void Printer::move(int n)
             this->x=this->rows - 1;
         }
     }
-    while(this->y >= this->cols)
+    while(this->y >= (int)this->cols)
     {
         this->y -= this->cols;
         this->x++;
-        if(this->x==this->rows)
+        if(this->x==(int)this->rows)
         {
             this->x = 0 ;
         }
@@ -663,9 +644,9 @@ void Printer::__putc(int chr)
 void Printer::clr()
 {
     this->setPos(0,0);
-    for(int i=0;i!=this->rows;i++)
+    for(size_t i=0;i!=this->rows;i++)
     {
-        for(int j=0;j!=this->cols;j++)
+        for(size_t j=0;j!=this->cols;j++)
         {
             this->putc(' ');
         }
@@ -733,7 +714,8 @@ String String::valueOf(int n)
 
 //============class : Queue<T>
 template<typename T>
-Queue<T>::Queue(T p[],size_t len):p(p),len(len),curLen(0),indexRemove(0),indexAdd(0)
+Queue<T>::Queue(T p[],size_t len):
+p(p),len(len),curLen(0),indexAdd(0),indexRemove(0)
 {
     
 }

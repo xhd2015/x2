@@ -17,9 +17,13 @@
 int which;
 //_process1
 
-__asm__(".section .proc1\n\t"
-		"jmp .\n\t");
-extern "C" __attribute__((section(".proc1"))) void process1()
+__asm__(".section .proc1,\"x\" \n\t"
+		"jmp . \n\t"
+);
+// TODO 检查下面的代码是否生成了堆栈框架，如果没有，去掉上面这段代码
+extern "C"
+__attribute__((optimize("-fomit-frame-pointer")))
+__attribute__((section(".proc1"))) void process1()
 {
 	Util::jmpDie();
 	Util::insertMark(0xCCCC);

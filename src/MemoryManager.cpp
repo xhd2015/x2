@@ -25,9 +25,12 @@ __asm__(".code32 \n\t");
 #include <cstdio>
 #include <cstring>
 #include <64/MallocToSimple.h>
-	template class MemoryManager<MallocToSimple>;
-	template class LinearSourceManager<LinearSourceDescriptor, MallocToSimple>;
-
+#include <EnvInterface64Impl.h>
+#include <File.h>
+	template class MemoryManager<MallocToSimple64Impl>;
+	template class MemoryManager<X2fsUtil<EnvInterface64Impl>::PartialMallocToSimple>;
+	template class LinearSourceManager<LinearSourceDescriptor, MallocToSimple64Impl>;
+	template class LinearSourceManager<LinearSourceDescriptor, X2fsUtil<EnvInterface64Impl>::PartialMallocToSimple>;
 #endif
 //
 //#if defined(CODE32)
@@ -215,7 +218,7 @@ void MemoryManager<_DescriptorAllocator>::withdrawNode(TreeNode<MemoryDescriptor
 
     //开始合并
     TreeNode<MemoryDescriptor> *prev=(TreeNode<MemoryDescriptor>*)exactNode->getPrevious();
-    if(prev && prev->getData().isAllocable() && exactNode->getData().getStart() - prev->getData().getStart() == (int)prev->getData().getLimit() )
+    if(prev && prev->getData().isAllocable() && exactNode->getData().getStart() - prev->getData().getStart() == prev->getData().getLimit() )
     {
     //	Util::printStr("combine..");
         prev->getData().setLimit(prev->getData().getLimit() + exactNode->getData().getLimit() );
@@ -227,7 +230,7 @@ void MemoryManager<_DescriptorAllocator>::withdrawNode(TreeNode<MemoryDescriptor
     }//OK,the previous node cheking is done
 
     TreeNode<MemoryDescriptor> *nxt=(TreeNode<MemoryDescriptor>*)prev->getNext();
-    if(nxt && nxt->getData().isAllocable() && nxt->getData().getStart() - prev->getData().getStart() == (int)prev->getData().getLimit() )
+    if(nxt && nxt->getData().isAllocable() && nxt->getData().getStart() - prev->getData().getStart() == prev->getData().getLimit() )
     {
         prev->getData().setLimit(prev->getData().getLimit() + nxt->getData().getLimit() );
         // //将next的子节点移动到此处
@@ -430,6 +433,9 @@ void*   MemoryManager<_DescriptorAllocator>::extend(size_t start,size_t size,int
 			break;
     }
 
+    // TODO 检查下面这个返回是否正确
+    return NULL;
+
 }
 /**
 *   Following:
@@ -512,7 +518,7 @@ TreeNode<MemoryDescriptor>* MemoryManager<_DescriptorAllocator>::findFirstStart(
 		}
         p=This::nextAllocable(p);
 	}
-	while(p && (int)(p->getData().getLimit() - len) < start - p->getData().getStart() )
+	while(p && p->getData().getLimit() - len < start - p->getData().getStart() )
 	{
         p=This::nextAllocable(p);
 	}
@@ -606,7 +612,7 @@ TreeNode<MemoryDescriptor>* MemoryManager<_DescriptorAllocator>::locateForInsert
     int start=son->getData().getStart();
     unsigned int len=son->getData().getLimit();
     
-	while(p && start - p->getData().getStart() < (int)p->getData().getLimit() )
+	while(p && start - p->getData().getStart() < p->getData().getLimit() )
 	{
 		p=(TreeNode<MemoryDescriptor>*)p->getNext();
 	}
@@ -616,7 +622,8 @@ TreeNode<MemoryDescriptor>* MemoryManager<_DescriptorAllocator>::locateForInsert
         {
             TreeNode<MemoryDescriptor> *forward=(TreeNode<MemoryDescriptor>*)p->getNext();
             
-            if(forward->getData().getStart() - start >= (int)len)
+            // size_t - int = size_t
+            if(forward->getData().getStart() - start >= len)
             {
                 return p;   //valid
             }else{
@@ -679,6 +686,8 @@ int MemoryManager<_DescriptorAllocator>::addToTree(TreeNode<MemoryDescriptor>* r
             {
                 
             }
+            // TODO 完成这个函数
+            return 0;
 }
 /**
 * head mustn't be NULL!!

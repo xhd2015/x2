@@ -42,9 +42,10 @@ Process::Process(
 ):
 		ErrorSaver(This::ERROR_NO_ERROR),
 		pid(pid),
+		status(This::STATUS_READY),
+		ptss(ptss),
 ldtm(ldtNStart,ldtTStart,ldtNItems,true),
-ptss(ptss),
-status(This::STATUS_READY),
+
 absBase(absBase),
 processBase(thisPrcBase),
 baseKsmm(),

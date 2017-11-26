@@ -7,29 +7,29 @@
 #include <cstdio>
 #include <List.h>
 #include <MemoryManager.h>
-	template class MallocToSimple<TreeNode<MemoryDescriptor> >;
-	template class MallocToSimple<ListNode<LinearSourceDescriptor> >;
+#include <EnvInterface64Impl.h>
+	template class MallocToSimple<TreeNode<MemoryDescriptor>,EnvInterface64Impl>;
+	template class MallocToSimple<ListNode<LinearSourceDescriptor>,EnvInterface64Impl>;
 #endif
 
 //============class functions definition
-template<class T>
-MallocToSimple<T>::MallocToSimple()
+template<class T,class __EnvInterface>
+MallocToSimple<T,__EnvInterface>::MallocToSimple(_EnvInterface *env):env(env)
+{
+
+}
+template<class T,class __EnvInterface>
+MallocToSimple<T,__EnvInterface>::~MallocToSimple()
 {
 
 }
 
-template<class T>
-MallocToSimple<T>::~MallocToSimple()
-{
-
-}
-
-template<class T>
-T *MallocToSimple<T>::getNew()
+template<class T,class __EnvInterface>
+T * MallocToSimple<T,__EnvInterface>::getNew()
 {
 //	printf("in getNew of MallocToSimple\n");
 //	printf("sizeof(T)=%d,sizeof(mynode)=%d\n",sizeof(T),sizeof(TreeNode<MemoryDescriptor>));
-	return (T*)malloc(sizeof(T));
+	return (T*)env->malloc(sizeof(T));
 //	return (T*) (new char[sizeof(T)]);
 //	TreeNode<MemoryDescriptor> *p=(TreeNode<MemoryDescriptor>*)malloc(sizeof(T));
 //	new (p) TreeNode<MemoryDescriptor>(MemoryDescriptor(0,0));
@@ -38,8 +38,8 @@ T *MallocToSimple<T>::getNew()
 }
 
 
-template<class T>
-void MallocToSimple<T>::withdraw(T *t)
+template<class T,class __EnvInterface>
+void  MallocToSimple<T,__EnvInterface>::withdraw(T *t)
 {
-	free(t);
+	env->free((u8_t*)t);
 }

@@ -39,7 +39,7 @@ AssociatedMemoryManager<T,MaxArrNum>::~AssociatedMemoryManager() {
 template<class T, size_t MaxArrNum>
 typename AssociatedMemoryManager<T,MaxArrNum>::TargetType* AssociatedMemoryManager<T,MaxArrNum>::getNew()
 {
-	for(int i=0;i<MaxArrNum;i++)
+	for(size_t i=0;i<MaxArrNum;i++)
 	{
 		if(!this->manArrs[this->lastMan].isFull())
 		{
@@ -54,7 +54,7 @@ typename AssociatedMemoryManager<T,MaxArrNum>::TargetType* AssociatedMemoryManag
 template<class T, size_t MaxArrNum>
 void AssociatedMemoryManager<T,MaxArrNum>::withraw(TargetType* t)
 {
-	for(int i=0;i<MaxArrNum;i++)
+	for(size_t i=0;i<MaxArrNum;i++)
 	{
 		size_t index=this->manArrs[i].getTargetIndex(t);
 		if(index < this->manArrs[i].getLen())
@@ -78,18 +78,23 @@ void			AssociatedMemoryManager<T,MaxArrNum>::setMan(size_t index,size_t nstart,s
 //============class  AssociatedMemoryManager<T,1>
 template<class T>
 AssociatedMemoryManager<T, 1>::AssociatedMemoryManager():
-nstart(0),tstart(0),len(0),curAllocedSize(0),lastIndex(0)
+nstart(0),tstart(0),len(0),
+lastIndex(0),
+curAllocedSize(0)
 {
 }
 template<class T>
 AssociatedMemoryManager<T, 1>::AssociatedMemoryManager(size_t nstart,size_t tstart,size_t len,bool nodeArrInit,int *usedList,size_t usedLen):
-nstart(nstart),tstart(tstart),len(len),
-curAllocedSize(usedLen),lastIndex(0)
+nstart(nstart),
+tstart(tstart),
+len(len),
+lastIndex(0),
+curAllocedSize(usedLen)
 {
 //	Kernel::printer->putsz("in AssociatedMemoryManager init\n");
 	if(nodeArrInit)
 	{
-		for(int i=0;i<this->len;i++)
+		for(size_t i=0;i<this->len;i++)
 		{
 			narr[i].setAlloced(false);
 		}
@@ -111,7 +116,7 @@ typename AssociatedMemoryManager<T,1>::TargetType *AssociatedMemoryManager<T,1>:
     TargetType *rt=NULL;
     if(!this->isFull())
     {
-        for(int i=0;i!=this->len;i++)
+        for(size_t i=0;i!=this->len;i++)
         {
             if(this->narr[this->lastIndex].isFree())
             {

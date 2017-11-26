@@ -1,0 +1,9 @@
+使用fdisk创建的硬盘文件,信息如下
+Device       Boot Start   End Sectors Size Id Type
+/dev/loop0p1       2048 12287   10240   5M 83 Linux
+/dev/loop0p2 *    12288 20479    8192   4M 83 Linux
+包含分区1和2，第2个分区是启动分区
+
+使用命令 'file' 显示的文件信息如下
+hdd.img: DOS/MBR boot sector; partition 1 : ID=0x83, start-CHS (0x0,32,33), end-CHS (0x0,195,3), startsector 2048, 10240 sectors; partition 2 : ID=0x83, active, start-CHS (0x0,195,4), end-CHS (0x1,70,5), startsector 12288, 8192 sectors
+

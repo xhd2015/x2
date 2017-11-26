@@ -77,6 +77,8 @@ public:
 #if defined(CODE16)
 		DRIVER = 0x80,  /*valid only for real mode*/
 #endif
+
+#if defined(CODE16) || defined(CODE32)
 		RESERVED_SECNUM = 32,
 		REAL_SECNUMS = CONFIG_REAL_SECNUMS,
 
@@ -87,6 +89,8 @@ public:
 		PROCESS_SECNUMS = CONFIG_USER_PROCESS_SECNUMS,
 		PROCESS_EACH_SECNUMS = CONFIG_USER_PROCESS_EACH_SECNUMS,
 		TEMP_SEG = 0xa00,
+#endif
+
 #if defined(CODE32)
 		/////////////Kernel arguments
 

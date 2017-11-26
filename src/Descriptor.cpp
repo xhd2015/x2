@@ -57,7 +57,7 @@ SegmentDescriptor::~SegmentDescriptor()
 
 }
 SegmentDescriptor::SegmentDescriptor(char* baseaddr,int limit,char g,char type,char dpl,char s,char b,char p)
-:AVL(0),G(g),D(b),P(p),S(s),L(0),DPL(dpl),type(type)
+:type(type),S(s),DPL(dpl),P(p),AVL(0),L(0),D(b),G(g)
 {
 	this->setBaseAddr((int)(size_t)baseaddr);
 	this->setLimit(limit);
@@ -210,7 +210,7 @@ void SegmentDescriptor::init(char* baseaddr,int limit,char type,char dpl,char s,
 //const int SelectorDescriptor::SIZE_16=0,
 //        SelectorDescriptor::SIZE_32=1;
 SelectorDescriptor::SelectorDescriptor():
-		__D(0),__DPL(0),__P(0)
+		__P(0),__DPL(0),__D(0)
 {
 
 }

@@ -25,6 +25,26 @@ void Util::reboot()
     :"eax"
     );
 }
+void Util::memcopyInlineable(int srcSeg,int srcOff,int dstSeg,int dstOff,int len)
+{
+#if defined(CODE32)||defined(CODE16)
+    ENTER_ES(dstSeg,s2);
+    ENTER_DS(srcSeg,s1);
+
+    __asm__ __volatile__( //ds:si --> es:di
+    "cld \n\t"
+    "rep movsb \n\t"
+    		:
+    		:"S"(srcOff),"D"(dstOff),"c"(len)
+			:
+    );
+
+    LEAVE_DS(srcSeg,s1);
+    LEAVE_ES(dstSeg,s2);
+#elif defined(CODE32USER)
+
+#endif
+}
 #endif
 
 
@@ -49,6 +69,19 @@ void Util::insertMark(int marker)
 void Util::jmpDie()
 {
     __asm__("jmp .\n\t");
+}
+void jmp(int addr)
+{
+	__asm__ __volatile__(
+#if defined(CODE16)
+			"jmp %%ax \n\t"
+#elif defined(CODE32)
+			"jmp %%eax \n\t"
+#endif
+			:
+			:"a"(addr)
+			:
+	);
 }
 
 void Util::cli()
@@ -154,7 +187,7 @@ void Util::ljmp(int newcs,int neweip)
 #elif defined(CODE32) || defined(CODE32USER)
 			"push %%ebx \n\t"
 #endif
-			"ljmp *(%esp) \n\t"
+			"ljmp *(%%esp) \n\t"
 			:
 			:"c"(newcs),"b"(neweip)
 			:"memory"
@@ -165,12 +198,27 @@ void Util::replaceCs(int newcs)
 {
 	__asm__ __volatile__(
 			"pushw  %%cx\n\t"
+#if defined(CODE32)
 			"push  	$1f \n\t"
-			"ljmp *(%esp) \n\t"
+#elif defined(CODE16)
+			"pushw  $1f \n\t"
+#endif
+			"ljmp *(%%esp) \n\t"
 			"1:\n\t"
 			:
 			:"c"(newcs)
 			:"memory"
+	);
+}
+void Util::replaceSS_DS_ES(int newseg)
+{
+	__asm__ __volatile__(
+			"mov %%ax,%%ss \n\t"
+			"mov %%ax,%%ds \n\t"
+			"mov %%ax,%%es \n\t"
+			:
+			:"a"(newseg)
+			:
 	);
 }
 
@@ -208,6 +256,23 @@ int Util::readSectorsInline(int dstSeg,int dstOff,int driver,int LBAStart,int nu
 {
 	 return Util::readSectorsCHSInline(dstSeg,dstOff,driver,LBAStart/36,(LBAStart - LBAStart/36*36)/18,(LBAStart%18) + 1,numSecs);
 }
+int Util::readSectorsExt(int driver,ExtendedInt0x13Info *info)
+{
+	int isError;
+	__asm__ __volatile__(
+			"movb %[func_ah],%%ah \n\t"
+			"movb %[driver_dl],%%dl \n\t"
+			"int $0x13 \n\t"
+			"mov $1,%%eax \n\t" //成功返回1
+			"jnc   1f \n\t"
+			"mov $0,%%eax \n\t"  //错误返回0
+			"1:"
+			:"=a"(isError)
+			:[func_ah]"i"(ExtendedInt0x13Info::FUNC_42_READ_LBA),[driver_dl]"m"(driver),"S"(info)
+			:
+	);
+	return isError;
+}
 #endif
 /*
 void Util::pusha()
@@ -219,6 +284,21 @@ void Util::popa()
     __asm__("popa \n\t");
 }
 */
+#endif
+
+#if defined(CODE16)
+ExtendedInt0x13Info::ExtendedInt0x13Info(u16_t dstSeg,u16_t dstOff,u32_t lbaAddrLow,u16_t sectorNum,u32_t lbaAddrHigh):
+		thisStructSize(16),reserved(0),
+		sectorNum(sectorNum),
+		dstOff(dstOff),
+		dstSeg(dstSeg),
+		lbaAddrLow(lbaAddrLow),
+		lbaAddrHigh(lbaAddrHigh)
+
+{
+
+}
+
 #endif
 
 #if defined(CODE32) || defined(CODE32USER)

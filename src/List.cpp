@@ -31,22 +31,30 @@
 	template class LinkedList<TreeNode<Process*>*,KernelSmmWrapper>;
 	template class Tree<MemoryDescriptor,KernelSmmWrapper>;
 #elif defined(CODE64)
+
+
+
 #include <cstdio>
-#include "filesystem/verify-in-cygwin/File.h"
+#include <EnvInterface64Impl.h>
+#include <File.h>
 #include <64/MallocToSimple.h>
+
 	template class TreeNode<FileDescriptor>;
 	template class SimpleMemoryManager<TreeNode<FileDescriptor> >;
 	template class TreeNode<int>;
 	template class SimpleMemoryManager<TreeNode<int> >;
 	template class TreeNode<MemoryDescriptor>;
 	template class Tree<FileDescriptor,SimpleMemoryManager>;
-	template class Tree<MemoryDescriptor, MallocToSimple>;
+	template class Tree<MemoryDescriptor, MallocToSimple64Impl>;
 	template class ListNode<LinearSourceDescriptor>;
 	template class ListNode<FileDescriptor>;
 	template class ListNode<MemoryDescriptor>;
-	template class LinkedList<LinearSourceDescriptor, MallocToSimple>;
-	template class LocateableLinkedList<LinearSourceDescriptor, Locator<LinearSourceDescriptor>::KEEP, MallocToSimple>;
-	template class LocateableLinkedList<LinearSourceDescriptor, Locator<LinearSourceDescriptor>::DISCARD, MallocToSimple>;
+	template class LinkedList<LinearSourceDescriptor, MallocToSimple64Impl>;
+	template class LocateableLinkedList<LinearSourceDescriptor, Locator<LinearSourceDescriptor>::KEEP, MallocToSimple64Impl>;
+	template class LocateableLinkedList<LinearSourceDescriptor, Locator<LinearSourceDescriptor>::DISCARD, MallocToSimple64Impl>;
+	template class LocateableLinkedList<LinearSourceDescriptor, Locator<LinearSourceDescriptor>::DISCARD, X2fsUtil<EnvInterface64Impl>::PartialMallocToSimple>;
+	template class Tree<MemoryDescriptor, X2fsUtil<EnvInterface64Impl>::PartialMallocToSimple>;
+	template class LinkedList<LinearSourceDescriptor, X2fsUtil<EnvInterface64Impl>::PartialMallocToSimple>;
 #endif
 
 
@@ -59,15 +67,17 @@
 template <class T>
 SimpleMemoryManager<T>::SimpleMemoryManager(size_t start,size_t limit,bool doInit,size_t initSize,SimpleMemoryManager<T>::ERROR_HANDLER errhandle):
 start(start),limit(limit),
-data((FullNode*)start),len(limit/x2sizeof(FullNode)),curSize(initSize),
+data((FullNode*)start),curSize(initSize),len(limit/x2sizeof(FullNode)),
 lastIndex(0),
 errhandle(errhandle)
 {
+#if defined(CODE32)
 	Kernel::printer->puti("len=",len);
+#endif
     if(doInit)
     {
 
-        for(int i=0;i!=len;i++)
+        for(size_t i=0;i!=len;i++)
         {
 //        	Kernel::printer->puti("i=",i);
            data[i].SimpleMemoryNode::setAlloced(false);
@@ -98,7 +108,7 @@ typename SimpleMemoryManager<T>::FullNode *SimpleMemoryManager<T>::getNewNode()
     FullNode *rt=NULL;
     if(!isFull())
     {
-        for(int i=0;i!=len;i++)
+        for(size_t i=0;i!=len;i++)
         {
             if(data[lastIndex].isAlloced()==false)
             {
@@ -120,9 +130,9 @@ template <class T>
 void SimpleMemoryManager<T>::withdraw(SimpleMemoryManager<T>::FullNode *t)
 {
 	FullNode* _t=(FullNode*)t;
-    if(_t && !_t->isFree())
+    if(_t && _t->isAlloced())
     {
-        _t->free(); //如果被标记为可用，就用lastIndex指向之
+        _t->setAlloced(false); //如果被标记为可用，就用lastIndex指向之
         curSize--;
         lastIndex = (size_t)(((size_t)_t - (size_t)start)/sizeof(FullNode)) % len;
     }
@@ -652,8 +662,8 @@ ListNode<_Locateable>* LocateableLinkedList<_Locateable,_HowAllocated,_Allocator
 template<class T>
 TreeNode<T>::TreeNode(const T& data,TreeNode<T>* father,TreeNode<T>* son,TreeNode<T>* next,TreeNode<T>* previous):
 ListNode<T>(data,next,previous),
-father(father),
-son(son)
+son(son),
+father(father)
 {
 
 }
@@ -738,7 +748,10 @@ TreeNode<T>* TreeNode<T>::removeSon() {
 		son->setFather(this);
 		this->getSon()->setFather(NULL);
 		this->getSon()->setSon(NULL);
+
 	}
+	// TODO 改变返回参数，什么都不返回
+	return NULL;
 }
 template<class T>
 void 			TreeNode<T>::adjustOffset(ptrdiff_t diff)
@@ -766,6 +779,8 @@ TreeNode<T>* TreeNode<T>::removeFather() {
 		this->getDirectFather()->setFather(NULL);
 		this->getDirectFather()->setSon(NULL);
 	}
+	//TODO 返回void
+	return NULL;
 }
 
 template<class T>
@@ -786,13 +801,14 @@ template<class T,template <class> class _Allocator>
 Tree<T,_Allocator>::Tree(_Allocator<TreeNode<T> >* smm,TreeNode<T>* root):
 smm(smm)
 {
-
+#if defined(CODE32)
 	Kernel::printer->putsz("in Tree init.");
 	Kernel::printer->putsz("in Tree init2");
 	Kernel::printer->putsz("in Tree init3");
 	Kernel::printer->putsz("\n");
 	Kernel::printer->putsz("in Tree init4");
 	Util::insertMark(0x785785); // 0013417
+#endif
 
 	// TODO 恢复下面的代码
 	TreeNode<T> *node=smm->getNew();
@@ -801,8 +817,9 @@ smm(smm)
 	node->initToNull();
 	this->root=(root==NULL?node:root);
 
-
+#if defined(CODE32)
 	Kernel::printer->putsz("in Tree init return\n");
+#endif
 	//char saver[sizeof(T)];
 	//new (this->root) TreeNode<T>(*(T*)saver);//root must be very carefully initiated,but if you don't do that,it is fine.Do be very
 	//careful about the actual type at a position.Because that's really important.

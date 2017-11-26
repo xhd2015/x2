@@ -10,7 +10,7 @@
 #include <Descriptor.h>
 #include <AssociatedMemoryManager.h>
 
-#if defined(CODE32)||defined(CODE64)
+#if defined(CODE32)
 /**
  * 一个符合内存分配器标准的分配器，只能用于内核。
  *

@@ -10,7 +10,7 @@
 
 #include <VirtualMemory.h>
 
-#if defined(CODE32) || defined(CODE64)
+#if defined(CODE32)
 //=============function macros
 CR3::CR3(u32_t cr3)
 {

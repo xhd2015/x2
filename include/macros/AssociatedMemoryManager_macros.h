@@ -88,7 +88,7 @@ size_t AssociatedMemoryManager<T, 1>::getTargetIndex(TargetType* t)const
 {
 //	ptrdiff_t diff=((char*)t - (char*)this->tarr)/sizeof(*t);
 	ptrdiff_t diff=t - this->tarr;
-	return (t==NULL || diff<0||diff >= this->len) ?(this->len +1 ):(size_t)diff;
+	return (t==NULL || diff<0||(size_t)diff >= this->len) ?(this->len +1 ):(size_t)diff;
 
 }
 template<class T>
@@ -96,7 +96,7 @@ size_t		AssociatedMemoryManager<T, 1>::getNodeIndex(NodeType* n)const
 {
 //	ptrdiff_t diff=((char*)n - (char*)this->narr)/sizeof(*n);
 	ptrdiff_t diff=n - this->narr;
-	return (n==NULL||diff<0||diff >= this->len) ?(this->len +1 ):(size_t)diff;
+	return (n==NULL||diff<0||(size_t)diff >= this->len) ?(this->len +1 ):(size_t)diff;
 }
 template<class T>
 size_t		AssociatedMemoryManager<T, 1>::getEachSize()

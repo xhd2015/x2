@@ -22,41 +22,41 @@ __asm__(".code32 \n\t");
 #if defined(CODE32)
 
 CR3::CR3(int base, int pwt, int pcd):
-PDE_BASE(base),
+		R0(0),
 PWT(pwt),
 PCD(pcd),
-R0(0),
-R1(0)
+R1(0),
+PDE_BASE(base)
 {
 }
 
 PDE::PDE(int base, char pwt, char pcd, char rw, char us, char present, char a) :
-PTE_BASE(base),
-PWT(pwt),
-PCD(pcd),
+P(present),
 RW(rw),
 US(us),
-P(present),
+PWT(pwt),
+PCD(pcd),
 A(a),
 R0(0),
 R1(0),
-R2(0)
+R2(0),
+PTE_BASE(base)
 {
 }
 
 PTE::PTE(int base, char pwt, char pcd, char rw, char us, char global, char pat,
 		char dirty, char present, char a):
-PAGE_BASE(base),
-PWT(pwt),
-PCD(pcd),
-PAT(pat),
-D(dirty),
+P(present),
 RW(rw),
 US(us),
-G(global),
-P(present),
+PWT(pwt),
+PCD(pcd),
 A(a),
-R0(0)
+D(dirty),
+PAT(pat),
+G(global),
+R0(0),
+PAGE_BASE(base)
 {
 }
 
@@ -174,10 +174,10 @@ int PDEManager::prepareVisitPhysical(u32_t phyaddr, size_t size,
 	}
 
 	//write pte
-	for(int i=0;i<nptes;i++)
+	for(size_t i=0;i<nptes;i++)
 	{
 //		 new (pte_p1 + i) PTE(phybase + i,PageAttributes::PWT_ALWAYS_UPDATE);
-		*((int*)pte_p1+i) = Kernel::makePTE(phyaddr + i*4*1024);
+		*((u32_t*)pte_p1+i) = Kernel::makePTE(phyaddr + i*4*1024);
 	}
 
 	if(pte_p1!=NULL && pde_p0!=NULL) //they are all fine

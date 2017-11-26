@@ -13,6 +13,9 @@ CONFIG_REAL_SECNUMS := 25
 # MBR扇区的分区表起始位置
 CONFIG_MBR_PARTITION_START := $(shell echo $$((0x1BE)))
 
+# 
+#CONFIG_VBR
+
 #应当比2048小，因为CODE_LIMIT=0xfffff，恰好是2048个扇区
 #250目前是正确的
 CONFIG_PROTECTED_SECNUMS := 250

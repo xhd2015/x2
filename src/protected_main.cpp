@@ -31,8 +31,8 @@ __asm__(
 "mov  $CONFIG_INIT_STACK_SIZE - 1,%esp \n\t"
 "call _extraVboxTest\n\t"
 "call _protectedEntryHolder \n\t"
-"DIE: \n\t"
-"jmp DIE \n\t"
+"jmp 1f \n\t"
+"1:\n\t"
 ); //注意，至多有两个扇区大小
 
 #if defined(CODE32)
@@ -432,7 +432,7 @@ void protectedEntryHolder()
 //    Util::changeCPL((int)afterCPL3,0x33,Util::getEflags(),4*512-4,0x43);
     while(true)
     {
-    	int readChar=pkernel->getChar();
+    	u32_t readChar=(u32_t)pkernel->getChar();
     	if(readChar!=Kernel::EOF)
     	{
     		pkernel->printer->putc(readChar);

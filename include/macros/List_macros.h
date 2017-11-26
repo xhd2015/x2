@@ -184,10 +184,12 @@ template<class T>
 	//printf("setSon is : %x \n",son);
 #endif
   	this->son=son;
+  	return this;
   }
 template<class T>
 TreeNode<T>* TreeNode<T>::setFather(TreeNode<T>* father) {
     this->father=father;
+    return this;
 }
 
 //#if ! defined(CODE64)

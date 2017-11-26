@@ -19,6 +19,7 @@
 #include <Cache.h>
 #include <VirtualMemory.h>
 #include <Descriptor.h>
+#include <Filesystem.h>
 
 #include <macros/List_macros.h>
 #include <macros/Process_macros.h>
@@ -31,6 +32,7 @@
 #include <macros/Locator_macros.h>
 #include <macros/VirtualMemory_macros.h>
 #include <macros/MemoryManager_macros.h>
+#include <macros/Filesystem_macros.h>
 
 
 

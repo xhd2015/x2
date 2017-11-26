@@ -315,8 +315,7 @@ int Keyboard::interpretCharData(u16_t data)
 
 #if defined(CODE32)||defined(CODE16)
 IO_HDD::IO_HDD(int hddNo,size_t secStart,unsigned char secNumber,int dstSeg,size_t dstOff) :
-hddNo(hddNo),secStart(secStart),secNumber(secNumber),dstSeg(dstSeg),dstOff(dstOff),
-LBAMode(true)
+hddNo(hddNo),LBAMode(true),secStart(secStart),secNumber(secNumber),dstSeg(dstSeg),dstOff(dstOff)
 {
 }
 IO_HDD::IO_HDD() :

@@ -19,12 +19,14 @@ __asm__(".code32 \n\t");
 #if defined(CODE32)
 //============class ProcessManager
 ProcessManager::ProcessManager():
-maxPID(1),lastValidPID(Process::PID_INVALID),curProcess(NULL),
-lksmm(),
-tksmm(),
+		lksmm(),
+		tksmm(),
 
-prcsQueue(&this->lksmm),
-prcsTree(&this->tksmm)
+		prcsQueue(&this->lksmm),
+		prcsTree(&this->tksmm),
+curProcess(NULL),
+lastValidPID(Process::PID_INVALID),
+maxPID(1)
 {
 //	Kernel::printer->putsz("in ProcessManager init\n\t");
 //	Util::printStr("Have I been called?\n"); //Of course you are called
@@ -324,8 +326,8 @@ kernelMM(&smm,kmmStart,kmmSize,usedList,usedLen,false),
 processMM(&smm,pmmStart,pmmSize,false),
 gdtm(gdtnstart,gdttstart,gdtitems,true,gusedList,gusedLen),
 idtm(idtnstart,idttstart,idtitems,true,iusedList,iusedLen),
-cr3(makeCR3(pde0_start)),
-processMan()
+processMan(),
+cr3(makeCR3(pde0_start))
 {
 	// 主要做的事情：初始化PDE管理器
 	//=============[init PDE]=================
@@ -370,7 +372,7 @@ processMan()
     //内核最初仅仅初始化了一个PTEManager,并且全部的项都是已经使用了的。
     new ((PTEManager*)ptemstart) PTEManager(asscoNodeStartForPTEman0,pte0_start,pte_size,true);
     new ((PTEManager*)ptemstart+1) PTEManager(asscoNodeStartForPTEman1,(size_t)KernelMemoryConfig::mmPTE_1,KernelMemoryConfig::PTE_1_NUM,true);
-    for(int i=0;i<pte_size;i++) //set PTE managers [0] all used.
+    for(size_t i=0;i<pte_size;i++) //set PTE managers [0] all used.
     {
     	((PTEManager*)ptemstart)[0].allocNode(i);
     }

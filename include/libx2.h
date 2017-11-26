@@ -2,6 +2,35 @@
 #ifndef libx2_h__
 #define libx2_h__
 #include <def.h>
+
+
+
+#if defined(CODE16)
+#pragma pack(push,1)
+/**
+ *  int 0x13扩展中断 0x42h等需要用到的数据结构
+ */
+class ExtendedInt0x13Info{
+public:
+	AS_MACRO ExtendedInt0x13Info(u16_t dstSeg,u16_t dstOff,u32_t lbaAddrLow,u16_t sectorNum,u32_t lbaAddrHigh=0);
+	~ExtendedInt0x13Info()=default;
+
+	enum{
+		FUNC_42_READ_LBA=0x42,
+		FUNC_43_WRITE_LBA=0x43
+	};
+public:
+	const u8_t thisStructSize;//16
+	const u8_t reserved;//0
+	u16_t		sectorNum;
+	u16_t		dstOff;
+	u16_t		dstSeg;
+	u32_t		lbaAddrLow;
+	u32_t		lbaAddrHigh;
+};
+#pragma pack(pop)
+#endif
+
 //静态工具类
 class Util{
 
@@ -83,6 +112,7 @@ public:
     static void setl(int seg,int off,int word);
     static void clr();
     AS_MACRO static void jmpDie();
+    AS_MACRO static void jmp(int addr);
     /**
     *使0x92端口的位0从0变化成1从而重启计算机
     */
@@ -94,6 +124,10 @@ public:
      * from srcSeg:srcOff --> dstSeg:dstOff
      */
     static void memcopy(int srcSeg,int srcOff,int dstSeg,int dstOff,int len);
+    /**
+     * memcopy的inline版本
+     */
+    AS_MACRO static void memcopyInlineable(int srcSeg,int srcOff,int dstSeg,int dstOff,int len);
 
     //==========macros
     AS_MACRO static void cli();
@@ -117,12 +151,19 @@ public:
      *  使用ljmp来跳转，eip照常增加
      *  只是相当于改变cs的内容，但是cs指向的地址不变
      *  用在32位模式下的虚拟内存映射
+     *  也可用于16位模式下，将代码复制后，进行跳转的操作，必须以宏的形式实现
      *
      *  相当于:
      *  		ljmp %cs:$HERE
      *  		HERE:
      */
     AS_MACRO static void replaceCs(int newcs);
+
+    /**
+     *  一次性重置ss,ds,es指针
+     *  注意：这是一个通常的任务，即ss,ds,es同时设置
+     */
+    AS_MACRO static void replaceSS_DS_ES(int newseg);
 
     //==================仅32位
 public:
@@ -230,10 +271,18 @@ public:
      * 	注意：这个函数作为宏实现,为了节省空间，你可以使用readSectors()替代
      */
     AS_MACRO static int readSectorsInline(int dstSeg,int dstOff,int driver,int LBAStart,int numSecs);
+
+    /**
+     *
+     * 使用扩展int13 0x42功能来读写LBA模式的磁盘
+     * @return  是否有错误，1无错误 0有错误
+     */
+    AS_MACRO static int readSectorsExt(int driver,ExtendedInt0x13Info *info);
 #endif
 
     
 };
+
 
 #if defined(CODE32) || defined(CODE32USER)
 class SimpleCharRotator{

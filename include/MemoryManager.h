@@ -8,7 +8,7 @@
 
 #if defined(CODE32)
 //new & delete
-AS_MACRO void*	operator new(size_t size){return NULL;}
+AS_MACRO void*	operator new(size_t size) throw() {return NULL;}
 AS_MACRO void	operator delete(void *p){}
 
 //全局方法: placement new和placement delete
@@ -171,6 +171,7 @@ public:
 	MemoryManager()=default;
     MemoryManager(_DescriptorAllocator<TreeNode<MemoryDescriptor> > *smm);//done
     /**
+     * 初始化一个带有待管理区间的内存管理器，区间范围是[start,start+len)
      * @param smm				节点分配器
      * @param start				开始地址
      * @param len				总长度

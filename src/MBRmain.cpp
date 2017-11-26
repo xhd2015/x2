@@ -1,5 +1,14 @@
 //extern int READSEG[];//use _READSEG in other file
 
+/**
+ * 该文件是MBR引导区，由于位置比较特殊，其代码的体积有446字节的限制
+ * 请谨慎修改该文件，并使用-O1及以下的优化级别
+ *
+ * 此文件读取分区表，找到其中标记为active的第一项，然后读取该项分区所在的硬盘到0x7c00处并跳转到该处执行
+ * 由于这个原因，所以在载入vbr扇区之前，需要将其自身从0x7c00移到一个安全的位置
+ *
+ */
+
 #include <libx2.h>
 #include <PMLoader.h>
 #include <Descriptor.h>
@@ -32,46 +41,99 @@ __asm__(
 "call _realModeTest \n\t"
 );
 
-extern "C" MBRTable* mbrtable;
+// 汇编代码中定义的MBRTable的,必须使用数组定义，因为需要的是一个地址
+extern "C" MBRTable mbrtable[1];
 
-__attribute__((section("textmbr"))) int readSectorsCHSInline(int dstSeg,int dstOff,int driver,int cylinder,int head,int startSec,int numSecs)
+
+/**
+ * 防止该函数被优化
+ */
+__attribute__((optimize("-fno-crossjumping")))
+__attribute__((optimize("-fno-reorder-blocks")))
+__attribute__((optimize("-fno-unsafe-loop-optimizations")))
+__attribute__((optimize("-fno-aggressive-loop-optimizations")))
+__attribute__((optimize("-fno-indirect-inlining")))
+__attribute__((optimize("-fno-inline")))
+__attribute__((section("textmbr"))) int findFirstActive()
 {
-	   int isCarried;
-	    __asm__ __volatile__(
-	    "push %%es\n\t"
-	    "movw %%ax,%%es\n\t"
-	    "movb %[head],%%dh \n\t"
-	    "shl   $6,%%cx \n\t"
-	    "addb %[startSec],%%cl \n\t"
-	    "movb $0x02,%%ah \n\t"
-	    "movb %[numSecs],%%al \n\t"
-	    "int $0x13 \n\t"
-	    "pop %%es \n\t"
-	    "xor %%eax,%%eax \n\t"
-	    "jc 1f \n\t"
-	    "mov $1,%%eax \n\t"
-	    "1:\n\t"
-	    :"=a"(isCarried)
-	    :"a"(dstSeg),"b"(dstOff),"d"(driver),"c"(cylinder),
-		 	 [head]"m"(head),[startSec]"m"(startSec),[numSecs]"m"(numSecs)
-	    :"memory","cc"
-	    );
-	    return isCarried;
+	return mbrtable[0].findFirstActiveInline();
 }
 
-// 使用该段代码来判断启动扇区，然后读入该扇区
-// 注意使用优化：如果一个函数宏被调用超过两次，请使用额外的函数定义
-extern "C" __attribute__((section("textmbr"))) void readLaterSectors()
+//#pragma GCC push_options
+//#pragma GCC optimize ("Os") //减少代码体积
+extern "C"
+__attribute__((section("textmbr")))
+__attribute__((optimize("O1"))) //请从不要使用O3 O2 Os,最多使用O1,如果可能，使用O0(当然不可能）
+__attribute__((optimize("-fno-reorder-blocks")))
+__attribute__((optimize("-fno-reorder-blocks-and-partition")))
+__attribute__((optimize("-fno-toplevel-reorder")))
+__attribute__((optimize("-fno-reorder-functions")))
+__attribute__((optimize("-fomit-frame-pointer")))
+__attribute__((optimize("-fno-unsafe-loop-optimizations")))
+__attribute__((optimize("-fno-aggressive-loop-optimizations")))
+__attribute__((optimize("-fno-delayed-branch")))
+__attribute__((optimize("-fno-crossjumping")))
+__attribute__((optimize("-fno-indirect-inlining")))
+__attribute__((optimize("-fno-branch-count-reg")))
+__attribute__((optimize("-fno-thread-jumps")))
+__attribute__((optimize("-fno-inline")))
+__attribute__((optimize("-fno-expensive-optimizations")))
+__attribute__((optimize("-fno-loop-parallelize-all")))
+__attribute__((optimize("-fno-variable-expansion-in-unroller")))
+__attribute__((optimize("-fno-guess-branch-probability")))
+__attribute__((optimize("-fno-profile-use")))
+//__attribute__((optimize("")))
+//__attribute__((optimize("")))
+void readLaterSectors()
 {
-	//通过让编译器自己计算这些值来减少代码量，因为我们没有启用优化选项
+	// 0. 一些调试代码
+
+
+
+	// 1.将整体代码和栈复制到0x7c0:栈后
+	Util::memcopyInlineable(0x7c0,0,0x7c0, CONFIG_REAL_INIT_STACK_SIZE, CONFIG_REAL_INIT_STACK_SIZE);
+
 	enum{
-		LBAStart=CONFIG_REAL_INIT_STACK_SIZE/CONST_SECSIZE,
-		Cylinder=LBAStart/36,
-		Head = (LBAStart - LBAStart/36*36)/18,
-		StartSec=(LBAStart%18) + 1,
-		NumSec =  CONFIG_REAL_SECNUMS - CONFIG_REAL_INIT_STACK_SIZE/CONST_SECSIZE,
+		NEW_SEG = (0x7c00+CONFIG_REAL_INIT_STACK_SIZE)>>4,
 	};
-	readSectorsCHSInline(0x7c0, CONFIG_REAL_INIT_STACK_SIZE, 0x80, Cylinder, Head, StartSec, NumSec);
+	// 2.跳转到复制后的代码处继续执行
+	Util::replaceCs( NEW_SEG );
+
+	// 3.重置ss,ds,es指针
+	Util::replaceSS_DS_ES( NEW_SEG );
+
+	// 4.读取活动分区(active)的第一个扇区到0x7c00处
+	int activePartition = findFirstActive();
+//	int activePartition = 0;
+//	if(mbrtable[0].table[activePartition].activeFlag==MBRPartitionEntry::FLAG_ACTIVE)goto found;
+//	if(mbrtable[0].table[++activePartition].activeFlag==MBRPartitionEntry::FLAG_ACTIVE)goto found;
+//	if(mbrtable[0].table[++activePartition].activeFlag==MBRPartitionEntry::FLAG_ACTIVE)goto found;
+//	if(mbrtable[0].table[++activePartition].activeFlag==MBRPartitionEntry::FLAG_ACTIVE)goto found;
+//	found:
+	if(activePartition != -1)
+	{
+		*(int*)0=activePartition;
+		*(int*)4=mbrtable[0].table[activePartition].lbaStart;
+		ExtendedInt0x13Info extInt3Info(0x7c0,0,mbrtable[0].table[activePartition].lbaStart,1);
+		Util::readSectorsExt(0x80, &extInt3Info);
+	}else{
+		Util::jmpDie();
+	}
+
+	// 5.重新跳转到 0x7c0:0
+	Util::ljmp(0x7c0,0);
+
+
+
+	//通过让编译器自己计算这些值来减少代码量，因为我们没有启用优化选项
+//	enum{
+//		LBAStart=CONFIG_REAL_INIT_STACK_SIZE/CONST_SECSIZE,
+//		Cylinder=LBAStart/36,
+//		Head = (LBAStart - LBAStart/36*36)/18,
+//		StartSec=(LBAStart%18) + 1,
+//		NumSec =  CONFIG_REAL_SECNUMS - CONFIG_REAL_INIT_STACK_SIZE/CONST_SECSIZE,
+//	};
+//	readSectorsCHSInline(0x7c0, CONFIG_REAL_INIT_STACK_SIZE, 0x80, Cylinder, Head, StartSec, NumSec);
 
 	// 这些是原来的代码，生成的代码量很大，不适合在mbr区中使用
 //	Util::readSectors(
@@ -98,18 +160,17 @@ extern "C" __attribute__((section("textmbr"))) void readLaterSectors()
 
 }
 
-
 __asm__(
 		".section textmbr,\"x\" \n\t"
-		".org CONFIG_MBR_PARTITION_START \n\t" // 保证代码不会覆盖分区表,463?
-		"_mbrtable: \n\t" //定义扇区位置
- 		".org 512 - 2 \n\t"
+		".org CONFIG_MBR_PARTITION_START \n\t" // 保证代码不会覆盖分区表,463?//注意：如果这里报错，就是前面代码区尺寸太大，需要优化
+		"_mbrtable: \n\t" //定义分区表的位置
+ 		".org 512 - 2\n\t"
 		".byte 0x55\n\t"
 		".byte 0xaa\n\t"
 		".org CONFIG_REAL_INIT_STACK_SIZE \n\t"
 );//make sure it has no more that this
-//align is 4
-//MBR starts from 0x1BE to 0x1FD,   (0x1FE,0x1FF)=0xaa55,  the last_section should start @0x1bc,and then org 2
+
+//#pragma GCC pop_options
 
 /*
 __asm__(

@@ -4,7 +4,7 @@
 
 //====数据宏
 #if !defined(NULL)
-#define NULL 0
+#define NULL (0)
 #endif
 
 //====为了解决环形依赖问题而设置的常数区域
@@ -18,6 +18,7 @@
 #if defined(CODE64)
 typedef __PTRDIFF_TYPE__ ptrdiff_t;
 typedef __SIZE_TYPE__ size_t;
+typedef unsigned long long u64_t;
 typedef unsigned int u32_t;
 typedef unsigned short u16_t;
 typedef unsigned char  u8_t;
