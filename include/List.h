@@ -53,6 +53,7 @@ public:
     SimpleMemoryManager()=default;//default constructor that has nothing
     //~SimpleMemoryManager(); //the only way to free all list is a call to free
 public:
+    // DEPRECATED 改善其设计
     /**
      * 将标记放到待存储结构的末尾
      *
@@ -170,6 +171,7 @@ protected:
 *
 */
 /**
+ * 一个链表实现
  * @param T 存储的类型
  * @param _Allocator 分配ListNode<T>的分配器
  */
@@ -235,36 +237,48 @@ protected:
 *   Extension or combination with template argument?
 *       Extension will cause longer class name
 *       template argument will interfer the orginal class
+*   @param _Locateable  具有start,limit的对象
+*   @param _HowAllocated 分配策略：丢弃或者保留
+*   @param _Allocator	分配器
 */
-template<class _Locateable,int _HowAllocated,template <class> class _Allocator >
+template<class _Locateable,int _HowAllocated,template <class> class _Allocator,typename __SizeType>
 class LocateableLinkedList:public LinkedList<_Locateable,_Allocator >
 {
 public:
 	 LocateableLinkedList()=default;//done
 public:
-	typedef LocateableLinkedList<_Locateable,_HowAllocated,_Allocator> This;
+	typedef LocateableLinkedList<_Locateable,_HowAllocated,_Allocator,__SizeType> This;
 public:
+	/**
+	 * @param smm   一个能否分配器ListNode<_Locateable>类型的分配器
+	 */
     LocateableLinkedList( _Allocator<ListNode<_Locateable> > *smm );//done
     ~LocateableLinkedList();//done
     /**
     * What should they return?The location,or a near location that can be later used to insert a node?
     */
-    static ListNode<_Locateable> *findFirstStartLen(ListNode<_Locateable>* startNode,size_t start,size_t len);//done
-    static ListNode<_Locateable> *findFirstLen(ListNode<_Locateable>* startNode,size_t len);//done
-    static ListNode<_Locateable> *findFirstStart(ListNode<_Locateable>* startNode,size_t start);//done
+    /**
+     * 找到第一个满足要求start相等,len
+     * @param startNode 查找的节点
+     * @param start		开始地址
+     * @param len		长度
+     */
+    static ListNode<_Locateable> *findFirstStartLen(ListNode<_Locateable>* startNode,__SizeType start,__SizeType len);//done
+    static ListNode<_Locateable> *findFirstLen(ListNode<_Locateable>* startNode,__SizeType len);//done
+    static ListNode<_Locateable> *findFirstStart(ListNode<_Locateable>* startNode,__SizeType start);//done
     /**
     * return the first node whose start equals with or is bigger that argument start.
     *  If there is no such node(e.g. the above returns NULL),then return the last one who is less.
     *  If the above two process get NULL,then return NULL,meaning the list is empty.
     */
-    static ListNode<_Locateable> *findFirstStartForInsert(ListNode<_Locateable> *startNode,size_t start);//done
+    static ListNode<_Locateable> *findFirstStartForInsert(ListNode<_Locateable> *startNode,__SizeType start);//done
 
 
     /**
     * The two locateForDeleteXXX methods are deprecated because now we have _HowAllocated.
     */
-    DEPRECATED static ListNode<_Locateable> *locateForDelete(ListNode<_Locateable>* startNode,size_t start,size_t len,bool allocable);//done
-    DEPRECATED static ListNode<_Locateable>* locateForDeleteStart(ListNode<_Locateable>* startNode,size_t start,bool allocable);//done
+    DEPRECATED static ListNode<_Locateable> *locateForDelete(ListNode<_Locateable>* startNode,__SizeType start,__SizeType len,bool allocable);//done
+    DEPRECATED static ListNode<_Locateable>* locateForDeleteStart(ListNode<_Locateable>* startNode,__SizeType start,bool allocable);//done
 
 
 

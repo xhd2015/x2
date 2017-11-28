@@ -12,6 +12,9 @@ Well, then I wrote a program like linux0.00,it runs under bochs well,but has cha
 
 So 'x2' is proposed as a name of this operating system,which has 2 remarkable features: completely written in c++ & the core is completely built from ground without using any existing.
 
+# 查看完整的帮助文档
+对于技术类的文档，请查看Manuals文件夹
+
 
 # Can I get involved into development?
 Of course you can(though currently there is no other person except me).

@@ -1,0 +1,4 @@
+Archive member included to satisfy reference by file (symbol)
+
+/usr/arm-linux-gnueabi/lib/libc_nonshared.a(elf-init.oS)
+                              /usr/lib/gcc-cross/arm-linux-gnueabi/5/../../../../arm-linux-gnueabi/lib/../lib/crt1.o (__libc_csu_init)

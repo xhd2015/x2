@@ -104,8 +104,7 @@ printf的每个参数都有相应的长度要求，比如，在64位系统上，
 # 文件读写问题
 http://en.cppreference.com/w/cpp/io/c/fopen
 注意，"w"会将文件清空。
-使用"r+"
-
+使用"r+
 
 filename    -   file name to associate the file stream to
 mode    -   null-terminated character string determining file access mode
@@ -124,15 +123,20 @@ On the append file access modes, data is written to the end of the file regardle
 File access mode flag "x" can optionally be appended to "w" or "w+" specifiers. This flag forces the function to fail if the file exists, instead of overwriting it. (C++17)
 The behavior is undefined if the mode is not one of the strings listed above. Some implementations define additional supported modes (e.g. Windows).
 
-
-正确的做法：
-    FILE *fp=fopen(file,"rb+");
-    if(fp==NULL)
+为了读写一个已经存的文件，并且与平台无关，正确的方式是：
+    FILE *fp=fopen(file,"rb+"); // 读写模式打开
+    if(fp==NULL) // 文件不存在
     {
-        fp=fopen(file,"wb+");
+        fp=fopen(file,"wb+");// 使用w创建
     }
 
 # malloc/free
 注意：如果你遇到了malloc/free带来的错误，那么检查以下几点
 1.malloc的实际申请的内存大于返回的内存，因此如果你写超过自己申请的大小，系统不会报错。但是由于在额外的内存区域存放一些管理信息，因此free时会报错。
 检查你的代码有没有这种类型的潜在错误。
+
+# 模板和静态函数
+如何在模板类中定义带有模板的静态函数？如何调用这个函数
+
+# 函数定义
+如果函数声明中已经有了默认参数，函数定义中不能出现默认参数。否则就是重定义。

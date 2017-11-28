@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CMakeWorkspace" PROJECT_DIR="$PROJECT_DIR$" />
+  <component name="CidrRootsConfiguration">
+    <excludeRoots>
+      <file path="$PROJECT_DIR$/backups" />
+      <file path="$PROJECT_DIR$/c++exception" />
+      <file path="$PROJECT_DIR$/deprecated" />
+      <file path="$PROJECT_DIR$/Documentation" />
+      <file path="$PROJECT_DIR$/exports" />
+      <file path="$PROJECT_DIR$/ignore" />
+      <file path="$PROJECT_DIR$/Manuals" />
+      <file path="$PROJECT_DIR$/run-png-images" />
+      <file path="$PROJECT_DIR$/stdc" />
+      <file path="$PROJECT_DIR$/stdc++" />
+      <file path="$PROJECT_DIR$/test" />
+      <file path="$PROJECT_DIR$/tools" />
+    </excludeRoots>
+  </component>
+</project>

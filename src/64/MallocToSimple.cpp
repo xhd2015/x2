@@ -8,8 +8,8 @@
 #include <List.h>
 #include <MemoryManager.h>
 #include <EnvInterface64Impl.h>
-	template class MallocToSimple<TreeNode<MemoryDescriptor>,EnvInterface64Impl>;
-	template class MallocToSimple<ListNode<LinearSourceDescriptor>,EnvInterface64Impl>;
+	template class MallocToSimple<TreeNode<MemoryDescriptor<size_t> >,EnvInterface64Impl>;
+	template class MallocToSimple<ListNode<LinearSourceDescriptor<size_t> >,EnvInterface64Impl>;
 #endif
 
 //============class functions definition

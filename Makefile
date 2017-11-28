@@ -90,7 +90,7 @@ DEPRECATED_CCFLAGS = -fpack-struct=1
 
 
 #toolchains
-CXX = g++
+CXX = g++ -fmax-errors=5
 AS = as
 ifeq ($(DEBUG),true)
 	CXX += -g

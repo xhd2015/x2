@@ -1,0 +1,915 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="BuildServerSettings">
+    <option name="LOGIN" value="" />
+    <option name="SERVER_URL" value="http://buildserver" />
+    <option name="REMEMBER_ME" value="true" />
+    <option name="USE_IDEA_PROXY_SETTINGS" value="true" />
+    <option name="INSPECTIONS_BUILD_TYPE_IDS" />
+    <option name="DUPLICATES_BUILD_TYPE_IDS" />
+    <option name="COVERAGE_SETTINGS" />
+    <option name="TEST_STATUS_ENABLED" value="true" />
+    <option name="TEST_STATUS_SHOW_SUCCESSFUL" value="false" />
+    <option name="ARTIFACTS_BUILD_TYPE_IDS" />
+    <option name="PERFORM_COMMIT_IF_SUCCESSFUL" value="true" />
+    <option name="PERFORM_COMMIT_IF_NO_NEW_FAILED_TESTS" value="false" />
+    <option name="REQUEST_CONFIRMATON" value="false" />
+    <option name="PRE_TESTED_COMMIT" value="true" />
+    <option name="FILTER_BY_STATUS" value="false" />
+    <option name="FILTER_MARKED_AS_FIXED" value="false" />
+    <option name="SHOW_CLOSE_PROMPT" value="true" />
+    <option name="TOOL_WINDOW_SELECTED_CONTENT_INDEX" value="0" />
+    <option name="FILTER_BY_CURRENT_PROJECT" value="true" />
+  </component>
+  <component name="CMakeRunConfigurationManager" shouldGenerate="true" shouldDeleteObsolete="true" buildAllGenerated="false">
+    <generated />
+  </component>
+  <component name="CMakeSettings">
+    <configurations>
+      <configuration CONFIG_NAME="Debug" />
+    </configurations>
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="1cded975-8a61-489e-9261-8532f5cb43ac" name="Default" comment="">
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Manuals/Others/assembler-intro.pdf" afterPath="$PROJECT_DIR$/Manuals/Others/assembler-intro.pdf" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/backups/x2-0.13.tar.xz" afterPath="$PROJECT_DIR$/backups/x2-0.13.tar.xz" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/filesystem/verify-in-cygwin/gen/File.o" afterPath="$PROJECT_DIR$/filesystem/verify-in-cygwin/gen/File.o" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/filesystem/verify-in-cygwin/gen/libfs.a" afterPath="$PROJECT_DIR$/filesystem/verify-in-cygwin/gen/libfs.a" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/filesystem/verify-in-cygwin/hdd.img" afterPath="$PROJECT_DIR$/filesystem/verify-in-cygwin/hdd.img" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/gen/32/KernelMemoryConfig.o" afterPath="$PROJECT_DIR$/gen/32/KernelMemoryConfig.o" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/gen/64/AssociatedMemoryManager.o" afterPath="$PROJECT_DIR$/gen/64/AssociatedMemoryManager.o" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/gen/64/CMDUtil_main.exe" afterPath="$PROJECT_DIR$/gen/64/CMDUtil_main.exe" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/gen/64/CMDUtil_mkfs.x2fs.exe" afterPath="$PROJECT_DIR$/gen/64/CMDUtil_mkfs.x2fs.exe" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/gen/64/Descriptor.o" afterPath="$PROJECT_DIR$/gen/64/Descriptor.o" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/gen/64/List.o" afterPath="$PROJECT_DIR$/gen/64/List.o" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/gen/64/Locator.o" afterPath="$PROJECT_DIR$/gen/64/Locator.o" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/gen/64/MemoryManager.o" afterPath="$PROJECT_DIR$/gen/64/MemoryManager.o" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/gen/64/PMLoader.o" afterPath="$PROJECT_DIR$/gen/64/PMLoader.o" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/gen/64/TSS.o" afterPath="$PROJECT_DIR$/gen/64/TSS.o" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/gen/64/lib64.a" afterPath="$PROJECT_DIR$/gen/64/lib64.a" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/gen/64/libx2.o" afterPath="$PROJECT_DIR$/gen/64/libx2.o" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/gen/main.bimg" afterPath="$PROJECT_DIR$/gen/main.bimg" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/partitions_table" afterPath="$PROJECT_DIR$/partitions_table" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/run-png-images/2017-11-26 17.03.23 依赖接口的文件系统完成.png" afterPath="$PROJECT_DIR$/run-png-images/2017-11-26 17.03.23 依赖接口的文件系统完成.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/run-png-images/run_0.20_keyboard_works.png" afterPath="$PROJECT_DIR$/run-png-images/run_0.20_keyboard_works.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/run-png-images/形状滑稽的函数名字--弯弯曲曲的.png" afterPath="$PROJECT_DIR$/run-png-images/形状滑稽的函数名字--弯弯曲曲的.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/run-png-images/调试了很久-内核设计大改变之后的首次成功运行.png" afterPath="$PROJECT_DIR$/run-png-images/调试了很久-内核设计大改变之后的首次成功运行.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/run-png-images/非常Lisp的一段内核代码.png" afterPath="$PROJECT_DIR$/run-png-images/非常Lisp的一段内核代码.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/stdc/examples/a.exe" afterPath="$PROJECT_DIR$/stdc/examples/a.exe" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/BIOS-bochs-latest" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/BIOS-bochs-latest" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/BIOS-bochs-legacy" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/BIOS-bochs-legacy" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/Uninstall.exe" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/Uninstall.exe" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/VGABIOS-elpin-2.40" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/VGABIOS-elpin-2.40" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/VGABIOS-lgpl-latest" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/VGABIOS-lgpl-latest" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/VGABIOS-lgpl-latest-cirrus" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/VGABIOS-lgpl-latest-cirrus" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/VGABIOS-lgpl-latest-cirrus-debug" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/VGABIOS-lgpl-latest-cirrus-debug" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/VGABIOS-lgpl-latest-debug" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/VGABIOS-lgpl-latest-debug" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/bios.bin-1.7.5" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/bios.bin-1.7.5" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/bochs.exe" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/bochs.exe" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/bochs.ico" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/bochs.ico" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/bochsdbg.exe" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/bochsdbg.exe" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/bxhub.exe" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/bxhub.exe" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/bximage.exe" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/bximage.exe" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/dlxlinux/hd10meg.img" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/dlxlinux/hd10meg.img" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/images/dlxlinux-in-linux.png" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/images/dlxlinux-in-linux.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/images/headerbar.png" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/images/headerbar.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/images/undercon.png" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/images/undercon.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/keymaps/sdl-pc-de.map" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/keymaps/sdl-pc-de.map" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/keymaps/sdl2-pc-de.map" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/keymaps/sdl2-pc-de.map" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/keymaps/x11-pc-be.map" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/keymaps/x11-pc-be.map" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/keymaps/x11-pc-da.map" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/keymaps/x11-pc-da.map" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/keymaps/x11-pc-de.map" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/keymaps/x11-pc-de.map" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/keymaps/x11-pc-fr.map" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/keymaps/x11-pc-fr.map" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/keymaps/x11-pc-it.map" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/keymaps/x11-pc-it.map" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/keymaps/x11-pc-ru.map" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/keymaps/x11-pc-ru.map" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/keymaps/x11-pc-se.map" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/keymaps/x11-pc-se.map" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/keymaps/x11-pc-uk.map" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/keymaps/x11-pc-uk.map" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/lgban.ico" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/lgban.ico" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/logo.ico" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/logo.ico" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/niclist.exe" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/niclist.exe" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/penguin.ico" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/penguin.ico" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/sb16ctrl.exe" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/sb16ctrl.exe" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/unbochs.ico" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/unbochs.ico" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/bochs-run/debugger.rc" afterPath="$PROJECT_DIR$/tools/bochs-run/debugger.rc" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/bochs-run/main.bimg.clean" afterPath="$PROJECT_DIR$/tools/bochs-run/main.bimg.clean" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/bochs-run/parts.table" afterPath="$PROJECT_DIR$/tools/bochs-run/parts.table" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/bochs-run/writeHdd.exe" afterPath="$PROJECT_DIR$/tools/bochs-run/writeHdd.exe" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.cproject" afterPath="$PROJECT_DIR$/.cproject" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.gitignore" afterPath="$PROJECT_DIR$/.gitignore" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.project" afterPath="$PROJECT_DIR$/.project" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.settings/language.settings.xml" afterPath="$PROJECT_DIR$/.settings/language.settings.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.settings/org.eclipse.cdt.codan.core.prefs" afterPath="$PROJECT_DIR$/.settings/org.eclipse.cdt.codan.core.prefs" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/CMDUtil_main.exe.stackdump" afterPath="$PROJECT_DIR$/CMDUtil_main.exe.stackdump" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Config.makefile" afterPath="$PROJECT_DIR$/Config.makefile" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Debug/filesystem/verify-in-cygwin/subdir.mk" afterPath="$PROJECT_DIR$/Debug/filesystem/verify-in-cygwin/subdir.mk" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Debug/gen/16/subdir.mk" afterPath="$PROJECT_DIR$/Debug/gen/16/subdir.mk" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Debug/gen/32/subdir.mk" afterPath="$PROJECT_DIR$/Debug/gen/32/subdir.mk" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Debug/io/subdir.mk" afterPath="$PROJECT_DIR$/Debug/io/subdir.mk" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Debug/makefile" afterPath="$PROJECT_DIR$/Debug/makefile" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Debug/objects.mk" afterPath="$PROJECT_DIR$/Debug/objects.mk" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Debug/sources.mk" afterPath="$PROJECT_DIR$/Debug/sources.mk" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Debug/src/64/subdir.mk" afterPath="$PROJECT_DIR$/Debug/src/64/subdir.mk" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Debug/src/subdir.mk" afterPath="$PROJECT_DIR$/Debug/src/subdir.mk" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/HINT" afterPath="$PROJECT_DIR$/HINT" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/LICENSE" afterPath="$PROJECT_DIR$/LICENSE" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Makefile" afterPath="$PROJECT_DIR$/Makefile" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Manuals/BIOS_int.md" afterPath="$PROJECT_DIR$/Manuals/BIOS_int.md" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Manuals/Book_effective_c++.md" afterPath="$PROJECT_DIR$/Manuals/Book_effective_c++.md" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Manuals/GNU_as.md" afterPath="$PROJECT_DIR$/Manuals/GNU_as.md" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Manuals/GNU_binutils.md" afterPath="$PROJECT_DIR$/Manuals/GNU_binutils.md" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Manuals/GNU_cc.md" afterPath="$PROJECT_DIR$/Manuals/GNU_cc.md" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Manuals/GNU_cc_errors.md" afterPath="$PROJECT_DIR$/Manuals/GNU_cc_errors.md" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Manuals/GNU_cc_optimize.md" afterPath="$PROJECT_DIR$/Manuals/GNU_cc_optimize.md" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Manuals/GNU_gcov.md" afterPath="$PROJECT_DIR$/Manuals/GNU_gcov.md" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Manuals/GNU_grub.md" afterPath="$PROJECT_DIR$/Manuals/GNU_grub.md" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Manuals/GNU_info.md" afterPath="$PROJECT_DIR$/Manuals/GNU_info.md" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Manuals/GNU_ld.md" afterPath="$PROJECT_DIR$/Manuals/GNU_ld.md" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Manuals/ISO_c++.md" afterPath="$PROJECT_DIR$/Manuals/ISO_c++.md" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Manuals/ISO_c.md" afterPath="$PROJECT_DIR$/Manuals/ISO_c.md" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Manuals/Others/const_optimize.cpp" afterPath="$PROJECT_DIR$/Manuals/Others/const_optimize.cpp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Manuals/README.md" afterPath="$PROJECT_DIR$/Manuals/README.md" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Manuals/x2_development.md" afterPath="$PROJECT_DIR$/Manuals/x2_development.md" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Manuals/x2_filesystem.md" afterPath="$PROJECT_DIR$/Manuals/x2_filesystem.md" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Manuals/x2_kernel.md" afterPath="$PROJECT_DIR$/Manuals/x2_kernel.md" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Manuals/x2_keyboard.md" afterPath="$PROJECT_DIR$/Manuals/x2_keyboard.md" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Manuals/x2_makefile.md" afterPath="$PROJECT_DIR$/Manuals/x2_makefile.md" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Manuals/x2_process.md" afterPath="$PROJECT_DIR$/Manuals/x2_process.md" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Manuals/x2_virtualmemory.md" afterPath="$PROJECT_DIR$/Manuals/x2_virtualmemory.md" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/README.md" afterPath="$PROJECT_DIR$/README.md" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/TODO" afterPath="$PROJECT_DIR$/TODO" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/VERSION" afterPath="$PROJECT_DIR$/VERSION" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/deprecated/SimpleMemoryManager.cpp" afterPath="$PROJECT_DIR$/deprecated/SimpleMemoryManager.cpp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/deprecated/Tree.cpp" afterPath="$PROJECT_DIR$/deprecated/Tree.cpp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/deprecated/checkMacros.h" afterPath="$PROJECT_DIR$/deprecated/checkMacros.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/deprecated/config.h" afterPath="$PROJECT_DIR$/deprecated/config.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/filesystem/README.md" afterPath="$PROJECT_DIR$/filesystem/README.md" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/filesystem/verify-in-cygwin/CMDUtil.exe.stackdump" afterPath="$PROJECT_DIR$/filesystem/verify-in-cygwin/CMDUtil.exe.stackdump" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/filesystem/verify-in-cygwin/Makefile" afterPath="$PROJECT_DIR$/filesystem/verify-in-cygwin/Makefile" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/filesystem/verify-in-cygwin/Reference.h" afterPath="$PROJECT_DIR$/filesystem/verify-in-cygwin/Reference.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/filesystem/verify-in-cygwin/core.dump" afterPath="$PROJECT_DIR$/filesystem/verify-in-cygwin/core.dump" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/filesystem/verify-in-cygwin/listFile.cpp" afterPath="$PROJECT_DIR$/filesystem/verify-in-cygwin/listFile.cpp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/filesystem/verify-in-cygwin/listFile.exe.stackdump" afterPath="$PROJECT_DIR$/filesystem/verify-in-cygwin/listFile.exe.stackdump" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/filesystem/verify-in-cygwin/listf.exe.stackdump" afterPath="$PROJECT_DIR$/filesystem/verify-in-cygwin/listf.exe.stackdump" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/filesystem/verify-in-cygwin/newFile.cpp" afterPath="$PROJECT_DIR$/filesystem/verify-in-cygwin/newFile.cpp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/gen/32/Config.prefixsize.makefile" afterPath="$PROJECT_DIR$/gen/32/Config.prefixsize.makefile" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/image_32_proc1.ld" afterPath="$PROJECT_DIR$/image_32_proc1.ld" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/image_32_proc2.ld" afterPath="$PROJECT_DIR$/image_32_proc2.ld" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/image_kernel.ld" afterPath="$PROJECT_DIR$/image_kernel.ld" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/image_mbr.ld" afterPath="$PROJECT_DIR$/image_mbr.ld" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/image_vbr.ld" afterPath="$PROJECT_DIR$/image_vbr.ld" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/include/64/MallocToSimple.h" afterPath="$PROJECT_DIR$/include/64/MallocToSimple.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/include/AssociatedMemoryManager.h" afterPath="$PROJECT_DIR$/include/AssociatedMemoryManager.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/include/Cache.h" afterPath="$PROJECT_DIR$/include/Cache.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/include/Descriptor.h" afterPath="$PROJECT_DIR$/include/Descriptor.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/include/EnvInterface.h" afterPath="$PROJECT_DIR$/include/EnvInterface.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/include/EnvInterface64Impl.h" afterPath="$PROJECT_DIR$/include/EnvInterface64Impl.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/include/EnvInterfaceX2Impl.cpp" afterPath="$PROJECT_DIR$/include/EnvInterfaceX2Impl.cpp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/include/EnvInterfaceX2Impl.h" afterPath="$PROJECT_DIR$/include/EnvInterfaceX2Impl.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/include/File.h" afterPath="$PROJECT_DIR$/include/File.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/include/Filesystem.h" afterPath="$PROJECT_DIR$/include/Filesystem.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/include/Functools.h" afterPath="$PROJECT_DIR$/include/Functools.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/include/IOProgramer.h" afterPath="$PROJECT_DIR$/include/IOProgramer.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/include/Kernel.h" afterPath="$PROJECT_DIR$/include/Kernel.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/include/KernelMemoryConfig.h" afterPath="$PROJECT_DIR$/include/KernelMemoryConfig.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/include/List.h" afterPath="$PROJECT_DIR$/include/List.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/include/Locator.h" afterPath="$PROJECT_DIR$/include/Locator.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/include/MemoryManager.h" afterPath="$PROJECT_DIR$/include/MemoryManager.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/include/PMLoader.h" afterPath="$PROJECT_DIR$/include/PMLoader.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/include/Process.h" afterPath="$PROJECT_DIR$/include/Process.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/include/TSS.h" afterPath="$PROJECT_DIR$/include/TSS.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/include/VirtualMemory.h" afterPath="$PROJECT_DIR$/include/VirtualMemory.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/include/after_def.h" afterPath="$PROJECT_DIR$/include/after_def.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/include/config.h" afterPath="$PROJECT_DIR$/include/config.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/include/def.h" afterPath="$PROJECT_DIR$/include/def.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/include/interrupts.h" afterPath="$PROJECT_DIR$/include/interrupts.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/include/libx2.h" afterPath="$PROJECT_DIR$/include/libx2.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/include/loki/Int2Type.h" afterPath="$PROJECT_DIR$/include/loki/Int2Type.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/include/macros/AssociatedMemoryManager_macros.h" afterPath="$PROJECT_DIR$/include/macros/AssociatedMemoryManager_macros.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/include/macros/Cache_macros.h" afterPath="$PROJECT_DIR$/include/macros/Cache_macros.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/include/macros/Descriptor_macros.h" afterPath="$PROJECT_DIR$/include/macros/Descriptor_macros.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/include/macros/Filesystem_macros.h" afterPath="$PROJECT_DIR$/include/macros/Filesystem_macros.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/include/macros/IOProgramer_macros.h" afterPath="$PROJECT_DIR$/include/macros/IOProgramer_macros.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/include/macros/Kernel_macros.h" afterPath="$PROJECT_DIR$/include/macros/Kernel_macros.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/include/macros/List_macros.h" afterPath="$PROJECT_DIR$/include/macros/List_macros.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/include/macros/Locator_macros.h" afterPath="$PROJECT_DIR$/include/macros/Locator_macros.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/include/macros/MemoryManager_macros.h" afterPath="$PROJECT_DIR$/include/macros/MemoryManager_macros.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/include/macros/Process_macros.h" afterPath="$PROJECT_DIR$/include/macros/Process_macros.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/include/macros/VirtualMemory_macros.h" afterPath="$PROJECT_DIR$/include/macros/VirtualMemory_macros.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/include/macros/all.h" afterPath="$PROJECT_DIR$/include/macros/all.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/include/macros/libx2_macros.h" afterPath="$PROJECT_DIR$/include/macros/libx2_macros.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/include/test.h" afterPath="$PROJECT_DIR$/include/test.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/io/HarddiskIO.cpp" afterPath="$PROJECT_DIR$/io/HarddiskIO.cpp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/makefile.init" afterPath="$PROJECT_DIR$/makefile.init" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/64/CMDUtil_main.cpp" afterPath="$PROJECT_DIR$/src/64/CMDUtil_main.cpp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/64/CMDUtil_mkfs.x2fs.cpp" afterPath="$PROJECT_DIR$/src/64/CMDUtil_mkfs.x2fs.cpp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/64/CMDUtil_test.cpp" afterPath="$PROJECT_DIR$/src/64/CMDUtil_test.cpp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/64/MallocToSimple.cpp" afterPath="$PROJECT_DIR$/src/64/MallocToSimple.cpp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/AssociatedMemoryManager.cpp" afterPath="$PROJECT_DIR$/src/AssociatedMemoryManager.cpp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Cache.cpp" afterPath="$PROJECT_DIR$/src/Cache.cpp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Descriptor.cpp" afterPath="$PROJECT_DIR$/src/Descriptor.cpp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/EnvInterface64Impl.cpp" afterPath="$PROJECT_DIR$/src/EnvInterface64Impl.cpp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/File.cpp" afterPath="$PROJECT_DIR$/src/File.cpp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/IOProgramer.cpp" afterPath="$PROJECT_DIR$/src/IOProgramer.cpp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Kernel.cpp" afterPath="$PROJECT_DIR$/src/Kernel.cpp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/KernelMemoryConfig.cpp" afterPath="$PROJECT_DIR$/src/KernelMemoryConfig.cpp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/List.cpp" afterPath="$PROJECT_DIR$/src/List.cpp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Locator.cpp" afterPath="$PROJECT_DIR$/src/Locator.cpp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/MBRmain.cpp" afterPath="$PROJECT_DIR$/src/MBRmain.cpp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/MemoryManager.cpp" afterPath="$PROJECT_DIR$/src/MemoryManager.cpp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/PMLoader.cpp" afterPath="$PROJECT_DIR$/src/PMLoader.cpp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Process.cpp" afterPath="$PROJECT_DIR$/src/Process.cpp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/SecondaryLoader.cpp" afterPath="$PROJECT_DIR$/src/SecondaryLoader.cpp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/TSS.cpp" afterPath="$PROJECT_DIR$/src/TSS.cpp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/UserProcess.cpp" afterPath="$PROJECT_DIR$/src/UserProcess.cpp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/VBRmain.cpp" afterPath="$PROJECT_DIR$/src/VBRmain.cpp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/VirtualMemory.cpp" afterPath="$PROJECT_DIR$/src/VirtualMemory.cpp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/idleProcess.cpp" afterPath="$PROJECT_DIR$/src/idleProcess.cpp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/interrupts.cpp" afterPath="$PROJECT_DIR$/src/interrupts.cpp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/libx2.cpp" afterPath="$PROJECT_DIR$/src/libx2.cpp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/protected_main.cpp" afterPath="$PROJECT_DIR$/src/protected_main.cpp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/test.cpp" afterPath="$PROJECT_DIR$/src/test.cpp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/stdc++/include/c++config" afterPath="$PROJECT_DIR$/stdc++/include/c++config" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/stdc++/include/do_not_include/README.txt" afterPath="$PROJECT_DIR$/stdc++/include/do_not_include/README.txt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/stdc++/include/do_not_include/c++config.h" afterPath="$PROJECT_DIR$/stdc++/include/do_not_include/c++config.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/stdc++/include/do_not_include/exception.h" afterPath="$PROJECT_DIR$/stdc++/include/do_not_include/exception.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/stdc++/include/do_not_include/new.h" afterPath="$PROJECT_DIR$/stdc++/include/do_not_include/new.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/stdc++/include/exception" afterPath="$PROJECT_DIR$/stdc++/include/exception" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/stdc++/include/gcc-parts/README.txt" afterPath="$PROJECT_DIR$/stdc++/include/gcc-parts/README.txt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/stdc++/include/new" afterPath="$PROJECT_DIR$/stdc++/include/new" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/stdc/examples/testx.c" afterPath="$PROJECT_DIR$/stdc/examples/testx.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/stdc/examples/use-assert.c" afterPath="$PROJECT_DIR$/stdc/examples/use-assert.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/stdc/examples/use-setjmp.c" afterPath="$PROJECT_DIR$/stdc/examples/use-setjmp.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/stdc/examples/use-stdarg.c" afterPath="$PROJECT_DIR$/stdc/examples/use-stdarg.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/stdc/examples/use-stddef.c" afterPath="$PROJECT_DIR$/stdc/examples/use-stddef.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/stdc/examples/use-stdlib.c" afterPath="$PROJECT_DIR$/stdc/examples/use-stdlib.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/stdc/implementation/arch/x86/README.txt" afterPath="$PROJECT_DIR$/stdc/implementation/arch/x86/README.txt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/stdc/implementation/compiler/shared/predefined-macros.h" afterPath="$PROJECT_DIR$/stdc/implementation/compiler/shared/predefined-macros.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/stdc/implementation/shared/README.txt" afterPath="$PROJECT_DIR$/stdc/implementation/shared/README.txt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/stdc/implementation/special-1/README.txt" afterPath="$PROJECT_DIR$/stdc/implementation/special-1/README.txt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/stdc/implementation/special-1/ctype.c" afterPath="$PROJECT_DIR$/stdc/implementation/special-1/ctype.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/stdc/implementation/special-1/malloc/malloc.c" afterPath="$PROJECT_DIR$/stdc/implementation/special-1/malloc/malloc.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/stdc/implementation/special-1/number.c" afterPath="$PROJECT_DIR$/stdc/implementation/special-1/number.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/stdc/implementation/special-1/printf/printf.c" afterPath="$PROJECT_DIR$/stdc/implementation/special-1/printf/printf.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/stdc/implementation/special-1/printf/vsprintf.c" afterPath="$PROJECT_DIR$/stdc/implementation/special-1/printf/vsprintf.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/stdc/include/CHANGELOG" afterPath="$PROJECT_DIR$/stdc/include/CHANGELOG" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/stdc/include/README.txt" afterPath="$PROJECT_DIR$/stdc/include/README.txt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/stdc/include/additional/README.txt" afterPath="$PROJECT_DIR$/stdc/include/additional/README.txt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/stdc/include/additional/number.h" afterPath="$PROJECT_DIR$/stdc/include/additional/number.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/stdc/include/assert.h" afterPath="$PROJECT_DIR$/stdc/include/assert.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/stdc/include/ctype.h" afterPath="$PROJECT_DIR$/stdc/include/ctype.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/stdc/include/errno.h" afterPath="$PROJECT_DIR$/stdc/include/errno.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/stdc/include/float.h" afterPath="$PROJECT_DIR$/stdc/include/float.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/stdc/include/limits.h" afterPath="$PROJECT_DIR$/stdc/include/limits.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/stdc/include/local-definitions/FILE.h" afterPath="$PROJECT_DIR$/stdc/include/local-definitions/FILE.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/stdc/include/local-definitions/NULL.h" afterPath="$PROJECT_DIR$/stdc/include/local-definitions/NULL.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/stdc/include/local-definitions/assert.h" afterPath="$PROJECT_DIR$/stdc/include/local-definitions/assert.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/stdc/include/local-definitions/fpos_t.h" afterPath="$PROJECT_DIR$/stdc/include/local-definitions/fpos_t.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/stdc/include/local-definitions/size_t.h" afterPath="$PROJECT_DIR$/stdc/include/local-definitions/size_t.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/stdc/include/locale.h" afterPath="$PROJECT_DIR$/stdc/include/locale.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/stdc/include/math.h" afterPath="$PROJECT_DIR$/stdc/include/math.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/stdc/include/setjmp.h" afterPath="$PROJECT_DIR$/stdc/include/setjmp.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/stdc/include/signal.h" afterPath="$PROJECT_DIR$/stdc/include/signal.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/stdc/include/stdarg.h" afterPath="$PROJECT_DIR$/stdc/include/stdarg.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/stdc/include/stddef.h" afterPath="$PROJECT_DIR$/stdc/include/stddef.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/stdc/include/stdio.h" afterPath="$PROJECT_DIR$/stdc/include/stdio.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/stdc/include/stdlib.h" afterPath="$PROJECT_DIR$/stdc/include/stdlib.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/stdc/include/string.h" afterPath="$PROJECT_DIR$/stdc/include/string.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/stdc/include/time.h" afterPath="$PROJECT_DIR$/stdc/include/time.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/CHANGES.txt" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/CHANGES.txt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/COPYING.txt" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/COPYING.txt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/LICENSE.txt" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/LICENSE.txt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/README.txt" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/README.txt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/SeaBIOS-README.txt" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/SeaBIOS-README.txt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/TESTFORM.txt" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/TESTFORM.txt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/TODO.txt" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/TODO.txt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/VGABIOS-elpin-LICENSE.txt" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/VGABIOS-elpin-LICENSE.txt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/VGABIOS-lgpl-README.txt" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/VGABIOS-lgpl-README.txt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/bochsrc-sample.txt" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/bochsrc-sample.txt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/dlxlinux/bochsrc.bxrc" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/dlxlinux/bochsrc.bxrc" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/dlxlinux/readme.txt" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/dlxlinux/readme.txt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/dlxlinux/run.bat" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/dlxlinux/run.bat" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/dlxlinux/testform.txt" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/dlxlinux/testform.txt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/development/about-the-code.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/development/about-the-code.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/development/add-keymapping.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/development/add-keymapping.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/development/available-tools.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/development/available-tools.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/development/cmos-map.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/development/cmos-map.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/development/coding.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/development/coding.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/development/configure-scripting.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/development/configure-scripting.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/development/debugger-advanced.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/development/debugger-advanced.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/development/debugger-internals.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/development/debugger-internals.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/development/directory-structure.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/development/directory-structure.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/development/emulator-objects.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/development/emulator-objects.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/development/harddisk-redologs.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/development/harddisk-redologs.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/development/index.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/development/index.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/development/instrumentation.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/development/instrumentation.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/development/logfunctions.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/development/logfunctions.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/development/other-content.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/development/other-content.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/development/other.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/development/other.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/development/resources.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/development/resources.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/development/sb16-emulation-basics.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/development/sb16-emulation-basics.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/development/sound-lowlovel-basics.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/development/sound-lowlovel-basics.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/development/svn-release.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/development/svn-release.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/development/timers.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/development/timers.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/development/update-online-docs.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/development/update-online-docs.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/development/update-svn-snapshot.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/development/update-svn-snapshot.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/development/update-website.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/development/update-website.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/development/using-svn-write-access.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/development/using-svn-write-access.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/development/webmastering.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/development/webmastering.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/documentation/basics.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/documentation/basics.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/documentation/conventions.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/documentation/conventions.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/documentation/index.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/documentation/index.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/documentation/layout.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/documentation/layout.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/documentation/nsgmls.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/documentation/nsgmls.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/documentation/reading-writing.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/documentation/reading-writing.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/documentation/references.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/documentation/references.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/index.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/index.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/bios-tips.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/bios-tips.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/bochs-linux-disktools.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/bochs-linux-disktools.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/bochsrc.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/bochsrc.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/cirrus-notes.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/cirrus-notes.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/common-problems.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/common-problems.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/compiling.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/compiling.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/config-tuntap.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/config-tuntap.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/cpu-models.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/cpu-models.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/debugging-with-gdb.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/debugging-with-gdb.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/diskimagehowto.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/diskimagehowto.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/dlxlinux-networking.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/dlxlinux-networking.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/enter-special-keys.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/enter-special-keys.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/faq.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/faq.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/features.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/features.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/feedback-support.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/feedback-support.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/get-src-svn.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/get-src-svn.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/guest-dos.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/guest-dos.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/guest-freebsd.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/guest-freebsd.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/guest-osr5.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/guest-osr5.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/guest-win2k.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/guest-win2k.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/guest-win7.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/guest-win7.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/guest-winnt4.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/guest-winnt4.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/guest-winxp.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/guest-winxp.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/guests.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/guests.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/harddisk-modes.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/harddisk-modes.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/howto.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/howto.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/index.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/index.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/install-binary.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/install-binary.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/installation.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/installation.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/internal-debugger.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/internal-debugger.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/introduction.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/introduction.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/is-bochs-right-for-me.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/is-bochs-right-for-me.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/keymap.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/keymap.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/license.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/license.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/loop-device-usage.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/loop-device-usage.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/mailinglist.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/mailinglist.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/mouse-toggle.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/mouse-toggle.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/mtools.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/mtools.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/release-notes.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/release-notes.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/rom-images.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/rom-images.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/screensaver.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/screensaver.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/search-order.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/search-order.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/serial-port.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/serial-port.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/setup.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/setup.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/smp.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/smp.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/supported-platforms.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/supported-platforms.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/textconfig.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/textconfig.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/textmode-problems.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/textmode-problems.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/thirdparty.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/thirdparty.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/using-bochs.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/using-bochs.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/using-bximage.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/using-bximage.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/using-save-restore.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/using-save-restore.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/using-slirp.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/using-slirp.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/using-socket.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/using-socket.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/using-sound.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/using-sound.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/vesa-notes.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/vesa-notes.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/who-uses-bochs.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/who-uses-bochs.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/will-it-work-for-me.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/will-it-work-for-me.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/winimage.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/winimage.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/xcolormap.html" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/docs/user/xcolormap.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/keymaps/sdl-pc-us.map" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/keymaps/sdl-pc-us.map" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/keymaps/sdl2-pc-us.map" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/keymaps/sdl2-pc-us.map" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/keymaps/x11-pc-es.map" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/keymaps/x11-pc-es.map" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/keymaps/x11-pc-si.map" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/keymaps/x11-pc-si.map" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/keymaps/x11-pc-us.map" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/keymaps/x11-pc-us.map" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/sb16ctrl.txt" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/sb16ctrl.txt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/Bochs-2.6.9/slirp.conf" afterPath="$PROJECT_DIR$/tools/Bochs-2.6.9/slirp.conf" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/README.txt" afterPath="$PROJECT_DIR$/tools/README.txt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/bochs-run/bochs2.6.9.bxrc" afterPath="$PROJECT_DIR$/tools/bochs-run/bochs2.6.9.bxrc" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/bochs-run/bochsrc.bxrc" afterPath="$PROJECT_DIR$/tools/bochs-run/bochsrc.bxrc" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/bochs-run/main.bimg.clean.info" afterPath="$PROJECT_DIR$/tools/bochs-run/main.bimg.clean.info" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/bochs-run/windows/CreateIMG.ini" afterPath="$PROJECT_DIR$/tools/bochs-run/windows/CreateIMG.ini" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/bochs-run/windows/create_main_image.cmd" afterPath="$PROJECT_DIR$/tools/bochs-run/windows/create_main_image.cmd" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/bochs-run/windows/dump_codes.cmd" afterPath="$PROJECT_DIR$/tools/bochs-run/windows/dump_codes.cmd" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/bochs-run/windows/run_bochs.cmd" afterPath="$PROJECT_DIR$/tools/bochs-run/windows/run_bochs.cmd" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/bochs-run/windows/start_bochs.cmd" afterPath="$PROJECT_DIR$/tools/bochs-run/windows/start_bochs.cmd" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/bochs-run/windows/start_bochs_norc.cmd" afterPath="$PROJECT_DIR$/tools/bochs-run/windows/start_bochs_norc.cmd" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/bochs-run/writeHdd.cpp" afterPath="$PROJECT_DIR$/tools/bochs-run/writeHdd.cpp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/generate-cpp/cpp.py" afterPath="$PROJECT_DIR$/tools/generate-cpp/cpp.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/generate-cpp/cpp.template" afterPath="$PROJECT_DIR$/tools/generate-cpp/cpp.template" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/generate-cpp/func.template" afterPath="$PROJECT_DIR$/tools/generate-cpp/func.template" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/generate-cpp/h.template" afterPath="$PROJECT_DIR$/tools/generate-cpp/h.template" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/time-manager/README.txt" afterPath="$PROJECT_DIR$/tools/time-manager/README.txt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/time-manager/in_log.md" afterPath="$PROJECT_DIR$/tools/time-manager/in_log.md" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/time-manager/in_log_2017_11_24.md" afterPath="$PROJECT_DIR$/tools/time-manager/in_log_2017_11_24.md" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/time-manager/post.md" afterPath="$PROJECT_DIR$/tools/time-manager/post.md" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/time-manager/pre.md" afterPath="$PROJECT_DIR$/tools/time-manager/pre.md" />
+    </list>
+    <ignored path="$PROJECT_DIR$/cmake-build-debug/" />
+    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
+    <option name="TRACKING_ENABLED" value="true" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileEditorManager">
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="375">
+      <file leaf-file-name="clion-log.txt" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/cmake-build-debug/CMakeFiles/clion-log.txt">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="0">
+              <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name=".gitignore" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/.gitignore">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="391">
+              <caret line="17" column="1" lean-forward="false" selection-start-line="17" selection-start-column="1" selection-end-line="17" selection-end-column="1" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="README.md" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/README.md">
+          <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
+            <state split_layout="SPLIT">
+              <first_editor relative-caret-position="0">
+                <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+                <folding />
+              </first_editor>
+              <second_editor />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="makefile.init" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/makefile.init">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="0">
+              <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Config.makefile" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Config.makefile">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="299">
+              <caret line="13" column="15" lean-forward="false" selection-start-line="13" selection-start-column="15" selection-end-line="13" selection-end-column="15" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Makefile" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Makefile">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="1748">
+              <caret line="76" column="13" lean-forward="false" selection-start-line="76" selection-start-column="13" selection-end-line="76" selection-end-column="13" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="CMDUtil_main.cpp" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/64/CMDUtil_main.cpp">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="346">
+              <caret line="445" column="13" lean-forward="false" selection-start-line="445" selection-start-column="13" selection-end-line="445" selection-end-column="13" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="List.cpp" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/List.cpp">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="138">
+              <caret line="21" column="46" lean-forward="true" selection-start-line="21" selection-start-column="46" selection-end-line="21" selection-end-column="46" />
+              <folding>
+                <element signature="e#6423#6432#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+    </leaf>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="IdeDocumentHistory">
+    <option name="CHANGED_PATHS">
+      <list>
+        <option value="$PROJECT_DIR$/.gitignore" />
+        <option value="$PROJECT_DIR$/src/64/CMDUtil_main.cpp" />
+      </list>
+    </option>
+  </component>
+  <component name="JsBuildToolGruntFileManager" detection-done="true" sorting="DEFINITION_ORDER" />
+  <component name="JsBuildToolPackageJson" detection-done="true" sorting="DEFINITION_ORDER" />
+  <component name="JsFlowSettings">
+    <service-enabled>true</service-enabled>
+    <exe-path />
+    <annotation-enable>false</annotation-enable>
+    <other-services-enabled>true</other-services-enabled>
+    <auto-save>true</auto-save>
+  </component>
+  <component name="JsGulpfileManager">
+    <detection-done>true</detection-done>
+    <sorting>DEFINITION_ORDER</sorting>
+  </component>
+  <component name="ProjectFrameBounds" extendedState="6">
+    <option name="x" value="194" />
+    <option name="y" value="83" />
+    <option name="width" value="1400" />
+    <option name="height" value="990" />
+  </component>
+  <component name="ProjectView">
+    <navigator currentView="ProjectPane" proportions="" version="1">
+      <flattenPackages />
+      <showMembers />
+      <showModules />
+      <showLibraryContents />
+      <hideEmptyPackages />
+      <abbreviatePackageNames />
+      <autoscrollToSource />
+      <autoscrollFromSource />
+      <sortByType />
+      <manualOrder />
+      <foldersAlwaysOnTop value="true" />
+    </navigator>
+    <panes>
+      <pane id="ProjectPane">
+        <subPane>
+          <expand>
+            <path>
+              <item name="x2-system" type="dad4c3:CidrFilesViewHelper$MyProjectTreeStructure$1" />
+              <item name="x2-system" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="x2-system" type="dad4c3:CidrFilesViewHelper$MyProjectTreeStructure$1" />
+              <item name="x2-system" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+            </path>
+          </expand>
+          <select />
+        </subPane>
+      </pane>
+    </panes>
+  </component>
+  <component name="PropertiesComponent">
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="run.code.analysis.last.selected.profile" value="pProject Default" />
+    <property name="settings.editor.selected.configurable" value="preferences.lookFeel" />
+  </component>
+  <component name="RunDashboard">
+    <option name="ruleStates">
+      <list>
+        <RuleState>
+          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
+        </RuleState>
+        <RuleState>
+          <option name="name" value="StatusDashboardGroupingRule" />
+        </RuleState>
+      </list>
+    </option>
+  </component>
+  <component name="ShelveChangesManager" show_recycled="false">
+    <option name="remove_strategy" value="false" />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="1cded975-8a61-489e-9261-8532f5cb43ac" name="Default" comment="" />
+      <created>1511715184529</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1511715184529</updated>
+      <workItem from="1511715188053" duration="3013000" />
+      <workItem from="1511841619601" duration="187000" />
+      <workItem from="1511841904491" duration="593000" />
+      <workItem from="1511854069593" duration="1276000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TimeTrackingManager">
+    <option name="totallyTimeSpent" value="5069000" />
+  </component>
+  <component name="TodoView">
+    <todo-panel id="selected-file">
+      <is-autoscroll-to-source value="true" />
+    </todo-panel>
+    <todo-panel id="all">
+      <are-packages-shown value="true" />
+      <is-autoscroll-to-source value="true" />
+    </todo-panel>
+  </component>
+  <component name="ToolWindowManager">
+    <frame x="-9" y="41" width="1938" height="1048" extended-state="6" />
+    <editor active="true" />
+    <layout>
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.1933405" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32918552" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="CMake" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.3280543" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="TeamCity" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32954547" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32954547" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
+      <window_info id="Data View" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
+      <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
+      <window_info id="Inspection Results" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.31704545" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+    </layout>
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="1" />
+    <option name="exactExcludedFiles">
+      <list>
+        <option value="$PROJECT_DIR$/ignore/BotBuilder/Node/calling/src/botbuilder.d.ts" />
+      </list>
+    </option>
+  </component>
+  <component name="VcsContentAnnotationSettings">
+    <option name="myLimit" value="2678400000" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager />
+    <watches-manager />
+  </component>
+  <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/cmake-build-debug/CMakeFiles/clion-log.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/.gitignore">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="391">
+          <caret line="17" column="1" lean-forward="false" selection-start-line="17" selection-start-column="1" selection-end-line="17" selection-end-column="1" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/README.md">
+      <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
+        <state split_layout="SPLIT">
+          <first_editor relative-caret-position="0">
+            <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+            <folding />
+          </first_editor>
+          <second_editor />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/makefile.init">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Config.makefile">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="299">
+          <caret line="13" column="15" lean-forward="false" selection-start-line="13" selection-start-column="15" selection-end-line="13" selection-end-column="15" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Makefile">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1748">
+          <caret line="76" column="13" lean-forward="false" selection-start-line="76" selection-start-column="13" selection-end-line="76" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/64/CMDUtil_main.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="10235">
+          <caret line="445" column="13" lean-forward="false" selection-start-line="445" selection-start-column="13" selection-end-line="445" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/cmake-build-debug/CMakeFiles/clion-log.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/.gitignore">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="391">
+          <caret line="17" column="1" lean-forward="false" selection-start-line="17" selection-start-column="1" selection-end-line="17" selection-end-column="1" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/makefile.init">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/README.md">
+      <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
+        <state split_layout="SPLIT">
+          <first_editor relative-caret-position="0">
+            <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+            <folding />
+          </first_editor>
+          <second_editor />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Config.makefile">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="299">
+          <caret line="13" column="15" lean-forward="false" selection-start-line="13" selection-start-column="15" selection-end-line="13" selection-end-column="15" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Makefile">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1748">
+          <caret line="76" column="13" lean-forward="false" selection-start-line="76" selection-start-column="13" selection-end-line="76" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/64/CMDUtil_main.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="10235">
+          <caret line="445" column="13" lean-forward="false" selection-start-line="445" selection-start-column="13" selection-end-line="445" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/cmake-build-debug/CMakeFiles/clion-log.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/.gitignore">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="391">
+          <caret line="17" column="1" lean-forward="false" selection-start-line="17" selection-start-column="1" selection-end-line="17" selection-end-column="1" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/README.md">
+      <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
+        <state split_layout="SPLIT">
+          <first_editor relative-caret-position="0">
+            <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+            <folding />
+          </first_editor>
+          <second_editor />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/makefile.init">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Config.makefile">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="299">
+          <caret line="13" column="15" lean-forward="false" selection-start-line="13" selection-start-column="15" selection-end-line="13" selection-end-column="15" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Makefile">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1748">
+          <caret line="76" column="13" lean-forward="false" selection-start-line="76" selection-start-column="13" selection-end-line="76" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/64/CMDUtil_main.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="10235">
+          <caret line="445" column="13" lean-forward="true" selection-start-line="445" selection-start-column="13" selection-end-line="445" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/cmake-build-debug/CMakeFiles/clion-log.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/.gitignore">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="391">
+          <caret line="17" column="1" lean-forward="false" selection-start-line="17" selection-start-column="1" selection-end-line="17" selection-end-column="1" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/README.md">
+      <provider editor-type-id="text-editor">
+        <state relative-caret-position="107">
+          <caret line="21" column="10" lean-forward="false" selection-start-line="21" selection-start-column="10" selection-end-line="21" selection-end-column="10" />
+          <folding />
+        </state>
+      </provider>
+      <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
+        <state split_layout="SPLIT">
+          <first_editor relative-caret-position="0">
+            <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+            <folding />
+          </first_editor>
+          <second_editor />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/makefile.init">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Config.makefile">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="299">
+          <caret line="13" column="15" lean-forward="false" selection-start-line="13" selection-start-column="15" selection-end-line="13" selection-end-column="15" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Makefile">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1748">
+          <caret line="76" column="13" lean-forward="false" selection-start-line="76" selection-start-column="13" selection-end-line="76" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/64/CMDUtil_main.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="346">
+          <caret line="445" column="13" lean-forward="false" selection-start-line="445" selection-start-column="13" selection-end-line="445" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/List.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="138">
+          <caret line="21" column="46" lean-forward="true" selection-start-line="21" selection-start-column="46" selection-end-line="21" selection-end-column="46" />
+          <folding>
+            <element signature="e#6423#6432#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+  </component>
+</project>

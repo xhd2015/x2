@@ -20,14 +20,13 @@ class EnvInterface64Impl
 private:
 	static EnvInterface64Impl * env;
 	static const char *file;
-	EnvInterface64Impl()=default;
+	EnvInterface64Impl() = default;
 public:
+
 	static EnvInterface64Impl *getInstance();
 	static void					setHDDFile(const char *file);
-		/**
-		 * 总是使用一个文件来作为驱动器
-		 */
-#define DRIVER_TO_FILE  "hdd.img"
+
+
 		enum{
 		/**
 		 * 必须根据磁盘文件的第一个active分区的起始地址设定
@@ -37,11 +36,13 @@ public:
 	/**
 	 * @param dstSeg	总是被忽略
 	 * @param LBAhigh  总是0
+	 * @return 写入的扇区总数
 	 */
 	int writeSectors(u32_t srcSeg,const u8_t* srcOff,u8_t driver,u32_t LBAlow,u32_t num,u32_t LBAhigh);
 	/**
 	 * @param dstSeg	总是被忽略
 	 * @param LBAhigh  总是0
+	 * @return 读取的扇区总数
 	 */
 	int readSectors(u32_t dstSeg,u8_t* dstOff,u8_t driver,u32_t LBAlow,u32_t num,u32_t LBAhigh);
 	int printf_simple(const char *fmt,int arg0=0,int arg1=0,int arg2=0);

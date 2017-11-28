@@ -735,7 +735,7 @@ void _int0x21()
     	if(op == OP_SET)
     		currentStatus |= madeIndex;
     	else
-    		currentStatus &= (!madeIndex);
+    		currentStatus &= (~madeIndex);
 //        Kernel::printer->putx("current status=",currentStatus);
     }
 //    Kernel::printer->putsz("\n");

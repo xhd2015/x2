@@ -32,11 +32,22 @@ public:
 	int writeSectors(u32_t srcSeg,const u8_t* srcOff,u8_t driver,u32_t LBAlow,u32_t num,u32_t LBAhigh);
 	int readSectors(u32_t dstSeg,u8_t* dstOff,u8_t driver,u32_t LBAlow,u32_t num,u32_t LBAhigh);
 	/**
-	 * 不支持除%d以外的其他任何格式化参数
-	 * 不要使用%s,%x,%p等
+	 * 这是一个简单版本的printf，有下面的实现要求：
+	 * 		不支持除%d以外的其他任何格式化参数
+	 * 		不要使用%s,%x,%p等，所以 "s=%s,p=%p"不能够接受
+	 * 		最多支持三个参数，所以 "a=%d,b=%d,c=%d,d=%d\n"不能够接受，当然，参数个数超出范围，编译器会报错。
+	 * @param fmt 格式化字符串
+	 * @param arg0
+	 * @param arg1
+	 * @param arg2
 	 */
 //	 __attribute__ ((format (printf, 1, 2)))
 	int printf_simple(const char *fmt,int arg0=0,int arg1=0,int arg2=0);
+	/**
+	 * @param s 要打印的字符串
+	 * @param n 打印的个数
+	 * @return 返回打印的字符个数
+	 */
 	int printf_sn(const char *s,size_t n);
 	u8_t* malloc(size_t size);
 	void  free(u8_t* p);
@@ -59,7 +70,7 @@ public:
 	int strncmp(const char *cs,const char *ct,size_t n);
 	size_t strlen(const char *cs);
 	void *memset(char *s,int c,size_t n);
-	void *memcpy(char *,const char *ct,size_t n);
+	void *memcpy(char *dst,const char *ct,size_t n);
 
 };
 

@@ -40,7 +40,9 @@ vector<string> regexSplit(const regex& re,const string& s);
  */
 class FileOperation{
 protected:
-	typedef X2fsUtil<EnvInterface64Impl>::FileNode FileNode;
+	typedef X2fsUtil<EnvInterface64Impl,size_t>::FileNode FileNode;
+	using __FileDescriptor = FileDescriptor<size_t>;
+	using __TimeType = __FileDescriptor::__TimeType;
 public:
 	FileOperation()=delete;
 	FileOperation(const string& img);
@@ -78,18 +80,28 @@ public:
 	 *  @param dir  a simple,1-level dirname,such as 'foo',but not 'foo/bar'
 	 */
 	void mkdir(const string & dir);
-	void touch(const string & fname,FileDescriptor::SizeType secNum,FileDescriptor::TimeType ctime);
+	void touch(const string & fname,size_t secNum,__TimeType ctime);
 	void cat();
 	void pwd();
 	void changeImage(const string& img);//change to another disk
+
 //	DEPRECATED
 	const std::string& curDir();
 //	static void splitPaths(const string& path,int maxNum,int &retNum,STR_ARR_PTR_TYPE &retPtr);
-protected:
+
+	/**
+	 * read并打印出来
+	 */
+	void read(const string& fname,size_t secStart,size_t byteLen);
+	/**
+	 * 如果文件不存在，则创建
+	 */
+	void write(const string& fname,size_t start,const char* content,size_t len);
+private:
 	void refreshCurrentPath();
 
 	string curImage;
-	X2fsUtil<EnvInterface64Impl> util;
+	X2fsUtil<EnvInterface64Impl,size_t> util;
 	/**
 	 *  当lastNode为NULL时，表明没有上一个目录
 	 */
@@ -136,6 +148,16 @@ int main(int argc,char *argv[])
 	FileOperation op(imgFile);
 
 
+//	op.touch("file",4,0);
+//	string content("dddddddddddddddddddddddddddddddd");
+//	op.write("file", 5,content.c_str(), content.length());
+//	op.read("file", 5, 512);
+//	op.ls();
+//	return 0;
+
+//	string content2("eeeeeeeeeeee");
+//	op.write("file",1,content2.c_str(),content2.length());
+//	op.ls();
 
 	while(
 			prompt(op.curDir()) &&
@@ -169,6 +191,22 @@ int main(int argc,char *argv[])
 			}else{
 				op.touch(args[1], atoi(args[2].c_str()),atoi(args[3].c_str()));
 			}
+		}else if(args[0].compare("write")==0){
+			if(args.size() < 4)// write file StartSec dddddddddddddd...
+			{
+				cerr << "see help for write" << endl;
+			}else{
+				op.write(args[1], atoi(args[2].c_str()),args[3].c_str(), args[3].length());
+			}
+		}else if(args[0].compare("read")==0){
+			//read file StartSec ByteNum
+			if(args.size() < 4)
+				cerr << "see help for read"<<endl;
+			else
+			{
+				op.read(args[1],atoi(args[2].c_str()), atoi(args[3].c_str()));
+			}
+
 		}else if(args[0].compare("quit")==0 || args[0].compare("exit")==0){
 			break;
 		}else{
@@ -233,6 +271,7 @@ FileOperation::FileOperation(const string& img):
 //	cout << "after get tree"<<endl;
 	curNode = (FileNode*)tree.getHead();
 	lastNode = NULL;
+
 }
 void FileOperation::help()
 {
@@ -246,6 +285,8 @@ void FileOperation::help()
        touch  fname secNum ctime
        exit
        quit
+       read file StartSec ByteNum   #读取并打印文件Start起,共ByteNum个字节的内容
+       write file StartSec dddddddddddddd...   #写一串字符串到file，startSec参数后面的所有内容被视为要写的字符串,长度至少为1个扇区
             注:pathName可以含有任意组合的路径,但是fname,dirName不被视为路径而是普通文件名
 )+*" ;
 }
@@ -367,7 +408,7 @@ void FileOperation::cdRoot()
 }
 void FileOperation::rm(const string & fname)
 {
-	util.seterrno(X2fsUtil<EnvInterface64Impl>::ERROR_NOERR);
+	util.seterrno(X2fsUtil<EnvInterface64Impl,size_t>::ERROR_NOERR);
 	FileNode *fnode=util.locatePath(curNode, fname.c_str());
 	if(fnode==NULL)
 	{
@@ -378,22 +419,22 @@ void FileOperation::rm(const string & fname)
 }
 void FileOperation::mkdir(const string& dir)
 {
-	util.seterrno(X2fsUtil<EnvInterface64Impl>::ERROR_NOERR);
-	util.create(curNode, FileDescriptor::TYPE_DIR, dir.c_str(), 0,0);
-	if(util.geterrno() == X2fsUtil<EnvInterface64Impl>::ERROR_FILE_ALREDY_EXIST)
+	util.seterrno(X2fsUtil<EnvInterface64Impl,size_t>::ERROR_NOERR);
+	util.create(curNode, FileDescriptor<size_t>::TYPE_DIR, dir.c_str(), 0,0);
+	if(util.geterrno() == X2fsUtil<EnvInterface64Impl,size_t>::ERROR_FILE_ALREDY_EXIST)
 	{
 		cerr << "file/directory \""<<dir<<"\" already exists"<<endl;
 	}
 }
-void FileOperation::touch(const string & fname,FileDescriptor::SizeType secNum,FileDescriptor::TimeType ctime)
+void FileOperation::touch(const string & fname,size_t secNum,__TimeType ctime)
 {
-	util.seterrno(X2fsUtil<EnvInterface64Impl>::ERROR_NOERR);
-	util.create(curNode, FileDescriptor::TYPE_FILE, fname.c_str(), secNum,ctime);
-	if(util.geterrno()!=X2fsUtil<EnvInterface64Impl>::ERROR_NOERR)
+	util.seterrno(X2fsUtil<EnvInterface64Impl,size_t>::ERROR_NOERR);
+	util.create(curNode, FileDescriptor<size_t>::TYPE_FILE, fname.c_str(), secNum,ctime);
+	if(util.geterrno()!=X2fsUtil<EnvInterface64Impl,size_t>::ERROR_NOERR)
 	{
 		cerr << "error code is "<<util.geterrno()<<endl;
 	}
-	if(util.geterrno() == X2fsUtil<EnvInterface64Impl>::ERROR_FILE_ALREDY_EXIST)
+	if(util.geterrno() == X2fsUtil<EnvInterface64Impl,size_t>::ERROR_FILE_ALREDY_EXIST)
 	{
 		cerr << "file/directory \""<<fname<<"\" already exists"<<endl;
 	}
@@ -418,12 +459,35 @@ const string& FileOperation::curDir()
 {
 	return curPath[curPath.size()-1];
 }
+void FileOperation::read(const string& fname,size_t secStart,size_t byteLen)
+{
+	size_t secnum = (byteLen/CONST_SECSIZE)+(byteLen%CONST_SECSIZE!=0);
+	char *buffer=new char[secnum * CONST_SECSIZE];
+
+	size_t readNum = util._readFromFile(buffer,secnum,util.locatePath(curNode, fname.c_str()), secStart);
+	cout << "read num is "<< readNum << endl;
+	for(size_t i=0;i!=byteLen;++i)
+		cout << buffer[i];
+	delete [] buffer;
+}
+void FileOperation::write(const string& fname,size_t start,const char* content,size_t len)
+{
+	size_t secnum= (len/CONST_SECSIZE)+(len%CONST_SECSIZE!=0);
+	char *buffer=new char[secnum * CONST_SECSIZE]();
+	for(size_t i=0;i<len;i++)
+		buffer[i]=content[i];
+	size_t writeNum = util._writeToFile(buffer, secnum, util.locatePath(curNode, fname.c_str()), start);
+	cout << "write num is "<< writeNum << endl;
+	delete []buffer;
+
+
+}
 
 void FileOperation::refreshCurrentPath()
 {
 	curPath.clear();
 	FileNode *head=(FileNode*)util.getFileTree().getHead();
-	X2fsUtil<EnvInterface64Impl>::FileTree tree=util.getFileTree();
+	X2fsUtil<EnvInterface64Impl,size_t>::FileTree tree=util.getFileTree();
 //	TreeNode<FileDescriptor> *ip=tree.getHead();
 
 	FileNode *p=curNode;

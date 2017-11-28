@@ -150,10 +150,10 @@ protected:
 class Kernel{
 public:
 	typedef	Kernel											This;
-	typedef TreeNode<MemoryDescriptor> 						MmNodeType;
+	typedef TreeNode<MemoryDescriptor<size_t>> 						MmNodeType;
 	typedef SimpleMemoryManager<MmNodeType>					SmmType;
 	typedef SmmType::FullNode								FullMMNodeType; //使用这个结构来计算占用空间的大小
-	typedef MemoryManager<SimpleMemoryManager>		 		MmType;
+	typedef MemoryManager<SimpleMemoryManager,size_t>		 		MmType;
 	typedef AssociatedMemoryManager<SegmentDescriptor,1>    SegManager;
 	/**
 	 * 键盘缓冲区的存储数据类型
