@@ -10,6 +10,9 @@
 
 #include <64/MallocToSimple.h>
 #include <EnvInterface.h>
+#include <string>
+#include <vector>
+#include <regex>
 
 
 class EnvInterface64Impl
@@ -17,14 +20,15 @@ class EnvInterface64Impl
 	:public EnvInterface
 #endif
 {
-private:
+protected:
+	const char *file;
 	static EnvInterface64Impl * env;
-	static const char *file;
-	EnvInterface64Impl() = default;
+	EnvInterface64Impl(const char *file);
 public:
 
-	static EnvInterface64Impl *getInstance();
-	static void					setHDDFile(const char *file);
+	static EnvInterface64Impl *getInstance(const char *file);
+
+	EnvInterface64Impl(const EnvInterface64Impl &rhs )=delete;
 
 
 		enum{
@@ -68,6 +72,32 @@ public:
 
 };
 
+
+class StdEnv64Impl:
+		public EnvInterface64Impl
+	{
+public:
+	using string=std::string;
+
+	template <class T,class A>
+		using vector=typename std::vector<T,A>;
+
+	template <class T>
+	using allocator=std::allocator<T>;
+
+	std::vector<std::string> regexSplit(const std::regex& re, const std::string& s);
+	std::vector<std::string> spaceSplit(const std::string& s);
+
+public:
+	static StdEnv64Impl * getInstance(const char *file);
+
+protected:
+	static StdEnv64Impl * env;
+
+	StdEnv64Impl(const char *file);
+};
+
+// ======= template declaration
 template <class T>
 using MallocToSimple64Impl = MallocToSimple<T,EnvInterface64Impl>;
 

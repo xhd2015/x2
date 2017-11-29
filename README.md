@@ -3,44 +3,21 @@
 
 > Francis Bach Blesses All the Old People !!!!
 
-> 联系：1377430541@qq.com
-
-# What is x2 ?
-At first there is no x2, but under the introduction by my teacher, who instructed to me write an operating system that can run on ARM, which can be later used for my graduation, I proposed to write an OS using complete c++.
-
-Well, then I wrote a program like linux0.00,it runs under bochs well,but has changed the way that a task runs(There are two tasks continuously changing a character on the screen, which becomes different with linux0.00), and also changed the way the code is written by -- it is completely written in c++ and completely compiled successfully using g++.Then as it proceeds, more and more issues have been raised,such as memory management, file system and process etc, and the kernel is getting more and more complicated.
-
-So 'x2' is proposed as a name of this operating system,which has 2 remarkable features: completely written in c++ & the core is completely built from ground without using any existing.
+# X2
+作为一个软件设计项目而产生的操作系统，能够运行在x86架构,ARM上（树莓派）
+其中移植了STLPort作为C++库
 
 # 查看完整的帮助文档
 对于技术类的文档，请查看Manuals文件夹
 
 
-# Can I get involved into development?
-Of course you can(though currently there is no other person except me).
+# 源代码说明
+源代码在include和src两个文件夹下, include存放设计说明,src存放实现
 
-# How can I get started to develop x2?
-Just as any other projects is developed by community, Copy, Compile, Debug, Modify & Push a request to
-fix bugs.
+# 开发者提示
+所有的代码看起来都很易懂，但是加在一起就失去了它们原来的含义。
+设计是万物的原动力，而人生必经两件事：死亡和重构。
 
-# About source code reading
-Src/ and include/ are the two most important folders that contains fully kernel codes.
-src/main.cpp 			a real mode program,which loads the protected mode code as kernel into memory.
-src/protected_main.cpp 		the protected mode kernel starting code.
-include/PMLoader.h src/PMLoader.cpp		mainProcess() describes how the kernel was loaded
-include/List.h src/List.cpp	containing two useful data structures : LinkedList & Tree
-include/Memory.h src/Memory.cpp describes how memory management was developed
-...
- 
-
-
-# Some Hint for developers
-1.There are multiple kinds of codes
-	16 only
-	32 only
-	16,32,64 compitable
-if one block of code is only supported by a certain length of bits,say XX,then should CODEXX be defined and encloses that block only if it is defined.
-Check the code to see if you have done this.
 
 # 测试和编译工具链版本号
 这里列出一些有效的测试和编译工具版本号，它们已经成功地编译了可运行的镜像文件

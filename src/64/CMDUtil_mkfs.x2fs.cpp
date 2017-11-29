@@ -23,15 +23,17 @@
 int main(int argc,char *argv[])
 {
 
+	const char *filestr;
 	if(argc<2)
 	{
 		std::string filename;
 		std::cout << "please input a file:";
 		std::cin >> filename;
-		EnvInterface64Impl::setHDDFile(filename.c_str());
+		filestr = filename.c_str();
 	}else{
-		EnvInterface64Impl::setHDDFile(argv[1]);
+		filestr = argv[1];
 	}
+	EnvInterface64Impl *envInstance=EnvInterface64Impl::getInstance(filestr);
 
 	X2fsMetaInfo<size_t> metainfo;
 	metainfo.lbaStartLow = 0x3000;
@@ -44,34 +46,33 @@ int main(int argc,char *argv[])
 	metainfo.optional[X2fsMetaInfo<size_t>::INDEX_OPTIONAL_SECD]=0;
 
 	std::cout << "information about metainfo"<<std::endl;
-	metainfo.dumpInfo(EnvInterface64Impl::getInstance());
+	metainfo.dumpInfo(envInstance);
 	std::cout << std::endl;
 
 	if(!X2fsMetaInfo<size_t>::checkMetainfo(&metainfo))
 		printf("cannot validate metainfo\n");
 	else
-		X2fsUtil<EnvInterface64Impl,size_t>::mkfs(EnvInterface64Impl::getInstance(), 0x80, &metainfo);
+		X2fsUtil<EnvInterface64Impl,size_t>::mkfs(envInstance, 0x80, &metainfo);
 
 	printf("re-reading the information to validate....");
-	EnvInterface64Impl *env=EnvInterface64Impl::getInstance();
 //	X2fsMetaInfo *buf=(X2fsMetaInfo*)env->malloc(sizeof(X2fsMetaInfo));
 //	X2fsMetaInfo *buf = new X2fsMetaInfo;
-	u8_t *buf = env->malloc(metainfo.metaSec * CONST_SECSIZE);
+	u8_t *buf = envInstance->malloc(metainfo.metaSec * CONST_SECSIZE);
 	X2fsMetaInfo<size_t> *readMetainfo=(X2fsMetaInfo<size_t>*)buf;
-	env->readSectors(EnvInterface::CUR_SEG, buf,0x80,0x3000+2, 1, 0);
+	envInstance->readSectors(EnvInterface::CUR_SEG, buf,0x80,0x3000+2, 1, 0);
 	if(!X2fsMetaInfo<size_t>::checkMetainfo(readMetainfo))
 	{
 		printf("validating failed!\n");
 	}else{
 		printf("validating succeed!\n");
 	}
-	env->flushOutputs();
+	envInstance->flushOutputs();
 
 
-	env->free(buf);
+	envInstance->free(buf);
 
 	printf("end.\n");
-	env->flushOutputs();
+	envInstance->flushOutputs();
 }
 
 #endif

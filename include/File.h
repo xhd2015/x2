@@ -110,12 +110,22 @@ public:
 		PARTS_REQUIRED=4,
 		PARTS_OPTIONAL=1,
 
+		BASIC_SIZE_TYPE =  sizeof(__SizeType),
+
 
 		INDEX_OPTIONAL_SECD=0
 	};
 	X2fsMetaInfo()=default;
 
 public:
+	/**
+	 *  记录文件系统的__SizeType的基本长度
+	 *  注意：该域必须放在开始，以便一个位置系统读取之后能够根据第一个字节判断出该文件系统的尺寸基本类型
+	 *  取值：1,2,4,...
+	 */
+	const u8_t	basicSizeType = BASIC_SIZE_TYPE;
+
+
 	const __SizeType reservedSec=SECNUM_RESERVED_CONST;//2
 	const __SizeType metaSec=SECNUM_META_CONST;
 	/**
@@ -143,7 +153,6 @@ public:
 	__SizeType wholeSecnums;
 
 	const u16_t	validFlag=VALID_FLAG;
-
 
 public:
 	/**
@@ -311,8 +320,8 @@ public:
 	int	 tellType(int argc,const char * argv[])const;
 	void listNode(int argc,const char * argv[],int maxdeepth=1)const;
 
-	__SizeType writeToFile(const char *buf,__SizeType objsize,__SizeType nobj,int argc,const char *argv[],__SizeType foff=0);
-	__SizeType r__SizeTypemFile(char *buf,__SizeType objsize, __SizeType nobj,int argc,const char *argv[],FileNode *fnode,__SizeType foff=0);
+	DEPRECATED __SizeType writeToFile(const char *buf,__SizeType objsize,__SizeType nobj,int argc,const char *argv[],__SizeType foff=0);
+	DEPRECATED __SizeType r__SizeTypemFile(char *buf,__SizeType objsize, __SizeType nobj,int argc,const char *argv[],FileNode *fnode,__SizeType foff=0);
 
 	void listRoot()const;
 	void listNode(const FileNode* p)const;
@@ -362,6 +371,7 @@ public:
 //	INCOMPLETE FileNode * locatePath(FileNode *base,const char *name);
 
 	/**
+	 *  DEPRECATED 已经弃用，使用_writeToFile替代
 	 * @param buf 源数据区
 	 * @param objsize 源数据区中每个数据的大小
 	 * @param nobj   要写的数据个数，nobj*objsize就是要写的总字节数
@@ -369,14 +379,17 @@ public:
 	 * @param	foff	写到文件的偏移位置
 	 */
 //	INCOMPLETE
-	__SizeType writeToFile(const char *buf,__SizeType objsize, __SizeType nobj,FileNode *fnode,__SizeType foff=0);
+	DEPRECATED __SizeType writeToFile(const char *buf,__SizeType objsize, __SizeType nobj,FileNode *fnode,__SizeType foff=0);
 
 	// UNTESTED
 	/**
 	 * 从startILink处开始查找off的ilink位置
+	 * 前置条件：startILink指向一个有效的ilink位置，它的末端必须有(0,0)结尾，startILink增加不会到达linkarrLen
+	 *
 	 * @param secPos  相对于startILink需要定位的偏移量,这个待定位的位置是可以访问的
 	 * @param refOff   如果找到这个ilink，则同时设置这个值表明距离此ilink区间的开始处偏移; 如果没有找到，则retOff存放最后一个非0ilink的剩余的secPos偏移量
-	 * @return 0 未找到，空间不足以定位到该处
+	 * @return
+	 * 		  最后一个查找的ilink; 如果此ilink 长度(limit)为0，则表明空间不足以定位到该处；此时ilink就是最后一个起始分区
 	 * 		   其他，则一定保证retOff小于该区的limit，也就是说refOff一定在该区的范围内。
 	 */
 	__SizeType locateILink(__SizeType startILink,__SizeType secPos,__SizeType & retOff);
@@ -405,12 +418,12 @@ public:
 	 */
 	__SizeType		getEndILink(FileNode *fileNode)const;
 
-	//INCOMPLETE
+	// TODO 添加完整文档注释
 	__SizeType _writeToFile(const char *buf, __SizeType nsec,FileNode *fnode,__SizeType secPos=0);
 	__SizeType _readFromFile(char *buf,__SizeType nsec,FileNode *fnode,__SizeType secPos=0);
 
-//	INCOMPLETE
-	__SizeType readFromFile(char *buf,__SizeType objsize, __SizeType nobj,FileNode *fnode,__SizeType foff=0);
+
+	DEPRECATED __SizeType readFromFile(char *buf,__SizeType objsize, __SizeType nobj,FileNode *fnode,__SizeType foff=0);
 	AS_MACRO void seterrno(int processErrno)const;
 	AS_MACRO void seterrno(int processErrno);
 	AS_MACRO FileNode * getRootBase()const;
@@ -428,7 +441,7 @@ public:
 
 	DEPRECATED static void createFile_old(void *base,const char* name,__SizeType secNum);//default length=0,start=0,span=secNum
 
-	AS_MACRO FileTree getFileTree();
+	AS_MACRO FileTree* getFileTree();
 protected:
 		DEPRECATED void initBuffers();
 
@@ -583,12 +596,163 @@ protected:
 	mutable int processErrno;/*can be used in both const & non-const method*/
 
 	// 不再加载可选分区
-//	/**
+//	/** DEPRECATED
 //	 * 二级加载器是否载入
 //	 */
 //	bool secdLoaded;
 
 };
+
+
+
+/**
+ *  属性：一个表示状态的当前目录，上一个目录
+ *  方法：help ls cd rm mkdir touch cat pwd plwd(-last-)
+ */
+template <class __StdEnv,class __SizeType>
+class FileOperation{
+public:
+	//===类型别名
+	using __X2fsUtil  = X2fsUtil<__StdEnv,__SizeType>;
+	using FileNode = typename __X2fsUtil::FileNode;
+	using __FileDescriptor = FileDescriptor<__SizeType>;
+	using __TimeType = typename __FileDescriptor::__TimeType;
+
+	//===============接口约束
+	// require __StdEnv::splitBySpaces;
+#if defined(IDE_MODE) //将__StdEnv换成std,以便IDE进行语法检查
+	using __String = typename std::string;
+	template <class T>
+		using __Allocator = typename std::template allocator<T>;
+	template <class T>
+		using __Vector = typename  std::template vector <T, __Allocator<T>>;
+#else
+	using __String =typename __StdEnv::string;
+	template <class T>
+			using __Allocator = typename __StdEnv::template allocator<T>;
+	template <class T>
+			using __Vector = typename __StdEnv::template vector <T, __Allocator<T>>;
+#endif
+
+
+	using __Vector_String =__Vector<__String>;
+	using __Vector_String_cit = typename __Vector_String::const_iterator;// cit = const_iterator
+	// 需要提供名为spaceSplit的函数，原型如下；完成以空格分隔字符串的功能
+	using FunType_SpaceSplit = __Vector_String (*)(const __String&); //声明一个函数
+
+
+public:
+	FileOperation()=default;
+	DEPRECATED FileOperation(__StdEnv * env,const __String& img)=delete;
+	/**
+	 * @param env  标准环境
+	 * @param driver 磁盘驱动器号，在64位系统上可能映射为文件
+	 * @param lbaAddress  分区的位置
+	 */
+	FileOperation(__StdEnv * env,u8_t driver,u32_t lbaAddress);
+
+	/**
+	 * 显示help内容
+	 */
+	void help();
+	/**
+	 * 显示当前目录下的内容
+	 */
+	void ls();
+	/**
+	 * 一般cd命令，如果出错则打印错误信息，设置错误代码（如果有）
+	 *
+	 * 支持多种模式，参数可以是一个，也可以是多个
+	 */
+	void cd(const __String& strPath);
+
+	/**
+	 * cd XXX, 从当前目录下开始
+	 *
+	 * 注意，path数组可以含有特殊含义的目录，比如 ., .., 它们不会被当做一般的目录名称处理
+	 */
+	void cdFromCur(__Vector_String_cit begin,__Vector_String_cit end);
+
+	/**
+	 * cd -的函数
+	 */
+	void cdLast();
+	/**
+	 * cd ..的函数
+	 */
+	void cdBack();
+
+	/**
+	 *  cd /
+	 */
+	void cdRoot();
+	/**
+	 * 删除由名称指定的文件或目录
+	 */
+	void rm(const __String & fname);
+	/**
+	 *  创建文件夹
+	 *  @param dir  a simple,1-level dirname,such as 'foo',but not 'foo/bar'
+	 */
+	void mkdir(const __String & dir);
+	/**
+	 * 创建文件，指定大小和时间，内容为空
+	 */
+	void touch(const __String & fname,__SizeType secNum,__TimeType ctime);
+	/**
+	 * 尚未实现，使用read
+	 */
+	void cat();
+	/**
+	 * 打印当前目录
+	 */
+	void pwd();
+
+	/**
+	 * 切换到另一个磁盘上，不再使用
+	 */
+	DEPRECATED void changeImage(const __String& img);//change to another disk
+
+//	DEPRECATED
+	const __String& curDir();
+
+	/**
+	 * read并打印出来
+	 */
+	void read(const __String& fname,__SizeType secStart,__SizeType byteLen);
+	/**
+	 * 如果文件不存在，则创建
+	 */
+	void write(const __String& fname,__SizeType start,const char* content,__SizeType len);
+private:
+	/**
+	 * 辅助函数，用于同步curNode和curPath的内容
+	 */
+	void refreshCurrentPath();
+
+	/**
+	 * 操作系统上下文
+	 */
+	__StdEnv* stdEnv;
+	/**
+	 * 用于操作文件系统的实用工具类
+	 */
+	__X2fsUtil util;
+
+	FileNode *curNode;
+	/**
+	 *  当lastNode为NULL时，表明没有上一个目录
+	 */
+	FileNode *lastNode;
+
+	/**
+	 * 当前的路径数组
+	 */
+	__Vector_String curPath;
+
+};
+
+
 
 //=============Function Macros
 //=====class : FileDescriptor
@@ -704,9 +868,9 @@ bool X2fsUtil<__EnvInterface,__SizeType>::isFile(const FileNode *p)
 	return p && p->getData().getType()==FileDescriptor<__SizeType>::TYPE_FILE;
 }
 template <class __EnvInterface,typename __SizeType>
-typename X2fsUtil<__EnvInterface,__SizeType>::FileTree X2fsUtil<__EnvInterface,__SizeType>::getFileTree()
+typename X2fsUtil<__EnvInterface,__SizeType>::FileTree* X2fsUtil<__EnvInterface,__SizeType>::getFileTree()
 {
-	return fileTree;
+	return &fileTree;
 }
 
 //template<template<class > class _Allocator>

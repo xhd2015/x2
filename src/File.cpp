@@ -37,13 +37,16 @@ void  X2fsMetaInfo<__SizeType>::dumpInfo(EnvInterface64Impl *env)
 {
 	//每次最多打印3个，这是printf_simple的实现限制
 	env->printf_simple("X2fsMetaInfo{"
+			"basic_sizetype:%d, "
 			"reserved:%d, "
 			"metainfo:%d, "
-			"sec_filename:%d, ",reservedSec,metaSec,secnums[INDEX_NAME]);
+			,(u32_t)basicSizeType,reservedSec,metaSec);
+
 	env->printf_simple(
+			"sec_filename:%d, "
 			"sec_dir:%d, "
 			"sec_freespace:%d, "
-			,secnums[INDEX_DIR],secnums[INDEX_FREE]);
+			,secnums[INDEX_NAME],secnums[INDEX_DIR],secnums[INDEX_FREE]);
 	env->printf_simple(
 			"sec_link:%d, "
 			"sec_optional_secd:%d, "
@@ -1184,7 +1187,9 @@ template <class __EnvInterface,typename __SizeType>
 __SizeType  X2fsUtil<__EnvInterface,__SizeType>::writeToFile(const char* buf,__SizeType objsize, __SizeType nobj, int argc, const char* argv[],
 		__SizeType foff)
 {
-	return this->writeToFile(buf, objsize, nobj, this->getPathNode(argc, argv), foff);
+	// DEPRECATED
+//	return this->writeToFile(buf, objsize, nobj, this->getPathNode(argc, argv), foff);
+	return 0;
 }
 // INCOMPLETE
 //template <class __EnvInterface,typename __SizeType>
@@ -1338,13 +1343,10 @@ __SizeType  X2fsUtil<__EnvInterface,__SizeType>::writeToFile(const char* buf,
 template <class __EnvInterface,typename __SizeType>
 __SizeType X2fsUtil<__EnvInterface,__SizeType>::locateILink(__SizeType startILink,__SizeType secPos,__SizeType & retOff)
 {
-	for(; startILink<linkarrLen && linkarr[startILink].getLimit()!=0 &&
+	for(; linkarr[startILink].getLimit()!=0 &&
 					secPos >= linkarr[startILink].getLimit();++startILink)
 							secPos -= linkarr[startILink].getLimit();
 	retOff = secPos;
-	if(startILink == linkarrLen || linkarr[startILink].getLimit()==0)
-		return 0;
-
 	return startILink;
 
 }
@@ -1440,12 +1442,15 @@ __SizeType X2fsUtil<__EnvInterface,__SizeType>::_writeToFile(const char *buf, __
 
 	__SizeType retOff=0;
 	__SizeType ilinkPos = locateILink(ilink, secPos, retOff);
-	// TODO 纠正extrasec的计算
-	__SizeType extrasec = nsec + retOff;
-	if(ilinkPos == 0 && !extendFileSecNum(fnode,extrasec , true))//空间不足，也不能分配
-		return 0;
-	if(ilinkPos == 0) //更新数据状态
-		ilinkPos = locateILink(ilink = fd.getSectionListIndex(), secPos, retOff);
+	// TODO 验证下面的计算法则
+	__SizeType extraSec = 0;
+	if(retOff + nsec > linkarr[ilinkPos].getLimit()) //需要额外的空间
+	{
+		extraSec = retOff +nsec - linkarr[ilinkPos].getLimit();
+		if(!extendFileSecNum(fnode, extraSec, true)) // 空间不足以分配
+			return 0;
+		ilinkPos = locateILink(ilink = fd.getSectionListIndex(), secPos, retOff);//更新数据状态
+	}
 
 	__SizeType thisOff = retOff;
 	__SizeType thisLen = (nsec > (linkarr[ilinkPos].getLimit()  - thisOff)? (linkarr[ilinkPos].getLimit()  - thisOff): nsec );
@@ -1479,9 +1484,9 @@ __SizeType X2fsUtil<__EnvInterface,__SizeType>::_readFromFile(char *buf, __SizeT
 
 	__SizeType retOff=0;
 	__SizeType ilinkPos = locateILink(ilink, secPos, retOff);
-	// TODO 纠正extrasec的计算
-	if(ilinkPos == 0) //更新数据状态
-		return 0;//不可能定位
+
+	if(linkarr[ilinkPos].getLimit() == 0) //不可能定位
+		return 0;
 
 	__SizeType thisOff = retOff;
 	__SizeType thisLen = (nsec > (linkarr[ilinkPos].getLimit()  - thisOff)? (linkarr[ilinkPos].getLimit()  - thisOff): nsec );
@@ -1503,7 +1508,7 @@ __SizeType X2fsUtil<__EnvInterface,__SizeType>::_readFromFile(char *buf, __SizeT
 		thisLen = (thisLeftSec > linkarr[i].getLimit() ? linkarr[i].getLimit()  : thisLeftSec );
 	}
 
-	return nsec -thisLeftSec;
+	return nsec - thisLeftSec;
 }
 
 template <class __EnvInterface,typename __SizeType>
@@ -1660,6 +1665,8 @@ void  X2fsUtil<__EnvInterface,__SizeType>::mkfs(_EnvInterface *env,u8_t driver,c
 //		i++;
 //	}
 //}
+
+#include "File_FileOperation.cpp"  //包含实现文件
 
 #endif
 

@@ -29,8 +29,11 @@ __asm__(".code32 \n\t");
 #include <File.h>
 	template class MemoryManager<MallocToSimple64Impl,size_t>;
 	template class MemoryManager<X2fsUtil<EnvInterface64Impl,size_t>::PartialMallocToSimple,size_t>;
+	template class MemoryManager<X2fsUtil<StdEnv64Impl, size_t>::PartialMallocToSimple, size_t>;
+
 	template class LinearSourceManager<LinearSourceDescriptor<size_t>, MallocToSimple64Impl,size_t>;
 	template class LinearSourceManager<LinearSourceDescriptor<size_t>, X2fsUtil<EnvInterface64Impl,size_t>::PartialMallocToSimple,size_t>;
+	template class LinearSourceManager<LinearSourceDescriptor<size_t>, X2fsUtil<StdEnv64Impl,size_t>::PartialMallocToSimple,size_t>;
 #endif
 //
 //#if defined(CODE32)

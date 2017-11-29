@@ -12,22 +12,25 @@
 #include <cstdarg>
 #include <cstdio>
 #include <cstring>
+#include <regex>
 
 #if defined(CODE64)
 
 EnvInterface64Impl * EnvInterface64Impl::env=NULL;
-const char * EnvInterface64Impl::file=NULL;
+StdEnv64Impl * StdEnv64Impl::env=NULL;
 
-EnvInterface64Impl *EnvInterface64Impl::getInstance()
+
+EnvInterface64Impl::EnvInterface64Impl(const char *file):
+	file(file)
+{
+}
+
+EnvInterface64Impl *EnvInterface64Impl::getInstance(const char *file)
 {
 	if(env==NULL)
-		env = new EnvInterface64Impl();
+		env = new EnvInterface64Impl(file);
 	return env;
 }
-void			EnvInterface64Impl::setHDDFile(const char *file)
-		{
-			EnvInterface64Impl::file=file;
-		}
 
 int EnvInterface64Impl::writeSectors(u32_t srcSeg,const u8_t* srcOff,u8_t driver,u32_t LBAlow,u32_t num,u32_t LBAhigh)
 {
@@ -124,5 +127,45 @@ u8_t* EnvInterface64Impl::malloc(size_t size)
 	{
 		return ::memcpy(s,ct,n);
 	}
+
+	//================ class StdEnv64Impl
+	std::vector<std::string> StdEnv64Impl::regexSplit(const std::regex& re, const std::string& s) {
+		const std::string::const_iterator begin = s.cbegin();
+		auto itBeg = begin;
+		std::vector<std::string> res;
+		std::smatch allmatch;
+
+		while (itBeg != s.end() && std::regex_search(itBeg, s.cend(), allmatch, re)) {
+			// pos,len 每次迭代时，当还有时,应将beg~pos之间保留，然后beg变换到length之后
+			res.push_back(s.substr(itBeg - begin, allmatch.position()));
+			auto len = allmatch.length() + allmatch.position();
+			if (s.cend() - itBeg <= len) //超出范围
+				break;
+			itBeg += len;
+		}
+		if(itBeg!=s.end())
+		{
+			res.push_back(s.substr(itBeg - begin));
+			itBeg = s.end();
+		}
+
+		return std::move(res);
+	}
+
+	std::vector<std::string> StdEnv64Impl::spaceSplit(const std::string& s) //static函数是不可继承的
+		{
+			return std::move(regexSplit(std::regex("\\s+"), s));
+		}
+
+	StdEnv64Impl * StdEnv64Impl::getInstance(const char *file)
+	{
+		if(env==NULL)
+			env=new StdEnv64Impl(file);
+		return env;
+	}
+	StdEnv64Impl::StdEnv64Impl(const char *file):EnvInterface64Impl(file){
+
+	}
+
 
 #endif
