@@ -44,6 +44,7 @@ public:
 	 */
 	int writeSectors(u32_t srcSeg,const u8_t* srcOff,u8_t driver,u32_t LBAlow,u32_t num,u32_t LBAhigh);
 	/**
+	 * 注：在64位机器上使用fread实现时，由于文件本身的长度有限，可能读到末尾后返回0.这种情况下，应当返回num值以模拟磁盘容量无限的情况。
 	 * @param dstSeg	总是被忽略
 	 * @param LBAhigh  总是0
 	 * @return 读取的扇区总数

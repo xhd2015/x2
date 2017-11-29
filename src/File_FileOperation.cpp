@@ -42,6 +42,8 @@ void FileOperation<__StdEnv,__SizeType>::help()
        read file StartSec ByteNum   #读取并打印文件Start起,共ByteNum个字节的内容
        write file StartSec dddddddddddddd...   #写一串字符串到file，startSec参数后面的所有内容被视为要写的字符串,长度至少为1个扇区
             注:pathName可以含有任意组合的路径,但是fname,dirName不被视为路径而是普通文件名
+       randread file startByte  byteNum   #按字节位置随机读取文件内容
+       randwrite file startByte dddddddddddddddd...  #按字节位置写文件内容
 )+*" );
 }
 
@@ -266,11 +268,40 @@ void FileOperation<__StdEnv,__SizeType>::write(const __String& fname,__SizeType 
 	for(size_t i=0;i<len;i++)
 		buffer[i]=content[i];
 	size_t writeNum = util._writeToFile(buffer, secnum, util.locatePath(curNode, fname.c_str()), start);
-	stdEnv->printf_simple( "write num is %d\n",writeNum );
+	stdEnv->printf_simple( "write sec num is %d\n",writeNum );
 	stdEnv->flushOutputs();
 	delete []buffer;
+}
 
+template <class __StdEnv,class __SizeType>
+void FileOperation<__StdEnv,__SizeType>::randwrite(const __String& fname,__SizeType byteStart,
+		const char* content,__SizeType byteLen)
+{
+	ManagedObject<char*,__StdEnv,__SizeType> mbuf(stdEnv);
+	__SizeType bufSize,startOff,endOff;
+	bufSize=__X2fsUtil::calculateRandomBufferSize(byteStart, byteLen, &startOff, &endOff, CONST_SECSIZE);
 
+	char *contentBuf = mbuf.getOnlyBuffer(bufSize);
+	stdEnv->memcpy(contentBuf + startOff, content,byteLen);
+
+	__SizeType writeNum = util._randomWriteFile(contentBuf, byteLen,
+			util.locatePath(curNode, fname.c_str()), byteStart);
+	stdEnv->printf_simple( "write byte num is %d\n",writeNum );
+	stdEnv->flushOutputs();
+}
+template <class __StdEnv,class __SizeType>
+void FileOperation<__StdEnv,__SizeType>::randread(const __String& fname,__SizeType byteStart,__SizeType byteLen)
+{
+	ManagedObject<char*,__StdEnv,__SizeType> mbuf(stdEnv);
+	__SizeType bufSize,startOff,endOff;
+	bufSize=__X2fsUtil::calculateRandomBufferSize(byteStart, byteLen, &startOff, &endOff, CONST_SECSIZE);
+
+	char *contentBuf = mbuf.getOnlyBuffer(bufSize);
+	size_t readNum = util._randomReadFile(contentBuf, byteLen,
+			util.locatePath(curNode, fname.c_str()), byteStart);
+	stdEnv->printf_simple( "read byte num is %d\n",readNum );
+	stdEnv->printf_sn(contentBuf+startOff,byteLen);
+	stdEnv->flushOutputs();
 }
 
 template <class __StdEnv,class __SizeType>

@@ -419,8 +419,69 @@ public:
 	__SizeType		getEndILink(FileNode *fileNode)const;
 
 	// TODO 添加完整文档注释
+	/**
+	 * 实现相对于文件的随机位置扇区的读写
+	 */
 	__SizeType _writeToFile(const char *buf, __SizeType nsec,FileNode *fnode,__SizeType secPos=0);
 	__SizeType _readFromFile(char *buf,__SizeType nsec,FileNode *fnode,__SizeType secPos=0);
+	/** UNTESTED
+	 * 前置条件：buf是扇区的整数倍, byteStart%CONST_SIZE是相对于buf的开始
+	 * @param buf 数据源，长度至少为 byteStart % CONST_SIZE + nbyte
+	 * @param nbyte 要写的长度
+	 * @param fnode  要写的文件节点
+	 * @param byteStart 偏移地址
+	 */
+	__SizeType _randomWriteFile(const char *buf, __SizeType nbyte,FileNode *fnode,__SizeType byteStart=0);
+	/** UNTESTED
+	 * 条件同上
+	 * 此函数的实现不需要补齐，返回值的buf+(byteStart%CONST_SECSIZE)为有效数据
+	 */
+	__SizeType _randomReadFile(char *buf, __SizeType nbyte,FileNode *fnode,__SizeType byteStart=0);
+
+
+
+	// EFF 使用自动管理的数组效果更佳
+	/**
+	 * 基于字节的随机位置读写
+	 * 长度会扩展
+	 */
+	DEPRECATED __SizeType randomWriteFile(const char *buf, __SizeType nbyte,FileNode *fnode,__SizeType byteStart=0);
+	/**
+	 * 长度可能不足以读取，返回实际读取的长度
+	 */
+	DEPRECATED __SizeType randomReadFile(char *buf,__SizeType nbyte,FileNode *fnode,__SizeType byteStart=0);
+
+	/**
+	 * 实现连续多个扇区的随机读写
+	 * TODO:应当使用vector来替代char，这样就无需手动管理内存了
+	 *
+	 */
+	DEPRECATED __SizeType randomReadSector(char *buf,__SizeType nbyte,__SizeType bytePos);
+	DEPRECATED __SizeType randomWriteSector(const char *buf,__SizeType nbyte,__SizeType bytePos);
+	/**
+	 * 随机读写一个扇区
+	 * 前置条件： 0<=byteStart<byteEnd<=CONST_SECSIZE;
+	 * @param buf  数据源,至少有CONST_SECSIZE - bytePos的大小
+	 * @param secPos  要写的扇区
+	 * @param byteStart 起始位置
+	 * @param byteEnd    结束位置,注意：使用的是闭区间形式，[byteStart,byteEnd)
+	 * @param optBuffer 一个用于暂存数据的buffer，如果为NULL，函数会自己申请一个；其中的数据会改变
+	 *
+	 * @return 成功返回true，失败返回false
+	 */
+	DEPRECATED bool randomWriteOneUnit(const char *buf,__SizeType secPos,__SizeType byteStart,
+			__SizeType byteEnd,char *optBuffer=NULL);
+	DEPRECATED bool randomReadOneUnit(char *buf,__SizeType secPos,__SizeType byteStart,
+			__SizeType byteEnd,char *optBuffer=NULL);
+
+	/**
+	 *
+	 */
+	DEPRECATED bool randomWriteFileOneUnit(const char *buf,
+			FileNode *fnode,
+			__SizeType secPos,
+			__SizeType byteStart,
+			__SizeType byteEnd,char *optBuffer=NULL);
 
 
 	DEPRECATED __SizeType readFromFile(char *buf,__SizeType objsize, __SizeType nobj,FileNode *fnode,__SizeType foff=0);
@@ -442,6 +503,25 @@ public:
 	DEPRECATED static void createFile_old(void *base,const char* name,__SizeType secNum);//default length=0,start=0,span=secNum
 
 	AS_MACRO FileTree* getFileTree();
+
+	/**
+	 * 根据此磁盘一次读写的单位来计算随机读写所需的buffer大小，该大小是unit的整数倍
+	 * 通过该函数，可以将对磁盘字节的随机读写变换成按磁盘单位（扇区）的读写
+	 * @param startByte  开始位置
+	 * @param numbyte    字节数量
+	 * @param startDiff  返回值，设置start的距离开始的偏移，范围[0,unit); NULL不设置
+	 * @param endDiff    返回值,设置end的距离末尾的偏移，范围[0,unit); NULL不设置
+	 * @param unit		单元大小
+	 *
+	 * @return 返回所需的buffer数量，是unit的整数倍，以byte为单位
+	 */
+	static __SizeType calculateRandomBufferSize(__SizeType startByte,__SizeType numebyte,
+			__SizeType *startDiff=NULL,
+			__SizeType *endDiff=NULL,
+			__SizeType unit=CONST_SECSIZE);
+
+
+
 protected:
 		DEPRECATED void initBuffers();
 
@@ -721,9 +801,17 @@ public:
 	 */
 	void read(const __String& fname,__SizeType secStart,__SizeType byteLen);
 	/**
+	 * TODO 创建文件，不存在的
 	 * 如果文件不存在，则创建
 	 */
 	void write(const __String& fname,__SizeType start,const char* content,__SizeType len);
+
+
+	/**
+	 * 按字节随机写文件
+	 */
+	void randwrite(const __String& fname,__SizeType byteStart,const char* content,__SizeType byteLen);
+	void randread(const __String& fname,__SizeType byteStart,__SizeType byteLen);
 private:
 	/**
 	 * 辅助函数，用于同步curNode和curPath的内容
@@ -750,6 +838,19 @@ private:
 	 */
 	__Vector_String curPath;
 
+};
+
+template <typename T,typename __EnvInterface,typename __SizeType>
+class ManagedObject{ // 在析构函数时自动调用，相当于unique_ptr
+public:
+	ManagedObject(__EnvInterface *env);
+	~ManagedObject();
+	void setBufferIfNone(T buffer);
+	T	 getOnlyBuffer()const;
+	T   getOnlyBuffer(__SizeType size);
+private:
+	__EnvInterface * env;
+	T buffer;
 };
 
 

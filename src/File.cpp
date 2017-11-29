@@ -1070,7 +1070,30 @@ void X2fsUtil<__EnvInterface,__SizeType>::listNode(const FileNode* p)const
 	}
 }
 
+template <class __EnvInterface,typename __SizeType>
+__SizeType X2fsUtil<__EnvInterface,__SizeType>::calculateRandomBufferSize(
+		__SizeType startByte,__SizeType numbyte,
+		__SizeType *startDiff,
+		__SizeType *endDiff,
+		__SizeType unit)
+{
+	if(unit==0|| numbyte==0)return 0;
+	__SizeType modSize = startByte % unit;
+	__SizeType adjustNumByte = numbyte  + modSize;
+	__SizeType adjustNumModSize = adjustNumByte % unit;
 
+	if(startDiff)
+		*startDiff=modSize;
+
+	if(adjustNumModSize!=0)//需要向后增加补齐
+		{
+			adjustNumModSize = unit - adjustNumModSize;
+			adjustNumByte += adjustNumModSize;
+		}
+	if(endDiff)
+		*endDiff=adjustNumModSize;
+	return adjustNumByte;
+}
 template <class __EnvInterface,typename __SizeType>
 void X2fsUtil<__EnvInterface,__SizeType>::initBuffers() {
 //	this->namebuf = (char*)malloc(This::namebufLen);
@@ -1511,6 +1534,370 @@ __SizeType X2fsUtil<__EnvInterface,__SizeType>::_readFromFile(char *buf, __SizeT
 	return nsec - thisLeftSec;
 }
 
+template<class __EnvInterface, typename __SizeType>
+__SizeType X2fsUtil<__EnvInterface,__SizeType>::_randomWriteFile(const char *buf,
+		__SizeType nbyte,FileNode *fnode,__SizeType byteStart)
+{
+	if(fnode==NULL || fnode->getData().getType()!=FileDescriptor<__SizeType>::TYPE_FILE
+			|| buf==NULL || nbyte==0)return 0;
+	__SizeType bufSize,startOff,endOff;
+	bufSize = calculateRandomBufferSize(byteStart, nbyte, &startOff, &endOff, CONST_SECSIZE);
+	ManagedObject<u8_t*,_EnvInterface,__SizeType> mbuf(env);
+
+	FileDescriptor<__SizeType> fd=fnode->getData();
+
+	const __SizeType nsec = bufSize/CONST_SECSIZE;
+	const __SizeType startSec = byteStart/CONST_SECSIZE;
+
+
+	// startOff读补齐
+	if(startOff!=0)
+	{
+		__SizeType retOff;
+		__SizeType ilink = locateILink(fd.getSectionListIndex(), startSec, retOff);
+		if(linkarr[ilink].getLimit()!=0)//文件足够长
+		{
+
+			u8_t *oneUnitBuf=mbuf.getOnlyBuffer(CONST_SECSIZE);
+
+			if( 1!= env->readSectors(EnvInterface::CUR_SEG,
+					oneUnitBuf, driver, metainfo->lbaStartLow + linkarr[ilink].getStart() + retOff,
+					1, metainfo->lbaStartHigh))
+				return 0;//失败
+			env->memcpy((char*)buf, (const char*)oneUnitBuf, startOff);//复制前面部分
+		}
+	}
+	// endOff读补齐
+	if(endOff!=0)
+	{
+		u8_t *oneUnitBuf=NULL;
+		if(nsec==1)// nsec==1 时，扇区已经读入了,直接取用即可
+			oneUnitBuf=mbuf.getOnlyBuffer(CONST_SECSIZE);
+		else
+		{
+			__SizeType retOff;
+			__SizeType ilink = locateILink(fd.getSectionListIndex(), startSec + nsec - 1, retOff);
+			if(linkarr[ilink].getLimit()!=0)//文件足够长
+			{
+
+				u8_t *oneUnitBuf=mbuf.getOnlyBuffer(CONST_SECSIZE);
+				if( 1!=env->readSectors(EnvInterface::CUR_SEG,
+						oneUnitBuf, driver, metainfo->lbaStartLow + linkarr[ilink].getStart()+retOff,
+						1, metainfo->lbaStartHigh))
+					return 0; // 失败
+			}
+		}
+
+		// 如果oneUnitBuf不为空，说明已经读入了，需要复制到原来的区域
+		__SizeType offFromBegin = CONST_SECSIZE - endOff;
+		env->memcpy((char*)buf+offFromBegin, (const char*)oneUnitBuf+offFromBegin, endOff);//复制后面部分
+	}
+
+	// 现在所有的扇区已经补齐了，数据不会覆盖，进行完整的扇区写
+	__SizeType written=_writeToFile(buf, nsec, fnode, startSec);
+	if(written==nsec) //没有写错误
+		return nbyte;
+	else //至少有一个扇区没有写
+		return written*CONST_SECSIZE - startOff; //已经写的减去偏移部分
+}
+
+template<class __EnvInterface, typename __SizeType>
+__SizeType X2fsUtil<__EnvInterface,__SizeType>::_randomReadFile(char *buf,
+		__SizeType nbyte,FileNode *fnode,__SizeType byteStart)
+{
+	if(fnode==NULL || fnode->getData().getType()!=FileDescriptor<__SizeType>::TYPE_FILE
+			|| buf==NULL || nbyte==0)return 0;
+	__SizeType bufSize,startOff,endOff;
+	bufSize = calculateRandomBufferSize(byteStart, nbyte, &startOff, &endOff, CONST_SECSIZE);
+
+	const __SizeType nsec = bufSize/CONST_SECSIZE;
+	const __SizeType startSec = byteStart/CONST_SECSIZE;
+
+	// 现在所有的扇区已经补齐了，数据不会覆盖，进行完整的扇区写
+	__SizeType readin=_readFromFile(buf, nsec, fnode, startSec);
+	if(readin==nsec) //没有读错误
+		return nbyte;
+	else //至少有一个扇区没有读
+		return readin*CONST_SECSIZE - startOff; //已经写的减去偏移部分
+}
+
+//
+//template<class __EnvInterface, typename __SizeType>
+//__SizeType X2fsUtil<__EnvInterface,__SizeType>::randomWriteFile(const char* buf, __SizeType nbyte,
+//		FileNode* fnode, __SizeType byteStart)
+//{
+//	if(buf==NULL || fnode==NULL || nbyte==0)return 0;
+//	__SizeType bufSize,startOff,endOff;
+//	bufSize = calculateRandomBufferSize(byteStart, nbyte, &startOff, &endOff, CONST_SECSIZE);
+//	if(bufSize==0)return 0;
+//	__SizeType nsecs=bufSize/CONST_SECSIZE;
+//	__SizeType startIlink = fnode->getData().getSectionListIndex();
+//	__SizeType retOff;
+//	__SizeType ilink = locateILink(startIlink, byteStart/CONST_SECSIZE, retOff);
+//
+//	if(linkarr[ilink].getLimit()==0)//长度不够
+//	{
+//		_writeToFile(buf, nsecs, fnode, linkarr[ilink-1].getStart() + linkarr[ilink-1].getLimit());
+//	}else{ //长度足够容纳该位置
+//
+//	}
+//
+//
+//	const char *pbase=buf;
+//
+//	ManagedObject<char*,_EnvInterface,__SizeType> mbuf(env);//用于自动管理资源
+//
+//
+//
+//
+//
+//	if(startOff!=0) //开始区间需要先读入再写回
+//	{
+//		if(nsecs==1)//只有一个扇区
+//		{
+//			randomWriteFileOneUnit(pbase, fnode, startSec, startOff, CONST_SECSIZE - endOff, NULL);
+//			return;
+//		}else{ //多个扇区
+//			randomWriteFileOneUnit(pbase, fnode, startSec, startOff, CONST_SECSIZE, NULL);
+//			//move to next sec,需要对文件的ilink进行遍历, nextSec
+//		}
+//
+//			++startSec;
+//			--nsecs;
+//			pbase+=CONST_SECSIZE;// 已写指针向前移动
+//			bufSize-=CONST_SECSIZE;// 需要普通写的buffer大小减小一个单位
+//		}
+//		//长度不足以定位到此，则不回写
+//	}
+//	if(nsecs==0)return nbyte; //已经写完
+//
+//	if(endOff!=0)//结束区间需要同样处理
+//	{
+//		char *oneUnitBuf=mbuf.getOnlyBuffer(CONST_SECSIZE);
+//		if(oneUnitBuf== NULL)return 0;
+//		||
+//				1 != _readFromFile(oneUnitBuf,1,fnode,startSec + nsecs -1))
+//		++startSec;
+//		--nsecs;
+//		bufSize-=CONST_SECSIZE;
+//	}
+//	if(nsecs==0)return nbyte;
+//
+//	__SizeType realWrite = env->writeSectors(EnvInterface::CUR_SEG,
+//			(u8_t*)pbase, driver, metainfo->lbaStartLow + startSec,nsecs, metainfo->lbaStartHigh) ;
+//
+//	if(realWrite == nsecs)
+//		return nbyte;
+//	else  //差至少1个扇区没有写
+//		return (bufSize/CONST_SECSIZE - nsecs+realWrite)*CONST_SECSIZE
+//				- startOff; //原来总的扇区数目，减去未写的扇区数目，减去偏移
+//}
+//
+//template<class __EnvInterface, typename __SizeType>
+//__SizeType X2fsUtil<__EnvInterface,__SizeType>::randomReadFile(char* buf, __SizeType nbyte, FileNode* fnode,
+//		__SizeType byteStart)
+//{
+//	__SizeType bufSize,startOff,endOff;
+//	bufSize = calculateRandomBufferSize(byteStart, nbyte, &startOff, &endOff, CONST_SECSIZE);
+//	if(bufSize==0)return 0;
+//	// EFF 可以按照更高的效率处理，但是最好的方式是动态内存，因此这个优化在将来没有意义
+//
+//	char *myBuf=buf;
+//	if(startOff!=0 || endOff!=0)
+//	{
+//		myBuf=(char*)env->malloc(bufSize);
+//		if(myBuf==NULL)return 0;
+//	}
+//	__SizeType needSec = bufSize/CONST_SECSIZE;
+//
+//	__SizeType readSec=_readFromFile(myBuf, needSec, fnode,byteStart/CONST_SECSIZE);
+//
+//	if(myBuf!=buf) //需要复制过来
+//	{
+//	// EFF 按字节复制低效
+//		for(__SizeType i=startOff;i+endOff!=bufSize;++i)
+//			buf[i-startOff]=myBuf[i];
+//		env->free((u8_t*)myBuf);
+//	}
+//
+//	return readSec*CONST_SECSIZE - startOff - (CONST_SECSIZE -endOff);
+//}
+
+
+//
+//template <class __EnvInterface,typename __SizeType>
+//__SizeType  X2fsUtil<__EnvInterface,__SizeType>::randomReadSector(char *buf,__SizeType nbyte,
+//		__SizeType bytePos)
+//		{
+//			__SizeType bufSize,startOff,endOff;
+//			bufSize = calculateRandomBufferSize(bytePos, nbyte, &startOff, &endOff, CONST_SECSIZE);
+//			if(bufSize==0)return 0;
+//
+//			char *myBuf=buf;
+//			if(startOff!=0 || endOff!=0)//需要额外的空间
+//			{
+//				myBuf=(char*)env->malloc(bufSize);
+//				if(myBuf==NULL)return 0;//内存不足
+//			}
+//			__SizeType needToRead = bufSize / CONST_SECSIZE;
+//
+//			__SizeType realRead = env->readSectors(EnvInterface::CUR_SEG,
+//					(u8_t*)myBuf, driver, metainfo->lbaStartLow + bytePos/CONST_SECSIZE, needToRead, metainfo->lbaStartHigh) ;
+//			if(realRead==0) //读取错误
+//			{
+//				if(myBuf!=buf)env->free((u8_t*)myBuf);
+//				return 0;
+//			}
+//
+//
+//			if(myBuf!=buf)//复制过去
+//			{
+//				for(__SizeType i=startOff; i + endOff!=bufSize ;++i)//按字节复制
+//					buf[i-startOff]=myBuf[i];
+//				env->free((u8_t*)myBuf);
+//			}
+//			if(realRead == needToRead)
+//				return nbyte;
+//			else  //差至少1个扇区没有读
+//				return realRead*CONST_SECSIZE - startOff;
+//		}
+//template <class __EnvInterface,typename __SizeType>
+//__SizeType  X2fsUtil<__EnvInterface,__SizeType>::randomWriteSector(const char *buf,__SizeType nbyte,
+//		__SizeType bytePos)
+//		{
+//				__SizeType bufSize,startOff,endOff;
+//				bufSize = calculateRandomBufferSize(bytePos, nbyte, &startOff, &endOff, CONST_SECSIZE);
+//				if(bufSize==0)return 0;
+//				__SizeType nsecs=bufSize/CONST_SECSIZE;
+//				__SizeType startSec=bytePos / CONST_SECSIZE;
+//
+//				const char *pbase=buf;
+//
+//
+//				if(startOff!=0) //开始区间需要先读入再写回
+//				{
+//					if(!randomWriteOneUnit(pbase, startSec,startOff,CONST_SECSIZE,NULL))
+//						return 0;
+//					++startSec;
+//					--nsecs;
+//					pbase+=CONST_SECSIZE;// 已写指针向前移动
+//					bufSize-=CONST_SECSIZE;// 需要普通写的buffer大小减小一个单位
+//				}
+//				if(nsecs==0)return nbyte;
+//
+//				if(endOff!=0)//结束区间需要同样处理
+//				{
+//					if(!randomWriteOneUnit(pbase + bufSize - CONST_SECSIZE,startSec+nsecs-1 ,
+//							0,CONST_SECSIZE - endOff, NULL));
+//					++startSec;
+//					--nsecs;
+//					bufSize-=CONST_SECSIZE;
+//				}
+//				if(nsecs==0)return nbyte;
+//
+//				__SizeType realWrite = env->writeSectors(EnvInterface::CUR_SEG,
+//						(u8_t*)pbase, driver, metainfo->lbaStartLow + startSec,nsecs, metainfo->lbaStartHigh) ;
+//
+//				if(realWrite == nsecs)
+//					return nbyte;
+//				else  //差至少1个扇区没有写
+//					return (bufSize/CONST_SECSIZE - nsecs+realWrite)*CONST_SECSIZE
+//							- startOff; //原来总的扇区数目，减去未写的扇区数目，减去偏移
+//		}
+
+//template <class __EnvInterface,typename __SizeType>
+//bool  X2fsUtil<__EnvInterface,__SizeType>::randomWriteOneUnit(const char *buf,__SizeType secPos,
+//		__SizeType byteStart,
+//		__SizeType byteEnd,
+//		char *optBuffer)
+//{
+//		if(buf==NULL || byteStart>=byteEnd || byteEnd > CONST_SECSIZE )return false;
+//		if(byteEnd - byteStart == CONST_SECSIZE)//可以直接写入
+//		{
+//			return 1 == env->writeSectors(EnvInterface::CUR_SEG,
+//				(const u8_t*)buf, driver, metainfo->lbaStartLow + secPos, 1, metainfo->lbaStartHigh) ;
+//		}
+//		// 需要先读入部分，再完整写入
+//		char *oneUnitBuffer=(optBuffer==NULL? (char*)env->malloc(CONST_SECSIZE):optBuffer);
+//		if(oneUnitBuffer==NULL)return false;//程序空间不足
+//
+//
+//		if( 1 != env->readSectors(EnvInterface::CUR_SEG,
+//				(u8_t*)oneUnitBuffer, driver, metainfo->lbaStartLow + secPos, 1, metainfo->lbaStartHigh)  )//没有成功
+//			goto ERROR;
+//
+//		// EFF 按字节复制，低效
+//		for(__SizeType i=byteStart;i!=byteEnd;++i) //将原来的数据复制到这个扇区，然后写回
+//				oneUnitBuffer[i]=buf[i-byteStart];
+//		if( 1!=env->writeSectors(EnvInterface::CUR_SEG,
+//					(u8_t*)oneUnitBuffer, driver, metainfo->lbaStartLow+secPos, 1, metainfo->lbaStartHigh))
+//			goto ERROR;
+//
+//		if(oneUnitBuffer!=optBuffer)env->free((u8_t*)oneUnitBuffer);
+//
+//		return true;
+//		ERROR:
+//			if(oneUnitBuffer!=optBuffer)env->free((u8_t*)oneUnitBuffer);
+//				return false;
+//}
+//template <class __EnvInterface,typename __SizeType>
+//bool  X2fsUtil<__EnvInterface,__SizeType>::randomReadOneUnit(char *buf,__SizeType secPos,__SizeType byteStart,
+//		__SizeType byteEnd,char *optBuffer)
+//{
+//	if(buf==NULL || byteStart>=byteEnd || byteEnd > CONST_SECSIZE )return false;
+//		if(byteEnd - byteStart == CONST_SECSIZE)//可以直接写入
+//		{
+//			return 1 == env->readSectors(EnvInterface::CUR_SEG,
+//				(const u8_t*)buf, driver, metainfo->lbaStartLow + secPos, 1, metainfo->lbaStartHigh) ;
+//		}
+//		// 需要先读入部分，再完整写入
+//		char *oneUnitBuffer=(optBuffer==NULL? (char*)env->malloc(CONST_SECSIZE):optBuffer);
+//		if(oneUnitBuffer==NULL)return false;//程序空间不足
+//
+//
+//		if( 1 != env->readSectors(EnvInterface::CUR_SEG,
+//				(u8_t*)oneUnitBuffer, driver, metainfo->lbaStartLow + secPos, 1, metainfo->lbaStartHigh)  )//没有成功
+//			goto ERROR;
+//
+//		// EFF 按字节复制，低效
+//		for(__SizeType i=byteStart;i!=byteEnd;++i) //将原来的数据复制到这个扇区，然后写回
+//			buf[i-byteStart]=oneUnitBuffer[i];
+//
+//		if(oneUnitBuffer!=optBuffer)env->free((u8_t*)oneUnitBuffer);//释放空间
+//
+//		return true;
+//		ERROR:
+//			if(oneUnitBuffer!=optBuffer)env->free((u8_t*)oneUnitBuffer);
+//				return false;
+//}
+
+//template <class __EnvInterface,typename __SizeType>
+//bool  X2fsUtil<__EnvInterface,__SizeType>::randomWriteFileOneUnit(const char *buf,
+//			FileNode *fnode,
+//			__SizeType secPos,
+//			__SizeType byteStart,
+//			__SizeType byteEnd,char *optBuffer)
+//{
+//
+//		if(buf==NULL||fnode==NULL||byteStart>=byteEnd || byteEnd>=CONST_SECSIZE)return false;
+//		ManagedObject<char*,_EnvInterface,__SizeType> mbuf(env);//自动管理资源
+//
+//		char *oneUnitBuf=(optBuffer==NULL?mbuf.getOnlyBuffer(CONST_SECSIZE):
+//				optBuffer);
+//
+//		if(oneUnitBuf==NULL)return 0;//空间不足
+//
+//		if(1==_readFromFile(oneUnitBuf, 1, fnode, secPos)) //长度足够
+//		{
+//			for(__SizeType i=byteStart;i!=byteEnd;++i) //可能只有一个扇区
+//				oneUnitBuf[i]=buf[i-byteStart];
+//			//回写
+//			return 1==_writeToFile(oneUnitBuf, 1, fnode, secPos);
+//		}
+//		return false;
+//}
+
+
 template <class __EnvInterface,typename __SizeType>
 __SizeType  X2fsUtil<__EnvInterface,__SizeType>::readFromFile(char* buf, __SizeType objsize, __SizeType nobj,FileNode* fnode, __SizeType foff)
 {
@@ -1668,5 +2055,36 @@ void  X2fsUtil<__EnvInterface,__SizeType>::mkfs(_EnvInterface *env,u8_t driver,c
 
 #include "File_FileOperation.cpp"  //包含实现文件
 
+template <typename T,typename __EnvInterface,typename __SizeType>
+ManagedObject<T,__EnvInterface,__SizeType>::ManagedObject(__EnvInterface *env):
+env(env),
+buffer(NULL)
+{}
+
+template <typename T,typename __EnvInterface,typename __SizeType>
+ManagedObject<T,__EnvInterface,__SizeType>::~ManagedObject()
+{
+	if(buffer!=NULL && env!=NULL)
+		env->free((u8_t*)buffer);
+}
+template <typename T,typename __EnvInterface,typename __SizeType>
+void ManagedObject<T,__EnvInterface,__SizeType>::setBufferIfNone(T buffer)
+{
+	if(this->buffer==NULL)
+		this->buffer=buffer;
+}
+template <typename T,typename __EnvInterface,typename __SizeType>
+T ManagedObject<T,__EnvInterface,__SizeType>::getOnlyBuffer()const
+{
+	return buffer;
+}
+
+template <typename T,typename __EnvInterface,typename __SizeType>
+T ManagedObject<T,__EnvInterface,__SizeType>::getOnlyBuffer(__SizeType size)
+{
+	if(buffer==NULL)
+		buffer=(T)env->malloc(size);
+	return buffer;
+}
 #endif
 

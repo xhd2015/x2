@@ -57,9 +57,10 @@ int main(int argc,char *argv[])
 
 	// DEBUG
 //	op.touch("file",4,0);
-//	string content("dddddddddddddddddddddddddddddddd");
+//	string content(1024,'d');
 //	op.write("file", 5,content.c_str(), content.length());
-//	op.read("file", 5, 512);
+//	op.randwrite("file",4,content.c_str(),content.length());
+//	op.randread("file", 4, content.length());
 //	op.ls();
 //	return 0;
 
@@ -101,20 +102,26 @@ int main(int argc,char *argv[])
 			}else{
 				op.touch(args[1], atoi(args[2].c_str()),atoi(args[3].c_str()));
 			}
-		}else if(args[0].compare("write")==0){
+		}else if(args[0].compare("write")==0 || args[0].compare("randwrite")==0){
 			if(args.size() < 4)// write file StartSec dddddddddddddd...
 			{
-				cerr << "see help for write" << endl;
+				cerr << "see help for "<<args[0] << endl;
 			}else{
-				op.write(args[1], atoi(args[2].c_str()),args[3].c_str(), args[3].length());
+				if(args[0].compare("write")==0)
+					op.write(args[1], atoi(args[2].c_str()),args[3].c_str(), args[3].length());
+				else
+					op.randwrite(args[1], atoi(args[2].c_str()),args[3].c_str(), args[3].length());
 			}
-		}else if(args[0].compare("read")==0){
+		}else if(args[0].compare("read")==0 || args[0].compare("randread")==0){
 			//read file StartSec ByteNum
 			if(args.size() < 4)
-				cerr << "see help for read"<<endl;
+				cerr << "see help for "<<args[0]<<endl;
 			else
 			{
-				op.read(args[1],atoi(args[2].c_str()), atoi(args[3].c_str()));
+				if(args[0].compare("read")==0)
+					op.read(args[1],atoi(args[2].c_str()), atoi(args[3].c_str()));
+				else
+					op.randread(args[1],atoi(args[2].c_str()), atoi(args[3].c_str()));
 			}
 
 		}else if(args[0].compare("quit")==0 || args[0].compare("exit")==0){

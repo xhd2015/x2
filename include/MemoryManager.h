@@ -157,7 +157,12 @@ public:
     		LinkedList<_LinearSourceDescriptor,_NodeAllocator> &list,__SizeType eachSectionExtraSize=0);
 
 
-    void				mdeleteLinked(LinkedList<_LinearSourceDescriptor,_NodeAllocator> &ist);
+    /**
+     * 删除一个链表中的已经分配了的节点
+     * 前置条件：list不为空，list中的节点之前已经分配过
+     * @param list 节点列表
+     */
+    void				mdeleteLinked(LinkedList<_LinearSourceDescriptor,_NodeAllocator> &list);
 
 
 protected:

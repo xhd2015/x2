@@ -38,7 +38,7 @@ int EnvInterface64Impl::writeSectors(u32_t srcSeg,const u8_t* srcOff,u8_t driver
 	if(fp==NULL)
 		fp=fopen(file,"wb+");
 	fseek(fp,(LBAlow - LBABASE)*CONST_SECSIZE,SEEK_SET);
-	size_t n=fwrite(srcOff,num,CONST_SECSIZE,fp);
+	size_t n=fwrite(srcOff,CONST_SECSIZE,num,fp);
 	fclose(fp);
 	return n;
 }
@@ -47,10 +47,14 @@ int EnvInterface64Impl::readSectors(u32_t dstSeg,u8_t* dstOff,u8_t driver,u32_t 
 	FILE *fp=fopen(file,"rb+");
 	if(fp==NULL)
 		fp=fopen(file,"wb+");
-	fseek(fp,(LBAlow - LBABASE)*CONST_SECSIZE,SEEK_SET);
-	size_t n=fread(dstOff,num,CONST_SECSIZE,fp);
+//	fseek(fp,0,SEEK_END);
+//	printf_simple("fp size=%d\n",ftell(fp));
+	fseek(fp,(LBAlow - LBABASE)*CONST_SECSIZE,SEEK_SET); // 如果已有文件不够大，会返回错误
+
+//	size_t n=fread(dstOff,CONST_SECSIZE,num,fp);
+	fread(dstOff,CONST_SECSIZE,num,fp); //可能返回0
 	fclose(fp);
-	return n;
+	return num;
 }
 int EnvInterface64Impl::printf_simple(const char *fmt,int arg0,int arg1,int arg2)
 {

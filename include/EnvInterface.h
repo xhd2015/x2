@@ -31,6 +31,12 @@ public:
 	// 不能使用
 	int writeSectors(u32_t srcSeg,const u8_t* srcOff,u8_t driver,u32_t LBAlow,u32_t num,u32_t LBAhigh);
 	int readSectors(u32_t dstSeg,u8_t* dstOff,u8_t driver,u32_t LBAlow,u32_t num,u32_t LBAhigh);
+
+
+
+
+
+
 	/**
 	 * 这是一个简单版本的printf，有下面的实现要求：
 	 * 		不支持除%d以外的其他任何格式化参数
