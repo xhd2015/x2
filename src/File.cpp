@@ -727,6 +727,14 @@ void X2fsUtil<__EnvInterface,__SizeType>::removeNode(FileNode * node)
 		}
 	}
 }
+template <class __EnvInterface,typename __SizeType>
+bool X2fsUtil<__EnvInterface,__SizeType>::deleteFile(FileNode* fnode)
+{
+	freeNode(fnode);
+	removeNode(fnode);
+	return true;
+
+}
 
 template <class __EnvInterface,typename __SizeType>
 bool X2fsUtil<__EnvInterface,__SizeType>::rename(FileNode *node,const char *newname)
@@ -948,15 +956,7 @@ bool X2fsUtil<__EnvInterface,__SizeType>::createDir(int argc,const char* argv[])
 template <class __EnvInterface,typename __SizeType>
 bool X2fsUtil<__EnvInterface,__SizeType>::deleteFile(int argc,const char * argv[])
 {
-	auto pnode=this->getPathNode(argc, argv);
-	if(pnode==NULL)
-	{
-		return false;
-	}else{
-		this->freeNode(pnode);
-		this->removeNode(pnode);
-		return true;
-	}
+	return deleteFile(getPathNode(argc, argv));
 }
 template <class __EnvInterface,typename __SizeType>
 bool X2fsUtil<__EnvInterface,__SizeType>::rename(int argc,const char *argv[],const char *newname)
@@ -1455,7 +1455,8 @@ __SizeType X2fsUtil<__EnvInterface,__SizeType>::getEndILink(FileNode *fileNode)c
 
 }
 template <class __EnvInterface,typename __SizeType>
-__SizeType X2fsUtil<__EnvInterface,__SizeType>::_writeToFile(const char *buf, __SizeType nsec,FileNode *fnode,__SizeType secPos)
+__SizeType X2fsUtil<__EnvInterface,__SizeType>::_writeToFile(const char *buf,
+		__SizeType nsec,FileNode *fnode,__SizeType secPos,bool updateFileLen)
 {
 	if(nsec==0 || fnode==NULL)return 0;
 
@@ -1470,7 +1471,7 @@ __SizeType X2fsUtil<__EnvInterface,__SizeType>::_writeToFile(const char *buf, __
 	if(retOff + nsec > linkarr[ilinkPos].getLimit()) //需要额外的空间
 	{
 		extraSec = retOff +nsec - linkarr[ilinkPos].getLimit();
-		if(!extendFileSecNum(fnode, extraSec, true)) // 空间不足以分配
+		if(!extendFileSecNum(fnode, extraSec, updateFileLen)) // 空间不足以分配
 			return 0;
 		ilinkPos = locateILink(ilink = fd.getSectionListIndex(), secPos, retOff);//更新数据状态
 	}
@@ -1535,7 +1536,7 @@ __SizeType X2fsUtil<__EnvInterface,__SizeType>::_readFromFile(char *buf, __SizeT
 }
 
 template<class __EnvInterface, typename __SizeType>
-__SizeType X2fsUtil<__EnvInterface,__SizeType>::_randomWriteFile(const char *buf,
+__SizeType X2fsUtil<__EnvInterface,__SizeType>::_randomWriteFile(char *buf,
 		__SizeType nbyte,FileNode *fnode,__SizeType byteStart)
 {
 	if(fnode==NULL || fnode->getData().getType()!=FileDescriptor<__SizeType>::TYPE_FILE
@@ -1544,7 +1545,7 @@ __SizeType X2fsUtil<__EnvInterface,__SizeType>::_randomWriteFile(const char *buf
 	bufSize = calculateRandomBufferSize(byteStart, nbyte, &startOff, &endOff, CONST_SECSIZE);
 	ManagedObject<u8_t*,_EnvInterface,__SizeType> mbuf(env);
 
-	FileDescriptor<__SizeType> fd=fnode->getData();
+	FileDescriptor<__SizeType>& fd=fnode->getData();
 
 	const __SizeType nsec = bufSize/CONST_SECSIZE;
 	const __SizeType startSec = byteStart/CONST_SECSIZE;
@@ -1567,7 +1568,7 @@ __SizeType X2fsUtil<__EnvInterface,__SizeType>::_randomWriteFile(const char *buf
 			env->memcpy((char*)buf, (const char*)oneUnitBuf, startOff);//复制前面部分
 		}
 	}
-	// endOff读补齐
+	// endOff读补齐, 大部分代码同上，但有些许不同
 	if(endOff!=0)
 	{
 		u8_t *oneUnitBuf=NULL;
@@ -1589,16 +1590,27 @@ __SizeType X2fsUtil<__EnvInterface,__SizeType>::_randomWriteFile(const char *buf
 		}
 
 		// 如果oneUnitBuf不为空，说明已经读入了，需要复制到原来的区域
-		__SizeType offFromBegin = CONST_SECSIZE - endOff;
-		env->memcpy((char*)buf+offFromBegin, (const char*)oneUnitBuf+offFromBegin, endOff);//复制后面部分
+		if(oneUnitBuf!=NULL)
+		{
+			__SizeType offFromBegin = CONST_SECSIZE - endOff;
+			env->memcpy((char*)buf + (startSec + nsec - 1)*CONST_SECSIZE + offFromBegin,
+					(const char*)oneUnitBuf+offFromBegin, endOff);//定位到最后一个扇区，然后补偿写数据
+		}
 	}
 
 	// 现在所有的扇区已经补齐了，数据不会覆盖，进行完整的扇区写
-	__SizeType written=_writeToFile(buf, nsec, fnode, startSec);
-	if(written==nsec) //没有写错误
-		return nbyte;
-	else //至少有一个扇区没有写
-		return written*CONST_SECSIZE - startOff; //已经写的减去偏移部分
+	__SizeType written=_writeToFile(buf, nsec, fnode, startSec,false);
+	__SizeType realWrittenByte = (
+						written==nsec?
+								nbyte : //没有写错误
+								written*CONST_SECSIZE - startOff);//至少有一个扇区没有写，则已经写的减去偏移部分
+
+	// UNTESTED
+	// 更新文件长度
+	__SizeType updateLen = realWrittenByte + byteStart;//最后一个不可到达的字节就是长度
+	if(updateLen > fd.getFileLen())
+		fd.setFileLen(updateLen);
+	return (realWrittenByte);
 }
 
 template<class __EnvInterface, typename __SizeType>
@@ -1613,12 +1625,60 @@ __SizeType X2fsUtil<__EnvInterface,__SizeType>::_randomReadFile(char *buf,
 	const __SizeType nsec = bufSize/CONST_SECSIZE;
 	const __SizeType startSec = byteStart/CONST_SECSIZE;
 
-	// 现在所有的扇区已经补齐了，数据不会覆盖，进行完整的扇区写
 	__SizeType readin=_readFromFile(buf, nsec, fnode, startSec);
-	if(readin==nsec) //没有读错误
+	if(readin==0)//没有成功
+		return 0;
+	else if(readin==nsec) //没有读错误
 		return nbyte;
 	else //至少有一个扇区没有读
-		return readin*CONST_SECSIZE - startOff; //已经写的减去偏移部分
+		return readin*CONST_SECSIZE - startOff; //已读减去偏移部分
+}
+
+template<class __EnvInterface, typename __SizeType>
+bool X2fsUtil<__EnvInterface,__SizeType>::truncateFile(FileNode *fnode,__SizeType newlen)
+{
+	if(fnode == NULL || newlen < CONST_SECSIZE*2 )return false;//文件至少占用两个扇区
+	FileDescriptor<__SizeType>& fd=fnode->getData();
+	__SizeType flen = fd.getFileLen();
+	if(flen==newlen)return true;
+
+	__SizeType secPos = (newlen/CONST_SECSIZE) + (newlen%CONST_SECSIZE==0?0:1);//需要定位的扇区
+	__SizeType retOff;
+	__SizeType ilink = locateILink(fd.getSectionListIndex(), secPos, retOff);
+
+	if(linkarr[ilink].getLimit()==0)//超过实际占用的扇区长度，需要分配retOff个扇区
+	{
+		if(retOff>0) //确实需要多余的空间
+		{
+			if(!extendFileSecNum(fnode, retOff, false))//不成功
+				return false;
+		}
+
+	}else{ //需要减少扇区数目
+		//将该ilink后面的所有扇区回收
+		__SizeType ilinkIt=ilink+1;//迭代
+		for(;linkarr[ilinkIt].getLimit()!=0;++ilinkIt)
+			freemm.mdelete((u8_t*)linkarr[ilinkIt].getStart(), linkarr[ilinkIt].getLimit());
+
+
+		__SizeType ilinkStart= ilink + 1;
+		__SizeType ilinkEnd = ilinkIt; //指向最后一个
+		if(retOff == 0) // 需要连该ilink一起回收
+		{
+			ilinkStart = ilink ;
+			freemm.mdelete((u8_t*)linkarr[ilink].getStart(), linkarr[ilink].getLimit());
+		}
+
+		// 回收link区
+		linkmm.mdelete((u8_t*)ilinkStart+1, ilinkEnd - ilinkStart);//保留一个作为(0,0)区域
+		linkarr[ilinkStart].setStart(0);
+		linkarr[ilinkStart].setLimit(0);
+	}
+
+	fd.setFileLen(newlen);
+	return true;
+
+
 }
 
 //
@@ -2081,6 +2141,13 @@ T ManagedObject<T,__EnvInterface,__SizeType>::getOnlyBuffer()const
 
 template <typename T,typename __EnvInterface,typename __SizeType>
 T ManagedObject<T,__EnvInterface,__SizeType>::getOnlyBuffer(__SizeType size)
+{
+	if(buffer==NULL)
+		buffer=(T)env->malloc(size);
+	return buffer;
+}
+template <typename T,typename __EnvInterface,typename __SizeType>
+const T&    ManagedObject<T,__EnvInterface,__SizeType>::getOnlyBufferReference(__SizeType size)const
 {
 	if(buffer==NULL)
 		buffer=(T)env->malloc(size);

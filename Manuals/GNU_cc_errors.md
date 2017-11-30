@@ -130,6 +130,12 @@ The behavior is undefined if the mode is not one of the strings listed above. So
         fp=fopen(file,"wb+");// 使用w创建
     }
 
+使用fstream的方式：
+    std::fstream fs(sysFile,std::fstream::in|std::fstream::out);//如果文件不存在，打开空的
+    if(!fs.is_open()) // 文件不存在
+        fs.open(sysFile, std::fstream::out);
+注意，如果不检测文件是否已经关联(is_open)，则如果文件不存在，根本就不会创建。只有out模式才能使其存在
+
 # malloc/free
 注意：如果你遇到了malloc/free带来的错误，那么检查以下几点
 1.malloc的实际申请的内存大于返回的内存，因此如果你写超过自己申请的大小，系统不会报错。但是由于在额外的内存区域存放一些管理信息，因此free时会报错。

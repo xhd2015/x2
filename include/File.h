@@ -348,7 +348,12 @@ public:
 	bool mkdir(FileNode * fatherDir,const char *dirname);
 	void freeNode(FileNode * node);//free all,not just a single.This is generally used in dir & file
 	void insertNode(FileNode *dst,FileNode *fnode);
+
+	// UNTESTED
 	void removeNode(FileNode *node);//remove is necessary only at the connected node(with this tree)
+
+	// UNTESTED
+	bool deleteFile(FileNode* fnode);
 	bool rename(FileNode *node,const char *newname);
 	bool move(FileNode *p,FileNode* dstDir,const char *newname=NULL);
 	void dumpFileInfo(FileNode * fnode);
@@ -387,7 +392,9 @@ public:
 	 * 前置条件：startILink指向一个有效的ilink位置，它的末端必须有(0,0)结尾，startILink增加不会到达linkarrLen
 	 *
 	 * @param secPos  相对于startILink需要定位的偏移量,这个待定位的位置是可以访问的
-	 * @param refOff   如果找到这个ilink，则同时设置这个值表明距离此ilink区间的开始处偏移; 如果没有找到，则retOff存放最后一个非0ilink的剩余的secPos偏移量
+	 * @param retOff   如果找到这个ilink，则同时设置这个值表明距离此ilink区间的开始处偏移;
+	 * 				如果没有找到，则retOff存放最后一个非0 ilink的剩余的secPos偏移量
+	 * 				如果retOff=0,表示恰好能够定位到第一个不可到达的字节
 	 * @return
 	 * 		  最后一个查找的ilink; 如果此ilink 长度(limit)为0，则表明空间不足以定位到该处；此时ilink就是最后一个起始分区
 	 * 		   其他，则一定保证retOff小于该区的limit，也就是说refOff一定在该区的范围内。
@@ -403,7 +410,7 @@ public:
 	__SizeType		writeToILink(__SizeType ilink,const char *src,__SizeType secPos,__SizeType secLen);
 
 	/**
-	 * 扩展文件的大小
+	 * 扩展文件实际占用的扇区数目
 	 * @param fileNode  要增加大小的文件
 	 * @param extraSec  要增加的扇区数目
 	 * @param addFileLength  是否也将文件内容长度更新
@@ -421,17 +428,23 @@ public:
 	// TODO 添加完整文档注释
 	/**
 	 * 实现相对于文件的随机位置扇区的读写
+	 * @param updateFileLen 当文件长度不足时，是否更新文件的长度
 	 */
-	__SizeType _writeToFile(const char *buf, __SizeType nsec,FileNode *fnode,__SizeType secPos=0);
+	__SizeType _writeToFile(const char *buf, __SizeType nsec,FileNode *fnode,__SizeType secPos=0,
+			bool updateFileLen=true);
 	__SizeType _readFromFile(char *buf,__SizeType nsec,FileNode *fnode,__SizeType secPos=0);
 	/** UNTESTED
+	 * 对文件进行按字节随机写
 	 * 前置条件：buf是扇区的整数倍, byteStart%CONST_SIZE是相对于buf的开始
-	 * @param buf 数据源，长度至少为 byteStart % CONST_SIZE + nbyte
+	 * 后置条件：如果所写的长度超过文件原始长度，则更新文件长度
+	 * @param buf 数据源，长度至少为 byteStart % CONST_SIZE + nbyte; 注意，由于可能修改buf数据源，所以不能传递const
 	 * @param nbyte 要写的长度
 	 * @param fnode  要写的文件节点
 	 * @param byteStart 偏移地址
+	 *
+	 * @return 实际写入的字节数目
 	 */
-	__SizeType _randomWriteFile(const char *buf, __SizeType nbyte,FileNode *fnode,__SizeType byteStart=0);
+	__SizeType _randomWriteFile(char *buf, __SizeType nbyte,FileNode *fnode,__SizeType byteStart=0);
 	/** UNTESTED
 	 * 条件同上
 	 * 此函数的实现不需要补齐，返回值的buf+(byteStart%CONST_SECSIZE)为有效数据
@@ -439,6 +452,15 @@ public:
 	__SizeType _randomReadFile(char *buf, __SizeType nbyte,FileNode *fnode,__SizeType byteStart=0);
 
 
+	/** INCOMPLETE
+	 * 减小或增加文件长度,取决于给定长度与原始文件长度的关系
+	 * 前置条件：
+	 * 后置条件：newlen如果小于2*CONST_SECSIZE，则返回false，不可完成
+	 * @param newlen 新长度
+	 *
+	 * @return 成功返回true，其他错误返回false
+	 */
+	bool truncateFile(FileNode *fnode,__SizeType newlen);
 
 	// EFF 使用自动管理的数组效果更佳
 	/**
@@ -743,20 +765,21 @@ public:
 	 * 一般cd命令，如果出错则打印错误信息，设置错误代码（如果有）
 	 *
 	 * 支持多种模式，参数可以是一个，也可以是多个
+	 * @return
 	 */
-	void cd(const __String& strPath);
+	bool cd(const __String& strPath);
 
 	/**
 	 * cd XXX, 从当前目录下开始
 	 *
 	 * 注意，path数组可以含有特殊含义的目录，比如 ., .., 它们不会被当做一般的目录名称处理
 	 */
-	void cdFromCur(__Vector_String_cit begin,__Vector_String_cit end);
+	bool cdFromCur(__Vector_String_cit begin,__Vector_String_cit end);
 
 	/**
 	 * cd -的函数
 	 */
-	void cdLast();
+	bool cdLast();
 	/**
 	 * cd ..的函数
 	 */
@@ -812,6 +835,35 @@ public:
 	 */
 	void randwrite(const __String& fname,__SizeType byteStart,const char* content,__SizeType byteLen);
 	void randread(const __String& fname,__SizeType byteStart,__SizeType byteLen);
+
+	/**
+	 * 截断文件长度
+	 */
+	void truncate(const __String & fname,__SizeType newlen);
+
+#if defined(CODE64)
+	/** UNTESTED
+	 *  与系统文件进行交互
+	 *
+	 *  @param maxLen 最大长度，如果设置成0，则表示读取sysFile的剩余长度
+	 */
+	__SizeType readSysFileToX2File(const __String &sysFile,__SizeType sysStart,
+								const __String &x2File,__SizeType x2Start,
+								__SizeType maxLen);
+	/** UNTESTED
+	 * @param maxLen 最大长度，如果设为0，则表示读取x2File的剩余长度
+	 */
+	__SizeType writeSysFileFromX2File(const __String &sysFile,__SizeType sysStart,
+								const __String &x2File,__SizeType x2Start,
+								__SizeType maxLen);
+#endif
+
+	bool checkIsFile(const __String & fname,FileNode *&fnode)const;
+	bool checkIsDir(const __String & fname,FileNode *&fnode)const;
+	bool checkExits(const __String & fname,FileNode *&fnode)const;
+	void errorFileNotExits(const __String & fname)const;
+	void errorNotAFile(const __String & fname)const;
+	void errorNotADir(const __String &fname)const;
 private:
 	/**
 	 * 辅助函数，用于同步curNode和curPath的内容
@@ -840,6 +892,10 @@ private:
 
 };
 
+/**
+ * 管理一个唯一的已分配对象
+ * 如果重复请求，则总是返回第一次分配的对象
+ */
 template <typename T,typename __EnvInterface,typename __SizeType>
 class ManagedObject{ // 在析构函数时自动调用，相当于unique_ptr
 public:
@@ -847,10 +903,15 @@ public:
 	~ManagedObject();
 	void setBufferIfNone(T buffer);
 	T	 getOnlyBuffer()const;
-	T   getOnlyBuffer(__SizeType size);
+	T    getOnlyBuffer(__SizeType size);
+	/**
+	 * 返回一个常量引用
+	 * 防止对其指向进行修改
+	 */
+	const T&    getOnlyBufferReference(__SizeType size)const;
 private:
 	__EnvInterface * env;
-	T buffer;
+	mutable T buffer;
 };
 
 

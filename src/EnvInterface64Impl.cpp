@@ -160,7 +160,10 @@ u8_t* EnvInterface64Impl::malloc(size_t size)
 		{
 			return std::move(regexSplit(std::regex("\\s+"), s));
 		}
-
+	std::vector<std::string> StdEnv64Impl::pathSplit(const std::string& s) //static函数是不可继承的
+		{
+			return std::move(regexSplit(std::regex("/+"), s));
+		}
 	StdEnv64Impl * StdEnv64Impl::getInstance(const char *file)
 	{
 		if(env==NULL)

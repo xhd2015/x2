@@ -26,6 +26,7 @@ KERNEL_SRC := $(SRC)/kernel
 SRC64 := src/64
 SRC32 := src
 SRC16 := src
+SRCCOMMON := $(SRC)/common
 EXPORTS := exports
 BACKUP := backups
 INCLUDE := include
@@ -266,7 +267,7 @@ $(GEN)/main.bimg:$(TOOLSDIR)/main.bimg.clean $(GEN16)/MBRmain.bimg $(GEN32)/main
 	dd if=$(GEN32USER)/UserProcess.bimg of=$@ bs=512c conv=notrunc seek=$$(( $(CONFIG_PROTECTED_SECNUMS) + $(CONFIG_REAL_SECNUMS) )) count=$(CONFIG_USER_PROCESS_SECNUMS)
 
 $(GEN64)/CMDUtil%.exe:$(GEN64)/lib64.a  $(SRC64)/CMDUtil%.cpp $(SRC)/File.cpp $(SRC)/EnvInterface64Impl.cpp \
-			$(SRC64)/MallocToSimple.cpp
+			$(SRC64)/MallocToSimple.cpp $(SRCCOMMON)/Getopt.cpp
 	filename=$$(basename $@|grep -P '.*CMDUtil.*\.exe' -o)
 	if [ -z $$filename ];then
 		echo 'filename is invalid'
@@ -277,8 +278,9 @@ $(GEN64)/CMDUtil%.exe:$(GEN64)/lib64.a  $(SRC64)/CMDUtil%.cpp $(SRC)/File.cpp $(
 	$(CXX) -Werror -fmax-errors=2 -Wall -DCODE64 -std=$(CXXSTD) -I$(INCLUDE) \
 	-Wformat \
 	 -o $@ \
-	-L$(GEN64) -Wl,'-(' -l64 $(SRC64)/CMDUtil$${basefilename}.cpp $(SRC)/File.cpp $(SRC)/EnvInterface64Impl.cpp \
-	$(SRC64)/MallocToSimple.cpp		\
+	-L$(GEN64) -Wl,'-(' -l64 $(SRC64)/CMDUtil$${basefilename}.cpp \
+			$(SRC)/File.cpp $(SRC)/EnvInterface64Impl.cpp $(SRCCOMMON)/Getopt.cpp \
+			$(SRC64)/MallocToSimple.cpp		\
 	-Wl,'-)' -static
 #$(GEN64)/CMDUtil.o:$(SRC64)/CMDUtil.cpp
 #	$(CXX) -Werror -fmax-errors=2 -Wall -DCODE64 -std=$(CXXSTD) -I$(INCLUDE) \

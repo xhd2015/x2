@@ -1,6 +1,6 @@
 00000000000i[      ] Bochs x86 Emulator 2.6.9
 00000000000i[      ]   Built from SVN snapshot on April 9, 2017
-00000000000i[      ] Compiled on Apr  9 2017 at 09:49:25
+00000000000i[      ] Compiled on Apr  9 2017 at 09:32:13
 00000000000i[      ] System configuration
 00000000000i[      ]   processors: 1 (cores=1, HT threads=1)
 00000000000i[      ]   A20 line support: yes
@@ -26,14 +26,14 @@
 00000000000i[      ] Optimization configuration
 00000000000i[      ]   RepeatSpeedups support: yes
 00000000000i[      ]   Fast function calls: yes
-00000000000i[      ]   Handlers Chaining speedups: no
+00000000000i[      ]   Handlers Chaining speedups: yes
 00000000000i[      ] Devices configuration
 00000000000i[      ]   PCI support: i440FX i430FX
 00000000000i[      ]   Networking support: NE2000 E1000
 00000000000i[      ]   Sound support: SB16 ES1370
 00000000000i[      ]   USB support: UHCI OHCI EHCI xHCI
 00000000000i[      ]   VGA extension support: vbe cirrus voodoo
-00000000000i[MEM0  ] allocated memory at 044FB020. after alignment, vector=044FC000
+00000000000i[MEM0  ] allocated memory at 03DA1020. after alignment, vector=03DA2000
 00000000000i[MEM0  ] 32.00MB
 00000000000i[MEM0  ] mem block size = 0x00020000, blocks=256
 00000000000i[MEM0  ] rom at 0xfffe0000/131072 ('..\Bochs-2.6.9\BIOS-bochs-latest')
@@ -1593,7 +1593,7 @@
 00000000000i[DEV   ] PIIX3 PCI-to-ISA bridge present at device 1, function 0
 00000000000i[PLUGIN] init_dev of 'cmos' plugin device by virtual method
 00000000000i[CMOS  ] Using local time for initial clock
-00000000000i[CMOS  ] Setting initial clock to: Sat Nov 25 04:25:47 2017 (time0=1511555147)
+00000000000i[CMOS  ] Setting initial clock to: Thu Nov 30 15:37:34 2017 (time0=1512027454)
 00000000000i[PLUGIN] init_dev of 'dma' plugin device by virtual method
 00000000000i[DMA   ] channel 4 used by cascade
 00000000000i[PLUGIN] init_dev of 'pic' plugin device by virtual method
@@ -1604,7 +1604,7 @@
 00000000000i[VGA   ] interval=200000, mode=realtime
 00000000000i[MEM0  ] Register memory access handlers: 0x0000e0000000 - 0x0000e0ffffff
 00000000000i[BXVGA ] VBE Bochs Display Extension Enabled
-00000000000i[WINGUI] Desktop Window dimensions: 1536 x 864
+00000000000i[WINGUI] Desktop Window dimensions: 1280 x 720
 00000000000i[WINGUI] Number of Mouse Buttons = 5
 00000000000i[WINGUI] IME disabled
 00000000000i[MEM0  ] rom at 0xc0000/41472 ('..\Bochs-2.6.9\VGABIOS-lgpl-latest')
@@ -1638,7 +1638,6 @@
 00000000000i[PLUGIN] init_dev of 'serial' plugin device by virtual method
 00000000000i[SER   ] com1 at 0x03f8 irq 4 (mode: null)
 00000000000i[PLUGIN] init_dev of 'gameport' plugin device by virtual method
-00000000000i[PLUGIN] init_dev of 'iodebug' plugin device by virtual method
 00000000000i[PLUGIN] init_dev of 'usb_uhci' plugin device by virtual method
 00000000000i[DEV   ] USB UHCI present at device 1, function 2
 00000000000i[UHCI  ] USB UHCI initialized
@@ -1657,7 +1656,6 @@
 00000000000i[PLUGIN] register state of 'parallel' plugin device by virtual method
 00000000000i[PLUGIN] register state of 'serial' plugin device by virtual method
 00000000000i[PLUGIN] register state of 'gameport' plugin device by virtual method
-00000000000i[PLUGIN] register state of 'iodebug' plugin device by virtual method
 00000000000i[PLUGIN] register state of 'usb_uhci' plugin device by virtual method
 00000000000i[PLUGIN] register state of 'acpi' plugin device by virtual method
 00000000000i[PLUGIN] register state of 'ioapic' plugin device by virtual method
@@ -1702,595 +1700,405 @@
 00000000000i[PLUGIN] reset of 'parallel' plugin device by virtual method
 00000000000i[PLUGIN] reset of 'serial' plugin device by virtual method
 00000000000i[PLUGIN] reset of 'gameport' plugin device by virtual method
-00000000000i[PLUGIN] reset of 'iodebug' plugin device by virtual method
 00000000000i[PLUGIN] reset of 'usb_uhci' plugin device by virtual method
-00000000000i[      ] set SIGINT handler to bx_debug_ctrlc_handler
-00000000024d[CPU0  ] inhibit interrupts mask = 3
-00000004662i[BIOS  ] $Revision: 13073 $ $Date: 2017-02-16 22:43:52 +0100 (Do, 16. Feb 2017) $
-00000322572i[KBD   ] reset-disable command received
-00000330298d[CPU0  ] protected mode activated
-00000330303d[CPU0  ] inhibit interrupts mask = 3
-00000330813i[BIOS  ] Starting rombios32
-00000331251i[BIOS  ] Shutdown flag 0
-00000331834i[BIOS  ] ram_size=0x02000000
-00000332255i[BIOS  ] ram_end=32MB
-00000332279d[CPU0  ] RDMSR: read 00000000:00000508 from MSR fe
-00000332361d[CPU0  ] WRMSR: write 06060606:06060606 to MSR 250
-00000332433d[CPU0  ] WRMSR: write 06060606:06060606 to MSR 258
-00000332440d[CPU0  ] WRMSR: write 00000000:00000000 to MSR 259
-00000332447d[CPU0  ] WRMSR: write 00000000:00000000 to MSR 268
-00000332454d[CPU0  ] WRMSR: write 00000000:00000000 to MSR 269
-00000332461d[CPU0  ] WRMSR: write 00000000:00000000 to MSR 26a
-00000332468d[CPU0  ] WRMSR: write 00000000:00000000 to MSR 26b
-00000332475d[CPU0  ] WRMSR: write 00000000:00000000 to MSR 26c
-00000332482d[CPU0  ] WRMSR: write 00000000:00000000 to MSR 26d
-00000332489d[CPU0  ] WRMSR: write 00000000:00000000 to MSR 26e
-00000332496d[CPU0  ] WRMSR: write 00000000:00000000 to MSR 26f
-00000332526d[CPU0  ] WRMSR: write 00000000:c0000000 to MSR 200
-00000332533d[CPU0  ] WRMSR: write 000000ff:c0000800 to MSR 201
-00000332540d[CPU0  ] WRMSR: write 00000000:00000c06 to MSR 2ff
-00000343993i[BIOS  ] Found 1 cpu(s)
-00000357577i[BIOS  ] bios_table_addr: 0x000f9cd8 end=0x000fcc00
-00000685372i[PCI   ] i440FX PMC write to PAM register 59 (TLB Flush)
-00001013301i[P2ISA ] PCI IRQ routing: PIRQA# set to 0x0b
-00001013320i[P2ISA ] PCI IRQ routing: PIRQB# set to 0x09
-00001013339i[P2ISA ] PCI IRQ routing: PIRQC# set to 0x0b
-00001013358i[P2ISA ] PCI IRQ routing: PIRQD# set to 0x09
-00001013368i[P2ISA ] write: ELCR2 = 0x0a
-00001014138i[BIOS  ] PIIX3/PIIX4 init: elcr=00 0a
-00001021861i[BIOS  ] PCI: bus=0 devfn=0x00: vendor_id=0x8086 device_id=0x1237 class=0x0600
-00001024140i[BIOS  ] PCI: bus=0 devfn=0x08: vendor_id=0x8086 device_id=0x7000 class=0x0601
-00001026258i[BIOS  ] PCI: bus=0 devfn=0x09: vendor_id=0x8086 device_id=0x7010 class=0x0101
-00001026487i[PIDE  ] new BM-DMA address: 0xc000
-00001027103i[BIOS  ] region 4: 0x0000c000
-00001029117i[BIOS  ] PCI: bus=0 devfn=0x0a: vendor_id=0x8086 device_id=0x7020 class=0x0c03
-00001029321i[UHCI  ] new base address: 0xc020
-00001029937i[BIOS  ] region 4: 0x0000c020
-00001030065i[UHCI  ] new irq line = 9
-00001031960i[BIOS  ] PCI: bus=0 devfn=0x0b: vendor_id=0x8086 device_id=0x7113 class=0x0680
-00001032192i[ACPI  ] new irq line = 11
-00001032204i[ACPI  ] new irq line = 9
-00001032229i[ACPI  ] new PM base address: 0xb000
-00001032243i[ACPI  ] new SM base address: 0xb100
-00001032271i[PCI   ] setting SMRAM control register to 0x4a
-00001196364i[CPU0  ] Enter to System Management Mode
-00001196364i[CPU0  ] enter_system_management_mode: temporary disable VMX while in SMM mode
-00001196364d[CPU0  ] real mode activated
-00001196374i[CPU0  ] RSM: Resuming from System Management Mode
-00001196374d[CPU0  ] protected mode activated
-00001360389d[CPU0  ] WBINVD: WB-Invalidate internal caches !
-00001360395i[PCI   ] setting SMRAM control register to 0x0a
-00001375302i[BIOS  ] MP table addr=0x000f9db0 MPC table addr=0x000f9ce0 size=0xc8
-00001377124i[BIOS  ] SMBIOS table addr=0x000f9dc0
-00001379305i[BIOS  ] ACPI tables: RSDP addr=0x000f9ee0 ACPI DATA addr=0x01ff0000 size=0xf72
-00001382517i[BIOS  ] Firmware waking vector 0x1ff00cc
-00001384292d[CPU0  ] WBINVD: WB-Invalidate internal caches !
-00001384312i[PCI   ] i440FX PMC write to PAM register 59 (TLB Flush)
-00001385035i[BIOS  ] bios_table_cur_addr: 0x000f9f04
-00001385055d[CPU0  ] inhibit interrupts mask = 3
-00001385060d[CPU0  ] real mode activated
-00001385068d[CPU0  ] inhibit interrupts mask = 3
-00001512652i[VBIOS ] VGABios $Id: vgabios.c,v 1.76 2013/02/10 08:07:03 vruppert Exp $
-00001512723i[BXVGA ] VBE known Display Interface b0c0
-00001512755i[BXVGA ] VBE known Display Interface b0c5
-00001515680i[VBIOS ] VBE Bios $Id: vbe.c,v 1.65 2014/07/08 18:02:25 vruppert Exp $
-00001515773d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001555483d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001573801d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001573923d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001574117d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001593359d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001593553d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001611239d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001611433d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001647695d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001647889d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001706633d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001706827d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001732683d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001733433d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001734183d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001734933d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001735683d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001736433d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001737183d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001737933d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001738683d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001739433d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001740183d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001740933d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001741683d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001742433d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001743183d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001743933d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001744683d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001745433d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001746183d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001746933d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001747765d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001748521d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001749277d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001750033d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001750789d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001751545d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001752301d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001753057d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001753834d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001754478d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001755242d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001755998d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001756754d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001757510d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001758266d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001759022d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001759778d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001760534d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001761290d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001762046d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001762802d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001763558d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001764314d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001765070d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001765826d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001766582d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001767338d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001768094d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001768850d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001769606d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001770362d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001771118d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001771874d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001772630d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001773386d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001774142d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001774898d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001775654d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001776410d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001777166d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001777922d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001778678d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001779434d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001780190d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001780946d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001781702d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001782458d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001783214d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001783970d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001784726d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001785482d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001786238d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001786994d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001787750d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001788506d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001789262d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001790018d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001790774d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001791530d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001792286d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001793042d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001793798d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001794554d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001795310d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001796066d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001796822d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001797578d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001798334d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001799090d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001799846d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001800602d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001801358d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001802114d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001802870d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001803626d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001804382d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001805138d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001805894d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001806650d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001807406d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001808162d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001808918d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001809695d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001810339d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001811021d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001811771d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001812521d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001813271d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001814021d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001814771d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001815521d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001816271d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001817021d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001817830d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001818580d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001819330d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001820080d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001820830d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001821580d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001822330d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001823080d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001823830d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001824580d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001825330d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001826080d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001826830d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001827580d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001828330d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001829080d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001829830d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001830580d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001831330d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001832080d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001832830d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001833580d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001834330d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001835080d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001835830d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001836580d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001837330d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001838080d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001838830d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001839580d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001840330d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001841080d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001841830d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001842580d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001843330d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001844080d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001844830d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001845580d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001846330d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001847080d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001847830d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001848580d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001849330d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001850079d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001850723d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001851404d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001852048d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001855348d[CPU0  ] inhibit interrupts mask = 1
-00001855350d[CPU0  ] interrupt(): vector = 08, TYPE = 0, EXT = 1
-00001855350d[CPU0  ] inhibit interrupts mask = 1
-00001855363d[CPU0  ] interrupt(): vector = 1c, TYPE = 4, EXT = 0
-00001859971i[BIOS  ] ata0-0: PCHS=20/16/63 translation=none LCHS=20/16/63
-00001863183d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001863933d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001864683d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001865526d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001866284d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001867116d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001867872d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001868628d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001869384d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001870140d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001870896d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001871674d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001872424d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001873317d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001874211d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001875105d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001875999d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001876893d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001877787d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001878681d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001879575d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001880469d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001881363d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001882257d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001883151d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001884000d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001884750d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001885500d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001886250d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001887000d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001887843d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001888601d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001889351d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001890101d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001890851d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001891601d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001892351d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001893101d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001893851d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001894601d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001895351d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001896101d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001896851d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001897727d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001898467d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001899221d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001899972d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001900730d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001901480d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001902230d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001902980d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001903730d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001904480d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001905230d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001905980d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001906729d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001907373d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00001923472i[WINGUI] dimension update x=720 y=400 fontheight=16 fontwidth=9 bpp=8
-00002197237d[CPU0  ] interrupt(): vector = 08, TYPE = 0, EXT = 1
-00002197237d[CPU0  ] inhibit interrupts mask = 1
-00002197250d[CPU0  ] interrupt(): vector = 1c, TYPE = 4, EXT = 0
-00002771227d[CPU0  ] interrupt(): vector = 08, TYPE = 0, EXT = 1
-00002771227d[CPU0  ] inhibit interrupts mask = 1
-00002771240d[CPU0  ] interrupt(): vector = 1c, TYPE = 4, EXT = 0
-00003572932d[CPU0  ] interrupt(): vector = 08, TYPE = 0, EXT = 1
-00003572932d[CPU0  ] inhibit interrupts mask = 1
-00003572945d[CPU0  ] interrupt(): vector = 1c, TYPE = 4, EXT = 0
-00004631407d[CPU0  ] interrupt(): vector = 08, TYPE = 0, EXT = 1
-00004631407d[CPU0  ] inhibit interrupts mask = 1
-00004631420d[CPU0  ] interrupt(): vector = 1c, TYPE = 4, EXT = 0
-00005306789i[BIOS  ] IDE time out
-00005308833d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00005309477d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00005311204d[CPU0  ] interrupt(): vector = 16, TYPE = 4, EXT = 0
-00005311205d[CPU0  ] inhibit interrupts mask = 1
-00005311387d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00005312137d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00005312887d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00005313637d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00005314387d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00005315137d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00005315887d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00005316637d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00005317387d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00005318137d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00005318887d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00005319637d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00005320387d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00005321137d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00005321887d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00005322637d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00005323387d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00005324137d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00005324887d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00005325637d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00005326387d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00005327137d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00005327887d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00005328637d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00005329386d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00005330030d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00005330711d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00005331355d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00005537002d[CPU0  ] interrupt(): vector = 08, TYPE = 0, EXT = 1
-00005537002d[CPU0  ] inhibit interrupts mask = 1
-00005537015d[CPU0  ] interrupt(): vector = 1c, TYPE = 4, EXT = 0
-00006268195d[CPU0  ] interrupt(): vector = 08, TYPE = 0, EXT = 1
-00006268195d[CPU0  ] inhibit interrupts mask = 1
-00006268208d[CPU0  ] interrupt(): vector = 1c, TYPE = 4, EXT = 0
-00006999358d[CPU0  ] interrupt(): vector = 08, TYPE = 0, EXT = 1
-00006999358d[CPU0  ] inhibit interrupts mask = 1
-00006999371d[CPU0  ] interrupt(): vector = 1c, TYPE = 4, EXT = 0
-00007909241d[CPU0  ] interrupt(): vector = 08, TYPE = 0, EXT = 1
-00007909241d[CPU0  ] inhibit interrupts mask = 1
-00007909254d[CPU0  ] interrupt(): vector = 1c, TYPE = 4, EXT = 0
-00010003614d[CPU0  ] interrupt(): vector = 08, TYPE = 0, EXT = 1
-00010003614d[CPU0  ] inhibit interrupts mask = 1
-00010003627d[CPU0  ] interrupt(): vector = 1c, TYPE = 4, EXT = 0
-00012098017d[CPU0  ] interrupt(): vector = 08, TYPE = 0, EXT = 1
-00012098017d[CPU0  ] inhibit interrupts mask = 1
-00012098030d[CPU0  ] interrupt(): vector = 1c, TYPE = 4, EXT = 0
-00014192380d[CPU0  ] interrupt(): vector = 08, TYPE = 0, EXT = 1
-00014192380d[CPU0  ] inhibit interrupts mask = 1
-00014192393d[CPU0  ] interrupt(): vector = 1c, TYPE = 4, EXT = 0
-00017063593d[CPU0  ] interrupt(): vector = 08, TYPE = 0, EXT = 1
-00017063593d[CPU0  ] inhibit interrupts mask = 1
-00017063606d[CPU0  ] interrupt(): vector = 1c, TYPE = 4, EXT = 0
-00020851316d[CPU0  ] interrupt(): vector = 08, TYPE = 0, EXT = 1
-00020851316d[CPU0  ] inhibit interrupts mask = 1
-00020851329d[CPU0  ] interrupt(): vector = 1c, TYPE = 4, EXT = 0
-00024638969d[CPU0  ] interrupt(): vector = 08, TYPE = 0, EXT = 1
-00024638969d[CPU0  ] inhibit interrupts mask = 1
-00024638982d[CPU0  ] interrupt(): vector = 1c, TYPE = 4, EXT = 0
-00025004992d[CPU0  ] interrupt(): vector = 08, TYPE = 0, EXT = 1
-00025004992d[CPU0  ] inhibit interrupts mask = 1
-00025005005d[CPU0  ] interrupt(): vector = 1c, TYPE = 4, EXT = 0
-00025005074d[CPU0  ] interrupt(): vector = 16, TYPE = 4, EXT = 0
-00025005075d[CPU0  ] inhibit interrupts mask = 1
-00025063949d[CPU0  ] interrupt(): vector = 08, TYPE = 0, EXT = 1
-00025063949d[CPU0  ] inhibit interrupts mask = 1
-00025063962d[CPU0  ] interrupt(): vector = 1c, TYPE = 4, EXT = 0
-00025119432d[CPU0  ] interrupt(): vector = 08, TYPE = 0, EXT = 1
-00025119432d[CPU0  ] inhibit interrupts mask = 1
-00025119445d[CPU0  ] interrupt(): vector = 1c, TYPE = 4, EXT = 0
-00025174905d[CPU0  ] interrupt(): vector = 08, TYPE = 0, EXT = 1
-00025174905d[CPU0  ] inhibit interrupts mask = 1
-00025174918d[CPU0  ] interrupt(): vector = 1c, TYPE = 4, EXT = 0
-00025230358d[CPU0  ] interrupt(): vector = 08, TYPE = 0, EXT = 1
-00025230358d[CPU0  ] inhibit interrupts mask = 1
-00025230371d[CPU0  ] interrupt(): vector = 1c, TYPE = 4, EXT = 0
-00025285831d[CPU0  ] interrupt(): vector = 08, TYPE = 0, EXT = 1
-00025285831d[CPU0  ] inhibit interrupts mask = 1
-00025285844d[CPU0  ] interrupt(): vector = 1c, TYPE = 4, EXT = 0
-00025341284d[CPU0  ] interrupt(): vector = 08, TYPE = 0, EXT = 1
-00025341284d[CPU0  ] inhibit interrupts mask = 1
-00025341297d[CPU0  ] interrupt(): vector = 1c, TYPE = 4, EXT = 0
-00025396737d[CPU0  ] interrupt(): vector = 08, TYPE = 0, EXT = 1
-00025396737d[CPU0  ] inhibit interrupts mask = 1
-00025396750d[CPU0  ] interrupt(): vector = 1c, TYPE = 4, EXT = 0
-00025452360d[CPU0  ] interrupt(): vector = 08, TYPE = 0, EXT = 1
-00025452360d[CPU0  ] inhibit interrupts mask = 1
-00025452373d[CPU0  ] interrupt(): vector = 1c, TYPE = 4, EXT = 0
-00025507853d[CPU0  ] interrupt(): vector = 08, TYPE = 0, EXT = 1
-00025507853d[CPU0  ] inhibit interrupts mask = 1
-00025507866d[CPU0  ] interrupt(): vector = 1c, TYPE = 4, EXT = 0
-00025563326d[CPU0  ] interrupt(): vector = 08, TYPE = 0, EXT = 1
-00025563326d[CPU0  ] inhibit interrupts mask = 1
-00025563339d[CPU0  ] interrupt(): vector = 1c, TYPE = 4, EXT = 0
-00025618809d[CPU0  ] interrupt(): vector = 08, TYPE = 0, EXT = 1
-00025618809d[CPU0  ] inhibit interrupts mask = 1
-00025618822d[CPU0  ] interrupt(): vector = 1c, TYPE = 4, EXT = 0
-00025618891d[CPU0  ] interrupt(): vector = 16, TYPE = 4, EXT = 0
-00025618892d[CPU0  ] inhibit interrupts mask = 1
-00025674286d[CPU0  ] interrupt(): vector = 08, TYPE = 0, EXT = 1
-00025674286d[CPU0  ] inhibit interrupts mask = 1
-00025674299d[CPU0  ] interrupt(): vector = 1c, TYPE = 4, EXT = 0
-00025729749d[CPU0  ] interrupt(): vector = 08, TYPE = 0, EXT = 1
-00025729749d[CPU0  ] inhibit interrupts mask = 1
-00025729762d[CPU0  ] interrupt(): vector = 1c, TYPE = 4, EXT = 0
-00025785222d[CPU0  ] interrupt(): vector = 08, TYPE = 0, EXT = 1
-00025785222d[CPU0  ] inhibit interrupts mask = 1
-00025785235d[CPU0  ] interrupt(): vector = 1c, TYPE = 4, EXT = 0
-00025847085d[CPU0  ] interrupt(): vector = 08, TYPE = 0, EXT = 1
-00025847085d[CPU0  ] inhibit interrupts mask = 1
-00025847098d[CPU0  ] interrupt(): vector = 1c, TYPE = 4, EXT = 0
-00025926808d[CPU0  ] interrupt(): vector = 08, TYPE = 0, EXT = 1
-00025926808d[CPU0  ] inhibit interrupts mask = 1
-00025926821d[CPU0  ] interrupt(): vector = 1c, TYPE = 4, EXT = 0
-00026006491d[CPU0  ] interrupt(): vector = 08, TYPE = 0, EXT = 1
-00026006491d[CPU0  ] inhibit interrupts mask = 1
-00026006504d[CPU0  ] interrupt(): vector = 1c, TYPE = 4, EXT = 0
-00026086224d[CPU0  ] interrupt(): vector = 08, TYPE = 0, EXT = 1
-00026086224d[CPU0  ] inhibit interrupts mask = 1
-00026086237d[CPU0  ] interrupt(): vector = 1c, TYPE = 4, EXT = 0
-00026203977d[CPU0  ] interrupt(): vector = 08, TYPE = 0, EXT = 1
-00026203977d[CPU0  ] inhibit interrupts mask = 1
-00026203990d[CPU0  ] interrupt(): vector = 1c, TYPE = 4, EXT = 0
-00026348230d[CPU0  ] interrupt(): vector = 08, TYPE = 0, EXT = 1
-00026348230d[CPU0  ] inhibit interrupts mask = 1
-00026348243d[CPU0  ] interrupt(): vector = 1c, TYPE = 4, EXT = 0
-00026492473d[CPU0  ] interrupt(): vector = 08, TYPE = 0, EXT = 1
-00026492473d[CPU0  ] inhibit interrupts mask = 1
-00026492486d[CPU0  ] interrupt(): vector = 1c, TYPE = 4, EXT = 0
-00026636716d[CPU0  ] interrupt(): vector = 08, TYPE = 0, EXT = 1
-00026636716d[CPU0  ] inhibit interrupts mask = 1
-00026636729d[CPU0  ] interrupt(): vector = 1c, TYPE = 4, EXT = 0
-00026636798d[CPU0  ] interrupt(): vector = 16, TYPE = 4, EXT = 0
-00026636799d[CPU0  ] inhibit interrupts mask = 1
-00026851013d[CPU0  ] interrupt(): vector = 08, TYPE = 0, EXT = 1
-00026851013d[CPU0  ] inhibit interrupts mask = 1
-00026851026d[CPU0  ] interrupt(): vector = 1c, TYPE = 4, EXT = 0
-00027065276d[CPU0  ] interrupt(): vector = 08, TYPE = 0, EXT = 1
-00027065276d[CPU0  ] inhibit interrupts mask = 1
-00027065289d[CPU0  ] interrupt(): vector = 1c, TYPE = 4, EXT = 0
-00027279569d[CPU0  ] interrupt(): vector = 08, TYPE = 0, EXT = 1
-00027279569d[CPU0  ] inhibit interrupts mask = 1
-00027279582d[CPU0  ] interrupt(): vector = 1c, TYPE = 4, EXT = 0
-00027550542d[CPU0  ] interrupt(): vector = 08, TYPE = 0, EXT = 1
-00027550542d[CPU0  ] inhibit interrupts mask = 1
-00027550555d[CPU0  ] interrupt(): vector = 1c, TYPE = 4, EXT = 0
-00027937975d[CPU0  ] interrupt(): vector = 08, TYPE = 0, EXT = 1
-00027937975d[CPU0  ] inhibit interrupts mask = 1
-00027937988d[CPU0  ] interrupt(): vector = 1c, TYPE = 4, EXT = 0
-00028325368d[CPU0  ] interrupt(): vector = 08, TYPE = 0, EXT = 1
-00028325368d[CPU0  ] inhibit interrupts mask = 1
-00028325381d[CPU0  ] interrupt(): vector = 1c, TYPE = 4, EXT = 0
-00028712801d[CPU0  ] interrupt(): vector = 08, TYPE = 0, EXT = 1
-00028712801d[CPU0  ] inhibit interrupts mask = 1
-00028712814d[CPU0  ] interrupt(): vector = 1c, TYPE = 4, EXT = 0
-00029232684d[CPU0  ] interrupt(): vector = 08, TYPE = 0, EXT = 1
-00029232684d[CPU0  ] inhibit interrupts mask = 1
-00029232697d[CPU0  ] interrupt(): vector = 1c, TYPE = 4, EXT = 0
-00029803887d[CPU0  ] interrupt(): vector = 08, TYPE = 0, EXT = 1
-00029803887d[CPU0  ] inhibit interrupts mask = 1
-00029803900d[CPU0  ] interrupt(): vector = 1c, TYPE = 4, EXT = 0
-00030375060d[CPU0  ] interrupt(): vector = 08, TYPE = 0, EXT = 1
-00030375060d[CPU0  ] inhibit interrupts mask = 1
-00030375073d[CPU0  ] interrupt(): vector = 1c, TYPE = 4, EXT = 0
-00030964903d[CPU0  ] interrupt(): vector = 08, TYPE = 0, EXT = 1
-00030964903d[CPU0  ] inhibit interrupts mask = 1
-00030964916d[CPU0  ] interrupt(): vector = 1c, TYPE = 4, EXT = 0
-00030964985d[CPU0  ] interrupt(): vector = 16, TYPE = 4, EXT = 0
-00030964986d[CPU0  ] inhibit interrupts mask = 1
-00031820590d[CPU0  ] interrupt(): vector = 08, TYPE = 0, EXT = 1
-00031820590d[CPU0  ] inhibit interrupts mask = 1
-00031820603d[CPU0  ] interrupt(): vector = 1c, TYPE = 4, EXT = 0
-00032676263d[CPU0  ] interrupt(): vector = 08, TYPE = 0, EXT = 1
-00032676263d[CPU0  ] inhibit interrupts mask = 1
-00032676276d[CPU0  ] interrupt(): vector = 1c, TYPE = 4, EXT = 0
-00033531976d[CPU0  ] interrupt(): vector = 08, TYPE = 0, EXT = 1
-00033531976d[CPU0  ] inhibit interrupts mask = 1
-00033531989d[CPU0  ] interrupt(): vector = 1c, TYPE = 4, EXT = 0
-00034998909d[CPU0  ] interrupt(): vector = 08, TYPE = 0, EXT = 1
-00034998909d[CPU0  ] inhibit interrupts mask = 1
-00034998922d[CPU0  ] interrupt(): vector = 1c, TYPE = 4, EXT = 0
-00037409152d[CPU0  ] interrupt(): vector = 08, TYPE = 0, EXT = 1
-00037409152d[CPU0  ] inhibit interrupts mask = 1
-00037409165d[CPU0  ] interrupt(): vector = 1c, TYPE = 4, EXT = 0
-00039819375d[CPU0  ] interrupt(): vector = 08, TYPE = 0, EXT = 1
-00039819375d[CPU0  ] inhibit interrupts mask = 1
-00039819388d[CPU0  ] interrupt(): vector = 1c, TYPE = 4, EXT = 0
-00042229628d[CPU0  ] interrupt(): vector = 08, TYPE = 0, EXT = 1
-00042229628d[CPU0  ] inhibit interrupts mask = 1
-00042229641d[CPU0  ] interrupt(): vector = 1c, TYPE = 4, EXT = 0
-00046198981d[CPU0  ] interrupt(): vector = 08, TYPE = 0, EXT = 1
-00046198981d[CPU0  ] inhibit interrupts mask = 1
-00046198994d[CPU0  ] interrupt(): vector = 1c, TYPE = 4, EXT = 0
-00047592164d[CPU0  ] interrupt(): vector = 08, TYPE = 0, EXT = 1
-00047592164d[CPU0  ] inhibit interrupts mask = 1
-00047592177d[CPU0  ] interrupt(): vector = 1c, TYPE = 4, EXT = 0
-00047664337d[CPU0  ] interrupt(): vector = 08, TYPE = 0, EXT = 1
-00047664337d[CPU0  ] inhibit interrupts mask = 1
-00047664350d[CPU0  ] interrupt(): vector = 1c, TYPE = 4, EXT = 0
-00047730490d[CPU0  ] interrupt(): vector = 08, TYPE = 0, EXT = 1
-00047730490d[CPU0  ] inhibit interrupts mask = 1
-00047730503d[CPU0  ] interrupt(): vector = 1c, TYPE = 4, EXT = 0
-00047730572d[CPU0  ] interrupt(): vector = 16, TYPE = 4, EXT = 0
-00047730573d[CPU0  ] inhibit interrupts mask = 1
-00047730674d[CPU0  ] interrupt(): vector = 16, TYPE = 4, EXT = 0
-00047730675d[CPU0  ] inhibit interrupts mask = 1
-00047730768d[CPU0  ] interrupt(): vector = 19, TYPE = 4, EXT = 0
-00047730775d[CPU0  ] inhibit interrupts mask = 3
-00047731052d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00047731802d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00047732552d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00047733302d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00047734052d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00047734802d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00047735552d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00047736302d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00047737052d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00047737802d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00047738552d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00047739302d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00047740052d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00047740884d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00047741640d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00047742396d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00047743152d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00047743908d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00047744664d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00047745420d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00047746176d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00047746932d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00047747772d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00047748522d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00047749272d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00047750021d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00047750665d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
-00047751364d[CPU0  ] interrupt(): vector = 13, TYPE = 4, EXT = 0
-00047826897d[CPU0  ] inhibit interrupts mask = 1
-00047826899d[CPU0  ] interrupt(): vector = 08, TYPE = 0, EXT = 1
-00047826899d[CPU0  ] inhibit interrupts mask = 1
-00047826912d[CPU0  ] interrupt(): vector = 1c, TYPE = 4, EXT = 0
-00047828743i[BIOS  ] Booting from 0000:7c00
-00047828802d[CPU0  ] inhibit interrupts mask = 3
-00047829853d[CPU0  ] inhibit interrupts mask = 3
-00047829902d[CPU0  ] interrupt(): vector = 13, TYPE = 4, EXT = 0
-00047875558d[CPU0  ] inhibit interrupts mask = 1
-00047875560d[CPU0  ] interrupt(): vector = 08, TYPE = 0, EXT = 1
-00047875560d[CPU0  ] inhibit interrupts mask = 1
-00047875573d[CPU0  ] interrupt(): vector = 1c, TYPE = 4, EXT = 0
-00047875937i[      ] dbg: Quit
-00047875937i[CPU0  ] CPU is in real mode (active)
-00047875937i[CPU0  ] CS.mode = 16 bit
-00047875937i[CPU0  ] SS.mode = 16 bit
-00047875937i[CPU0  ] EFER   = 0x00000000
-00047875937i[CPU0  ] | EAX=00000001  EBX=00000000  ECX=000007c0  EDX=00003080
-00047875937i[CPU0  ] | ESP=000003cb  EBP=00000000  ESI=000003db  EDI=00000800
-00047875937i[CPU0  ] | IOPL=0 id vip vif ac vm rf nt of df if tf sf zf af pf cf
-00047875937i[CPU0  ] | SEG sltr(index|ti|rpl)     base    limit G D
-00047875937i[CPU0  ] |  CS:0800( 0004| 0|  0) 00008000 0000ffff 0 0
-00047875937i[CPU0  ] |  DS:0800( 0005| 0|  0) 00008000 0000ffff 0 0
-00047875937i[CPU0  ] |  SS:0800( 0005| 0|  0) 00008000 0000ffff 0 0
-00047875937i[CPU0  ] |  ES:0800( 0005| 0|  0) 00008000 0000ffff 0 0
-00047875937i[CPU0  ] |  FS:0000( 0005| 0|  0) 00000000 0000ffff 0 0
-00047875937i[CPU0  ] |  GS:0000( 0005| 0|  0) 00000000 0000ffff 0 0
-00047875937i[CPU0  ] | EIP=0000014e (0000014e)
-00047875937i[CPU0  ] | CR0=0x60000010 CR2=0x00000000
-00047875937i[CPU0  ] | CR3=0x00000000 CR4=0x00000000
-00047875937i[CMOS  ] Last time is 1511555150 (Sat Nov 25 04:25:50 2017)
-00047875937i[SIM   ] quit_sim called with exit code 0
+00000000019d[CPU0  ] inhibit interrupts mask = 3
+00000004635i[BIOS  ] $Revision: 13073 $ $Date: 2017-02-16 22:43:52 +0100 (Do, 16. Feb 2017) $
+00000322561i[KBD   ] reset-disable command received
+00000330286d[CPU0  ] protected mode activated
+00000330300d[CPU0  ] inhibit interrupts mask = 3
+00000330727i[BIOS  ] Starting rombios32
+00000331170i[BIOS  ] Shutdown flag 0
+00000331733i[BIOS  ] ram_size=0x02000000
+00000332189i[BIOS  ] ram_end=32MB
+00000332273d[CPU0  ] RDMSR: read 00000000:00000508 from MSR fe
+00000332302d[CPU0  ] WRMSR: write 06060606:06060606 to MSR 250
+00000332381d[CPU0  ] WRMSR: write 06060606:06060606 to MSR 258
+00000332434d[CPU0  ] WRMSR: write 00000000:00000000 to MSR 259
+00000332441d[CPU0  ] WRMSR: write 00000000:00000000 to MSR 268
+00000332448d[CPU0  ] WRMSR: write 00000000:00000000 to MSR 269
+00000332455d[CPU0  ] WRMSR: write 00000000:00000000 to MSR 26a
+00000332462d[CPU0  ] WRMSR: write 00000000:00000000 to MSR 26b
+00000332469d[CPU0  ] WRMSR: write 00000000:00000000 to MSR 26c
+00000332476d[CPU0  ] WRMSR: write 00000000:00000000 to MSR 26d
+00000332483d[CPU0  ] WRMSR: write 00000000:00000000 to MSR 26e
+00000332490d[CPU0  ] WRMSR: write 00000000:00000000 to MSR 26f
+00000332497d[CPU0  ] WRMSR: write 00000000:c0000000 to MSR 200
+00000332527d[CPU0  ] WRMSR: write 000000ff:c0000800 to MSR 201
+00000332534d[CPU0  ] WRMSR: write 00000000:00000c06 to MSR 2ff
+00000506252i[WINGUI] dimension update x=720 y=400 fontheight=16 fontwidth=9 bpp=8
+00038471607i[BIOS  ] Found 1 cpu(s)
+00038485051i[BIOS  ] bios_table_addr: 0x000f9cd8 end=0x000fcc00
+00038812989i[PCI   ] i440FX PMC write to PAM register 59 (TLB Flush)
+00039140969i[P2ISA ] PCI IRQ routing: PIRQA# set to 0x0b
+00039140995i[P2ISA ] PCI IRQ routing: PIRQB# set to 0x09
+00039140995i[P2ISA ] PCI IRQ routing: PIRQC# set to 0x0b
+00039140995i[P2ISA ] PCI IRQ routing: PIRQD# set to 0x09
+00039140995i[P2ISA ] write: ELCR2 = 0x0a
+00039141787i[BIOS  ] PIIX3/PIIX4 init: elcr=00 0a
+00039149515i[BIOS  ] PCI: bus=0 devfn=0x00: vendor_id=0x8086 device_id=0x1237 class=0x0600
+00039151764i[BIOS  ] PCI: bus=0 devfn=0x08: vendor_id=0x8086 device_id=0x7000 class=0x0601
+00039153937i[BIOS  ] PCI: bus=0 devfn=0x09: vendor_id=0x8086 device_id=0x7010 class=0x0101
+00039154148i[PIDE  ] new BM-DMA address: 0xc000
+00039154762i[BIOS  ] region 4: 0x0000c000
+00039156786i[BIOS  ] PCI: bus=0 devfn=0x0a: vendor_id=0x8086 device_id=0x7020 class=0x0c03
+00039156968i[UHCI  ] new base address: 0xc020
+00039157611i[BIOS  ] region 4: 0x0000c020
+00039157704i[UHCI  ] new irq line = 9
+00039159639i[BIOS  ] PCI: bus=0 devfn=0x0b: vendor_id=0x8086 device_id=0x7113 class=0x0680
+00039159861i[ACPI  ] new irq line = 11
+00039159885i[ACPI  ] new irq line = 9
+00039159904i[ACPI  ] new PM base address: 0xb000
+00039159904i[ACPI  ] new SM base address: 0xb100
+00039159936i[PCI   ] setting SMRAM control register to 0x4a
+00039324054i[CPU0  ] Enter to System Management Mode
+00039324054i[CPU0  ] enter_system_management_mode: temporary disable VMX while in SMM mode
+00039324054d[CPU0  ] real mode activated
+00039324058i[CPU0  ] RSM: Resuming from System Management Mode
+00039324058d[CPU0  ] protected mode activated
+00039487924d[CPU0  ] WBINVD: WB-Invalidate internal caches !
+00039488080i[PCI   ] setting SMRAM control register to 0x0a
+00039502686i[BIOS  ] MP table addr=0x000f9db0 MPC table addr=0x000f9ce0 size=0xc8
+00039504668i[BIOS  ] SMBIOS table addr=0x000f9dc0
+00039506639i[BIOS  ] ACPI tables: RSDP addr=0x000f9ee0 ACPI DATA addr=0x01ff0000 size=0xf72
+00039510041i[BIOS  ] Firmware waking vector 0x1ff00cc
+00039511981d[CPU0  ] WBINVD: WB-Invalidate internal caches !
+00039511983i[PCI   ] i440FX PMC write to PAM register 59 (TLB Flush)
+00039512564i[BIOS  ] bios_table_cur_addr: 0x000f9f04
+00039512742d[CPU0  ] inhibit interrupts mask = 3
+00039512742d[CPU0  ] real mode activated
+00039512752d[CPU0  ] inhibit interrupts mask = 3
+00039640321i[VBIOS ] VGABios $Id: vgabios.c,v 1.76 2013/02/10 08:07:03 vruppert Exp $
+00039640406i[BXVGA ] VBE known Display Interface b0c0
+00039640425i[BXVGA ] VBE known Display Interface b0c5
+00039643349i[VBIOS ] VBE Bios $Id: vbe.c,v 1.65 2014/07/08 18:02:25 vruppert Exp $
+00039643462d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039683160d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039701489d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039701604d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039701803d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039721040d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039721239d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039738893d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039739119d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039775378d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039775575d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039834298d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039834513d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039860367d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039861076d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039861826d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039862576d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039863326d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039864076d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039864826d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039865576d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039866326d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039867076d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039867826d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039868576d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039869326d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039870076d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039870826d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039871576d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039872326d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039873076d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039873826d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039874576d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039875423d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039876175d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039876931d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039877687d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039878443d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039879199d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039879955d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039880711d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039881476d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039882157d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039882896d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039883652d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039884408d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039885164d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039885920d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039886676d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039887432d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039888188d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039888944d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039889700d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039890456d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039891212d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039891968d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039892724d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039893480d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039894236d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039894992d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039895748d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039896504d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039897260d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039898016d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039898772d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039899528d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039900284d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039901040d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039901796d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039902552d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039903308d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039904064d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039904820d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039905576d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039906332d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039907088d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039907844d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039908600d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039909356d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039910112d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039910868d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039911624d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039912380d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039913136d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039913892d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039914648d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039915404d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039916160d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039916916d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039917672d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039918428d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039919184d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039919940d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039920696d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039921452d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039922208d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039922964d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039923720d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039924476d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039925232d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039925988d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039926744d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039927500d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039928260d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039929012d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039929768d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039930524d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039931280d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039932036d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039932792d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039933548d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039934304d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039935060d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039935816d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039936572d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039937335d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039938018d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039938664d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039939414d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039940164d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039940914d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039941664d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039942414d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039943164d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039943914d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039944664d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039945462d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039946223d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039946973d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039947723d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039948473d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039949223d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039949973d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039950723d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039951473d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039952223d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039952973d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039953723d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039954473d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039955223d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039955973d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039956723d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039957473d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039958223d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039958973d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039959723d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039960473d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039961223d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039961973d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039962723d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039963473d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039964223d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039964973d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039965723d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039966473d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039967223d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039967973d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039968723d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039969473d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039970223d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039970973d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039971723d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039972473d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039973223d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039973973d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039974723d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039975473d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039976223d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039976973d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039977723d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039978402d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039979048d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039979727d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039983038d[CPU0  ] inhibit interrupts mask = 1
+00039983040d[CPU0  ] interrupt(): vector = 08, TYPE = 0, EXT = 1
+00039983040d[CPU0  ] inhibit interrupts mask = 1
+00039983052d[CPU0  ] interrupt(): vector = 1c, TYPE = 4, EXT = 0
+00039987615i[BIOS  ] ata0-0: PCHS=20/16/63 translation=none LCHS=20/16/63
+00039990815d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039991576d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039992326d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039993161d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039993923d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039994770d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039995526d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039996282d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039997038d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039997794d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039998550d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00039999313d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00040000067d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00040000974d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00040001846d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00040002740d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00040003634d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00040004528d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00040005422d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00040006316d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00040007210d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00040008104d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00040008998d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00040009892d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00040010786d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00040011632d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00040012393d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00040013143d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00040013893d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00040014643d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00040015478d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00040016253d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00040016994d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00040017744d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00040018494d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00040019244d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00040020003d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00040020744d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00040021494d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00040022244d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00040022994d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00040023753d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00040024494d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00040025386d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00040026120d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00040026860d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00040027618d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00040028369d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00040029123d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00040029873d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00040030623d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00040031373d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00040032123d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00040032873d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00040033623d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00040034373d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00040035052d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00043434345i[BIOS  ] IDE time out
+00043436374d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00043437064d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00043438801d[CPU0  ] interrupt(): vector = 16, TYPE = 4, EXT = 0
+00043438803d[CPU0  ] inhibit interrupts mask = 1
+00043438927d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00043439688d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00043440438d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00043441188d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00043441938d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00043442688d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00043443450d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00043444188d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00043444938d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00043445688d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00043446438d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00043447188d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00043447938d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00043448688d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00043449438d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00043450188d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00043450938d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00043451688d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00043452438d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00043453188d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00043453938d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00043454688d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00043455438d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00043456188d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00043456938d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00043457617d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00043458263d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00043458942d[CPU0  ] interrupt(): vector = 10, TYPE = 4, EXT = 0
+00043593310d[CPU0  ] interrupt(): vector = 08, TYPE = 0, EXT = 1
+00043593310d[CPU0  ] inhibit interrupts mask = 1
+00043593310d[CPU0  ] interrupt(): vector = 1c, TYPE = 4, EXT = 0
+00055492500p[      ] >>PANIC<< SIGNAL 2 caught
+00058080103d[CPU0  ] interrupt(): vector = 08, TYPE = 0, EXT = 1
+00058080103d[CPU0  ] inhibit interrupts mask = 1
+00058080103d[CPU0  ] interrupt(): vector = 1c, TYPE = 4, EXT = 0
+00060346116d[CPU0  ] interrupt(): vector = 08, TYPE = 0, EXT = 1
+00060346116d[CPU0  ] inhibit interrupts mask = 1
+00060346116d[CPU0  ] interrupt(): vector = 1c, TYPE = 4, EXT = 0
+00062842449d[CPU0  ] interrupt(): vector = 08, TYPE = 0, EXT = 1
+00062842449d[CPU0  ] inhibit interrupts mask = 1
+00062842449d[CPU0  ] interrupt(): vector = 1c, TYPE = 4, EXT = 0
+00065338782d[CPU0  ] interrupt(): vector = 08, TYPE = 0, EXT = 1
+00065338782d[CPU0  ] inhibit interrupts mask = 1
+00065338782d[CPU0  ] interrupt(): vector = 1c, TYPE = 4, EXT = 0
+00069542775d[CPU0  ] interrupt(): vector = 08, TYPE = 0, EXT = 1
+00069542775d[CPU0  ] inhibit interrupts mask = 1
+00069542775d[CPU0  ] interrupt(): vector = 1c, TYPE = 4, EXT = 0
+00072188458d[CPU0  ] interrupt(): vector = 08, TYPE = 0, EXT = 1
+00072188458d[CPU0  ] inhibit interrupts mask = 1
+00072188458d[CPU0  ] interrupt(): vector = 1c, TYPE = 4, EXT = 0
+00072244361d[CPU0  ] interrupt(): vector = 08, TYPE = 0, EXT = 1
+00072244361d[CPU0  ] inhibit interrupts mask = 1
+00072244361d[CPU0  ] interrupt(): vector = 1c, TYPE = 4, EXT = 0
+00072299844d[CPU0  ] interrupt(): vector = 08, TYPE = 0, EXT = 1
+00072299844d[CPU0  ] inhibit interrupts mask = 1
+00072299844d[CPU0  ] interrupt(): vector = 1c, TYPE = 4, EXT = 0
+00072355317d[CPU0  ] interrupt(): vector = 08, TYPE = 0, EXT = 1
+00072355317d[CPU0  ] inhibit interrupts mask = 1
+00072355317d[CPU0  ] interrupt(): vector = 1c, TYPE = 4, EXT = 0
+00072410800d[CPU0  ] interrupt(): vector = 08, TYPE = 0, EXT = 1
+00072410800d[CPU0  ] inhibit interrupts mask = 1
+00072410800d[CPU0  ] interrupt(): vector = 1c, TYPE = 4, EXT = 0
+00072410878d[CPU0  ] interrupt(): vector = 16, TYPE = 4, EXT = 0
+00072410883d[CPU0  ] inhibit interrupts mask = 1
+00072466267d[CPU0  ] interrupt(): vector = 08, TYPE = 0, EXT = 1
+00072466267d[CPU0  ] inhibit interrupts mask = 1
+00072466267d[CPU0  ] interrupt(): vector = 1c, TYPE = 4, EXT = 0
+00072521760d[CPU0  ] interrupt(): vector = 08, TYPE = 0, EXT = 1
+00072521760d[CPU0  ] inhibit interrupts mask = 1
+00072521760d[CPU0  ] interrupt(): vector = 1c, TYPE = 4, EXT = 0
+00072568056i[CPU0  ] CPU is in real mode (halted)
+00072568056i[CPU0  ] CS.mode = 16 bit
+00072568056i[CPU0  ] SS.mode = 16 bit
+00072568056i[CPU0  ] EFER   = 0x00000000
+00072568056i[CPU0  ] | EAX=00000000  EBX=00000000  ECX=0009e080  EDX=00000000
+00072568056i[CPU0  ] | ESP=0000ff9c  EBP=0000ffb0  ESI=000e0000  EDI=0000ffac
+00072568056i[CPU0  ] | IOPL=0 id vip vif ac vm rf nt of df IF tf SF zf AF pf CF
+00072568056i[CPU0  ] | SEG sltr(index|ti|rpl)     base    limit G D
+00072568056i[CPU0  ] |  CS:f000( 0004| 0|  0) 000f0000 0000ffff 0 0
+00072568056i[CPU0  ] |  DS:0000( 0005| 0|  0) 00000000 0000ffff 0 0
+00072568056i[CPU0  ] |  SS:0000( 0005| 0|  0) 00000000 0000ffff 0 0
+00072568056i[CPU0  ] |  ES:0080( 0005| 0|  0) 00000800 0000ffff 0 0
+00072568056i[CPU0  ] |  FS:0000( 0005| 0|  0) 00000000 0000ffff 0 0
+00072568056i[CPU0  ] |  GS:0000( 0005| 0|  0) 00000000 0000ffff 0 0
+00072568056i[CPU0  ] | EIP=00000863 (00000863)
+00072568056i[CPU0  ] | CR0=0x60000010 CR2=0x00000000
+00072568056i[CPU0  ] | CR3=0x00000000 CR4=0x00000000
+00072568056i[CPU0  ] 0x0000000000000863>> mov ax, word ptr ds:0x046c : A16C04
+00072568056i[CMOS  ] Last time is 1512027458 (Thu Nov 30 15:37:38 2017)
+00072568056i[      ] restoring default signal behavior
+00072568056i[SIM   ] quit_sim called with exit code 1

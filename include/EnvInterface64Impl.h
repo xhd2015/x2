@@ -88,6 +88,7 @@ public:
 
 	std::vector<std::string> regexSplit(const std::regex& re, const std::string& s);
 	std::vector<std::string> spaceSplit(const std::string& s);
+	std::vector<std::string> pathSplit(const std::string& s);
 
 public:
 	static StdEnv64Impl * getInstance(const char *file);

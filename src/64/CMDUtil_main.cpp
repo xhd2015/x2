@@ -56,11 +56,11 @@ int main(int argc,char *argv[])
 
 
 	// DEBUG
-//	op.touch("file",4,0);
+//	op.touch("file",2,0);
 //	string content(1024,'d');
 //	op.write("file", 5,content.c_str(), content.length());
 //	op.randwrite("file",4,content.c_str(),content.length());
-//	op.randread("file", 4, content.length());
+//	op.randread("file", 1024, 20);
 //	op.ls();
 //	return 0;
 
@@ -122,6 +122,12 @@ int main(int argc,char *argv[])
 					op.read(args[1],atoi(args[2].c_str()), atoi(args[3].c_str()));
 				else
 					op.randread(args[1],atoi(args[2].c_str()), atoi(args[3].c_str()));
+			}
+		}else if(args[0].compare("truncate")==0){
+			if(args.size() < 3)
+				cerr << "see help for "<<args[0]<<endl;
+			else{
+				op.truncate(args[1], atoi(args[2].c_str()));
 			}
 
 		}else if(args[0].compare("quit")==0 || args[0].compare("exit")==0){
