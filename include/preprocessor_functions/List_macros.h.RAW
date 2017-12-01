@@ -1,0 +1,64 @@
+
+/**
+ * @param __DEF_ALIGNMENT
+ */
+
+#if !defined(__DEF_ALIGNMENT)
+#error "please define __DEF_ALIGNMENT"
+#endif
+
+#define __DEF_ListNode ListNode<T,__DEF_ALIGNMENT>
+
+template<class T>
+typename __DEF_ListNode::__ListNode* __DEF_ListNode::getNext()const
+{
+    return next;
+}
+
+template<class T>
+typename __DEF_ListNode::__ListNode* __DEF_ListNode::getPrevious()const
+{
+    return previous;
+}
+template<class T>
+void __DEF_ListNode::setNext(__ListNode* next)
+{
+    this->next = next;
+}
+
+template<class T>
+void  __DEF_ListNode::setPrevious(__ListNode* previous)
+{
+    this->previous = previous;
+}
+template<class T>
+int  __DEF_ListNode::hasPrevious()const
+{
+    return (this->previous!=NULL);
+}
+
+template<class T>
+int  __DEF_ListNode::hasNext()const
+{
+    return (this->next!=NULL);
+}
+
+template<class T>
+const T& __DEF_ListNode::getData()const
+{
+    return data;
+}
+template<class T>
+T& __DEF_ListNode::getData()
+{
+    return data;
+}
+template<class T>
+void __DEF_ListNode::setData(const T& data)
+{
+    this->data=data;
+}
+
+#undef __DEF_ListNode
+
+#undef __DEF_ALIGNMENT

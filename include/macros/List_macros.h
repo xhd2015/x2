@@ -16,77 +16,44 @@
 
 //============函数宏区
 //=========class : ListNode
-template<class T>
-ListNode<T>* ListNode<T>::getNext()const
-{
-    return next;
-}
+#if defined(CODE64)
+#define __DEF_ALIGNMENT sizeof(size_t)
+#include <preprocessor_functions/List_macros.h.RAW>
+#endif
 
-template<class T>
-ListNode<T>* ListNode<T>::getPrevious()const
-{
-    return previous;
-}
-template<class T>
-void ListNode<T>::setNext(ListNode<T>* next)
-{
-    this->next = next;
-}
+#if defined(CODE32) ||defined(CODE32USER)|| defined(CODE64)
+#define __DEF_ALIGNMENT 4
+#include <preprocessor_functions/List_macros.h.RAW>
+#endif
 
-template<class T>
-void  ListNode<T>::setPrevious(ListNode<T>* previous)
-{
-    this->previous = previous;
-}
-template<class T>
-int  ListNode<T>::hasPrevious()const
-{
-    return (this->previous!=NULL);
-}
-//template<class T>
-//void ListNode<T>::adjustOffset(char **p,ptrdiff_t diff)
-//{
-//	if(p!=NULL && *p!=NULL)*p+=diff;
-//}
-template<class T>
-int  ListNode<T>::hasNext()const
-{
-    return (this->next!=NULL);
-}
+#if defined(CODE16) || defined(CODE32) ||defined(CODE32USER)|| defined(CODE64)
+#define __DEF_ALIGNMENT 2
+#include <preprocessor_functions/List_macros.h.RAW>
+#endif
 
-template<class T>
-const T& ListNode<T>::getData()const
-{
-    return data;
-}
-template<class T>
-T& ListNode<T>::getData()
-{
-    return data;
-}
-template<class T>
-void ListNode<T>::setData(const T& data)
-{
-    this->data=data;
-}
+
+
 //=============class:LinkedList
-template <class T,template <class> class _Allocator>
-ListNode<T>* LinkedList<T,_Allocator >::getHead()const
+template <class T,template <class> class _Allocator,int __Alignment>
+typename LinkedList<T,_Allocator,__Alignment>::__ListNode*
+LinkedList<T,_Allocator,__Alignment>::getHead()const
 {
     return root->getNext();
 }
-template<class T,template <class> class _Allocator>
-ListNode<T>*  LinkedList<T,_Allocator>::getLast()const
+template <class T,template <class> class _Allocator,int __Alignment>
+typename LinkedList<T,_Allocator,__Alignment>::__ListNode*
+LinkedList<T,_Allocator,__Alignment>::getLast()const
 {
     return last->getNext();
 }
-template <class T,template <class> class _Allocator>
-bool			LinkedList<T,_Allocator>::isEmpty()const
+template <class T,template <class> class _Allocator,int __Alignment>
+bool			LinkedList<T,_Allocator,__Alignment>::isEmpty()const
 {
 	return this->getHead()==NULL;
 }
-template <class T,template <class> class _Allocator>
-_Allocator<ListNode<T> > *LinkedList<T,_Allocator>::getMemoryManager()const
+template <class T,template <class> class _Allocator,int __Alignment>
+_Allocator<typename LinkedList<T,_Allocator,__Alignment>::__ListNode>
+*LinkedList<T,_Allocator,__Alignment>::getMemoryManager()const
 {
     return smm;
 }
@@ -176,77 +143,34 @@ bool			SimpleMemoryManager<T>::checkIsInternal(FullNode *t)
 	return this->start <= (size_t)t && (size_t)t - (size_t)this->start <= this->limit ;
 }
 //===========class TreeNode
-
-template<class T>
-  TreeNode<T>* TreeNode<T>::setSon(TreeNode<T>* son)
-  {
 #if defined(CODE64)
-	//printf("setSon is : %x \n",son);
+#define __DEF_ALIGNMENT sizeof(size_t)
+#include <preprocessor_functions/List_TreeNode_macros.h.RAW>
 #endif
-  	this->son=son;
-  	return this;
-  }
-template<class T>
-TreeNode<T>* TreeNode<T>::setFather(TreeNode<T>* father) {
-    this->father=father;
-    return this;
-}
 
-//#if ! defined(CODE64)
-template<class T>
-TreeNode<T>* TreeNode<T>::getSon() const{
-//#if defined(CODE64)
-//	printf("gettSon \n");
-//#endif
-	return son;
-}
-//#endif
-
-
-template<class T>
-TreeNode<T>* TreeNode<T>::getNext() const{
-	TreeNode<T>* next=(TreeNode<T>*)this->ListNode<T>::getNext();//这种情况下的强制转换一定是正确的，因为TreeNode中只存储TreeNode，而不会存储ListNode
-	return next;
-}
-
-template<class T>
-TreeNode<T>* TreeNode<T>::getPrevious() const{
-	TreeNode<T>* previous=(TreeNode<T>*)this->ListNode<T>::getPrevious();
-	return previous;
-}
-
-
-template<class T>
-TreeNode<T>* TreeNode<T>::getDirectFather()const {//direct father
-#if defined(CODE64)
-//	printf("call direct,this is %x,father is %x\n",this,this->father);
+#if defined(CODE32) ||defined(CODE32USER)|| defined(CODE64)
+#define __DEF_ALIGNMENT 4
+#include <preprocessor_functions/List_TreeNode_macros.h.RAW>
 #endif
-    return father;
-}
 
-template<class T>
-bool		 TreeNode<T>::hasSon()const
-{
-	return this->son!=NULL;
-}
-template<class T>
-bool 		 TreeNode<T>::hasFather()const
-{
-	return this->father!=NULL;
-}
+#if defined(CODE16) || defined(CODE32) ||defined(CODE32USER)|| defined(CODE64)
+#define __DEF_ALIGNMENT 2
+#include <preprocessor_functions/List_TreeNode_macros.h.RAW>
+#endif
+
 
 
 //======class Tree
-template<class T,template <class> class _Allocator>
-TreeNode<T>* Tree<T,_Allocator>::getHead()const {
+template<class T,template <class> class _Allocator,int __Alignment>
+typename Tree<T,_Allocator,__Alignment>::__TreeNode* Tree<T,_Allocator,__Alignment>::getHead()const {
 #ifdef CODE64
 //	std::cout << "tree getHead()"<<std::endl;
 #endif
 	return root->getSon();
 }
 
-template<class T,template <class> class _Allocator>
-void  Tree<T,_Allocator>::setHead(TreeNode<T> *head)
+template<class T,template <class> class _Allocator,int __Alignment>
+void  Tree<T,_Allocator,__Alignment>::setHead(__TreeNode *head)
  {
 #if defined(CODE64)
 	//printf("root : %x  , head : %x\n",root,head);
@@ -260,18 +184,18 @@ void  Tree<T,_Allocator>::setHead(TreeNode<T> *head)
 #endif
  }
 
-template<class T,template <class> class _Allocator>
-void		Tree<T,_Allocator>::addRoot(TreeNode<T>* node)
+template<class T,template <class> class _Allocator,int __Alignment>
+void		Tree<T,_Allocator,__Alignment>::addRoot(__TreeNode* node)
 {
 	this->root->addSon(node);
 }
-template<class T,template <class> class _Allocator>
-bool		Tree<T,_Allocator>::isEmpty()const
+template<class T,template <class> class _Allocator,int __Alignment>
+bool		Tree<T,_Allocator,__Alignment>::isEmpty()const
 {
 	return !(this->root->hasSon());
 }
-template<class T,template <class> class _Allocator>
-_Allocator<TreeNode<T> >*	Tree<T,_Allocator>::getSmm()const
+template<class T,template <class> class _Allocator,int __Alignment>
+typename Tree<T,_Allocator,__Alignment>::__Allocator *Tree<T,_Allocator,__Alignment>::getSmm()const
 {
 	return this->smm;
 }

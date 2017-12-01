@@ -51,8 +51,8 @@ int main(int argc,char *argv[])
 
 	// 注意，由于采用单例模式，所以该类只有一个文件指针
 
-	StdEnv64Impl *envInstance = StdEnv64Impl::getInstance(imgFile.c_str());
-	FileOperation<StdEnv64Impl,size_t> op(envInstance,0x80,0x3000);
+	StdEnv64Impl envInstance (imgFile.c_str());
+	FileOperation<StdEnv64Impl,size_t> op(&envInstance,0x80,0x3000);
 
 
 	// DEBUG
@@ -77,7 +77,7 @@ int main(int argc,char *argv[])
 	{
 		//parse all args
 		//将其用正则表达式分解成数组格式
-		vector<string> args=envInstance->spaceSplit(cmd);
+		vector<string> args=envInstance.spaceSplit(cmd);
 		if(args.size()==0)continue;
 		if(args[0].compare("help")==0)
 		{

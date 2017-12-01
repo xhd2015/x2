@@ -118,44 +118,24 @@ protected:
     ERROR_HANDLER errhandle;
 };
 
-template<class T>
-class ListNode{
-public:
-	typedef ListNode<T> This;
-public:
-    ListNode(const T& data,ListNode<T>* next=NULL,ListNode<T>* previous=NULL);
-    ~ListNode();
-    
-    AS_MACRO const T& getData()const;
-    AS_MACRO T& getData();
-    AS_MACRO void setData(const T& data);
-    AS_MACRO ListNode<T>* getNext()const;
-    AS_MACRO ListNode<T>* getPrevious()const;
-    AS_MACRO void setNext(ListNode<T>* next);
-    AS_MACRO void  setPrevious(ListNode<T>* previous);
-    ListNode<T>* removeNext();
-    ListNode<T>* removePrevious();
-    void    insertNext(ListNode<T>* next);
-    void    insertPrevious(ListNode<T>* previous);
-    AS_MACRO int  hasNext()const;
-    AS_MACRO int  hasPrevious()const;//done
-    /**
-     * @new method since 2017-03-18 21:23:10
-     */
-    void		adjustOffset(ptrdiff_t diff);
-    void		initToNull();
+//===ListNode的定义
+template<class T,int __Alignment>
+class ListNode{};//模板
+#if defined(CODE64)
+#define __DEF_ALIGNMENT sizeof(size_t)
+#include <preprocessor_functions/List.h.RAW>
+#endif
 
+#if defined(CODE32) ||defined(CODE32USER)|| defined(CODE64)
+#define __DEF_ALIGNMENT 4
+#include <preprocessor_functions/List.h.RAW>
+#endif
 
-    ListNode<T>*    getLast()const;//done
-    ListNode<T>*    getFirst()const;//done
-    DEPRECATED AS_MACRO static void adjustOffset(char **p,ptrdiff_t off);
-    //指向构造函数的地址
-    //用 new (void*p) 构造函数,俗称placement new
-protected:
-    T   data;//for storage
-    ListNode<T> *next,*previous;
-    
-};
+#if defined(CODE16) || defined(CODE32) ||defined(CODE32USER)|| defined(CODE64)
+#define __DEF_ALIGNMENT 2
+#include <preprocessor_functions/List.h.RAW>
+#endif
+//*****=========ListNode定义完毕
 
 /**
 *这个类内容是彻底位于FREE_HEAP上的/这样的类最好将其析构函数设为protected
@@ -175,47 +155,50 @@ protected:
  * @param T 存储的类型
  * @param _Allocator 分配ListNode<T>的分配器
  */
-template<class T,template <class> class _Allocator >
+template<class T,template <class> class _Allocator,int __Alignment=sizeof(size_t)>
 class LinkedList{
+public:
+	using __ListNode = ListNode<T,__Alignment>;
+	using __Allocator = _Allocator<__ListNode>;
 public:
 	LinkedList()=default;
 
 public:
-    LinkedList(  _Allocator<ListNode<T> > *smm);
+    LinkedList(  __Allocator *smm);
     ~LinkedList();
     
-    AS_MACRO ListNode<T>* getHead()const;//done
-    AS_MACRO _Allocator<ListNode<T> > *getMemoryManager()const;//done
+    AS_MACRO __ListNode* getHead()const;//done
+    AS_MACRO _Allocator<__ListNode > *getMemoryManager()const;//done
 
 
-    AS_MACRO ListNode<T>*    getLast()const;//done
-    ListNode<T>*    append(const T &t);//done
-    ListNode<T>*    append(ListNode<T>* p);//done
-    ListNode<T>*    appendHead(ListNode<T>* p);//done
-    ListNode<T>*    appendHead(const T &t);//done
-    ListNode<T>*    remove();//done
-    ListNode<T>*    removeHead();//done
-    void            remove(ListNode<T>* p);//done
-    void			insertNext(ListNode<T>* where,ListNode<T>* p);//done
-    void			insertPrevious(ListNode<T>* where,ListNode<T>* p);//done
+    AS_MACRO __ListNode*    getLast()const;//done
+    __ListNode*    append(const T &t);//done
+    __ListNode*    append(__ListNode* p);//done
+    __ListNode*    appendHead(__ListNode* p);//done
+    __ListNode*    appendHead(const T &t);//done
+    __ListNode*    remove();//done
+    __ListNode*    removeHead();//done
+    void            remove(__ListNode* p);//done
+    void			insertNext(__ListNode* where,__ListNode* p);//done
+    void			insertPrevious(__ListNode* where,__ListNode* p);//done
     size_t 			getSize()const;//done
     AS_MACRO 		bool			isEmpty()const;
 
 
-    void freeNode(ListNode<T> * node);//done
+    void freeNode(__ListNode * node);//done
     void free();//free this list,(equals to destruct) that means free all,then set root&last as NULL.   done
-    void freeNext(ListNode<T> *t);//forward list free,begin with this                 done
-    void freePrevious(ListNode<T> *t);//backward list free,begin with This            done
+    void freeNext(__ListNode *t);//forward list free,begin with this                 done
+    void freePrevious(__ListNode *t);//backward list free,begin with This            done
     
 
 protected:
-    _Allocator<ListNode<T> > *smm; //空间分配代理器
+    _Allocator<__ListNode > *smm; //空间分配代理器
 
     /**
     *Designing them as pointer is the best choice I've ever made.
     */
-    ListNode<T>* root;
-    ListNode<T>* last; //next指向最后一个
+    __ListNode* root;
+    __ListNode* last; //next指向最后一个
     
     
 };
@@ -241,18 +224,26 @@ protected:
 *   @param _HowAllocated 分配策略：丢弃或者保留
 *   @param _Allocator	分配器
 */
-template<class _Locateable,int _HowAllocated,template <class> class _Allocator,typename __SizeType>
-class LocateableLinkedList:public LinkedList<_Locateable,_Allocator >
+template<class _Locateable,int _HowAllocated,
+		template <class> class _Allocator,
+		typename __SizeType,
+		int __Alignment=sizeof(__SizeType)>
+class LocateableLinkedList:public LinkedList<_Locateable,_Allocator,__Alignment>
 {
 public:
-	 LocateableLinkedList()=default;//done
+	using This =  LocateableLinkedList<_Locateable,_HowAllocated,_Allocator,__SizeType,__Alignment>;
+	using Super = LinkedList<_Locateable,_Allocator,__Alignment>;
+	using __LocateableLinkedList = This;
+	using __LinkedList = Super;
+	using __ListNode = typename Super::__ListNode;
+	using __Allocator = _Allocator<__ListNode>;
 public:
-	typedef LocateableLinkedList<_Locateable,_HowAllocated,_Allocator,__SizeType> This;
+	 LocateableLinkedList()=default;//done
 public:
 	/**
 	 * @param smm   一个能否分配器ListNode<_Locateable>类型的分配器
 	 */
-    LocateableLinkedList( _Allocator<ListNode<_Locateable> > *smm );//done
+    LocateableLinkedList( __Allocator *smm );//done
     ~LocateableLinkedList();//done
     /**
     * What should they return?The location,or a near location that can be later used to insert a node?
@@ -263,74 +254,50 @@ public:
      * @param start		开始地址
      * @param len		长度
      */
-    static ListNode<_Locateable> *findFirstStartLen(ListNode<_Locateable>* startNode,__SizeType start,__SizeType len);//done
-    static ListNode<_Locateable> *findFirstLen(ListNode<_Locateable>* startNode,__SizeType len);//done
-    static ListNode<_Locateable> *findFirstStart(ListNode<_Locateable>* startNode,__SizeType start);//done
+    static __ListNode *findFirstStartLen(__ListNode* startNode,__SizeType start,__SizeType len);//done
+    static __ListNode *findFirstLen(__ListNode* startNode,__SizeType len);//done
+    static __ListNode *findFirstStart(__ListNode* startNode,__SizeType start);//done
     /**
     * return the first node whose start equals with or is bigger that argument start.
     *  If there is no such node(e.g. the above returns NULL),then return the last one who is less.
     *  If the above two process get NULL,then return NULL,meaning the list is empty.
     */
-    static ListNode<_Locateable> *findFirstStartForInsert(ListNode<_Locateable> *startNode,__SizeType start);//done
+    static __ListNode *findFirstStartForInsert(__ListNode *startNode,__SizeType start);//done
 
 
     /**
     * The two locateForDeleteXXX methods are deprecated because now we have _HowAllocated.
     */
-    DEPRECATED static ListNode<_Locateable> *locateForDelete(ListNode<_Locateable>* startNode,__SizeType start,__SizeType len,bool allocable);//done
-    DEPRECATED static ListNode<_Locateable>* locateForDeleteStart(ListNode<_Locateable>* startNode,__SizeType start,bool allocable);//done
+    DEPRECATED static __ListNode *locateForDelete(__ListNode* startNode,__SizeType start,__SizeType len,bool allocable);//done
+    DEPRECATED static __ListNode* locateForDeleteStart(__ListNode* startNode,__SizeType start,bool allocable);//done
 
 
 
-    static ListNode<_Locateable>* nextAllocable(ListNode<_Locateable>* startNode);//done
+    static __ListNode* nextAllocable(__ListNode* startNode);//done
 protected:
-    static ListNode<_Locateable>* nextAllocable(ListNode<_Locateable>* startNode,Int2Type<Locator<_Locateable>::KEEP>);//done
-    static ListNode<_Locateable>* nextAllocable(ListNode<_Locateable>* startNode,Int2Type<Locator<_Locateable>::DISCARD>);//done
+    static __ListNode* nextAllocable(__ListNode* startNode,Int2Type<Locator<_Locateable>::KEEP>);//done
+    static __ListNode* nextAllocable(__ListNode* startNode,Int2Type<Locator<_Locateable>::DISCARD>);//done
 };
 
 
 //===============TreeNode and Tree
 //	uses "Tree.cpp"
-template <class T>
-class TreeNode:public ListNode<T>{
-public:
-	typedef ListNode<T> Father;
-public:
-	TreeNode()=default;
-    TreeNode(const T& data,TreeNode<T>* father=NULL,TreeNode<T>* son=NULL,TreeNode<T>* next=NULL,TreeNode<T>* previous=NULL);
-    ~TreeNode();
+template <class T,int __Alignment>
+class TreeNode{}; //模板
+#if defined(CODE64)
+#define __DEF_ALIGNMENT sizeof(size_t)
+#include <preprocessor_functions/List_TreeNode.h.RAW>
+#endif
 
-    AS_MACRO TreeNode<T>* setSon(TreeNode<T>* son);//done
-    AS_MACRO TreeNode<T>* setFather(TreeNode<T>* father);//done
+#if defined(CODE32) ||defined(CODE32USER)|| defined(CODE64)
+#define __DEF_ALIGNMENT 4
+#include <preprocessor_functions/List_TreeNode.h.RAW>
+#endif
 
-//#if defined(CODE64)
-//    TreeNode<T>* getSon()const;
-//#else
-    AS_MACRO TreeNode<T>* getSon()const; //done
-//#endif
-    AS_MACRO TreeNode<T>* getNext()const;
-    AS_MACRO TreeNode<T>* getPrevious()const;
-
-    AS_MACRO TreeNode<T>* getDirectFather()const;//direct father,done
-    		void		addSon(TreeNode<T>* son);
-    AS_MACRO bool		hasSon()const;
-    AS_MACRO bool 		hasFather()const;
-
-    void		insertSon(TreeNode<T>* son);
-    void		insertFather(TreeNode<T>* father);
-    TreeNode<T>*	removeSon();
-	TreeNode<T>*	removeFather();
-	void 			adjustOffset(ptrdiff_t diff);
-	void			initToNull();
-
-
-    TreeNode<T>* getParent()const;//往previous一直遍历，直到是根，然后返回根的father,done
-    
-protected:
-    
-    TreeNode<T> *son,*father;
-    
-};
+#if defined(CODE16) || defined(CODE32) ||defined(CODE32USER)|| defined(CODE64)
+#define __DEF_ALIGNMENT 2
+#include <preprocessor_functions/List_TreeNode.h.RAW>
+#endif
 
 //============class Tree
 /**
@@ -343,27 +310,32 @@ protected:
  *	@param T			节点存储的数据类型
  *	@param _Allocator  分配TreeNode的分配器类型
  */
-template <class T,template <class> class _Allocator>
+template <class T,template <class> class _Allocator,int __Alignment=sizeof(size_t)>
 class Tree{
+public:
+	using This = Tree<T,_Allocator,__Alignment>;
+	using __Tree = This;
+	using __TreeNode=TreeNode<T,__Alignment>;
+	using __Allocator = _Allocator<__TreeNode>;
 public:
 //	Tree()=default;
 	Tree();
 public:
-    Tree(_Allocator<TreeNode<T> > *smm,TreeNode<T>* root=NULL);//If give root=NULL,then assign root by smm,else by root.
+    Tree(__Allocator *smm,__TreeNode* root=NULL);//If give root=NULL,then assign root by smm,else by root.
     ~Tree();
     
-    AS_MACRO TreeNode<T> *getHead()const;//done
-    AS_MACRO void 		setHead(TreeNode<T> *head);  //返回其自身,done
-    AS_MACRO void		addRoot(TreeNode<T>* node);
+    AS_MACRO __TreeNode *getHead()const;//done
+    AS_MACRO void 		setHead(__TreeNode *head);  //返回其自身,done
+    AS_MACRO void		addRoot(__TreeNode* node);
     AS_MACRO bool		isEmpty()const;
-    AS_MACRO	_Allocator<TreeNode<T> >*	getSmm()const;
-    void         free(TreeNode<T> *root);//将root自身和所有子节点都释放掉，== withdraw all nodes recursively  done
+    AS_MACRO	__Allocator*	getSmm()const;
+    void         free(__TreeNode *root);//将root自身和所有子节点都释放掉，== withdraw all nodes recursively  done
 
 #if defined(CODE32)
     void		dumpInfo(Printer* p)const;
 #endif
 protected:
-    _Allocator<TreeNode<T> > *smm;
+    __Allocator *smm;
     // 0
     // 1 
     // 2
@@ -375,7 +347,7 @@ protected:
     // |
     // *->*->*
     //father 是最左边的节点的father
-    TreeNode<T> *root;//有唯一的son，此节点不用于存储。root->son = head，此节点为头节点。
+    __TreeNode *root;//有唯一的son，此节点不用于存储。root->son = head，此节点为头节点。
     
 };
 
@@ -385,243 +357,9 @@ protected:
 //
 //};
 //template<class T>
-//class SimpleTreeNode:public TreeNode<T>,public SimpleMemoryNode{
+//class SimpleTreeNode:public __TreeNode,public SimpleMemoryNode{
 //
 //};
-
-/*
-//============函数宏区
-//=========class : ListNode
-template<class T>
-ListNode<T>* ListNode<T>::getNext()const
-{
-    return next;
-}
-
-template<class T>
-ListNode<T>* ListNode<T>::getPrevious()const
-{
-    return previous;
-}
-template<class T>
-void ListNode<T>::setNext(ListNode<T>* next)
-{
-    this->next = next;
-}
-
-template<class T>
-void  ListNode<T>::setPrevious(ListNode<T>* previous)
-{
-    this->previous = previous;
-}
-template<class T>
-int  ListNode<T>::hasPrevious()const
-{
-    return (this->previous!=NULL);
-}
-//template<class T>
-//void ListNode<T>::adjustOffset(char **p,ptrdiff_t diff)
-//{
-//	if(p!=NULL && *p!=NULL)*p+=diff;
-//}
-template<class T>
-int  ListNode<T>::hasNext()const
-{
-    return (this->next!=NULL);
-}
-
-template<class T>
-const T& ListNode<T>::getData()const
-{
-    return data;
-}
-template<class T>
-T& ListNode<T>::getData()
-{
-    return data;
-}
-template<class T>
-void ListNode<T>::setData(const T& data)
-{
-    this->data=data;
-}
-//=============class:LinkedList
-template <class T,template <class> class _Allocator>
-ListNode<T>* LinkedList<T,_Allocator >::getHead()const
-{
-    return root->getNext();
-}
-template<class T,template <class> class _Allocator>
-ListNode<T>*  LinkedList<T,_Allocator>::getLast()const
-{
-    return last->getNext();
-}
-template <class T,template <class> class _Allocator>
-bool			LinkedList<T,_Allocator>::isEmpty()const
-{
-	return this->getHead()==NULL;
-}
-template <class T,template <class> class _Allocator>
-_Allocator<ListNode<T> > *LinkedList<T,_Allocator>::getMemoryManager()const
-{
-    return smm;
-}
-
-//=====class: SimpleMemoryNode
-SimpleMemoryNode::SimpleMemoryNode(bool NO):
-NO(NO)
-{
-
-}
-bool SimpleMemoryNode::getNO()
-{
-    return this->NO;
-}
-bool SimpleMemoryNode::isFree()
-{
-    return this->NO==false;
-}
-void SimpleMemoryNode::free()
-{
-    this->NO=false;
-}
-void SimpleMemoryNode::unfree()
-{
-    this->NO=true;
-}
-void SimpleMemoryNode::setNO(bool NO)
-{
-    this->NO = NO;
-}
-
-//=====class:SimpleMemoryManager
-template<class T>
-bool SimpleMemoryManager<T>::isFull()const
-{
-    return this->curSize==this->len;
-}
-template<class T>
-size_t SimpleMemoryManager<T>::getLen()const
-{
-    return this->len;
-}
-template<class T>
-size_t SimpleMemoryManager<T>::getCurSize()const
-{
-    return this->curSize;
-}
-template<class T>
-size_t SimpleMemoryManager<T>::getStart()const
-{
-    return this->start;
-}
-template<class T>
-size_t SimpleMemoryManager<T>::getLimit()const
-{
-    return this->limit;
-}    ///////////
-
-template<class T>
-size_t  SimpleMemoryManager<T>::getNodeSize()
-{
-	return sizeof(Node);
-}
-
-template<class T>
-typename SimpleMemoryManager<T>::ERROR_HANDLER SimpleMemoryManager<T>::getErrHandler()
-{
-	return this->errhandle;
-}
-template<class T>
-void			SimpleMemoryManager<T>::setErrHandler(SimpleMemoryManager<T>::ERROR_HANDLER errhandle)
-{
-	this->errhandle= errhandle;
-}
-template<class T>
-bool			SimpleMemoryManager<T>::checkIsInternal(Node *t)
-{
-	return this->start <= (size_t)t && (size_t)t - (size_t)this->start <= this->limit ;
-}
-//===========class TreeNode
-
-template<class T>
-  TreeNode<T>* TreeNode<T>::setSon(TreeNode<T>* son)
-  {
-#if defined(CODE64)
-	//printf("setSon is : %x \n",son);
-#endif
-  	this->son=son;
-  }
-template<class T>
-TreeNode<T>* TreeNode<T>::setFather(TreeNode<T>* father) {
-    this->father=father;
-}
-
-template<class T>
-TreeNode<T>* TreeNode<T>::getSon() const{
-#if defined(CODE64)
-//	printf("gettSon \n");
-#endif
-	return son;
-}
-
-template<class T>
-TreeNode<T>* TreeNode<T>::getDirectFather()const {//direct father
-#if defined(CODE64)
-//	printf("call direct,this is %x,father is %x\n",this,this->father);
-#endif
-    return father;
-}
-
-template<class T>
-bool		 TreeNode<T>::hasSon()const
-{
-	return this->son!=NULL;
-}
-template<class T>
-bool 		 TreeNode<T>::hasFather()const
-{
-	return this->father!=NULL;
-}
-
-//======class Tree
-template<class T,template <class> class _Allocator>
-TreeNode<T>* Tree<T,_Allocator>::getHead()const {
-	return root->getSon();
-}
-
-template<class T,template <class> class _Allocator>
-void  Tree<T,_Allocator>::setHead(TreeNode<T> *head)
- {
-#if defined(CODE64)
-	//printf("root : %x  , head : %x\n",root,head);
-	//head->setFather(root);
-	//head->setSon(root);
-	//printf("head data : %x \n",head->getDirectFather());
-#endif
- 	root->setSon(head);
-#if defined(CODE64)
- 	//printf("root->setSon : %x\n",root->getSon());
-#endif
- }
-
-template<class T,template <class> class _Allocator>
-void		Tree<T,_Allocator>::addRoot(TreeNode<T>* node)
-{
-	this->root->addSon(node);
-}
-template<class T,template <class> class _Allocator>
-bool		Tree<T,_Allocator>::isEmpty()const
-{
-	return !(this->root->hasSon());
-}
-template<class T,template <class> class _Allocator>
-_Allocator<TreeNode<T> >*	Tree<T,_Allocator>::getSmm()const
-{
-	return this->smm;
-}
-
-*/
 
 
 #endif //List_h__

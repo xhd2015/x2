@@ -91,7 +91,7 @@ DEPRECATED_CCFLAGS = -fpack-struct=1
 
 
 #toolchains
-CXX = g++ -fmax-errors=5
+CXX = g++ -fmax-errors=5 -finput-charset=utf8
 AS = as
 ifeq ($(DEBUG),true)
 	CXX += -g

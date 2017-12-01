@@ -203,6 +203,17 @@ public:
     static int strcmp(const char* a,const char *b);
     static int strlen(const char *a);
     static int strcopy(const char *src,char *dst,int len);
+
+    /**
+     * 返回最小值
+     * @param __SimpleType  必须是基本类型
+     * @param t1 操作数
+     * @param t2 操作数
+     */
+    template <typename __SimpleType>
+    AS_MACRO static __SimpleType min(__SimpleType t1,__SimpleType t2);
+    template <typename __SimpleType>
+    AS_MACRO static __SimpleType max(__SimpleType t1,__SimpleType t2);
     
     //math related
     static int sign(int n);

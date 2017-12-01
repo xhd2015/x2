@@ -10,7 +10,7 @@
 
 #include <libx2.h>
 //================函数宏区：使用 __attribute__((always_inline))===============
-#if defined(CODE32)||defined(CODE16)||CODE32USER
+#if defined(CODE32)||defined(CODE16)|| defined(CODE32USER)
 void Util::reboot()
 {
 
@@ -70,13 +70,15 @@ void Util::jmpDie()
 {
     __asm__("jmp .\n\t");
 }
-void jmp(int addr)
+void Util::jmp(int addr)
 {
 	__asm__ __volatile__(
 #if defined(CODE16)
 			"jmp %%ax \n\t"
 #elif defined(CODE32)
 			"jmp %%eax \n\t"
+#else
+			""
 #endif
 			:
 			:"a"(addr)
@@ -409,8 +411,23 @@ __asm__ __volatile__("":"=c"(*(char**)target)::);
 */
 #endif
 
+#if defined(CODE32)||defined(CODE64)||defined(CODE16)||defined(CODE32USER) //通用
+template <typename __SimpleType>
+__SimpleType Util::min(__SimpleType t1,__SimpleType t2)
+{
+	return (t1>t2?t2:t1);
+}
+template <typename __SimpleType>
+__SimpleType Util::max(__SimpleType t1,__SimpleType t2)
+{
+	return (t1>t2?t1:t2);
+}
+#endif
+
 
 #if defined(CODE32)||defined(CODE64)||defined(CODE32USER)
+
+
 //=======class : Queue 宏
 template <typename T>
 bool Queue<T>::isEmpty()

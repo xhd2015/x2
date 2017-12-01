@@ -190,7 +190,7 @@ protected:
 	/**
 	 * 用于baseMM的一般内存分配器
 	 */
-	KernelSmmWrapper<TreeNode<MemoryDescriptor<size_t> > > baseKsmm;
+	KernelSmmWrapper<TreeNode<MemoryDescriptor<size_t>,4> > baseKsmm;
 
 	/**
 	 *

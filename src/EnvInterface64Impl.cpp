@@ -16,21 +16,20 @@
 
 #if defined(CODE64)
 
-EnvInterface64Impl * EnvInterface64Impl::env=NULL;
-StdEnv64Impl * StdEnv64Impl::env=NULL;
 
 
 EnvInterface64Impl::EnvInterface64Impl(const char *file):
 	file(file)
 {
 }
-
-EnvInterface64Impl *EnvInterface64Impl::getInstance(const char *file)
-{
-	if(env==NULL)
-		env = new EnvInterface64Impl(file);
-	return env;
+const char* EnvInterface64Impl::getFile() const {
+	return file;
 }
+
+void EnvInterface64Impl::setFile(const char* file) {
+	this->file = file;
+}
+
 
 int EnvInterface64Impl::writeSectors(u32_t srcSeg,const u8_t* srcOff,u8_t driver,u32_t LBAlow,u32_t num,u32_t LBAhigh)
 {
@@ -164,12 +163,6 @@ u8_t* EnvInterface64Impl::malloc(size_t size)
 		{
 			return std::move(regexSplit(std::regex("/+"), s));
 		}
-	StdEnv64Impl * StdEnv64Impl::getInstance(const char *file)
-	{
-		if(env==NULL)
-			env=new StdEnv64Impl(file);
-		return env;
-	}
 	StdEnv64Impl::StdEnv64Impl(const char *file):EnvInterface64Impl(file){
 
 	}

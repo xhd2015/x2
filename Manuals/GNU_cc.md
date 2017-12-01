@@ -41,6 +41,9 @@ __asm__(
 	);
 通过数组就可以实现对该处值的引用。这可以用来解决as中不能交叉定义分区，存放数据；通过在.text区声明一个标号，然后extern外部c引用即可。
 
+# 偏特化
+c++的类支持偏特化
+
 # 扩展(动态)内联汇编
 快速参考：http://ericw.ca/notes/a-tiny-guide-to-gcc-inline-assembly.html
 常用形式：

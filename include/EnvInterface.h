@@ -20,6 +20,8 @@ private:
 		EnvInterface()=default;
 		virtual ~EnvInterface()=default;
 public:
+	// define SizeType
+
 	enum{
 		/**
 		 * 默认使用当前段
@@ -50,17 +52,22 @@ public:
 //	 __attribute__ ((format (printf, 1, 2)))
 	int printf_simple(const char *fmt,int arg0=0,int arg1=0,int arg2=0);
 	/**
+	 * 打印s的至多n个字符
 	 * @param s 要打印的字符串
 	 * @param n 打印的个数
 	 * @return 返回打印的字符个数
 	 */
 	int printf_sn(const char *s,size_t n);
+
+	/**
+	 * 内存管理函数
+	 */
 	u8_t* malloc(size_t size);
 	void  free(u8_t* p);
 
 
 	/**
-	 * this can be ignored if there should nothing happens
+	 * 系统终止函数，这应当改变程序的流程
 	 */
 	void systemAbort(const char *msg,int code);
 	/**

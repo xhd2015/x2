@@ -18,8 +18,8 @@ __asm__(".code32 \n\t");
 
 //=============template ininstantiate
 #if defined(CODE32)
-	template class MemoryManager<SimpleMemoryManager>;
-	template class MemoryManager<KernelSmmWrapper>;
+	template class MemoryManager<SimpleMemoryManager,u32_t>;
+	template class MemoryManager<KernelSmmWrapper,u32_t>;
 #elif defined(CODE64)
 
 #include <cstdio>
@@ -50,16 +50,17 @@ __asm__(".code32 \n\t");
 //#endif
 
 //============class : MemoryManager
-template<template <class> class _DescriptorAllocator,typename __SizeType>
-MemoryManager<_DescriptorAllocator,__SizeType>::MemoryManager(_DescriptorAllocator<TreeNode<__MemoryDescriptor> > *smm)
+template<template <class> class _DescriptorAllocator,typename __SizeType,int __Alignment>
+MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::
+MemoryManager(__Allocator *smm)
 :
 Tree<MemoryDescriptor<__SizeType>,_DescriptorAllocator>(smm) //调用父类的构造函数
 {
 
 }
-template<template <class> class _DescriptorAllocator,typename __SizeType>
-MemoryManager<_DescriptorAllocator,__SizeType>::MemoryManager(
-		_DescriptorAllocator<TreeNode<__MemoryDescriptor> > *smm,__SizeType start,__SizeType len,bool fatherAllocable)
+template<template <class> class _DescriptorAllocator,typename __SizeType,int __Alignment>
+MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::MemoryManager(
+		__Allocator *smm,__SizeType start,__SizeType len,bool fatherAllocable)
 :MemoryManager(smm)
 //:dbg1("MemoryManager 1\n")
 {
@@ -70,9 +71,9 @@ MemoryManager<_DescriptorAllocator,__SizeType>::MemoryManager(
 	//Kernel::printer->move(-40);
 
 
-	TreeNode<__MemoryDescriptor> *head=smm->getNew();
+	__TreeNode *head=smm->getNew();
 
-	new (head) TreeNode<__MemoryDescriptor>(__MemoryDescriptor(start,len,fatherAllocable));
+	new (head) __TreeNode(__MemoryDescriptor(start,len,fatherAllocable));
 
 	this->setHead(head);
 
@@ -85,17 +86,17 @@ MemoryManager<_DescriptorAllocator,__SizeType>::MemoryManager(
     //printf("%x ~ %x\n",this->getHead()->getData().getStart(),this->getHead()->getData().getLimit());
 #endif
 }
-template<template <class> class _DescriptorAllocator,typename __SizeType>
-MemoryManager<_DescriptorAllocator,__SizeType>::
-MemoryManager(_DescriptorAllocator<TreeNode<__MemoryDescriptor> > *smm,__SizeType start,__SizeType len,
+template<template <class> class _DescriptorAllocator,typename __SizeType,int __Alignment>
+MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::
+MemoryManager(__Allocator *smm,__SizeType start,__SizeType len,
 		__SizeType usedList[][2],__SizeType usedLen,bool fatherAllocable):MemoryManager(smm,start,len,fatherAllocable)
 {
 	for(size_t i=0;i<usedLen;i++)
 		mnew(usedList[i][0], usedList[i][1]);
 }
 
-template<template <class> class _DescriptorAllocator,typename __SizeType>
-MemoryManager<_DescriptorAllocator,__SizeType>::~MemoryManager()
+template<template <class> class _DescriptorAllocator,typename __SizeType,int __Alignment>
+MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::~MemoryManager()
 {
     //这里不进行真正的撤销，只是把管理器所使用的节点撤销
     if(this->getHead())
@@ -105,11 +106,11 @@ MemoryManager<_DescriptorAllocator,__SizeType>::~MemoryManager()
     this->smm->withdraw(this->root);
 }
 
-template<template <class> class _DescriptorAllocator,typename __SizeType>
-void MemoryManager<_DescriptorAllocator,__SizeType>::withdrawToParent()
+template<template <class> class _DescriptorAllocator,typename __SizeType,int __Alignment>
+void MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::withdrawToParent()
 {
     //回收后进行两点之间的检查，如果能够合并就进行合并
-    TreeNode<__MemoryDescriptor> *head=this->getHead();
+    __TreeNode *head=this->getHead();
     if(head)
     {
         //顶级管理器和非顶级管理器操作相同
@@ -134,14 +135,14 @@ void MemoryManager<_DescriptorAllocator,__SizeType>::withdrawToParent()
 *       means avlNode,start,len should be derived from the inner method
 */
 
-template<template <class> class _DescriptorAllocator,typename __SizeType>
-TreeNode<typename MemoryManager<_DescriptorAllocator,__SizeType>::__MemoryDescriptor> *
-MemoryManager<_DescriptorAllocator,__SizeType>::allocOutNode(TreeNode<__MemoryDescriptor> *avlNode,__SizeType start,__SizeType len)
+template<template <class> class _DescriptorAllocator,typename __SizeType,int __Alignment>
+typename MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::__TreeNode*
+MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::allocOutNode(__TreeNode *avlNode,__SizeType start,__SizeType len)
 {
 
 //	Util::printf("in mm allocOut for %x,%x\n",start,len);
     // Test::dumpMemoryData(avlNode->getData());
-    TreeNode<__MemoryDescriptor> *newnode=NULL;
+    __TreeNode *newnode=NULL;
     if(avlNode)
     {
         __SizeType len1=(__SizeType)(start-avlNode->getData().getStart());
@@ -172,7 +173,7 @@ MemoryManager<_DescriptorAllocator,__SizeType>::allocOutNode(TreeNode<__MemoryDe
             avlNode->getData().setLimit(len1);
             newnode = this->smm->getNew();
             newnode->initToNull();
-             new (newnode) TreeNode<__MemoryDescriptor>(__MemoryDescriptor(start,len,false));//新建一个node，不可用于分配
+             new (newnode) __TreeNode(__MemoryDescriptor(start,len,false));//新建一个node，不可用于分配
                                             //将这个节点加入以这个点为根的树中
             avlNode->insertNext(newnode);//中间的节点，已经分配
         }else{//直接取代前面的点
@@ -187,11 +188,11 @@ MemoryManager<_DescriptorAllocator,__SizeType>::allocOutNode(TreeNode<__MemoryDe
         if(len2>0)//后面有剩余
         {
 //        	Util::printf("before smm new\n");
-        	TreeNode<__MemoryDescriptor> *newnodeEnd=this->smm->getNew();
+        	__TreeNode *newnodeEnd=this->smm->getNew();
         	newnodeEnd->initToNull();
 
 //        	Util::printf("after smm new \n");
-            new (newnodeEnd) TreeNode<__MemoryDescriptor>(__MemoryDescriptor(start+len,len2));
+            new (newnodeEnd) __TreeNode(__MemoryDescriptor(start+len,len2));
 //            Util::printf("newnodeend is %x,%x,%d\n",newnodeEnd->getData().getStart(),newnodeEnd->getData().getLimit(),newnodeEnd->getData().isAllocable());
 
             newnode->insertNext(newnodeEnd);
@@ -209,21 +210,21 @@ MemoryManager<_DescriptorAllocator,__SizeType>::allocOutNode(TreeNode<__MemoryDe
 *       exactNode==NULL
 */
 
-template<template <class> class _DescriptorAllocator,typename __SizeType>
-void MemoryManager<_DescriptorAllocator,__SizeType>::withdrawNode(TreeNode<__MemoryDescriptor> *exactNode)
+template<template <class> class _DescriptorAllocator,typename __SizeType,int __Alignment>
+void MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::withdrawNode(__TreeNode *exactNode)
 {
     //先释放其所有子节点
-    TreeNode<__MemoryDescriptor> *p=exactNode->getSon();
+    __TreeNode *p=exactNode->getSon();
     while(p)
     {
         this->free(p);
-        p=(TreeNode<__MemoryDescriptor>*)p->getNext();
+        p=(__TreeNode*)p->getNext();
     }
 //    Util::printf("in mm,withdrawNode \n");
     exactNode->setSon(NULL);//free完毕
 
     //开始合并
-    TreeNode<__MemoryDescriptor> *prev=(TreeNode<__MemoryDescriptor>*)exactNode->getPrevious();
+    __TreeNode *prev=(__TreeNode*)exactNode->getPrevious();
     if(prev && prev->getData().isAllocable() && exactNode->getData().getStart() - prev->getData().getStart() == prev->getData().getLimit() )
     {
     //	Util::printStr("combine..");
@@ -235,7 +236,7 @@ void MemoryManager<_DescriptorAllocator,__SizeType>::withdrawNode(TreeNode<__Mem
         prev->getData().setAllocable(1);
     }//OK,the previous node cheking is done
 
-    TreeNode<__MemoryDescriptor> *nxt=(TreeNode<__MemoryDescriptor>*)prev->getNext();
+    __TreeNode *nxt=(__TreeNode*)prev->getNext();
     if(nxt && nxt->getData().isAllocable() && nxt->getData().getStart() - prev->getData().getStart() == prev->getData().getLimit() )
     {
         prev->getData().setLimit(prev->getData().getLimit() + nxt->getData().getLimit() );
@@ -260,13 +261,13 @@ void MemoryManager<_DescriptorAllocator,__SizeType>::withdrawNode(TreeNode<__Mem
     }
 
 }
-template<template<class > class _DescriptorAllocator,typename __SizeType>
-char MemoryManager<_DescriptorAllocator,__SizeType>::findExtend(__SizeType start,
-		__SizeType size, __SizeType extsize,TreeNode<__MemoryDescriptor> * &rtnode) const
+template<template<class > class _DescriptorAllocator,typename __SizeType,int __Alignment>
+u8_t MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::findExtend(__SizeType start,
+		__SizeType size, __SizeType extsize,__TreeNode * &rtnode) const
 {
 //	Util::printf("in findExtend,start=%x,size=%x,extsize=%d\n",start,size,extsize);
 	if(extsize==0)return false;
-	TreeNode<__MemoryDescriptor>* found=This::findFirstStart(this->getHead(), start + size, extsize);/*starts at start or upper,hold size or more*/
+	__TreeNode* found=This::findFirstStart(this->getHead(), start + size, extsize);/*starts at start or upper,hold size or more*/
 	if(found && (found->getData().getStart() - start == size))//exactly starts at start + size
 	{
 		rtnode=found;
@@ -287,9 +288,9 @@ char MemoryManager<_DescriptorAllocator,__SizeType>::findExtend(__SizeType start
 }
 
 DEVEL_UNTESTED(Douglas_Fulton_Shaw)
-template<template <class> class _DescriptorAllocator,typename __SizeType>
-MemoryManager<_DescriptorAllocator,__SizeType>
-MemoryManager<_DescriptorAllocator,__SizeType>::allocFreeStart(__SizeType start,__SizeType len) {
+template<template <class> class _DescriptorAllocator,typename __SizeType,int __Alignment>
+MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>
+MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::allocFreeStart(__SizeType start,__SizeType len) {
     // Util::printStr("Enter allocFreeStart: ");
     
     MemoryManager<_DescriptorAllocator,__SizeType>          spaces(this->smm);
@@ -298,14 +299,16 @@ MemoryManager<_DescriptorAllocator,__SizeType>::allocFreeStart(__SizeType start,
         spaces.setNull();//ok
     }else{
         this->copyOnAllocation(this->getHead());//保证复制了父节点(当父节点可用于分配但是子节点中没有任何一个节点时，调用此方法）
-        TreeNode<__MemoryDescriptor> *firstNode=MemoryManager<_DescriptorAllocator,__SizeType>::findFirstStart(this->getHead(),start,len);//ok,the information of head is ignored,it's full information is stored in it's sons
+        __TreeNode *firstNode=MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::findFirstStart(this->getHead(),start,len);//ok,the information of head is ignored,it's full information is stored in it's sons
         spaces.setHead(this->allocOutNode(firstNode,start,len));//either not found or found,set the new manager
     }
     return spaces;
 }
 
-template<template <class> class _DescriptorAllocator,typename __SizeType>
-MemoryManager<_DescriptorAllocator,__SizeType> MemoryManager<_DescriptorAllocator,__SizeType>::allocFree(__SizeType len) {
+template<template <class> class _DescriptorAllocator,typename __SizeType,int __Alignment>
+MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>
+MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::
+allocFree(__SizeType len) {
     
     MemoryManager<_DescriptorAllocator,__SizeType>          spaces(this->smm);
     if(len<=0 || this->isNullManager() )
@@ -313,18 +316,19 @@ MemoryManager<_DescriptorAllocator,__SizeType> MemoryManager<_DescriptorAllocato
         spaces.setNull();//ok
     }else{
         this->copyOnAllocation(this->getHead());//保证复制了父节点
-        TreeNode<__MemoryDescriptor> *firstNode=MemoryManager<_DescriptorAllocator,__SizeType>::findFirstLen(this->getHead(),len);//ok,the information of head is ignored,it's full information is stored in it's sons
+        __TreeNode *firstNode=MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::findFirstLen(this->getHead(),len);//ok,the information of head is ignored,it's full information is stored in it's sons
         spaces.setHead(allocOutNode(firstNode,firstNode->getData().getStart(),len));//either not found or found,set the new manager
     }
     return spaces;
 }
 
-template<template <class> class _DescriptorAllocator,typename __SizeType>
-void* MemoryManager<_DescriptorAllocator,__SizeType>::mnew(__SizeType start,__SizeType size)
+template<template <class> class _DescriptorAllocator,typename __SizeType,int __Alignment>
+void* MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::
+mnew(__SizeType start,__SizeType size)
 {
 
     this->copyOnAllocation(this->getHead());//保证复制了父节点
-    TreeNode<__MemoryDescriptor> *found=MemoryManager<_DescriptorAllocator,__SizeType>::findFirstStart(this->getHead(),start,size);
+    __TreeNode *found=MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::findFirstStart(this->getHead(),start,size);
 #if defined(CODE64)
 //    printf("MemoryManager mnew\n");
 //    if(found==NULL)
@@ -336,7 +340,7 @@ void* MemoryManager<_DescriptorAllocator,__SizeType>::mnew(__SizeType start,__Si
 #endif
     if(found)
     {
-        TreeNode<__MemoryDescriptor> *alloced = allocOutNode(found,start,size);
+        __TreeNode *alloced = allocOutNode(found,start,size);
         if(alloced)
         {
             return (void*)(alloced->getData().getStart());
@@ -345,16 +349,16 @@ void* MemoryManager<_DescriptorAllocator,__SizeType>::mnew(__SizeType start,__Si
     return NULL;    
 }
 
-template<template <class> class _DescriptorAllocator,typename __SizeType>
-void* MemoryManager<_DescriptorAllocator,__SizeType>::mnew(__SizeType size) {
+template<template <class> class _DescriptorAllocator,typename __SizeType,int __Alignment>
+void* MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::mnew(__SizeType size) {
 
     this->copyOnAllocation(this->getHead());//保证复制了父节点
-    TreeNode<__MemoryDescriptor> *found=MemoryManager<_DescriptorAllocator,__SizeType>::findFirstLen(this->getHead(),size);
+    __TreeNode *found=MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::findFirstLen(this->getHead(),size);
 
     if(found)
     {
 //    	Util::printf("found is ok.\n");
-        TreeNode<__MemoryDescriptor> *alloced = allocOutNode(found,found->getData().getStart(),size);
+        __TreeNode *alloced = allocOutNode(found,found->getData().getStart(),size);
         if(alloced)
         {
             return (void*)(alloced->getData().getStart());
@@ -362,17 +366,17 @@ void* MemoryManager<_DescriptorAllocator,__SizeType>::mnew(__SizeType size) {
     }
     return NULL;
 }
-template<template <class> class _DescriptorAllocator,typename __SizeType>
-void* MemoryManager<_DescriptorAllocator,__SizeType>::mnewAlign(__SizeType size,__SizeType alignment) {
+template<template <class> class _DescriptorAllocator,typename __SizeType,int __Alignment>
+void* MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::mnewAlign(__SizeType size,__SizeType alignment) {
 
     this->copyOnAllocation(this->getHead());//保证复制了父节点
     size_t extra;
-    TreeNode<__MemoryDescriptor> *found=MemoryManager<_DescriptorAllocator,__SizeType>::findFirstLenAlign(this->getHead(),size,extra,alignment);
+    __TreeNode *found=MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::findFirstLenAlign(this->getHead(),size,extra,alignment);
 
     if(found)
     {
 //    	Util::printf("found is ok.\n");
-        TreeNode<__MemoryDescriptor> *alloced = allocOutNode(found,found->getData().getStart()+extra,size);
+        __TreeNode *alloced = allocOutNode(found,found->getData().getStart()+extra,size);
         if(alloced)
         {
             return (void*)(alloced->getData().getStart());
@@ -380,13 +384,13 @@ void* MemoryManager<_DescriptorAllocator,__SizeType>::mnewAlign(__SizeType size,
     }
     return NULL;
 }
-template<template <class> class _DescriptorAllocator,typename __SizeType>
-void*   MemoryManager<_DescriptorAllocator,__SizeType>::extend(__SizeType start,__SizeType size,int extsize,char *realBase,bool moveData)
+template<template <class> class _DescriptorAllocator,typename __SizeType,int __Alignment>
+void*   MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::extend(__SizeType start,__SizeType size,int extsize,char *realBase,bool moveData)
 {
 //	Util::printf("extend arg: start,size,extsize = %d,%d,%d\n",start,size,extsize);
 	if(extsize==0)return (char*)start;
     this->copyOnAllocation(this->getHead());//保证复制了父节点
-    TreeNode<__MemoryDescriptor> *found;
+    __TreeNode *found;
     if(extsize < 0)
     {
     	found=This::locateForDelete(this->getHead(), start, size, false);
@@ -451,12 +455,12 @@ void*   MemoryManager<_DescriptorAllocator,__SizeType>::extend(__SizeType start,
 *
 */
 
-template<template <class> class _DescriptorAllocator,typename __SizeType>
-void MemoryManager<_DescriptorAllocator,__SizeType>::mdelete(void* p, __SizeType size) {
+template<template <class> class _DescriptorAllocator,typename __SizeType,int __Alignment>
+void MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::mdelete(void* p, __SizeType size) {
 #if defined(CODE64)
 //	printf("in mdelete,request for %x,%x\n",p,size);
 #endif
-    TreeNode<__MemoryDescriptor>* toDeleteNode=This::locateForDelete(this->getHead(),(__SizeType)p,size,0);
+    __TreeNode* toDeleteNode=This::locateForDelete(this->getHead(),(__SizeType)p,size,0);
 #if defined(CODE64)
 //    if(toDeleteNode==NULL)
 //    {
@@ -472,10 +476,10 @@ void MemoryManager<_DescriptorAllocator,__SizeType>::mdelete(void* p, __SizeType
     }
 }
 
-template<template <class> class _DescriptorAllocator,typename __SizeType>
-void MemoryManager<_DescriptorAllocator,__SizeType>::mdelete(void *p)
+template<template <class> class _DescriptorAllocator,typename __SizeType,int __Alignment>
+void MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::mdelete(void *p)
 {
-    TreeNode<__MemoryDescriptor>* toDeleteNode=MemoryManager<_DescriptorAllocator,__SizeType>::locateForDeleteStart(this->getHead(),(__SizeType)p,0);
+    __TreeNode* toDeleteNode=MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::locateForDeleteStart(this->getHead(),(__SizeType)p,0);
     if(toDeleteNode)//if found it
     {
         //Util::printStr("Found delete.   ");
@@ -492,12 +496,12 @@ void MemoryManager<_DescriptorAllocator,__SizeType>::mdelete(void *p)
 */
 DEVEL_UNTESTED(Douglas_Fulton_Shaw) DEVEL_COMPLETED(Douglas_Fulton_Shaw) DEVEL_LAST(Douglas_Fulton_Shaw,2017-02-21 23:27:31) DEVEL_AUTHOR(Douglas_Fulton_Shaw) DEVEL_DEP(MemoryManager::getData,MemoryDescriptor::getStart)
 
-template<template <class> class _DescriptorAllocator,typename __SizeType>
-TreeNode<typename MemoryManager<_DescriptorAllocator,__SizeType>::__MemoryDescriptor>*
-MemoryManager<_DescriptorAllocator,__SizeType>::findFirstStart(
-		TreeNode<__MemoryDescriptor>* loc, __SizeType start,__SizeType len)
+template<template <class> class _DescriptorAllocator,typename __SizeType,int __Alignment>
+typename MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::__TreeNode *
+MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::findFirstStart(
+		__TreeNode* loc, __SizeType start,__SizeType len)
 {
-	TreeNode<__MemoryDescriptor>* p=loc->getSon();
+	__TreeNode* p=loc->getSon();
   
     // if(p)
     // {
@@ -533,11 +537,11 @@ MemoryManager<_DescriptorAllocator,__SizeType>::findFirstStart(
 	return p; //NULL or first valid section
 }
 
-template<template <class> class _DescriptorAllocator,typename __SizeType>
-TreeNode<typename MemoryManager<_DescriptorAllocator,__SizeType>::__MemoryDescriptor>*
-MemoryManager<_DescriptorAllocator,__SizeType>::findFirstLen(
-		TreeNode<__MemoryDescriptor>* loc, __SizeType len) {
-	TreeNode<__MemoryDescriptor> *p=loc->getSon();
+template<template <class> class _DescriptorAllocator,typename __SizeType,int __Alignment>
+typename MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::__TreeNode *
+MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::findFirstLen(
+		__TreeNode* loc, __SizeType len) {
+	__TreeNode *p=loc->getSon();
 	if(p && p->getData().isAllocable()==false)
 	{
 		p=This::nextAllocable(p);
@@ -551,12 +555,12 @@ MemoryManager<_DescriptorAllocator,__SizeType>::findFirstLen(
 /**
  * find one such has an alignment and enough space
  */
-template<template <class> class _DescriptorAllocator,typename __SizeType>
-TreeNode<typename MemoryManager<_DescriptorAllocator,__SizeType>::__MemoryDescriptor>*
- MemoryManager<_DescriptorAllocator,__SizeType>::findFirstLenAlign(
-		TreeNode<__MemoryDescriptor>* loc, __SizeType len,__SizeType &extra,__SizeType alignment) {
+template<template <class> class _DescriptorAllocator,typename __SizeType,int __Alignment>
+typename MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::__TreeNode *
+ MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::findFirstLenAlign(
+		__TreeNode* loc, __SizeType len,__SizeType &extra,__SizeType alignment) {
 	if(alignment==0)return NULL;
-	TreeNode<__MemoryDescriptor> *p=loc->getSon();
+	__TreeNode *p=loc->getSon();
 	if(p && p->getData().isAllocable()==false)
 	{
 		p=This::nextAllocable(p);
@@ -577,19 +581,19 @@ TreeNode<typename MemoryManager<_DescriptorAllocator,__SizeType>::__MemoryDescri
     }
 	return NULL;
 }
-template<template <class> class _DescriptorAllocator,typename __SizeType>
-int MemoryManager<_DescriptorAllocator,__SizeType>::isNullManager() {
+template<template <class> class _DescriptorAllocator,typename __SizeType,int __Alignment>
+int MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::isNullManager() {
 	return this->getHead()==NULL;
 }
 
-template<template <class> class _DescriptorAllocator,typename __SizeType>
-void  MemoryManager<_DescriptorAllocator,__SizeType>::setNull()
+template<template <class> class _DescriptorAllocator,typename __SizeType,int __Alignment>
+void  MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::setNull()
 {
     this->setHead(NULL);
 }
 #if defined(CODE32)
-template<template <class> class _DescriptorAllocator,typename __SizeType>
-void MemoryManager<_DescriptorAllocator,__SizeType>::dumpInfo(Printer *p)const
+template<template <class> class _DescriptorAllocator,typename __SizeType,int __Alignment>
+void MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::dumpInfo(Printer *p)const
 {
 	if(p!=NULL)
 	{
@@ -614,24 +618,24 @@ void MemoryManager<_DescriptorAllocator,__SizeType>::dumpInfo(Printer *p)const
 #endif
 
 //确保这条线段是位于两个分割点的缝隙之间，如果不是，返回NULL
-template<template <class> class _DescriptorAllocator,typename __SizeType>
-TreeNode<typename MemoryManager<_DescriptorAllocator,__SizeType>::__MemoryDescriptor>*
-MemoryManager<_DescriptorAllocator,__SizeType>::locateForInsertation(
-		TreeNode<__MemoryDescriptor>* loc, TreeNode<__MemoryDescriptor>* son) {
+template<template <class> class _DescriptorAllocator,typename __SizeType,int __Alignment>
+typename MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::__TreeNode *
+MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::locateForInsertation(
+		__TreeNode* loc, __TreeNode* son) {
     if( loc==NULL || son==NULL)return NULL;
-    TreeNode<__MemoryDescriptor>* p=loc;
+    __TreeNode* p=loc;
     __SizeType start=son->getData().getStart();
    __SizeType len=son->getData().getLimit();
     
 	while(p && start - p->getData().getStart() < p->getData().getLimit() )
 	{
-		p=(TreeNode<__MemoryDescriptor>*)p->getNext();
+		p=(__TreeNode*)p->getNext();
 	}
 	if(p)
     {
         if(p->getNext())
         {
-            TreeNode<__MemoryDescriptor> *forward=(TreeNode<__MemoryDescriptor>*)p->getNext();
+            __TreeNode *forward=(__TreeNode*)p->getNext();
             
             // size_t - int = size_t
             if( (__SizeType)(forward->getData().getStart() - start) >= len)
@@ -650,15 +654,15 @@ MemoryManager<_DescriptorAllocator,__SizeType>::locateForInsertation(
 /**
 * find for its sons which is exactly the same with passed arguments.
 */
-template<template <class> class _DescriptorAllocator,typename __SizeType>
-TreeNode<typename MemoryManager<_DescriptorAllocator,__SizeType>::__MemoryDescriptor>*
- MemoryManager<_DescriptorAllocator,__SizeType>::locateForDelete(TreeNode<__MemoryDescriptor>* loc,__SizeType start,__SizeType len,bool allocable)
+template<template <class> class _DescriptorAllocator,typename __SizeType,int __Alignment>
+typename MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::__TreeNode *
+ MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::locateForDelete(__TreeNode* loc,__SizeType start,__SizeType len,bool allocable)
 {
     if(loc==NULL||len==0)return NULL;
-    TreeNode<__MemoryDescriptor>* p=loc->getSon();
+    __TreeNode* p=loc->getSon();
 
     while(p && p->getData().getStart() < start)
-            p=(TreeNode<__MemoryDescriptor>*)p->getNext();
+            p=(__TreeNode*)p->getNext();
     if(p && p->getData().getStart() == start && p->getData().getLimit()==len && p->getData().isAllocable()==allocable)
     {
         return p;
@@ -671,15 +675,15 @@ TreeNode<typename MemoryManager<_DescriptorAllocator,__SizeType>::__MemoryDescri
 /**
 * find for its sons which is exactly the same with passed arguments.
 */
-template<template <class> class _DescriptorAllocator,typename __SizeType>
-TreeNode<typename MemoryManager<_DescriptorAllocator,__SizeType>::__MemoryDescriptor>*
- MemoryManager<_DescriptorAllocator,__SizeType>::locateForDeleteStart(TreeNode<__MemoryDescriptor>* loc,__SizeType start,bool allocable)
+template<template <class> class _DescriptorAllocator,typename __SizeType,int __Alignment>
+typename MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::__TreeNode *
+ MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::locateForDeleteStart(__TreeNode* loc,__SizeType start,bool allocable)
 {
     if(loc==NULL)return NULL;
-    TreeNode<__MemoryDescriptor>* p=loc->getSon();
+    __TreeNode* p=loc->getSon();
 
     while(p && p->getData().getStart() < start)
-            p=(TreeNode<__MemoryDescriptor>*)p->getNext();
+            p=(__TreeNode*)p->getNext();
     if(p && p->getData().getStart() == start && p->getData().isAllocable()==allocable)
     {
         return p;
@@ -691,10 +695,10 @@ TreeNode<typename MemoryManager<_DescriptorAllocator,__SizeType>::__MemoryDescri
 
 
 
-template<template <class> class _DescriptorAllocator,typename __SizeType>
-int MemoryManager<_DescriptorAllocator,__SizeType>::addToTree(TreeNode<__MemoryDescriptor>* root,
-		TreeNode<__MemoryDescriptor>* son) {
-            TreeNode<__MemoryDescriptor> *location=MemoryManager<_DescriptorAllocator,__SizeType>::locateForInsertation(root,son);
+template<template <class> class _DescriptorAllocator,typename __SizeType,int __Alignment>
+int MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::addToTree(__TreeNode* root,
+		__TreeNode* son) {
+            __TreeNode *location=MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::locateForInsertation(root,son);
             if(location)
             {
                 
@@ -705,9 +709,9 @@ int MemoryManager<_DescriptorAllocator,__SizeType>::addToTree(TreeNode<__MemoryD
 /**
 * head mustn't be NULL!!
 */
-template<template <class> class _DescriptorAllocator,typename __SizeType>
-TreeNode<typename MemoryManager<_DescriptorAllocator,__SizeType>::__MemoryDescriptor>*
-MemoryManager<_DescriptorAllocator,__SizeType>::copyOnAllocation(TreeNode<__MemoryDescriptor> *head)
+template<template <class> class _DescriptorAllocator,typename __SizeType,int __Alignment>
+typename MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::__TreeNode *
+MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::copyOnAllocation(__TreeNode *head)
 {
     if(!head->getSon())
     {
@@ -717,9 +721,9 @@ MemoryManager<_DescriptorAllocator,__SizeType>::copyOnAllocation(TreeNode<__Memo
         //Util::printStr("copyOnAllocation -- ");
         //**********
 
-        TreeNode<__MemoryDescriptor> *newnode=this->smm->getNew();
+        __TreeNode *newnode=this->smm->getNew();
         newnode->initToNull();
-        new (newnode) TreeNode<__MemoryDescriptor>(__MemoryDescriptor(data.getStart(),data.getLimit(),!data.isAllocable()));
+        new (newnode) __TreeNode(__MemoryDescriptor(data.getStart(),data.getLimit(),!data.isAllocable()));
 
         newnode->setFather(head);
         head->setSon(newnode);
@@ -733,51 +737,51 @@ MemoryManager<_DescriptorAllocator,__SizeType>::copyOnAllocation(TreeNode<__Memo
 
 DEVEL_UNTESTED(Douglas_Fulton_Shaw)
 DEVEL_AUTHOR(Douglas_Fulton_Shaw)
-template<template <class> class _DescriptorAllocator,typename __SizeType>
-TreeNode<typename MemoryManager<_DescriptorAllocator,__SizeType>::__MemoryDescriptor>*
-MemoryManager<_DescriptorAllocator,__SizeType>::nextAllocable(
-		TreeNode<__MemoryDescriptor>* node) {
+template<template <class> class _DescriptorAllocator,typename __SizeType,int __Alignment>
+typename MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::__TreeNode *
+MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::nextAllocable(
+		__TreeNode* node) {
         if(node)
         {
             do{
-                node=(TreeNode<__MemoryDescriptor>*)node->getNext();
+                node=(__TreeNode*)node->getNext();
             }while( node && (node->getData().isAllocable()==false) );
         }
         return node;
 }
 
 //==========class:LinearSourceManager
-template <class _LinearSourceDescriptor,template <class> class _NodeAllocator,typename __SizeType>
-LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator ,__SizeType>::LinearSourceManager()
+template <class _LinearSourceDescriptor,template <class> class _NodeAllocator,typename __SizeType,int __Alignment>
+LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator ,__SizeType,__Alignment>::LinearSourceManager()
 {
 }
 
-template <class _LinearSourceDescriptor,template <class> class _NodeAllocator,typename __SizeType>
-LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator,__SizeType >::LinearSourceManager(_NodeAllocator<ListNode<_LinearSourceDescriptor> > *smm,
+template <class _LinearSourceDescriptor,template <class> class _NodeAllocator,typename __SizeType,int __Alignment>
+LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator ,__SizeType,__Alignment>::LinearSourceManager(__Allocator *smm,
     __SizeType start,__SizeType size):
 LocateableLinkedList<_LinearSourceDescriptor,Locator<_LinearSourceDescriptor>::DISCARD, _NodeAllocator,__SizeType>(smm),
 space(_LinearSourceDescriptor(start,size))
 {
 	auto node=smm->getNew();
 	node->initToNull();
-	this->appendHead( new(node) ListNode<_LinearSourceDescriptor>(space));
+	this->appendHead( new(node) __ListNode(space));
 
 }
 
-template <class _LinearSourceDescriptor,template <class> class _NodeAllocator,typename __SizeType>
-LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator,__SizeType >::~LinearSourceManager()
+template <class _LinearSourceDescriptor,template <class> class _NodeAllocator,typename __SizeType,int __Alignment>
+LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator,__SizeType,__Alignment>::~LinearSourceManager()
 {
 
 }
 
-template <class _LinearSourceDescriptor,template <class> class _NodeAllocator,typename __SizeType>
-void* LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator ,__SizeType>::mnew(__SizeType start,__SizeType size)
+template <class _LinearSourceDescriptor,template <class> class _NodeAllocator,typename __SizeType,int __Alignment>
+void* LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator ,__SizeType,__Alignment>::mnew(__SizeType start,__SizeType size)
 {
     if(!this->checkRange(start,size))return NULL;
 #if defined(CODE64)
 //    printf("not null,request for (%x,%x)\n",start,size);
 #endif
-    ListNode<_LinearSourceDescriptor> *found=Father::findFirstStartLen(this->getHead(),start,size);
+    __ListNode *found=Super::findFirstStartLen(this->getHead(),start,size);
 #if defined(CODE64)
 //    if(found)
 //    {
@@ -798,10 +802,10 @@ void* LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator ,__SizeType>::m
     return NULL;  
 }
  
-template <class _LinearSourceDescriptor,template <class> class _NodeAllocator,typename __SizeType>
-void* LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator,__SizeType >::mnew(__SizeType size)
+template <class _LinearSourceDescriptor,template <class> class _NodeAllocator,typename __SizeType,int __Alignment>
+void* LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator,__SizeType,__Alignment>::mnew(__SizeType size)
 {
-    ListNode<_LinearSourceDescriptor> *found=Father::findFirstLen(this->getHead(),size);
+    __ListNode *found=Super::findFirstLen(this->getHead(),size);
     Util::printf("in lm,mnew for len %d\n",size);
     if(found)
     {
@@ -815,8 +819,8 @@ void* LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator,__SizeType >::m
     Util::printf("found is NULL\n");
     return NULL;
 }
-template <class _LinearSourceDescriptor,template <class> class _NodeAllocator,typename __SizeType>
-void* LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator,__SizeType >::extend(
+template <class _LinearSourceDescriptor,template <class> class _NodeAllocator,typename __SizeType,int __Alignment>
+void* LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator,__SizeType,__Alignment>::extend(
 		__SizeType start,__SizeType size,bool addOrReduce,__SizeType extsize,char *realBase,bool moveData)
 {
 
@@ -830,13 +834,13 @@ void* LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator,__SizeType >::e
     }
 
     // 下面开始处理真正的扩展类型
-    NodeType *found=Father::findFirstStartLen(this->getHead(),start+size,extsize);
+    NodeType *found=Super::findFirstStartLen(this->getHead(),start+size,extsize);
     if(found && found->getData().getStart()==start + size)
     {
     		this->allocOutNode(found, start+size, extsize);
     		return (char*)start;
     }else{
-    	found = Father::findFirstLen(this->getHead(), size + extsize);
+    	found = Super::findFirstLen(this->getHead(), size + extsize);
     	if(found)
     	{
     		if(moveData)
@@ -858,11 +862,11 @@ void* LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator,__SizeType >::e
 }
 
     
-template <class _LinearSourceDescriptor,template <class> class _NodeAllocator,typename __SizeType>
-void LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator ,__SizeType>::mdelete(void* p,__SizeType size)
+template <class _LinearSourceDescriptor,template <class> class _NodeAllocator,typename __SizeType,int __Alignment>
+void LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator ,__SizeType,__Alignment>::mdelete(void* p,__SizeType size)
 {
     if(!this->checkRange((__SizeType)p,size))return;
-    ListNode<_LinearSourceDescriptor> *found=Father::findFirstStartForInsert(this->getHead(),(__SizeType)p);
+    __ListNode *found=Super::findFirstStartForInsert(this->getHead(),(__SizeType)p);
     if(found)
     {
         int diff=found->getData().getStart()-(__SizeType)p;
@@ -875,9 +879,9 @@ void LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator ,__SizeType>::md
         }else{
             if(diff>0)
             {
-                found->insertPrevious(new (this->smm->getNew()) ListNode<_LinearSourceDescriptor>(_LinearSourceDescriptor((__SizeType)p,size)) );
+                found->insertPrevious(new (this->smm->getNew()) __ListNode(_LinearSourceDescriptor((__SizeType)p,size)) );
             }else{
-                found->insertNext(new (this->smm->getNew()) ListNode<_LinearSourceDescriptor>(_LinearSourceDescriptor((__SizeType)p,size)) );
+                found->insertNext(new (this->smm->getNew()) __ListNode(_LinearSourceDescriptor((__SizeType)p,size)) );
             }
         }
     }else{//empty list
@@ -885,9 +889,9 @@ void LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator ,__SizeType>::md
     }
 
 }
-template<class _LinearSourceDescriptor, template<class > class _NodeAllocator,typename __SizeType>
- bool LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator,__SizeType>::mnewLinked(__SizeType size,
-		 LinkedList<_LinearSourceDescriptor, _NodeAllocator> &list,__SizeType eachSectionExtraSize)
+template <class _LinearSourceDescriptor,template <class> class _NodeAllocator,typename __SizeType,int __Alignment>
+ bool LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator ,__SizeType,__Alignment>::mnewLinked(__SizeType size,
+		 __LinkedList&list,__SizeType eachSectionExtraSize)
 {
 //	printf("in mnewlinked,size is %d,this space is %d,%d\n",size,this->space.getStart(),this->space.getLimit());
 	NodeType * p=this->getHead(),*lastAvl=NULL;
@@ -947,8 +951,9 @@ template<class _LinearSourceDescriptor, template<class > class _NodeAllocator,ty
 
 
 
-template<class _LinearSourceDescriptor, template<class > class _NodeAllocator,typename __SizeType>
-void  LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator,__SizeType>::mdeleteLinked(LinkedList<_LinearSourceDescriptor, _NodeAllocator>& list)
+template <class _LinearSourceDescriptor,template <class> class _NodeAllocator,typename __SizeType,int __Alignment>
+void  LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator ,__SizeType,__Alignment>::
+mdeleteLinked(__LinkedList& list)
 {
 	NodeType *p=list.getHead();
 	while(p)
@@ -958,25 +963,25 @@ void  LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator,__SizeType>::md
 	}
 }
 
-template <class _LinearSourceDescriptor,template <class> class _NodeAllocator,typename __SizeType>
- bool LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator ,__SizeType>::checkRange(__SizeType start,__SizeType size)
+template <class _LinearSourceDescriptor,template <class> class _NodeAllocator,typename __SizeType,int __Alignment>
+ bool LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator ,__SizeType,__Alignment>::checkRange(__SizeType start,__SizeType size)
  {
     return (this->space.getStart() <= start) && (start-this->space.getStart() <= this->space.getLimit() - size );
  }
-template <class _LinearSourceDescriptor,template <class> class _NodeAllocator,typename __SizeType>
- bool LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator,__SizeType>::checkRange(__SizeType start)
+template <class _LinearSourceDescriptor,template <class> class _NodeAllocator,typename __SizeType,int __Alignment>
+ bool LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator ,__SizeType,__Alignment>::checkRange(__SizeType start)
  {
     return this->space.getStart() <= start;
  }
 
-template <class _LinearSourceDescriptor,template <class> class _NodeAllocator,typename __SizeType>
-bool LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator,__SizeType >::checkPrevious(ListNode<_LinearSourceDescriptor> *prev,__SizeType start)
+template <class _LinearSourceDescriptor,template <class> class _NodeAllocator,typename __SizeType,int __Alignment>
+bool LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator,__SizeType,__Alignment>::checkPrevious(__ListNode *prev,__SizeType start)
 {
     return !prev || (start - prev->getData().getStart() >= prev->getData().getLimit());
 }
 
-template <class _LinearSourceDescriptor,template <class> class _NodeAllocator,typename __SizeType>
-bool LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator ,__SizeType>::checkNext(ListNode<_LinearSourceDescriptor> *nxt,__SizeType start,__SizeType len)
+template <class _LinearSourceDescriptor,template <class> class _NodeAllocator,typename __SizeType,int __Alignment>
+bool LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator ,__SizeType,__Alignment>::checkNext(__ListNode *nxt,__SizeType start,__SizeType len)
 {
     return !nxt || (nxt->getData().getStart() - start >= len );
 }
@@ -986,8 +991,8 @@ bool LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator ,__SizeType>::ch
  *
  *  But currently we don't have that promise,So check the returned node if it havs a positive limit
  */
-template <class _LinearSourceDescriptor,template <class> class _NodeAllocator,typename __SizeType>
-_LinearSourceDescriptor LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator,__SizeType>::allocOutNode(ListNode<_LinearSourceDescriptor> *avlNode,__SizeType start,__SizeType len)
+template <class _LinearSourceDescriptor,template <class> class _NodeAllocator,typename __SizeType,int __Alignment>
+_LinearSourceDescriptor LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator ,__SizeType,__Alignment>::allocOutNode(__ListNode *avlNode,__SizeType start,__SizeType len)
 {
 	_LinearSourceDescriptor newnode(start,len);
     if(avlNode)
@@ -1014,7 +1019,7 @@ _LinearSourceDescriptor LinearSourceManager<_LinearSourceDescriptor,_NodeAllocat
             avlNode->getData().setLimit(len1);
         }else{//前后都有剩余
             avlNode->getData().setLimit(len1);
-            this->insertNext(avlNode, new (this->smm->getNew()) ListNode<_LinearSourceDescriptor>(_LinearSourceDescriptor(start+len,len2)) );
+            this->insertNext(avlNode, new (this->smm->getNew()) __ListNode(_LinearSourceDescriptor(start+len,len2)) );
 
         }
     }

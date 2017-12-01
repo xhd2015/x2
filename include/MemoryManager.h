@@ -25,46 +25,40 @@ AS_MACRO void operator delete[](void*, void*){};
 		#include <new>
 		#include <cstdio>
 #endif
-/**
-*   This is simple enough,and should not  be modified any longer.
-*
-*/
-template <typename __SizeType>
-class LinearSourceDescriptor{
-public:
-	typedef __SizeType SizeType;
-	AS_MACRO LinearSourceDescriptor()=default;
-public:
-    AS_MACRO LinearSourceDescriptor(SizeType start,SizeType limit); //done
-    AS_MACRO ~LinearSourceDescriptor();//done
-    AS_MACRO SizeType getStart() const ;//done
-    AS_MACRO SizeType getLimit() const ;//done
-    AS_MACRO bool isAllocable() const;//done,always return true;
-    AS_MACRO void setStart(SizeType start);//done
-    AS_MACRO void setLimit(SizeType limit);//done
-    AS_MACRO bool contains(const LinearSourceDescriptor& b)const;//done
-    AS_MACRO bool contains(SizeType start,SizeType limit)const;//done
-    /**
-    * 逻辑相等而非全等
-    */
-    AS_MACRO	bool operator==(const LinearSourceDescriptor& b)const;//done
-    AS_MACRO    bool operator!=(const LinearSourceDescriptor& b)const;//done
-protected:
-    /**
-     * 描述对象的起始地址
-     */
-    SizeType start;
-    /**
-     * 描述对象的所占用的长度
-     */
-    SizeType limit;
-};
+
+
+template <typename __SizeType,int __Alignment=sizeof(__SizeType)>
+class LinearSourceDescriptor{};  //一个普通的、仅用作模板的类
+
+
+
+#if defined(CODE64)
+#define __DEF_SIZE_TYPE u64_t
+#define __DEF_ALIGNMENT 8
+#include <preprocessor_functions/MemoryManager.h.RAW>
+#define __DEF_SIZE_TYPE size_t
+#define __DEF_ALIGNMENT sizeof(size_t)
+#include <preprocessor_functions/MemoryManager.h.RAW>
+#endif
+
+#if defined(CODE32) ||defined(CODE32USER)|| defined(CODE64)
+#define __DEF_SIZE_TYPE u32_t
+#define __DEF_ALIGNMENT 4
+#include <preprocessor_functions/MemoryManager.h.RAW>
+#endif
+
+#if defined(CODE16) || defined(CODE32) ||defined(CODE32USER)|| defined(CODE64)
+#define __DEF_SIZE_TYPE u16_t
+#define __DEF_ALIGNMENT 2
+#include <preprocessor_functions/MemoryManager.h.RAW>
+#endif
+
 
 
 template <class __SizeType>
-class MemoryDescriptor:public LinearSourceDescriptor<__SizeType>{
+class MemoryDescriptor:public LinearSourceDescriptor<__SizeType,sizeof(__SizeType)>{
 public:
-
+	using __LinearSourceDescriptor = LinearSourceDescriptor<__SizeType,sizeof(__SizeType)>;
     AS_MACRO MemoryDescriptor(__SizeType start,__SizeType limit,bool allocable=true);//done
 
     AS_MACRO ~MemoryDescriptor();//done
@@ -94,20 +88,30 @@ protected:
 *
 */
 
-template <class _LinearSourceDescriptor,template <class> class _NodeAllocator,typename __SizeType>
+template <class _LinearSourceDescriptor,template <class> class _NodeAllocator,
+	typename __SizeType,int __Alignment=sizeof(size_t)>
 class LinearSourceManager:
-		public LocateableLinkedList<_LinearSourceDescriptor,Locator<_LinearSourceDescriptor>::DISCARD,_NodeAllocator,__SizeType >{
+		public
+		LocateableLinkedList<_LinearSourceDescriptor,
+		Locator<_LinearSourceDescriptor>::DISCARD,_NodeAllocator,__SizeType,
+		__Alignment
+		>{
 public:
-	typedef LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator,__SizeType> This;
-    typedef LocateableLinkedList<_LinearSourceDescriptor,Locator<_LinearSourceDescriptor>::DISCARD,_NodeAllocator,__SizeType > Father;
-	typedef ListNode<_LinearSourceDescriptor> NodeType;
+	using This = LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator,__SizeType,__Alignment>;
+	using __LinearSourceManager = This;
+	using Super = LocateableLinkedList<_LinearSourceDescriptor,
+			Locator<_LinearSourceDescriptor>::DISCARD,_NodeAllocator,__SizeType,__Alignment>;
+    using __ListNode = typename Super::__ListNode;
+    using NodeType = __ListNode;
+    using __Allocator = _NodeAllocator<__ListNode>;
+    using __LinkedList =  LinkedList<_LinearSourceDescriptor,_NodeAllocator,__Alignment>;
 	LinearSourceManager();
 public:
 
 	/**
 	 * @param start应当不等于0，否则可能返回错误值
 	 */
-    LinearSourceManager(_NodeAllocator< ListNode<_LinearSourceDescriptor> >*smm,__SizeType start,__SizeType size);//done
+    LinearSourceManager(__Allocator *smm,__SizeType start,__SizeType size);//done
     ~LinearSourceManager();//done
     
     AS_MACRO const _LinearSourceDescriptor & getSpace()const;
@@ -154,7 +158,7 @@ public:
      * @return 如果空间足够，则一定保证分配成功，list指向分配的所有节点；否则失败，list保持不变
      */
     bool mnewLinked(__SizeType size,
-    		LinkedList<_LinearSourceDescriptor,_NodeAllocator> &list,__SizeType eachSectionExtraSize=0);
+    		__LinkedList &list,__SizeType eachSectionExtraSize=0);
 
 
     /**
@@ -162,21 +166,21 @@ public:
      * 前置条件：list不为空，list中的节点之前已经分配过
      * @param list 节点列表
      */
-    void				mdeleteLinked(LinkedList<_LinearSourceDescriptor,_NodeAllocator> &list);
+    void				mdeleteLinked(__LinkedList &list);
 
 
 protected:
-    _LinearSourceDescriptor  allocOutNode(ListNode<_LinearSourceDescriptor> *avlNode,__SizeType start,__SizeType len);//done
+    _LinearSourceDescriptor  allocOutNode(__ListNode *avlNode,__SizeType start,__SizeType len);//done
     /**
     * This method is not needed
     */
-    DEPRECATED void withdrawNode(ListNode<_LinearSourceDescriptor> *exactNode);//done
+    DEPRECATED void withdrawNode(__ListNode *exactNode);//done
     
 
     bool checkRange(__SizeType start,__SizeType size);//done
     bool checkRange(__SizeType start);//done
-    static bool checkPrevious(ListNode<_LinearSourceDescriptor> *prev, __SizeType start);//done
-    static bool checkNext(ListNode<_LinearSourceDescriptor>* nxt, __SizeType start,__SizeType len);//done
+    static bool checkPrevious(__ListNode *prev, __SizeType start);//done
+    static bool checkNext(__ListNode* nxt, __SizeType start,__SizeType len);//done
 
 protected:
     _LinearSourceDescriptor space;
@@ -210,18 +214,22 @@ protected:
 * 					  son-->next-->next---> ....  此层就是所有的分配节点信息
 */
 
-template <template <class> class _DescriptorAllocator,typename __SizeType>
-class MemoryManager:public Tree<MemoryDescriptor<__SizeType>,_DescriptorAllocator>{
+template <template <class> class _DescriptorAllocator,typename __SizeType,int __Alignment=sizeof(size_t)>
+class MemoryManager:public Tree<MemoryDescriptor<__SizeType>,_DescriptorAllocator,__Alignment>{
 public:
 	using __MemoryDescriptor=MemoryDescriptor<__SizeType>;
+	using This = MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>;
+	using __MemoryManager = This;
+	using Super = Tree<MemoryDescriptor<__SizeType>,_DescriptorAllocator,__Alignment>;
+	using __TreeNode = typename Super::__TreeNode;
+	using NodeType = __TreeNode;
 
-	typedef MemoryManager<_DescriptorAllocator,__SizeType> This;
-	typedef Tree<MemoryDescriptor<__SizeType>,_DescriptorAllocator> Father;
-	typedef TreeNode<__MemoryDescriptor>			NodeType;
-	typedef SimpleMemoryManager<NodeType>		SimpleAllocator;
+	using SimpleAllocator = SimpleMemoryManager<NodeType>;
+	using __Allocator = _DescriptorAllocator<__TreeNode>;
+
 public:
 	MemoryManager()=default;
-    MemoryManager(_DescriptorAllocator<TreeNode<__MemoryDescriptor> > *smm);//done
+    MemoryManager(__Allocator *smm);//done
     /**
      * 初始化一个带有待管理区间的内存管理器，区间范围是[start,start+len)
      * @param smm				节点分配器
@@ -230,23 +238,23 @@ public:
      * @param fatherAllocable	- // TODO 完善参数含义注释
      *
      */
-    MemoryManager(_DescriptorAllocator<TreeNode<__MemoryDescriptor> > *smm,__SizeType start,__SizeType len,bool fatherAllocable=true);
+    MemoryManager(__Allocator *smm,__SizeType start,__SizeType len,bool fatherAllocable=true);
     //以典型的内存描述建立管理器,但这不是唯一的初始化方式，因为开始和结束可以由内部节点指定，实际上开始和结束可以完全没有必要在初始化中指定
 
 
     /**
      * 建立初始管理器，并确定其中已经被分配的片段
      */
-    MemoryManager(_DescriptorAllocator<TreeNode<__MemoryDescriptor> > *smm,__SizeType start,__SizeType len,
+    MemoryManager(__Allocator *smm,__SizeType start,__SizeType len,
     		__SizeType usedList[][2],__SizeType usedLen,bool fatherAllocable=true);
 
     ~MemoryManager(); 
     
     //注意：不能在父类管理器中
-    MemoryManager<_DescriptorAllocator,__SizeType> allocFreeStart(__SizeType start,__SizeType len); //从父级管理器衍生,done
-    MemoryManager<_DescriptorAllocator,__SizeType> allocFree(__SizeType len);//done
+    __MemoryManager allocFreeStart(__SizeType start,__SizeType len); //从父级管理器衍生,done
+    __MemoryManager allocFree(__SizeType len);//done
     
-    TreeNode<__MemoryDescriptor> *copyOnAllocation(TreeNode<__MemoryDescriptor> *head);//复制后的allocable标志位与父节点相反，这从根本上保证了内存的一致性 done
+    __TreeNode *copyOnAllocation(__TreeNode *head);//复制后的allocable标志位与父节点相反，这从根本上保证了内存的一致性 done
     
     //operator new and delete
     void* mnew(__SizeType start,__SizeType size);//done
@@ -275,22 +283,22 @@ public:
     AS_MACRO __SizeType getLimit()const;
 
     //===support for List
-    static TreeNode<__MemoryDescriptor> *findFirstStart(TreeNode<__MemoryDescriptor>* loc,__SizeType start,__SizeType len);//done
-    static TreeNode<__MemoryDescriptor> *findFirstLen(TreeNode<__MemoryDescriptor>* loc,__SizeType len);//done
+    static __TreeNode *findFirstStart(__TreeNode* loc,__SizeType start,__SizeType len);//done
+    static __TreeNode *findFirstLen(__TreeNode* loc,__SizeType len);//done
     /**
      *
      */
-    static TreeNode<__MemoryDescriptor>*findFirstLenAlign(TreeNode<__MemoryDescriptor>* loc, __SizeType len,__SizeType &extra,__SizeType alignment);
-    static TreeNode<__MemoryDescriptor> *locateForInsertation(TreeNode<__MemoryDescriptor>* loc,TreeNode<__MemoryDescriptor> *son);
-    static TreeNode<__MemoryDescriptor> *locateForDelete(TreeNode<__MemoryDescriptor>* loc,__SizeType start,__SizeType len,bool allocable);//done
-    static TreeNode<__MemoryDescriptor>* locateForDeleteStart(TreeNode<__MemoryDescriptor>* loc,__SizeType start,bool allocable);//done
+    static __TreeNode*findFirstLenAlign(__TreeNode* loc, __SizeType len,__SizeType &extra,__SizeType alignment);
+    static __TreeNode *locateForInsertation(__TreeNode* loc,__TreeNode  *son);
+    static __TreeNode  *locateForDelete(__TreeNode * loc,__SizeType start,__SizeType len,bool allocable);//done
+    static __TreeNode * locateForDeleteStart(__TreeNode * loc,__SizeType start,bool allocable);//done
 
     /**
      * 1	success
      * 0	failed
      */
-    static int addToTree(TreeNode<__MemoryDescriptor> *root,TreeNode<__MemoryDescriptor> *son);
-    static TreeNode<__MemoryDescriptor> *nextAllocable(TreeNode<__MemoryDescriptor> *node);//done
+    static int addToTree(__TreeNode  *root,__TreeNode  *son);
+    static __TreeNode  *nextAllocable(__TreeNode  *node);//done
 
 
     int isNullManager();//done
@@ -300,8 +308,8 @@ public:
     void dumpInfo(Printer *p)const;
 #endif
 protected:
-    TreeNode<__MemoryDescriptor> * allocOutNode(TreeNode<__MemoryDescriptor> *avlNode,__SizeType start,__SizeType len);//done
-    void withdrawNode(TreeNode<__MemoryDescriptor> *exactNode);//done
+    __TreeNode  * allocOutNode(__TreeNode  *avlNode,__SizeType start,__SizeType len);//done
+    void withdrawNode(__TreeNode  *exactNode);//done
     /**
      * Note: extsize is __SizeType,it cannot be less than 0.if it is 0,then returned false.
      * if not found,return false
@@ -310,10 +318,10 @@ protected:
      *
      * 	@return 根据查找的情况返回值0,1,2
      */
-    char findExtend(__SizeType start,__SizeType size,__SizeType extsize,TreeNode<__MemoryDescriptor> * &rtnode)const;
+    u8_t findExtend(__SizeType start,__SizeType size,__SizeType extsize,__TreeNode  * &rtnode)const;
     
 protected:
-    //SimpleMemoryManager<TreeNode<__MemoryDescriptor> > *smm;  //the base class already has one
+    //SimpleMemoryManager<__TreeNode  > *smm;  //the base class already has one
 
 private:
 

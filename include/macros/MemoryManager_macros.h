@@ -12,70 +12,27 @@
 
 
 //========Function Macro
-//===class: LinearSourceDescriptor
-template <class __SizeType>
-LinearSourceDescriptor<__SizeType>::LinearSourceDescriptor(SizeType start,SizeType limit):
- start(start),limit(limit)
- {
-
- }
-
- template <class __SizeType>
-LinearSourceDescriptor<__SizeType>::~LinearSourceDescriptor() {
- }
-
- template <class __SizeType>
- typename LinearSourceDescriptor<__SizeType>::SizeType LinearSourceDescriptor<__SizeType>::getStart()const
- {
-    return start;
- }
-template <class __SizeType>
-typename LinearSourceDescriptor<__SizeType>::SizeType LinearSourceDescriptor<__SizeType>::getLimit()const
- {
-    return limit;
- }
-template <class __SizeType>
-void LinearSourceDescriptor<__SizeType>::setStart(SizeType start)
- {
-    this->start=start;
- }
- template <class __SizeType>
- void LinearSourceDescriptor<__SizeType>::setLimit(SizeType limit)
- {
-    this->limit=limit;
- }
-
- template <class __SizeType>
- bool LinearSourceDescriptor<__SizeType>::contains(const LinearSourceDescriptor& b)const
-{
-	return contains(b.getStart(),b.getLimit());
-}
-template <class __SizeType>
-bool LinearSourceDescriptor<__SizeType>::contains(SizeType start,SizeType limit)const
-{
+//==class LinearSourceDescriptor
 #if defined(CODE64)
-//	printf("this->start-start>=limit-this->limit   : (%d >= %d = %d)\n",this->start-start,limit-this->limit,(int)(this->start-start)>=(int)(limit-this->limit));
+#define __DEF_SIZE_TYPE u64_t
+#define __DEF_ALIGNMENT sizeof(u64_t)
+#include <preprocessor_functions/MemoryManager_macros.h.RAW>
+#define __DEF_SIZE_TYPE size_t
+#define __DEF_ALIGNMENT sizeof(size_t)
+#include <preprocessor_functions/MemoryManager_macros.h.RAW>
 #endif
-	return (this->start<=start)&&( limit<=this->limit  && (start - this->start)<=(this->limit - limit));
 
-}
-template <class __SizeType>
-bool LinearSourceDescriptor<__SizeType>::operator==(const LinearSourceDescriptor& b)const
-{
+#if defined(CODE32) ||defined(CODE32USER)|| defined(CODE64)
+#define __DEF_SIZE_TYPE u32_t
+#define __DEF_ALIGNMENT 4
+#include <preprocessor_functions/MemoryManager_macros.h.RAW>
+#endif
 
-   return this->getStart()==b.getStart() && this->getLimit()==b.getLimit();
-}
-
-template <class __SizeType>
-bool LinearSourceDescriptor<__SizeType>::operator!=(const LinearSourceDescriptor& b)const
-{
-    return ! this->operator==(b);
-}
-template <class __SizeType>
-bool LinearSourceDescriptor<__SizeType>::isAllocable()const
-{
-    return true;
-}
+#if defined(CODE16) || defined(CODE32) ||defined(CODE32USER)|| defined(CODE64)
+#define __DEF_SIZE_TYPE u16_t
+#define __DEF_ALIGNMENT 2
+#include <preprocessor_functions/MemoryManager_macros.h.RAW>
+#endif
 
  //==========class: MemoryDescriptor
 // TODO 检查下面的声明有什么错误
@@ -106,7 +63,7 @@ bool MemoryDescriptor<__SizeType>::isAllocable()const{
 template <class __SizeType>
  bool MemoryDescriptor<__SizeType>::operator==(const MemoryDescriptor<__SizeType>& b)const
 {
-    return this->LinearSourceDescriptor<__SizeType>::operator==(b) && this->allocable==b.allocable;
+    return this->__LinearSourceDescriptor::operator==(b) && this->allocable==b.allocable;
 
 }
 
@@ -118,20 +75,21 @@ bool MemoryDescriptor<__SizeType>::operator!=(const MemoryDescriptor<__SizeType>
 }
 
 //==============class LinearSourceManager
-template <class _LinearSourceDescriptor,template <class> class _NodeAllocator,typename __SizeType>
-const _LinearSourceDescriptor & LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator,__SizeType>::getSpace()const
+template <class _LinearSourceDescriptor,template <class> class _NodeAllocator,typename __SizeType,int __Alignment>
+const _LinearSourceDescriptor & LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator,__SizeType,__Alignment>::
+getSpace()const
 {
 	return this->space;
 }
 
 //============class MemoryManager<_DescriptorAllocator>
-template<template<class > class _DescriptorAllocator,typename __SizeType>
-__SizeType MemoryManager<_DescriptorAllocator,__SizeType>::getBase() const {
+template<template<class > class _DescriptorAllocator,typename __SizeType,int __Alignment>
+__SizeType MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::getBase() const {
 	return this->root->getData().getStart();
 }
 
-template<template<class > class _DescriptorAllocator,typename __SizeType>
-__SizeType MemoryManager<_DescriptorAllocator,__SizeType>::getLimit() const {
+template<template<class > class _DescriptorAllocator,typename __SizeType,int __Alignment>
+__SizeType MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::getLimit() const {
 	return this->root->getData().getLimit();
 }
 

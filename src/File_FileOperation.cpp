@@ -193,7 +193,7 @@ template <class __StdEnv,class __SizeType>
 void FileOperation<__StdEnv,__SizeType>::mkdir(const __String& dir)
 {
 	util.seterrno(X2fsUtil<EnvInterface64Impl,size_t>::ERROR_NOERR);
-	util.create(curNode, FileDescriptor<size_t>::TYPE_DIR, dir.c_str(), 0,0);
+	util.create(curNode, FileDescriptor<size_t,sizeof(size_t)>::TYPE_DIR, dir.c_str(), 0,0);
 	if(util.geterrno() == X2fsUtil<EnvInterface64Impl,size_t>::ERROR_FILE_ALREDY_EXIST)
 	{
 		stdEnv->printf_simple("file/directory");
@@ -206,7 +206,7 @@ template <class __StdEnv,class __SizeType>
 void FileOperation<__StdEnv,__SizeType>::touch(const __String & fname,__SizeType secNum,__TimeType ctime)
 {
 	util.seterrno(X2fsUtil<EnvInterface64Impl,size_t>::ERROR_NOERR);
-	util.create(curNode, FileDescriptor<size_t>::TYPE_FILE, fname.c_str(), secNum,ctime);
+	util.create(curNode, FileDescriptor<size_t,sizeof(size_t)>::TYPE_FILE, fname.c_str(), secNum,ctime);
 	if(util.geterrno()!=X2fsUtil<EnvInterface64Impl,size_t>::ERROR_NOERR)
 	{
 		stdEnv->printf_simple("error code is %d\n",util.geterrno());
@@ -372,7 +372,8 @@ __SizeType FileOperation<__StdEnv,__SizeType>::readSysFileToX2File(const __Strin
 	__SizeType start=x2Start;
 	while(leftLen>0 && sysFileLeft>0)
 	{
-		__SizeType thisAvl = (bufsize > sysFileLeft? sysFileLeft:bufsize);
+		__SizeType thisAvl =Util::min(bufsize, Util::min( sysFileLeft,leftLen));
+				//取leftLen,sysFileLeft,bufSize中的最小者
 		fs.read(buf + headingByte, thisAvl);
 		util._randomWriteFile(buf, thisAvl,fnode, start);
 		sysFileLeft-=thisAvl;
@@ -422,7 +423,7 @@ __SizeType FileOperation<__StdEnv,__SizeType>::writeSysFileFromX2File(const __St
 	__SizeType start = x2Start;
 	while(leftLen>0 && x2FileLeft>0)
 	{
-		__SizeType thisAvl = (bufsize > x2FileLeft? x2FileLeft:bufsize);
+		__SizeType thisAvl =Util::min(bufsize, Util::min( x2FileLeft,leftLen));
 		util._randomReadFile(buf, thisAvl,
 					fnode, start);
 		fs.write(buf+headingByte,thisAvl);

@@ -13,76 +13,22 @@
 #endif
 
 
-/**
-* 
-*/
-template <typename __SizeType>
-class FileDescriptor
-{
-public:
-	enum{ TYPE_FILE=0,TYPE_DIR=1,TYPE_EAP=2};
+template <typename __SizeType,int __Alignment>
+class FileDescriptor{};//模板
+#if defined(CODE64)
+#define __DEF_ALIGNMENT sizeof(size_t)
+#include <preprocessor_functions/File_FileDescriptor.h.RAW>
+#endif
 
-	/**
-	 * 仅仅是__SizeType的别名
-	 */
-	typedef __SizeType __TimeType;
-public:
-	AS_MACRO FileDescriptor(u8_t type,__SizeType sectionList,
-			__SizeType fileLen,__SizeType nameStart,__TimeType createdTime,__TimeType lastModefiedTime);
+#if defined(CODE32) ||defined(CODE32USER)|| defined(CODE64)
+#define __DEF_ALIGNMENT 4
+#include <preprocessor_functions/File_FileDescriptor.h.RAW>
+#endif
 
-	AS_MACRO u8_t getType()const;
-	AS_MACRO void setType(u8_t type);
-
-	AS_MACRO __SizeType getNameOffset()const;
-	AS_MACRO void	setNameOffset(__SizeType off);
-	AS_MACRO __TimeType getCreatedTime() const;
-	AS_MACRO void setCreatedTime(__TimeType createdTime);
-	AS_MACRO __SizeType getFileLen() const;
-	AS_MACRO void setFileLen(__SizeType fileLen);
-	AS_MACRO DEPRECATED __SizeType getFileStart() const;//file will always starts from the beginning
-	AS_MACRO DEPRECATED void setFileStart(__SizeType fileStart);
-	AS_MACRO __TimeType getLastModefiedTime() const;
-	AS_MACRO void setLastModefiedTime(__TimeType lastModefiedTime);
-	AS_MACRO DEPRECATED __SizeType getSectionSpan() const;
-	AS_MACRO DEPRECATED void setSectionSpan(__SizeType sectionSpan);
-	AS_MACRO DEPRECATED __SizeType getSectionStart() const;
-	AS_MACRO DEPRECATED void setSectionStart(__SizeType sectionStart);
-
-
-	AS_MACRO __SizeType getSectionListIndex() const ;
-	AS_MACRO void setSectionListIndex(__SizeType	sectionListIndex);
-
-protected:
-	/**
-	 * 类型，文件，文件夹，或者扩展区域（废弃）
-	 */
-	u8_t type;
-
-	/**
-	 * 文件占据的分区链表的下标
-	 */
-	__SizeType /* DEPRECATED sectionStart,sectionSpan,*//*DEPRECATED fileStart */sectionListIndex;
-	/**
-	 * 文件长度
-	 */
-	__SizeType fileLen;
-
-	/**
-	 * 文件名在 name分区中的开始下标
-	 */
-	__SizeType nameStart;
-
-	/**
-	 * 创建时间
-	 */
-	__TimeType createdTime;
-
-	/**
-	 * 最后修改时间
-	 */
-	__TimeType lastModefiedTime;
-
-};
+#if defined(CODE16) || defined(CODE32) ||defined(CODE32USER)|| defined(CODE64)
+#define __DEF_ALIGNMENT 2
+#include <preprocessor_functions/File_FileDescriptor.h.RAW>
+#endif
 
 #pragma pack(push,1)
 
@@ -159,7 +105,11 @@ public:
 	 *  校验metainfo是否符合结构
 	 */
 	static bool checkMetainfo(const X2fsMetaInfo<__SizeType>* info);
+
+#if defined(CODE64)
+	// TODO 在任意主机上dump都可以
 	void dumpInfo(EnvInterface64Impl *env);
+#endif
 //	__SizeType getDataAllocation
 };
 
@@ -191,7 +141,7 @@ public:
 #endif
 		_EnvInterface;
 
-	using __FileDescriptor = FileDescriptor<__SizeType>;
+	using __FileDescriptor = FileDescriptor<__SizeType,sizeof(__SizeType)>;
 	using __TimeType = typename __FileDescriptor::__TimeType;
 
 public:
@@ -247,8 +197,8 @@ public:
 	/**
 	 * 依赖这些类型作为分配器
 	 */
-	typedef MallocToSimple<TreeNode<MemoryDescriptor<__SizeType>>,_EnvInterface> TMSmm;
-	typedef MallocToSimple<ListNode<LinearSourceDescriptor<__SizeType>>,_EnvInterface> LLSmm;
+	typedef MallocToSimple<TreeNode<MemoryDescriptor<__SizeType>,sizeof(__SizeType)>,_EnvInterface> TMSmm;
+	typedef MallocToSimple<ListNode<LinearSourceDescriptor<__SizeType>,sizeof(__SizeType)>,_EnvInterface> LLSmm;
 
 	// TODO 检查下面的做法是否合法
 //	template <class T>
@@ -258,8 +208,8 @@ public:
 	template <class T>
 	using PartialMallocToSimple=MallocToSimple<T,_EnvInterface>;
 
-	typedef MemoryManager<PartialMallocToSimple,__SizeType> FileNameMM;
-	typedef SimpleMemoryManager<TreeNode<FileDescriptor<__SizeType> > > FileNodeMM;
+	typedef MemoryManager<PartialMallocToSimple,__SizeType,sizeof(__SizeType)> FileNameMM;
+	typedef SimpleMemoryManager<TreeNode<FileDescriptor<__SizeType,sizeof(__SizeType)>,sizeof(__SizeType) > > FileNodeMM;
 
 	//FileNode 真实类型是  SimpleMemoryManager<TreeNode<FileDescriptor> >::Node
 	//即 TreeNode<FileDescriptor>,SimpleMemoryNode的组合
@@ -271,7 +221,7 @@ public:
 //	using FileNode = TreeNode<FileDescriptor<__SizeType> >;
 //	using FileNode = int;
 
-	typedef Tree<FileDescriptor<__SizeType>,SimpleMemoryManager> FileTree;
+	typedef Tree<FileDescriptor<__SizeType,sizeof(__SizeType)>,SimpleMemoryManager> FileTree;
 
 	typedef LinearSourceManager<LinearSourceDescriptor<__SizeType>,PartialMallocToSimple,__SizeType> FreeSpaceMM;
 	typedef LinearSourceManager<LinearSourceDescriptor<__SizeType>,PartialMallocToSimple,__SizeType> LinkedInfoMM;
@@ -334,7 +284,7 @@ public:
 	AS_MACRO void setEnvInterface(_EnvInterface *env);
 
 public:
-	char *getFileNameCstr(const FileDescriptor<__SizeType> &fd,__SizeType &nlen)const;
+	char *getFileNameCstr(const FileDescriptor<__SizeType,sizeof(__SizeType)> &fd,__SizeType &nlen)const;
 //	std::string getFileName(const FileNode *p)const;
 
 //	UNTESTED
@@ -717,7 +667,7 @@ public:
 	//===类型别名
 	using __X2fsUtil  = X2fsUtil<__StdEnv,__SizeType>;
 	using FileNode = typename __X2fsUtil::FileNode;
-	using __FileDescriptor = FileDescriptor<__SizeType>;
+	using __FileDescriptor = FileDescriptor<__SizeType,sizeof(__SizeType)>;
 	using __TimeType = typename __FileDescriptor::__TimeType;
 
 	//===============接口约束
@@ -729,11 +679,11 @@ public:
 	template <class T>
 		using __Vector = typename  std::template vector <T, __Allocator<T>>;
 #else
-	using __String =typename __StdEnv::string;
+	using __String =typename __StdEnv::String;
 	template <class T>
-			using __Allocator = typename __StdEnv::template allocator<T>;
+			using __Allocator = typename __StdEnv::template Allocator<T>;
 	template <class T>
-			using __Vector = typename __StdEnv::template vector <T, __Allocator<T>>;
+			using __Vector = typename __StdEnv::template Vector <T, __Allocator<T>>;
 #endif
 
 
@@ -918,74 +868,22 @@ private:
 
 //=============Function Macros
 //=====class : FileDescriptor
-template <typename __SizeType>
-FileDescriptor<__SizeType>::FileDescriptor(u8_t type,__SizeType sectionList,__SizeType fileLen,__SizeType nameStart,
-		__TimeType createdTime,__TimeType lastModefiedTime):
-type(type),sectionListIndex(sectionList),fileLen(fileLen),
-nameStart(nameStart),createdTime(createdTime),lastModefiedTime(lastModefiedTime)
-{
-}
+#if defined(CODE64)
+#define __DEF_ALIGNMENT sizeof(size_t)
+#include <preprocessor_functions/File_FileDescriptor_macros.h.RAW>
+#endif
 
-template <typename __SizeType>
-typename FileDescriptor<__SizeType>::__TimeType FileDescriptor<__SizeType>::getCreatedTime() const
-{
-	return createdTime;
-}
+#if defined(CODE32) ||defined(CODE32USER)|| defined(CODE64)
+#define __DEF_ALIGNMENT 4
+#include <preprocessor_functions/File_FileDescriptor_macros.h.RAW>
+#endif
 
-template <typename __SizeType>
-void FileDescriptor<__SizeType>::setCreatedTime(__TimeType createdTime) {
-	this->createdTime = createdTime;
-}
+#if defined(CODE16) || defined(CODE32) ||defined(CODE32USER)|| defined(CODE64)
+#define __DEF_ALIGNMENT 2
+#include <preprocessor_functions/File_FileDescriptor_macros.h.RAW>
+#endif
 
-template <typename __SizeType>
-__SizeType FileDescriptor<__SizeType>::getFileLen() const {
-	return fileLen;
-}
 
-template <typename __SizeType>
-void FileDescriptor<__SizeType>::setFileLen(__SizeType fileLen) {
-	this->fileLen = fileLen;
-}
-
-template <typename __SizeType>
-typename FileDescriptor<__SizeType>::__TimeType FileDescriptor<__SizeType>::getLastModefiedTime() const {
-	return lastModefiedTime;
-}
-template <typename __SizeType>
-void FileDescriptor<__SizeType>::setLastModefiedTime(__TimeType lastModefiedTime) {
-	this->lastModefiedTime = lastModefiedTime;
-}
-template <typename __SizeType>
-__SizeType FileDescriptor<__SizeType>::getSectionListIndex() const
-{
-	return this->sectionListIndex;
-}
-
-template <typename __SizeType>
-void FileDescriptor<__SizeType>::setSectionListIndex(__SizeType	sectionListIndex)
-{
-	this->sectionListIndex = sectionListIndex;
-}
-
-template <typename __SizeType>
-u8_t FileDescriptor<__SizeType>::getType() const {
-	return type;
-}
-template <typename __SizeType>
-void FileDescriptor<__SizeType>::setType(u8_t type) {
-	this->type = type;
-}
-
-template <typename __SizeType>
-__SizeType FileDescriptor<__SizeType>::getNameOffset()const
-{
-	return this->nameStart;
-}
-template <typename __SizeType>
-void FileDescriptor<__SizeType>::setNameOffset(__SizeType off)
-{
-	this->nameStart=off;
-}
 
 //=========class X2fsUtil
 template <class __EnvInterface,typename __SizeType>
@@ -1022,12 +920,12 @@ typename X2fsUtil<__EnvInterface,__SizeType>::FileNode *X2fsUtil<__EnvInterface,
 template <class __EnvInterface,typename __SizeType>
 bool X2fsUtil<__EnvInterface,__SizeType>::isDirectory(const FileNode *p)
 {
-	return p && p->getData().getType()==FileDescriptor<__SizeType>::TYPE_DIR;
+	return p && p->getData().getType()==__FileDescriptor::TYPE_DIR;
 }
 template <class __EnvInterface,typename __SizeType>
 bool X2fsUtil<__EnvInterface,__SizeType>::isFile(const FileNode *p)
 {
-	return p && p->getData().getType()==FileDescriptor<__SizeType>::TYPE_FILE;
+	return p && p->getData().getType()==__FileDescriptor::TYPE_FILE;
 }
 template <class __EnvInterface,typename __SizeType>
 typename X2fsUtil<__EnvInterface,__SizeType>::FileTree* X2fsUtil<__EnvInterface,__SizeType>::getFileTree()
@@ -1039,5 +937,6 @@ typename X2fsUtil<__EnvInterface,__SizeType>::FileTree* X2fsUtil<__EnvInterface,
 //void X2fsUtil::getLinkedList(LinearSourceDescriptor* buffer,
 //		LinkedList<LinearSourceDescriptor, _Allocator>& list, __SizeType maxlen) {
 //}
+
 
 #endif //File_h__

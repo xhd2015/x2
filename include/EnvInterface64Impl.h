@@ -15,20 +15,22 @@
 #include <regex>
 
 
+
 class EnvInterface64Impl
 #if defined(IDE_MODE)
 	:public EnvInterface
 #endif
 {
-protected:
+private:
 	const char *file;
-	static EnvInterface64Impl * env;
-	EnvInterface64Impl(const char *file);
 public:
+	using SizeType = size_t;
 
-	static EnvInterface64Impl *getInstance(const char *file);
-
+	EnvInterface64Impl(const char *file=NULL);
 	EnvInterface64Impl(const EnvInterface64Impl &rhs )=delete;
+	const char* getFile() const;
+	void setFile(const char* file);
+
 
 
 		enum{
@@ -78,27 +80,22 @@ class StdEnv64Impl:
 		public EnvInterface64Impl
 	{
 public:
-	using string=std::string;
-
-	template <class T,class A>
-		using vector=typename std::vector<T,A>;
-
+	using String=std::string;
 	template <class T>
-	using allocator=std::allocator<T>;
+	using Allocator=std::allocator<T>;
+
+	template <class T,class A=Allocator<T>>
+		using Vector=typename std::vector<T,A>;
+
+
 
 	std::vector<std::string> regexSplit(const std::regex& re, const std::string& s);
 	std::vector<std::string> spaceSplit(const std::string& s);
 	std::vector<std::string> pathSplit(const std::string& s);
 
 public:
-	static StdEnv64Impl * getInstance(const char *file);
-
-protected:
-	static StdEnv64Impl * env;
-
-	StdEnv64Impl(const char *file);
+	StdEnv64Impl(const char *file=NULL);
 };
-
 // ======= template declaration
 template <class T>
 using MallocToSimple64Impl = MallocToSimple<T,EnvInterface64Impl>;

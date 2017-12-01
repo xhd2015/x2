@@ -67,15 +67,15 @@ public:
 	/**
 	 * 建立一个指向Process*的TreeNode<Process*>
 	 */
-	AS_MACRO TreeNode<Process*>*	createProcessWrapper(Process* p);
-	void	setFatherProcess(TreeNode<Process*> *p,TreeNode<Process*> *father);
-	AS_MACRO TreeNode<Process*> *	getFatherProcess(TreeNode<Process*> *p);
-	TreeNode<Process*>*	getCurrentProcess()const;
+	AS_MACRO TreeNode<Process*,4>*	createProcessWrapper(Process* p);
+	void	setFatherProcess(TreeNode<Process*,4> *p,TreeNode<Process*,4> *father);
+	AS_MACRO TreeNode<Process*,4> *	getFatherProcess(TreeNode<Process*,4> *p);
+	TreeNode<Process*,4>*	getCurrentProcess()const;
 	void				swithcNextProcess();
 	/**
 	 * 分配进程结构并且将其加入进程树和进程调度队列
 	 */
-	TreeNode<Process*>*	addNewProcess(size_t codeLimit,size_t dataLimit,size_t stackLimit,
+	TreeNode<Process*,4>*	addNewProcess(size_t codeLimit,size_t dataLimit,size_t stackLimit,
 			char dpl=SegmentDescriptor::DPL_3);
 	/**
 	 * It is not safe
@@ -112,20 +112,20 @@ protected:
 			char dpl=SegmentDescriptor::DPL_3);
 	void		createIdleProcess();
 	void	invokeProcess(Process* p);
-	TreeNode<Process*>*		getByPid(unsigned int pid);
+	TreeNode<Process*,4>*		getByPid(unsigned int pid);
 
 	/**
 	 * point to the tree
 	 */
-	KernelSmmWrapper<ListNode<TreeNode<Process*>* > >		lksmm;
+	KernelSmmWrapper<ListNode<TreeNode<Process*,4>*,4> >		lksmm;
 
-	KernelSmmWrapper<TreeNode<Process*> >					tksmm;
-	LinkedList<TreeNode<Process*>*,KernelSmmWrapper>  		prcsQueue;//for schedule
+	KernelSmmWrapper<TreeNode<Process*,4> >					tksmm;
+	LinkedList<TreeNode<Process*,4>*,KernelSmmWrapper>  		prcsQueue;//for schedule
 	Tree<Process*,KernelSmmWrapper> 						prcsTree;
 	Process													 *idleProcess;//The special one to ensure that at least one process is running but when there is alive process ,this process
 						//should never be run
 					//as it's name indicated,only when CPU gets idle,this process is called.
-	TreeNode<Process*>										*curProcess;
+	TreeNode<Process*,4>										*curProcess;
 	unsigned int lastValidPID;
 	/**
 	 * max pid of currently allocated
@@ -150,7 +150,7 @@ protected:
 class Kernel{
 public:
 	typedef	Kernel											This;
-	typedef TreeNode<MemoryDescriptor<size_t>> 						MmNodeType;
+	typedef TreeNode<MemoryDescriptor<size_t>,4> 						MmNodeType;
 	typedef SimpleMemoryManager<MmNodeType>					SmmType;
 	typedef SmmType::FullNode								FullMMNodeType; //使用这个结构来计算占用空间的大小
 	typedef MemoryManager<SimpleMemoryManager,size_t>		 		MmType;
@@ -247,11 +247,11 @@ public:
 
 	//related to process management
 	AS_MACRO void	switchNextProcess();
-	AS_MACRO TreeNode<Process*>* addNewProcess(size_t codeLimit,size_t dataLimit,size_t stackLimit,
+	AS_MACRO TreeNode<Process*,4>* addNewProcess(size_t codeLimit,size_t dataLimit,size_t stackLimit,
 			char dpl=SegmentDescriptor::DPL_3);
-	void suspendProcess(TreeNode<Process*>* wp);
-	void resumeProcess(TreeNode<Process*>* wp);
-	void killProcess(TreeNode<Process*>* wp);
+	void suspendProcess(TreeNode<Process*,4>* wp);
+	void resumeProcess(TreeNode<Process*,4>* wp);
+	void killProcess(TreeNode<Process*,4>* wp);
 
 	//==========get arguments
 	/**

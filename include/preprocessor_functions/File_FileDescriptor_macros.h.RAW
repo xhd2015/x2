@@ -1,0 +1,84 @@
+
+/**
+ * @param __DEF_ALIGNMENT
+ */
+
+#if !defined(__DEF_ALIGNMENT)
+#error "please define __DEF_ALIGNMENT"
+#endif
+
+#define __DEF_FileDescriptor FileDescriptor<__SizeType,__DEF_ALIGNMENT>
+
+template <typename __SizeType>
+__DEF_FileDescriptor::FileDescriptor(u8_t type,__SizeType sectionList,__SizeType fileLen,__SizeType nameStart,
+		__TimeType createdTime,__TimeType lastModefiedTime):
+type(type),sectionListIndex(sectionList),fileLen(fileLen),
+nameStart(nameStart),createdTime(createdTime),lastModefiedTime(lastModefiedTime)
+{
+}
+
+template <typename __SizeType>
+typename __DEF_FileDescriptor::__TimeType __DEF_FileDescriptor::getCreatedTime() const
+{
+	return createdTime;
+}
+
+template <typename __SizeType>
+void __DEF_FileDescriptor::setCreatedTime(__TimeType createdTime) {
+	this->createdTime = createdTime;
+}
+
+template <typename __SizeType>
+__SizeType __DEF_FileDescriptor::getFileLen() const {
+	return fileLen;
+}
+
+template <typename __SizeType>
+void __DEF_FileDescriptor::setFileLen(__SizeType fileLen) {
+	this->fileLen = fileLen;
+}
+
+template <typename __SizeType>
+typename __DEF_FileDescriptor::__TimeType __DEF_FileDescriptor::getLastModefiedTime() const {
+	return lastModefiedTime;
+}
+template <typename __SizeType>
+void __DEF_FileDescriptor::setLastModefiedTime(__TimeType lastModefiedTime) {
+	this->lastModefiedTime = lastModefiedTime;
+}
+template <typename __SizeType>
+__SizeType __DEF_FileDescriptor::getSectionListIndex() const
+{
+	return this->sectionListIndex;
+}
+
+template <typename __SizeType>
+void __DEF_FileDescriptor::setSectionListIndex(__SizeType	sectionListIndex)
+{
+	this->sectionListIndex = sectionListIndex;
+}
+
+template <typename __SizeType>
+u8_t __DEF_FileDescriptor::getType() const {
+	return type;
+}
+template <typename __SizeType>
+void __DEF_FileDescriptor::setType(u8_t type) {
+	this->type = type;
+}
+
+template <typename __SizeType>
+__SizeType __DEF_FileDescriptor::getNameOffset()const
+{
+	return this->nameStart;
+}
+template <typename __SizeType>
+void __DEF_FileDescriptor::setNameOffset(__SizeType off)
+{
+	this->nameStart=off;
+}
+
+
+#undef __DEF_FileDescriptor
+
+#undef __DEF_ALIGNMENT

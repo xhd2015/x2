@@ -12,7 +12,7 @@ __asm__(".code32 \n\t");
 #endif
 
 #if defined(CODE32)
- template class KernelSmmWrapper<TreeNode<MemoryDescriptor> >;
+ template class KernelSmmWrapper<TreeNode<MemoryDescriptor<u32_t>> >;
 #endif
 
 

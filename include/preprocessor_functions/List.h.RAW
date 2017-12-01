@@ -1,0 +1,55 @@
+
+/**
+ * @param __DEF_ALIGNMENT
+ */
+
+#if !defined(__DEF_ALIGNMENT)
+#error "please define __DEF_ALIGNMENT"
+#endif
+
+
+#pragma pack(push,__DEF_ALIGNMENT)
+template<class T>
+class ListNode<T,__DEF_ALIGNMENT>{
+public:
+	using This = ListNode<T,__DEF_ALIGNMENT>;
+	using __ListNode = This;
+public:
+    ListNode(const T& data,__ListNode* next=NULL,__ListNode* previous=NULL);
+    ~ListNode();
+    
+    AS_MACRO const T& getData()const;
+    AS_MACRO T& getData();
+    AS_MACRO void setData(const T& data);
+    AS_MACRO __ListNode* getNext()const;
+    AS_MACRO __ListNode* getPrevious()const;
+    AS_MACRO void setNext(__ListNode* next);
+    AS_MACRO void  setPrevious(__ListNode* previous);
+    __ListNode* removeNext();
+    __ListNode* removePrevious();
+    void    insertNext(__ListNode* next);
+    void    insertPrevious(__ListNode* previous);
+    AS_MACRO int  hasNext()const;
+    AS_MACRO int  hasPrevious()const;//done
+    /**
+     * @new method since 2017-03-18 21:23:10
+     */
+    void		adjustOffset(ptrdiff_t diff);
+    void		initToNull();
+
+
+    __ListNode*    getLast()const;//done
+    __ListNode*    getFirst()const;//done
+    DEPRECATED AS_MACRO static void adjustOffset(char **p,ptrdiff_t off);
+    //指向构造函数的地址
+    //用 new (void*p) 构造函数,俗称placement new
+protected:
+    T   data;//for storage
+    __ListNode *next;
+    __ListNode *previous;
+    
+};
+#pragma pack(pop)
+
+
+#undef __DEF_ALIGNMENT

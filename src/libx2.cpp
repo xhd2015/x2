@@ -14,9 +14,10 @@
     __asm__(".code32 \n\t");
 #endif
 
-#if defined(CODE64)
+#if defined(CODE64) //模板实例化
 #include <cstdio>
 #include <cstdarg>
+
 #endif
 //==============模板实例化
 //===在此声明实例化
@@ -419,6 +420,7 @@ int Util::sign(int n)
     if(n==0)return 0;
     return 1;
 }
+
 #endif //CODE32 || CODE64
 
 #if defined(CODE32)

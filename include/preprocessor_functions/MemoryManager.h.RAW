@@ -1,0 +1,58 @@
+
+/**
+ * @param __DEF_SIZE_TYPE
+ * @param __DEF_ALIGNMENT
+ */
+
+#if !defined(__DEF_SIZE_TYPE) || !defined(__DEF_ALIGNMENT)
+#error "please define __DEF_SIZE_TYPE and/or __DEF_ALIGNMENT"
+#endif
+
+
+#pragma pack(push,__DEF_ALIGNMENT)
+/**
+*   This is simple enough,and should not  be modified any longer.
+*
+*/
+template <>
+class LinearSourceDescriptor<__DEF_SIZE_TYPE,__DEF_ALIGNMENT>{
+public:
+	//==这是唯一的不同
+	using __SizeType = __DEF_SIZE_TYPE;
+	enum{__Alignment=__DEF_ALIGNMENT};
+	//=========
+	
+	using __LinearSourceDescriptor=LinearSourceDescriptor<__SizeType,__Alignment>;
+
+public:
+	AS_MACRO LinearSourceDescriptor()=default;
+public:
+    AS_MACRO LinearSourceDescriptor(__SizeType start,__SizeType limit); //done
+    AS_MACRO ~LinearSourceDescriptor();//done
+    AS_MACRO __SizeType getStart() const ;//done
+    AS_MACRO __SizeType getLimit() const ;//done
+    AS_MACRO bool isAllocable() const;//done,always return true;
+    AS_MACRO void setStart(__SizeType start);//done
+    AS_MACRO void setLimit(__SizeType limit);//done
+    AS_MACRO bool contains(const LinearSourceDescriptor& b)const;//done
+    AS_MACRO bool contains(__SizeType start,__SizeType limit)const;//done
+    /**
+    * 逻辑相等而非全等
+    */
+    AS_MACRO	bool operator==(const __LinearSourceDescriptor& b)const;//done
+    AS_MACRO    bool operator!=(const __LinearSourceDescriptor& b)const;//done
+protected:
+    /**
+     * 描述对象的起始地址
+     */
+    __SizeType start;
+    /**
+     * 描述对象的所占用的长度
+     */
+    __SizeType limit;
+};
+#pragma pack(pop)
+
+
+#undef __DEF_SIZE_TYPE
+#undef __DEF_ALIGNMENT
