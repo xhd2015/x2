@@ -39,10 +39,10 @@ struct ParamMkfs{
 	bool lbaLowSet=false;
 
 	size_t secSpaces[4]={
-			X2fsUtil<EnvInterface64Impl,size_t>::FileNameSectionLen/CONST_SECSIZE,
-			X2fsUtil<EnvInterface64Impl,size_t>::DirSectionLen/CONST_SECSIZE,
-			X2fsUtil<EnvInterface64Impl,size_t>::FreeSpaceSectionLen/CONST_SECSIZE,
-			X2fsUtil<EnvInterface64Impl,size_t>::LinkedInfoSectionLen/CONST_SECSIZE,
+			X2fsUtil<EnvInterface64Impl,FsEnv64>::FileNameSectionLen/CONST_SECSIZE,
+			X2fsUtil<EnvInterface64Impl,FsEnv64>::DirSectionLen/CONST_SECSIZE,
+			X2fsUtil<EnvInterface64Impl,FsEnv64>::FreeSpaceSectionLen/CONST_SECSIZE,
+			X2fsUtil<EnvInterface64Impl,FsEnv64>::LinkedInfoSectionLen/CONST_SECSIZE,
 	};
 	size_t optional[1]={0};
 

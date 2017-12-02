@@ -38,7 +38,7 @@
 // TODO 检查下面的声明有什么错误
 template <class __SizeType>
 MemoryDescriptor<__SizeType>::MemoryDescriptor(__SizeType start,__SizeType limit,bool allocable):
-LinearSourceDescriptor<__SizeType>(start,limit),allocable(allocable)
+Super(start,limit),allocable(allocable)
 {
 
 }
@@ -75,13 +75,15 @@ bool MemoryDescriptor<__SizeType>::operator!=(const MemoryDescriptor<__SizeType>
 }
 
 //==============class LinearSourceManager
-template <class _LinearSourceDescriptor,template <class> class _NodeAllocator,typename __SizeType,int __Alignment>
-const _LinearSourceDescriptor & LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator,__SizeType,__Alignment>::
-getSpace()const
+#define __DEF_Template_LinearSourceManager template <class _LinearSourceDescriptor,template <class> class _NodeAllocator,typename __SizeType,int __Alignment>
+#define __DEF_LinearSourceManager LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator,__SizeType,__Alignment>
+__DEF_Template_LinearSourceManager
+const _LinearSourceDescriptor & __DEF_LinearSourceManager::getSpace()const
 {
 	return this->space;
 }
-
+#undef __DEF_Template_LinearSourceManager
+#undef __DEF_LinearSourceManager
 //============class MemoryManager<_DescriptorAllocator>
 template<template<class > class _DescriptorAllocator,typename __SizeType,int __Alignment>
 __SizeType MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::getBase() const {

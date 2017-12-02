@@ -18,6 +18,23 @@ LinearSourceDescriptor<__DEF_SIZE_TYPE,__DEF_ALIGNMENT>::LinearSourceDescriptor(
  {
 
  }
+template <class __AnotherSizeType,int __AnotherAlignment>
+LinearSourceDescriptor<__DEF_SIZE_TYPE,__DEF_ALIGNMENT>::
+LinearSourceDescriptor(const LinearSourceDescriptor<__AnotherSizeType,__AnotherAlignment> & rhs):
+	start((__DEF_SIZE_TYPE)rhs.getStart()),
+	limit((__DEF_SIZE_TYPE)rhs.getLimit())
+{
+	
+}
+template <class __AnotherSizeType,int __AnotherAlignment>
+typename LinearSourceDescriptor<__DEF_SIZE_TYPE,__DEF_ALIGNMENT>::__LinearSourceDescriptor& 
+LinearSourceDescriptor<__DEF_SIZE_TYPE,__DEF_ALIGNMENT>::
+operator=(const LinearSourceDescriptor<__AnotherSizeType,__AnotherAlignment> & rhs)
+{
+	start = (__DEF_SIZE_TYPE)rhs.getStart();
+	limit = (__DEF_SIZE_TYPE)rhs.getLimit();
+	return *this;
+}
 
 LinearSourceDescriptor<__DEF_SIZE_TYPE,__DEF_ALIGNMENT>::~LinearSourceDescriptor() {
  }

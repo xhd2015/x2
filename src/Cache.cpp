@@ -11,6 +11,8 @@
 	__asm__(".code32 \n\t");
 #endif
 
+
+#if defined(CODE32) || defined(CODE32USER)
 //=========class Cache<K,V>
 template<class K, class V>
 Cache<K, V>::Cache(size_t capacity,DEFAULT_GETTER getter,COMPARATOR cmp):
@@ -19,6 +21,7 @@ cmp(cmp),capacity(capacity),getter(getter),accessTimes(0),hitTimes(0)
 	karr=(KeyType*)Kernel::getTheKernel()->mnewKernel((size_t)this->capacity * (sizeof(KeyType) + sizeof(ValueType)));
 	varr = karr + this->capacity;
 }
+
 
 template<class K, class V>
 typename  Cache<K, V>::ValueType Cache<K, V>::get(KeyType k)
@@ -52,3 +55,5 @@ typename  Cache<K, V>::ValueType Cache<K, V>::get(KeyType k)
 	}
 	return NULL; //not found both in cache and in original container
 }
+
+#endif

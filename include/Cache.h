@@ -9,6 +9,8 @@
 #define INCLUDE_CACHE_H_
 #include <def.h>
 
+// TODO 解封下面结构，在64位下也能够验证
+#if defined(CODE32)||defined(CODE32USER)
 /**
  * V is likely to be a pointer and
  * K is likely to be a simple type
@@ -43,6 +45,7 @@ protected:
 	size_t		accessTimes,hitTimes;
 
 };
+#endif // CODE32*
 
 
 

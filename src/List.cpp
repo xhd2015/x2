@@ -39,30 +39,33 @@
 #include <File.h>
 #include <64/MallocToSimple.h>
 
-	template class TreeNode<FileDescriptor<size_t,sizeof(size_t)>,sizeof(size_t)>;
-	template class SimpleMemoryManager<TreeNode<FileDescriptor<size_t,sizeof(size_t)>,sizeof(size_t)> >;
-	template class TreeNode<int,sizeof(size_t)>;
-	template class SimpleMemoryManager<TreeNode<int,sizeof(size_t)>>;
-	template class TreeNode<MemoryDescriptor<size_t>,sizeof(size_t)>;
-	template class Tree<FileDescriptor<size_t,sizeof(size_t)> ,SimpleMemoryManager>;
-	template class Tree<MemoryDescriptor<size_t> , MallocToSimple64Impl>;
-	template class Tree<MemoryDescriptor<size_t>, X2fsUtil<StdEnv64Impl, size_t>::PartialMallocToSimple>;
-	template class Tree<MemoryDescriptor<size_t>, X2fsUtil<EnvInterface64Impl,size_t>::PartialMallocToSimple>;
-
-	template class ListNode<LinearSourceDescriptor<size_t>,sizeof(size_t)>;
-	template class ListNode<FileDescriptor<size_t,sizeof(size_t)>,sizeof(size_t)>;
-	template class ListNode<MemoryDescriptor<size_t>,sizeof(size_t)>;
-
-	template class LinkedList<LinearSourceDescriptor<size_t> , MallocToSimple64Impl>;
-	template class LinkedList<LinearSourceDescriptor<size_t>, X2fsUtil<StdEnv64Impl,size_t>::PartialMallocToSimple>;
-	template class LinkedList<LinearSourceDescriptor<size_t> , X2fsUtil<EnvInterface64Impl,size_t>::PartialMallocToSimple>;
-
-	template class LocateableLinkedList<LinearSourceDescriptor<size_t> ,
-		Locator<LinearSourceDescriptor<size_t> >::KEEP, MallocToSimple64Impl,size_t>;
-	template class LocateableLinkedList<LinearSourceDescriptor<size_t> , Locator<LinearSourceDescriptor<size_t> >::DISCARD, MallocToSimple64Impl,size_t>;
-	template class LocateableLinkedList<LinearSourceDescriptor<size_t> , Locator<LinearSourceDescriptor<size_t> >::DISCARD, X2fsUtil<EnvInterface64Impl,size_t>::PartialMallocToSimple,size_t>;
-	template class LocateableLinkedList<LinearSourceDescriptor<size_t>, Locator<LinearSourceDescriptor<size_t> >::DISCARD,
-			X2fsUtil<StdEnv64Impl, size_t>::PartialMallocToSimple, size_t>;
+//	template class TreeNode<FileDescriptor<size_t,sizeof(size_t)>,sizeof(size_t)>;
+//	template class SimpleMemoryManager<TreeNode<FileDescriptor<size_t,sizeof(size_t)>,sizeof(size_t)> >;
+//	template class TreeNode<int,sizeof(size_t)>;
+//	template class SimpleMemoryManager<TreeNode<int,sizeof(size_t)>>;
+//	template class TreeNode<MemoryDescriptor<size_t>,sizeof(size_t)>;
+//	template class Tree<FileDescriptor<size_t,sizeof(size_t)> ,SimpleMemoryManager>;
+//	template class Tree<MemoryDescriptor<size_t> , MallocToSimple64Impl>;
+//	template class Tree<MemoryDescriptor<size_t>, X2fsUtil<StdEnv64Impl, FsEnv64>::PartialMallocToSimple>;
+//	template class Tree<MemoryDescriptor<size_t>, X2fsUtil<EnvInterface64Impl,FsEnv64>::PartialMallocToSimple>;
+//
+//	template class ListNode<LinearSourceDescriptor<size_t,sizeof(size_t)>,sizeof(size_t)>;
+//	template class ListNode<FileDescriptor<size_t,sizeof(size_t)>,sizeof(size_t)>;
+//	template class ListNode<MemoryDescriptor<size_t>,sizeof(size_t)>;
+//
+//	template class LinkedList<LinearSourceDescriptor<size_t,sizeof(size_t)> , MallocToSimple64Impl,sizeof(size_t)>;
+//	template class LinkedList<LinearSourceDescriptor<size_t,sizeof(size_t)>, X2fsUtil<StdEnv64Impl,FsEnv64>::PartialMallocToSimple,sizeof(size_t)>;
+//	template class LinkedList<LinearSourceDescriptor<size_t,sizeof(size_t)> , X2fsUtil<EnvInterface64Impl,FsEnv64>::PartialMallocToSimple,sizeof(size_t)>;
+//
+//	template class LocateableLinkedList<LinearSourceDescriptor<size_t,sizeof(size_t)> ,
+//		Locator<LinearSourceDescriptor<size_t,sizeof(size_t)> >::KEEP, MallocToSimple64Impl,size_t,sizeof(size_t)>;
+//	template class LocateableLinkedList<LinearSourceDescriptor<size_t,sizeof(size_t)> ,
+//			Locator<LinearSourceDescriptor<size_t,sizeof(size_t)> >::DISCARD, MallocToSimple64Impl,size_t,sizeof(size_t)>;
+//	template class LocateableLinkedList<LinearSourceDescriptor<size_t,sizeof(size_t)> ,
+//			Locator<LinearSourceDescriptor<size_t,sizeof(size_t)> >::DISCARD, X2fsUtil<EnvInterface64Impl,FsEnv64>::PartialMallocToSimple,size_t,sizeof(size_t)>;
+//	template class LocateableLinkedList<LinearSourceDescriptor<size_t,sizeof(size_t)>,
+//	Locator<LinearSourceDescriptor<size_t,sizeof(size_t)> >::DISCARD,
+//			X2fsUtil<StdEnv64Impl, FsEnv64>::PartialMallocToSimple, size_t,sizeof(size_t)>;
 #endif
 
 

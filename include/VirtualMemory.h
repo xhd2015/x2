@@ -8,7 +8,6 @@
 #if defined(CODE32)
 #include <Descriptor.h>
 	class PTE;
-	class PDE;
 	typedef AssociatedMemoryManager<SegmentDescriptor,1> SegManager;
 	typedef AssociatedMemoryManager<PTE,1>	PTEManager;
 #endif
@@ -16,8 +15,10 @@
 #if defined(CODE32) || defined(CODE64)
 #pragma pack(push,1)
 //just for 32-bit paging,for others you must define additional structures
-struct PageAttributes{
+struct PageAttributes
+{
 	enum{
+
 		PWT_ALWAYS_UPDATE=1,
 		PWT_CACHE_UPDATE=0,
 		PCD_CACHE_ENABLE=0,
@@ -39,9 +40,8 @@ struct PageAttributes{
 	};
 };
 struct CR3{
-
 	CR3(int base,int pwt/*=PageAttributes::PWT_ALWAYS_UPDATE*/,
-			int pcd=PageAttributes::PCD_CACHE_DISABLE);
+			int  pcd=PageAttributes::PCD_CACHE_DISABLE);
 	AS_MACRO CR3(u32_t cr3);//从32位无符号数赋值到CR3结构
 	int R0:3; //reserved
 	int PWT:1;

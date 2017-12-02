@@ -8,8 +8,7 @@
 #include <AssociatedMemoryManager.h>
 #include <VirtualMemory.h>
 #include <Descriptor.h>
-//#include <PMLoader.h>
-#include <after_def.h>
+
 #include <Kernel.h>
 
 //class Process;
@@ -74,10 +73,19 @@ extern "C" {
 		RESERVED_PDE_START = 0,
 		RESERVED_PDE_NUM=10,
 		RESERVED_PTE_START = (RESERVED_PDE_NUM*(sizeof(PDEManager::NodeType) + sizeof(PDEManager::TargetType)) + 4)&0xfffffffc,//it must align with 4
+#if defined(CODE64)
+		RESERVED_PTE_NUM=0, /*无法计算*/
+#elif defined(CODE32)
 		RESERVED_PTE_NUM=(CONST_SECSIZE - RESERVED_PTE_START)/(sizeof(PTEManager::NodeType)+sizeof(PTEManager::TargetType)),
+#endif
 		RESERVED_PTE_MANAGER_START = CONST_SECSIZE,
 		RESERVED_PTE_MANAGER_NUM = RESERVED_PDE_NUM,
+#if defined(CODE64)
+		RESERVED_END =0, /*无法计算*/
+#elif defined(CODE32)
 		RESERVED_END = RESERVED_PTE_MANAGER_START + RESERVED_PTE_MANAGER_NUM * sizeof(PTEManager*),
+#endif
+
 
 		ERROR_NO_ERROR=0,
 		ERROR_NO_ENOUGH_PROCESS_SPACE,
@@ -195,7 +203,7 @@ protected:
 	/**
 	 *
 	 */
-	MemoryManager<KernelSmmWrapper,size_t> baseMM;
+	MemoryManager<KernelSmmWrapper,size_t,PREFERED_ALIGNMENT> baseMM;
 
 	/**
 	 * 管理PDE项

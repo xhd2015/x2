@@ -7,6 +7,7 @@
 #include <Locator.h>
 #include <libx2.h>
 
+#pragma pack(push,1)
 class SimpleMemoryNode{
 public:
     AS_MACRO SimpleMemoryNode(bool NO=false);//done
@@ -31,7 +32,7 @@ public:
     */
     bool alloced;
 };
-
+#pragma pack(pop)
 /**
 *此管理器管理一个连续的区域，然后每次分配固定大小的内存
 *为链表等结构提供支持
@@ -155,7 +156,7 @@ class ListNode{};//模板
  * @param T 存储的类型
  * @param _Allocator 分配ListNode<T>的分配器
  */
-template<class T,template <class> class _Allocator,int __Alignment=sizeof(size_t)>
+template<class T,template <class> class _Allocator,int __Alignment>
 class LinkedList{
 public:
 	using __ListNode = ListNode<T,__Alignment>;
@@ -227,7 +228,7 @@ protected:
 template<class _Locateable,int _HowAllocated,
 		template <class> class _Allocator,
 		typename __SizeType,
-		int __Alignment=sizeof(__SizeType)>
+		int __Alignment>
 class LocateableLinkedList:public LinkedList<_Locateable,_Allocator,__Alignment>
 {
 public:
@@ -310,7 +311,7 @@ class TreeNode{}; //模板
  *	@param T			节点存储的数据类型
  *	@param _Allocator  分配TreeNode的分配器类型
  */
-template <class T,template <class> class _Allocator,int __Alignment=sizeof(size_t)>
+template <class T,template <class> class _Allocator,int __Alignment>
 class Tree{
 public:
 	using This = Tree<T,_Allocator,__Alignment>;

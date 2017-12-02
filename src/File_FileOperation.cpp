@@ -12,12 +12,18 @@
 
 #if defined(CODE64)
 #include <EnvInterface64Impl.h>
-	template class FileOperation<StdEnv64Impl, size_t>;
+//	template class FileOperation<StdEnv64Impl,FsEnv16>;
+//	template class FileOperation<StdEnv64Impl,FsEnv32>;
+//	template class FileOperation<StdEnv64Impl,FsEnv64>;
 #endif
 
 
-template <class __StdEnv,class __SizeType>
-FileOperation<__StdEnv,__SizeType>::FileOperation(__StdEnv * env,u8_t driver,u32_t lbaAddress):
+//==class FileOperation
+#define __DEF_Template_FileOperation template <class __StdEnv,class __FsEnv>
+#define __DEF_FileOperation FileOperation<__StdEnv,__FsEnv>
+
+__DEF_Template_FileOperation
+__DEF_FileOperation::FileOperation(__StdEnv * env,u8_t driver,u32_t lbaAddress):
 	stdEnv(env),
 	util(env, driver, lbaAddress),
 	curNode(NULL),
@@ -26,8 +32,8 @@ FileOperation<__StdEnv,__SizeType>::FileOperation(__StdEnv * env,u8_t driver,u32
 	curPath.push_back("");
 	curNode = (FileNode*) util.getFileTree()->getHead();//当前目录为根目录
 }
-template <class __StdEnv,class __SizeType>
-void FileOperation<__StdEnv,__SizeType>::help()
+__DEF_Template_FileOperation
+void __DEF_FileOperation::help()
 {
 	stdEnv->printf_simple(R"+*( 
        help
@@ -50,14 +56,14 @@ void FileOperation<__StdEnv,__SizeType>::help()
 
 
 
-template <class __StdEnv,class __SizeType>
-void FileOperation<__StdEnv,__SizeType>::ls()
+__DEF_Template_FileOperation
+void __DEF_FileOperation::ls()
 {
 	util.listNode(curNode);
 }
 
-template <class __StdEnv,class __SizeType>
-bool FileOperation<__StdEnv,__SizeType>::cd(const __String& strPath)
+__DEF_Template_FileOperation
+bool __DEF_FileOperation::cd(const __String& strPath)
 {
 	__Vector_String paths=stdEnv->pathSplit(strPath);
 	if(paths.size()==0) // no argument
@@ -84,8 +90,8 @@ bool FileOperation<__StdEnv,__SizeType>::cd(const __String& strPath)
 
 }
 
-template <class __StdEnv,class __SizeType>
-bool FileOperation<__StdEnv,__SizeType>::cdFromCur(__Vector_String_cit begin,__Vector_String_cit end)
+__DEF_Template_FileOperation
+bool __DEF_FileOperation::cdFromCur(__Vector_String_cit begin,__Vector_String_cit end)
 {
 	FileNode *tempCur=curNode;
 	FileNode *temp=NULL;
@@ -158,8 +164,8 @@ bool FileOperation<__StdEnv,__SizeType>::cdFromCur(__Vector_String_cit begin,__V
 
 	return (!isError);
 }
-template <class __StdEnv,class __SizeType>
-bool FileOperation<__StdEnv,__SizeType>::cdLast()
+__DEF_Template_FileOperation
+bool __DEF_FileOperation::cdLast()
 {
 	if(lastNode!=NULL)
 	{
@@ -172,29 +178,30 @@ bool FileOperation<__StdEnv,__SizeType>::cdLast()
 	}
 	return true;
 }
-template <class __StdEnv,class __SizeType>
-void FileOperation<__StdEnv,__SizeType>::cdRoot()
+__DEF_Template_FileOperation
+void __DEF_FileOperation::cdRoot()
 {
 	lastNode=curNode;
 	curPath.clear();
 	curPath.push_back("");
 }
-template <class __StdEnv,class __SizeType>
-void FileOperation<__StdEnv,__SizeType>::rm(const __String & fname)
+__DEF_Template_FileOperation
+void __DEF_FileOperation::rm(const __String & fname)
 {
-	util.seterrno(X2fsUtil<EnvInterface64Impl,size_t>::ERROR_NOERR);
+	util.seterrno(__X2fsUtil::ERROR_NOERR);
 	FileNode *fnode;
 	if(checkExits(fname, fnode))
 	{
 		util.deleteFile(fnode);
 	}
 }
-template <class __StdEnv,class __SizeType>
-void FileOperation<__StdEnv,__SizeType>::mkdir(const __String& dir)
+__DEF_Template_FileOperation
+void __DEF_FileOperation::mkdir(const __String& dir)
 {
-	util.seterrno(X2fsUtil<EnvInterface64Impl,size_t>::ERROR_NOERR);
+
+	util.seterrno(__X2fsUtil::ERROR_NOERR);
 	util.create(curNode, FileDescriptor<size_t,sizeof(size_t)>::TYPE_DIR, dir.c_str(), 0,0);
-	if(util.geterrno() == X2fsUtil<EnvInterface64Impl,size_t>::ERROR_FILE_ALREDY_EXIST)
+	if(util.geterrno() == __X2fsUtil::ERROR_FILE_ALREDY_EXIST)
 	{
 		stdEnv->printf_simple("file/directory");
 		stdEnv->printf_simple(dir.c_str());
@@ -202,17 +209,17 @@ void FileOperation<__StdEnv,__SizeType>::mkdir(const __String& dir)
 		stdEnv->flushOutputs();
 	}
 }
-template <class __StdEnv,class __SizeType>
-void FileOperation<__StdEnv,__SizeType>::touch(const __String & fname,__SizeType secNum,__TimeType ctime)
+__DEF_Template_FileOperation
+void __DEF_FileOperation::touch(const __String & fname,__FsSizeType secNum,__FsTimeType ctime)
 {
-	util.seterrno(X2fsUtil<EnvInterface64Impl,size_t>::ERROR_NOERR);
+	util.seterrno(__X2fsUtil::ERROR_NOERR);
 	util.create(curNode, FileDescriptor<size_t,sizeof(size_t)>::TYPE_FILE, fname.c_str(), secNum,ctime);
-	if(util.geterrno()!=X2fsUtil<EnvInterface64Impl,size_t>::ERROR_NOERR)
+	if(util.geterrno()!=__X2fsUtil::ERROR_NOERR)
 	{
 		stdEnv->printf_simple("error code is %d\n",util.geterrno());
 		stdEnv->flushOutputs();
 	}
-	if(util.geterrno() == X2fsUtil<EnvInterface64Impl,size_t>::ERROR_FILE_ALREDY_EXIST)
+	if(util.geterrno() == __X2fsUtil::ERROR_FILE_ALREDY_EXIST)
 	{
 		stdEnv->printf_simple("file/directory");
 		stdEnv->printf_simple(fname.c_str());
@@ -220,14 +227,14 @@ void FileOperation<__StdEnv,__SizeType>::touch(const __String & fname,__SizeType
 		stdEnv->flushOutputs();
 	}
 }
-template <class __StdEnv,class __SizeType>
-void FileOperation<__StdEnv,__SizeType>::cat()
+__DEF_Template_FileOperation
+void __DEF_FileOperation::cat()
 {
 	stdEnv->printf_simple("method unsupported\n");
 	stdEnv->flushOutputs();
 }
-template <class __StdEnv,class __SizeType>
-void FileOperation<__StdEnv,__SizeType>::pwd()
+__DEF_Template_FileOperation
+void __DEF_FileOperation::pwd()
 {
 	for(__String& s:curPath)
 	{
@@ -237,19 +244,19 @@ void FileOperation<__StdEnv,__SizeType>::pwd()
 	stdEnv->printf_simple("\n");
 	stdEnv->flushOutputs();
 }
-template <class __StdEnv,class __SizeType>
-void FileOperation<__StdEnv,__SizeType>::changeImage(const __String& img)
+__DEF_Template_FileOperation
+void __DEF_FileOperation::changeImage(const __String& img)
 {
 	stdEnv->printf_simple("method unsupported\n");
 	stdEnv->flushOutputs();
 }
-template <class __StdEnv,class __SizeType>
-const typename FileOperation<__StdEnv,__SizeType>::__String& FileOperation<__StdEnv,__SizeType>::curDir()
+__DEF_Template_FileOperation
+const typename __DEF_FileOperation::__String& __DEF_FileOperation::curDir()
 {
 	return curPath[curPath.size()-1];
 }
-template <class __StdEnv,class __SizeType>
-void FileOperation<__StdEnv,__SizeType>::read(const __String& fname,__SizeType secStart,__SizeType byteLen)
+__DEF_Template_FileOperation
+void __DEF_FileOperation::read(const __String& fname,__FsSizeType secStart,__FsSizeType byteLen)
 {
 	size_t secnum = (byteLen/CONST_SECSIZE)+(byteLen%CONST_SECSIZE!=0);
 	char *buffer=new char[secnum * CONST_SECSIZE];
@@ -260,8 +267,8 @@ void FileOperation<__StdEnv,__SizeType>::read(const __String& fname,__SizeType s
 	stdEnv->flushOutputs();
 	delete [] buffer;
 }
-template <class __StdEnv,class __SizeType>
-void FileOperation<__StdEnv,__SizeType>::write(const __String& fname,__SizeType start,const char* content,__SizeType len)
+__DEF_Template_FileOperation
+void __DEF_FileOperation::write(const __String& fname,__FsSizeType start,const char* content,__FsSizeType len)
 {
 	size_t secnum= (len/CONST_SECSIZE)+(len%CONST_SECSIZE!=0);
 	char *buffer=new char[secnum * CONST_SECSIZE]();
@@ -273,27 +280,27 @@ void FileOperation<__StdEnv,__SizeType>::write(const __String& fname,__SizeType 
 	delete []buffer;
 }
 
-template <class __StdEnv,class __SizeType>
-void FileOperation<__StdEnv,__SizeType>::randwrite(const __String& fname,__SizeType byteStart,
-		const char* content,__SizeType byteLen)
+__DEF_Template_FileOperation
+void __DEF_FileOperation::randwrite(const __String& fname,__FsSizeType byteStart,
+		const char* content,__FsSizeType byteLen)
 {
-	ManagedObject<char*,__StdEnv,__SizeType> mbuf(stdEnv);
-	__SizeType bufSize,startOff,endOff;
+	ManagedObject<char*,__StdEnv> mbuf(stdEnv);
+	__FsSizeType bufSize,startOff,endOff;
 	bufSize=__X2fsUtil::calculateRandomBufferSize(byteStart, byteLen, &startOff, &endOff, CONST_SECSIZE);
 
 	char *contentBuf = mbuf.getOnlyBuffer(bufSize);
 	stdEnv->memcpy(contentBuf + startOff, content,byteLen);
 
-	__SizeType writeNum = util._randomWriteFile(contentBuf, byteLen,
+	__FsSizeType writeNum = util._randomWriteFile(contentBuf, byteLen,
 			util.locatePath(curNode, fname.c_str()), byteStart);
 	stdEnv->printf_simple( "write byte num is %d\n",writeNum );
 	stdEnv->flushOutputs();
 }
-template <class __StdEnv,class __SizeType>
-void FileOperation<__StdEnv,__SizeType>::randread(const __String& fname,__SizeType byteStart,__SizeType byteLen)
+__DEF_Template_FileOperation
+void __DEF_FileOperation::randread(const __String& fname,__FsSizeType byteStart,__FsSizeType byteLen)
 {
-	ManagedObject<char*,__StdEnv,__SizeType> mbuf(stdEnv);
-	__SizeType bufSize,startOff,endOff;
+	ManagedObject<char*,__StdEnv> mbuf(stdEnv);
+	__FsSizeType bufSize,startOff,endOff;
 	bufSize=__X2fsUtil::calculateRandomBufferSize(byteStart, byteLen, &startOff, &endOff, CONST_SECSIZE);
 
 	char *contentBuf = mbuf.getOnlyBuffer(bufSize);
@@ -305,13 +312,13 @@ void FileOperation<__StdEnv,__SizeType>::randread(const __String& fname,__SizeTy
 	stdEnv->flushOutputs();
 }
 
-template <class __StdEnv,class __SizeType>
-void FileOperation<__StdEnv,__SizeType>::truncate(const __String & fname,__SizeType newlen)
+__DEF_Template_FileOperation
+void __DEF_FileOperation::truncate(const __String & fname,__FsSizeType newlen)
 {
 	FileNode *fnode;
 	if(checkIsFile(fname, fnode))
 	{
-		__SizeType oldLen = fnode->getData().getFileLen();
+		__FsSizeType oldLen = fnode->getData().getFileLen();
 		if(util.truncateFile(fnode, newlen))
 		{
 			stdEnv->printf_simple("len:%d --> %d\n",oldLen,fnode->getData().getFileLen());
@@ -322,10 +329,10 @@ void FileOperation<__StdEnv,__SizeType>::truncate(const __String & fname,__SizeT
 }
 #if defined(CODE64)
 #include <fstream>
-template <class __StdEnv,class __SizeType>
-__SizeType FileOperation<__StdEnv,__SizeType>::readSysFileToX2File(const __String &sysFile,__SizeType sysStart,
-							const __String &x2File,__SizeType x2Start,
-							__SizeType maxLen)
+__DEF_Template_FileOperation
+typename __DEF_FileOperation::__FsSizeType __DEF_FileOperation::readSysFileToX2File(const __String &sysFile,__FsSizeType sysStart,
+							const __String &x2File,__FsSizeType x2Start,
+							__FsSizeType maxLen)
 {
 	FileNode *fnode=util.locatePath(curNode, x2File.c_str());
 	if(fnode==NULL)
@@ -340,7 +347,7 @@ __SizeType FileOperation<__StdEnv,__SizeType>::readSysFileToX2File(const __Strin
 		return 0;
 
 	fs.seekg(0,std::fstream::end);
-	__SizeType fcount = fs.tellg();
+	__FsSizeType fcount = fs.tellg();
 	stdEnv->printf_simple("file gcount = %d\n",fcount);
 	stdEnv->flushOutputs();
 	if(sysStart >= fcount)
@@ -354,10 +361,10 @@ __SizeType FileOperation<__StdEnv,__SizeType>::readSysFileToX2File(const __Strin
 
 
 	// 申请 4KB的buffer，然后循环读取
-	const __SizeType headingByte = (x2Start%CONST_SECSIZE);
-	const __SizeType bufsize=4*2*CONST_SECSIZE;
+	const __FsSizeType headingByte = (x2Start%CONST_SECSIZE);
+	const __FsSizeType bufsize=4*2*CONST_SECSIZE;
 
-	ManagedObject<char*,EnvInterface64Impl,__SizeType> mbuf(stdEnv);
+	ManagedObject<char*,EnvInterface64Impl> mbuf(stdEnv);
 
 	char *buf=mbuf.getOnlyBuffer(headingByte + bufsize);//为了兼容
 	if(buf==NULL)
@@ -367,12 +374,12 @@ __SizeType FileOperation<__StdEnv,__SizeType>::readSysFileToX2File(const __Strin
 	if(maxLen==0)
 		maxLen = fcount - sysStart;
 
-	__SizeType leftLen=maxLen;
-	__SizeType sysFileLeft = fcount - sysStart;
-	__SizeType start=x2Start;
+	__FsSizeType leftLen=maxLen;
+	__FsSizeType sysFileLeft = fcount - sysStart;
+	__FsSizeType start=x2Start;
 	while(leftLen>0 && sysFileLeft>0)
 	{
-		__SizeType thisAvl =Util::min(bufsize, Util::min( sysFileLeft,leftLen));
+		__FsSizeType thisAvl =Util::min(bufsize, Util::min( sysFileLeft,leftLen));
 				//取leftLen,sysFileLeft,bufSize中的最小者
 		fs.read(buf + headingByte, thisAvl);
 		util._randomWriteFile(buf, thisAvl,fnode, start);
@@ -386,13 +393,13 @@ __SizeType FileOperation<__StdEnv,__SizeType>::readSysFileToX2File(const __Strin
 	return (maxLen - leftLen);
 
 }
-template <class __StdEnv,class __SizeType>
-__SizeType FileOperation<__StdEnv,__SizeType>::writeSysFileFromX2File(const __String &sysFile,__SizeType sysStart,
-							const __String &x2File,__SizeType x2Start,
-							__SizeType maxLen)
+__DEF_Template_FileOperation
+typename __DEF_FileOperation::__FsSizeType __DEF_FileOperation::writeSysFileFromX2File(const __String &sysFile,__FsSizeType sysStart,
+							const __String &x2File,__FsSizeType x2Start,
+							__FsSizeType maxLen)
 {
 	FileNode *fnode=util.locatePath(curNode, x2File.c_str());
-	__SizeType flen;
+	__FsSizeType flen;
 	if(fnode==NULL || (flen=fnode->getData().getFileLen()) <= x2Start)
 	{
 		stdEnv->printf_simple("error,file in x2 not exists or no a single byte is"
@@ -405,10 +412,10 @@ __SizeType FileOperation<__StdEnv,__SizeType>::writeSysFileFromX2File(const __St
 		fs.open(sysFile, std::fstream::out);
 
 	// 申请 4KB的buffer，然后循环读取
-	const __SizeType headingByte = (x2Start%CONST_SECSIZE);
-	const __SizeType bufsize=4*2*CONST_SECSIZE;
+	const __FsSizeType headingByte = (x2Start%CONST_SECSIZE);
+	const __FsSizeType bufsize=4*2*CONST_SECSIZE;
 
-	ManagedObject<char*,EnvInterface64Impl,__SizeType> mbuf(stdEnv);
+	ManagedObject<char*,EnvInterface64Impl> mbuf(stdEnv);
 
 	char *buf=mbuf.getOnlyBuffer(headingByte + bufsize);//为了兼容x2随机写的需求
 	if(buf==NULL)
@@ -418,12 +425,12 @@ __SizeType FileOperation<__StdEnv,__SizeType>::writeSysFileFromX2File(const __St
 	if(maxLen==0)
 		maxLen = flen - x2Start;
 
-	__SizeType leftLen = maxLen;
-	__SizeType x2FileLeft = flen - x2Start;
-	__SizeType start = x2Start;
+	__FsSizeType leftLen = maxLen;
+	__FsSizeType x2FileLeft = flen - x2Start;
+	__FsSizeType start = x2Start;
 	while(leftLen>0 && x2FileLeft>0)
 	{
-		__SizeType thisAvl =Util::min(bufsize, Util::min( x2FileLeft,leftLen));
+		__FsSizeType thisAvl =Util::min(bufsize, Util::min( x2FileLeft,leftLen));
 		util._randomReadFile(buf, thisAvl,
 					fnode, start);
 		fs.write(buf+headingByte,thisAvl);
@@ -436,8 +443,8 @@ __SizeType FileOperation<__StdEnv,__SizeType>::writeSysFileFromX2File(const __St
 }
 #endif
 
-template <class __StdEnv,class __SizeType>
-bool FileOperation<__StdEnv,__SizeType>::checkIsFile(const __String & fname,FileNode *&fnode)const
+__DEF_Template_FileOperation
+bool __DEF_FileOperation::checkIsFile(const __String & fname,FileNode *&fnode)const
 {
 	bool exist=checkExits(fname, fnode) ;
 	if(exist && fnode->getData().getType()!=__FileDescriptor::TYPE_FILE){
@@ -446,8 +453,8 @@ bool FileOperation<__StdEnv,__SizeType>::checkIsFile(const __String & fname,File
 	}
 	return exist;
 }
-template <class __StdEnv,class __SizeType>
-bool FileOperation<__StdEnv,__SizeType>::checkIsDir(const __String & fname,FileNode *&fnode)const
+__DEF_Template_FileOperation
+bool __DEF_FileOperation::checkIsDir(const __String & fname,FileNode *&fnode)const
 {
 	bool exist=checkExits(fname, fnode) ;
 	if(exist && fnode->getData().getType()!=__FileDescriptor::TYPE_DIR){
@@ -457,8 +464,8 @@ bool FileOperation<__StdEnv,__SizeType>::checkIsDir(const __String & fname,FileN
 	return exist;
 }
 
-template <class __StdEnv,class __SizeType>
-bool FileOperation<__StdEnv,__SizeType>::checkExits(const __String & fname,FileNode *&fnode)const
+__DEF_Template_FileOperation
+bool __DEF_FileOperation::checkExits(const __String & fname,FileNode *&fnode)const
 {
 	fnode = util.locatePath(curNode, fname.c_str());
 	if(fnode==NULL)
@@ -468,16 +475,16 @@ bool FileOperation<__StdEnv,__SizeType>::checkExits(const __String & fname,FileN
 	}
 	return true;
 }
-template <class __StdEnv,class __SizeType>
-void FileOperation<__StdEnv,__SizeType>::errorFileNotExits(const __String & fname)const
+__DEF_Template_FileOperation
+void __DEF_FileOperation::errorFileNotExits(const __String & fname)const
 {
 	stdEnv->printf_simple("file/dir \"");
 	stdEnv->printf_simple(fname.c_str());
 	stdEnv->printf_simple("\" not exists.\n");
 	stdEnv->flushOutputs();
 }
-template <class __StdEnv,class __SizeType>
-void FileOperation<__StdEnv,__SizeType>::errorNotAFile(const __String & fname)const
+__DEF_Template_FileOperation
+void __DEF_FileOperation::errorNotAFile(const __String & fname)const
 {
 	stdEnv->printf_simple("name \"");
 	stdEnv->printf_simple(fname.c_str());
@@ -485,8 +492,8 @@ void FileOperation<__StdEnv,__SizeType>::errorNotAFile(const __String & fname)co
 	stdEnv->flushOutputs();
 }
 
-template <class __StdEnv,class __SizeType>
-void FileOperation<__StdEnv,__SizeType>::errorNotADir(const __String &fname)const
+__DEF_Template_FileOperation
+void __DEF_FileOperation::errorNotADir(const __String &fname)const
 {
 	stdEnv->printf_simple("file \"");
 	stdEnv->printf_simple(fname.c_str());
@@ -494,8 +501,8 @@ void FileOperation<__StdEnv,__SizeType>::errorNotADir(const __String &fname)cons
 	stdEnv->flushOutputs();
 }
 
-template <class __StdEnv,class __SizeType>
-void FileOperation<__StdEnv,__SizeType>::refreshCurrentPath()
+__DEF_Template_FileOperation
+void __DEF_FileOperation::refreshCurrentPath()
 {
 	curPath.clear();
 	FileNode *head=(FileNode*)util.getFileTree()->getHead();
@@ -506,10 +513,13 @@ void FileOperation<__StdEnv,__SizeType>::refreshCurrentPath()
 //	vector<string>::size_type i=1;
 	while(p!=head)
 	{
-		size_t nlen;
+		__FsSizeType nlen;
 		char* str=util.getFileNameCstr(p->getData(), nlen);
 		curPath.insert(curPath.begin(),__String(str));
 		p = (FileNode*)p->getDirectFather();
 	}
 }
+
+#undef __DEF_Template_FileOperation
+#undef __DEF_FileOperation
 

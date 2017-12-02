@@ -27,9 +27,11 @@ SRC64 := src/64
 SRC32 := src
 SRC16 := src
 SRCCOMMON := $(SRC)/common
+SRCCONCEPTUAL := $(SRC)/conceptual
 EXPORTS := exports
 BACKUP := backups
 INCLUDE := include
+INCLUDECONCEPTUAL := $(INCLUDE)/conceptual
 STDC := stdc
 STDCPP := stdc++
 
@@ -91,7 +93,7 @@ DEPRECATED_CCFLAGS = -fpack-struct=1
 
 
 #toolchains
-CXX = g++ -fmax-errors=5 -finput-charset=utf8
+CXX = g++ -fmax-errors=20 -finput-charset=utf8  -save-temps
 AS = as
 ifeq ($(DEBUG),true)
 	CXX += -g
@@ -275,12 +277,25 @@ $(GEN64)/CMDUtil%.exe:$(GEN64)/lib64.a  $(SRC64)/CMDUtil%.cpp $(SRC)/File.cpp $(
 	fi
 	basefilename=$${filename/%.exe/}
 	basefilename=$${basefilename/#CMDUtil/}
-	$(CXX) -Werror -fmax-errors=2 -Wall -DCODE64 -std=$(CXXSTD) -I$(INCLUDE) \
+	$(CXX) -Werror -Wall -DCODE64 -std=$(CXXSTD) -I$(INCLUDE) \
 	-Wformat \
 	 -o $@ \
 	-L$(GEN64) -Wl,'-(' -l64 $(SRC64)/CMDUtil$${basefilename}.cpp \
 			$(SRC)/File.cpp $(SRC)/EnvInterface64Impl.cpp $(SRCCOMMON)/Getopt.cpp \
 			$(SRC64)/MallocToSimple.cpp		\
+	-Wl,'-)' -static
+$(GEN64)/conceptual_%.exe:$(INCLUDECONCEPTUAL)/all.h $(SRCCONCEPTUAL)/all.cpp
+	filename=$$(basename $@|grep -P '.*conceptual_.*\.exe' -o)
+	if [ -z $$filename ];then
+		echo 'filename is invalid'
+		exit 1
+	fi
+	basefilename=$${filename/%.exe/}
+	basefilename=$${basefilename/#conceptual_/}
+	$(CXX) -Werror -Wall -DCODE64 -DCMDUTIL=$${basefilename}.cpp -std=$(CXXSTD) -I$(INCLUDE) \
+	-Wformat \
+	 -o $@ \
+	-L$(GEN64) -Wl,'-(' $(SRCCONCEPTUAL)/all.cpp \
 	-Wl,'-)' -static
 #$(GEN64)/CMDUtil.o:$(SRC64)/CMDUtil.cpp
 #	$(CXX) -Werror -fmax-errors=2 -Wall -DCODE64 -std=$(CXXSTD) -I$(INCLUDE) \

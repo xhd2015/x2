@@ -1,6 +1,7 @@
 # 此文件
 此文件描述了通过一些特别的手段来实现各种比较特殊的要求，其中一些可能十分有技术含量，另一些却看起来平淡无奇。
 但是，无论如何这些技巧都最大化遵循最佳实践原则，并且随着时间会进行改进。
+
 # 实现结构体按不同字节对齐以及C++代码生成技术
 代码生成很重要，不可否认。受boost preprocessor的启发，我对此问题的最新的最优雅的解决方法是：
 ```c++
@@ -77,6 +78,30 @@ public:
 #undef __DEF_SIZE_TYPE
 #undef __DEF_ALIGNMENT
 ```
+
+# 掌握预处理器
+注：关于宏的测试可以使用eclipse cdt进行，鼠标放在最后的宏上面就能生成替换。
+提示： .在宏处理中由特殊含义
+```c++
+#define __STR(s) #s
+#define STR(s) __STR(s)
+#define CONH(A,B,C) A##B##C.h
+
+#define h PAPA
+#include STR(CONH(dio,h,op))
+```
+请问include最后生成了什么？（答案：#include "diohop.PAPA"
+TODO：解释
+```c++
+#define __STR(s) #s
+#define STR(s) __STR(s)
+#define CONH(A,B,C) A##B##C.h
+
+#define INC(A,B,C) STR(CONH(A,B,C))
+#define FOO foo2
+#include INC(dio,FOO,op)
+```
+请问include最后生成了什么？（答案：#include "diofoo2op.h" TODO:解释
 
 # 实现结构体按不同字节对齐的版本（过时，请看最新版）
 现在需要在64位下，同时有一个class的3份定义，它们都是重复的，唯一的不同是它们的对齐方式：这些结构体会被存入文件中，并可能在32位机器上读取，因此必须使结构体的每个域在64位和32位机器上具有相同的偏移。

@@ -22,6 +22,7 @@ typedef unsigned long long u64_t;
 typedef unsigned int u32_t;
 typedef unsigned short u16_t;
 typedef unsigned char  u8_t;
+#define PREFERED_ALIGNMENT 8
 #endif
 
 #include <config.h>
@@ -34,7 +35,13 @@ typedef unsigned int size_t;
 typedef unsigned int u32_t;
 typedef unsigned short u16_t;
 typedef unsigned char  u8_t;
+#if defined(CODE16)
+#define PREFERED_ALIGNMENT 2
+#else
+#define PREFERED_ALIGNMENT 4
 #endif
+#endif
+
 
 // IDE-ISSUE CODE16总是显示已经定义，而我定义的是CODE32等
 #if defined(CODE16) && ( defined(CODE32) || defined(CODE32USER) || defined(CODE64))

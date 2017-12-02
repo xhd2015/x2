@@ -27,11 +27,10 @@ AS_MACRO void operator delete[](void*, void*){};
 #endif
 
 
-template <typename __SizeType,int __Alignment=sizeof(__SizeType)>
+
+//===class LinearSourceDescriptor
+template <typename __SizeType,int __Alignment>
 class LinearSourceDescriptor{};  //一个普通的、仅用作模板的类
-
-
-
 #if defined(CODE64)
 #define __DEF_SIZE_TYPE u64_t
 #define __DEF_ALIGNMENT 8
@@ -54,11 +53,13 @@ class LinearSourceDescriptor{};  //一个普通的、仅用作模板的类
 #endif
 
 
-
+//====class MemoryDescriptor
 template <class __SizeType>
-class MemoryDescriptor:public LinearSourceDescriptor<__SizeType,sizeof(__SizeType)>{
+class MemoryDescriptor:public LinearSourceDescriptor<__SizeType,sizeof(size_t)>{
 public:
-	using __LinearSourceDescriptor = LinearSourceDescriptor<__SizeType,sizeof(__SizeType)>;
+	using This = MemoryDescriptor<__SizeType>;
+	using Super  = LinearSourceDescriptor<__SizeType,sizeof(size_t)>;
+	using __LinearSourceDescriptor  = Super;
     AS_MACRO MemoryDescriptor(__SizeType start,__SizeType limit,bool allocable=true);//done
 
     AS_MACRO ~MemoryDescriptor();//done
@@ -71,7 +72,6 @@ public:
     //const static MemoryDescriptor NULL_DESCRIPTOR;
 protected:
     bool allocable;
-    
 };
 
 
@@ -89,7 +89,7 @@ protected:
 */
 
 template <class _LinearSourceDescriptor,template <class> class _NodeAllocator,
-	typename __SizeType,int __Alignment=sizeof(size_t)>
+	typename __SizeType,int __Alignment>
 class LinearSourceManager:
 		public
 		LocateableLinkedList<_LinearSourceDescriptor,
@@ -214,7 +214,7 @@ protected:
 * 					  son-->next-->next---> ....  此层就是所有的分配节点信息
 */
 
-template <template <class> class _DescriptorAllocator,typename __SizeType,int __Alignment=sizeof(size_t)>
+template <template <class> class _DescriptorAllocator,typename __SizeType,int __Alignment>
 class MemoryManager:public Tree<MemoryDescriptor<__SizeType>,_DescriptorAllocator,__Alignment>{
 public:
 	using __MemoryDescriptor=MemoryDescriptor<__SizeType>;

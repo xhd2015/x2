@@ -115,7 +115,7 @@ int main(int argc,char *argv[])
 	if(status==MyPorcessor::RETURN_CONTINUE)
 	{
 			env.setFile(p.hddfile.c_str());
-			FileOperation<StdEnv64Impl,size_t> fop(&env,0x80,0x3000);
+			FileOperation<StdEnv64Impl,FsEnv64> fop(&env,0x80,0x3000);
 			if(p.cdpath.size()==0 || fop.cd(p.cdpath) )
 			{
 				if(p.mode==p.READ)

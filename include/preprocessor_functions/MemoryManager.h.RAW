@@ -28,6 +28,11 @@ public:
 	AS_MACRO LinearSourceDescriptor()=default;
 public:
     AS_MACRO LinearSourceDescriptor(__SizeType start,__SizeType limit); //done
+	template <class __AnotherSizeType,int __AnotherAlignment>
+	AS_MACRO LinearSourceDescriptor(const LinearSourceDescriptor<__AnotherSizeType,__AnotherAlignment> & rhs);
+	template <class __AnotherSizeType,int __AnotherAlignment>
+	AS_MACRO __LinearSourceDescriptor &operator=(const LinearSourceDescriptor<__AnotherSizeType,__AnotherAlignment> & rhs);
+
     AS_MACRO ~LinearSourceDescriptor();//done
     AS_MACRO __SizeType getStart() const ;//done
     AS_MACRO __SizeType getLimit() const ;//done

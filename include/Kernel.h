@@ -44,6 +44,11 @@ public:
 
 class ProcessManager{
 public:
+	using This = ProcessManager;
+	using __TreeNode_Process = TreeNode<Process*,PREFERED_ALIGNMENT>;
+	using __ListNode_Process = ListNode<__TreeNode_Process,PREFERED_ALIGNMENT>;
+	using __ProcessQueueType = LinkedList<__TreeNode_Process,KernelSmmWrapper,PREFERED_ALIGNMENT> ;
+	using __ProcessTreeType = Tree<Process*,KernelSmmWrapper,PREFERED_ALIGNMENT> ;
 	enum{
 		LDT_ITEMS=10
 	};
@@ -67,15 +72,15 @@ public:
 	/**
 	 * 建立一个指向Process*的TreeNode<Process*>
 	 */
-	AS_MACRO TreeNode<Process*,4>*	createProcessWrapper(Process* p);
+	AS_MACRO __TreeNode_Process	createProcessWrapper(Process* p);
 	void	setFatherProcess(TreeNode<Process*,4> *p,TreeNode<Process*,4> *father);
 	AS_MACRO TreeNode<Process*,4> *	getFatherProcess(TreeNode<Process*,4> *p);
-	TreeNode<Process*,4>*	getCurrentProcess()const;
+	__TreeNode_Process	getCurrentProcess()const;
 	void				swithcNextProcess();
 	/**
 	 * 分配进程结构并且将其加入进程树和进程调度队列
 	 */
-	TreeNode<Process*,4>*	addNewProcess(size_t codeLimit,size_t dataLimit,size_t stackLimit,
+	__TreeNode_Process	addNewProcess(size_t codeLimit,size_t dataLimit,size_t stackLimit,
 			char dpl=SegmentDescriptor::DPL_3);
 	/**
 	 * It is not safe
@@ -112,20 +117,21 @@ protected:
 			char dpl=SegmentDescriptor::DPL_3);
 	void		createIdleProcess();
 	void	invokeProcess(Process* p);
-	TreeNode<Process*,4>*		getByPid(unsigned int pid);
+	__TreeNode_Process		getByPid(unsigned int pid);
 
 	/**
 	 * point to the tree
 	 */
-	KernelSmmWrapper<ListNode<TreeNode<Process*,4>*,4> >		lksmm;
+	KernelSmmWrapper<__ListNode_Process >		lksmm;
 
-	KernelSmmWrapper<TreeNode<Process*,4> >					tksmm;
-	LinkedList<TreeNode<Process*,4>*,KernelSmmWrapper>  		prcsQueue;//for schedule
-	Tree<Process*,KernelSmmWrapper> 						prcsTree;
+	KernelSmmWrapper<__TreeNode_Process >					tksmm;
+	__ProcessQueueType								  		prcsQueue;//for schedule
+
+	__ProcessTreeType										prcsTree;
 	Process													 *idleProcess;//The special one to ensure that at least one process is running but when there is alive process ,this process
 						//should never be run
 					//as it's name indicated,only when CPU gets idle,this process is called.
-	TreeNode<Process*,4>										*curProcess;
+	__TreeNode_Process										*curProcess;
 	unsigned int lastValidPID;
 	/**
 	 * max pid of currently allocated
@@ -153,8 +159,9 @@ public:
 	typedef TreeNode<MemoryDescriptor<size_t>,4> 						MmNodeType;
 	typedef SimpleMemoryManager<MmNodeType>					SmmType;
 	typedef SmmType::FullNode								FullMMNodeType; //使用这个结构来计算占用空间的大小
-	typedef MemoryManager<SimpleMemoryManager,size_t>		 		MmType;
+	typedef MemoryManager<SimpleMemoryManager,size_t,PREFERED_ALIGNMENT>		 		MmType;
 	typedef AssociatedMemoryManager<SegmentDescriptor,1>    SegManager;
+	using __TreeNode_Process =typename ProcessManager::__TreeNode_Process;
 	/**
 	 * 键盘缓冲区的存储数据类型
 	 * 低8位为键盘的输入码，高8位的信息参见IOProgrammer::Keyboard的定义和说明
@@ -247,11 +254,11 @@ public:
 
 	//related to process management
 	AS_MACRO void	switchNextProcess();
-	AS_MACRO TreeNode<Process*,4>* addNewProcess(size_t codeLimit,size_t dataLimit,size_t stackLimit,
+	AS_MACRO __TreeNode_Process addNewProcess(size_t codeLimit,size_t dataLimit,size_t stackLimit,
 			char dpl=SegmentDescriptor::DPL_3);
-	void suspendProcess(TreeNode<Process*,4>* wp);
-	void resumeProcess(TreeNode<Process*,4>* wp);
-	void killProcess(TreeNode<Process*,4>* wp);
+	void suspendProcess(__TreeNode_Process wp);
+	void resumeProcess(__TreeNode_Process wp);
+	void killProcess(__TreeNode_Process wp);
 
 	//==========get arguments
 	/**

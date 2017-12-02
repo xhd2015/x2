@@ -27,13 +27,17 @@ __asm__(".code32 \n\t");
 #include <64/MallocToSimple.h>
 #include <EnvInterface64Impl.h>
 #include <File.h>
-	template class MemoryManager<MallocToSimple64Impl,size_t>;
-	template class MemoryManager<X2fsUtil<EnvInterface64Impl,size_t>::PartialMallocToSimple,size_t>;
-	template class MemoryManager<X2fsUtil<StdEnv64Impl, size_t>::PartialMallocToSimple, size_t>;
+	template class MemoryManager<MallocToSimple64Impl,size_t,PREFERED_ALIGNMENT>;
+	template class MemoryManager<X2fsUtil<EnvInterface64Impl,FsEnv64>::PartialMallocToSimple,size_t,PREFERED_ALIGNMENT>;
+	template class MemoryManager<X2fsUtil<StdEnv64Impl, FsEnv64>::PartialMallocToSimple, size_t,PREFERED_ALIGNMENT>;
+	template class MemoryManager<X2fsUtil<StdEnv64Impl, FsEnv32>::PartialMallocToSimple, size_t,PREFERED_ALIGNMENT>;
 
-	template class LinearSourceManager<LinearSourceDescriptor<size_t>, MallocToSimple64Impl,size_t>;
-	template class LinearSourceManager<LinearSourceDescriptor<size_t>, X2fsUtil<EnvInterface64Impl,size_t>::PartialMallocToSimple,size_t>;
-	template class LinearSourceManager<LinearSourceDescriptor<size_t>, X2fsUtil<StdEnv64Impl,size_t>::PartialMallocToSimple,size_t>;
+	template class LinearSourceManager<
+	LinearSourceDescriptor<size_t,sizeof(size_t)>, MallocToSimple64Impl,size_t,sizeof(size_t)>;
+	template class LinearSourceManager<
+	LinearSourceDescriptor<size_t,sizeof(size_t)>, X2fsUtil<EnvInterface64Impl,FsEnv64>::PartialMallocToSimple,size_t,sizeof(size_t)>;
+	template class LinearSourceManager<
+	LinearSourceDescriptor<size_t,sizeof(size_t)>, X2fsUtil<EnvInterface64Impl,FsEnv32>::PartialMallocToSimple,size_t,sizeof(size_t)>;
 #endif
 //
 //#if defined(CODE32)
@@ -54,7 +58,7 @@ template<template <class> class _DescriptorAllocator,typename __SizeType,int __A
 MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::
 MemoryManager(__Allocator *smm)
 :
-Tree<MemoryDescriptor<__SizeType>,_DescriptorAllocator>(smm) //调用父类的构造函数
+Super(smm) //调用父类的构造函数
 {
 
 }
@@ -293,13 +297,13 @@ MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>
 MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::allocFreeStart(__SizeType start,__SizeType len) {
     // Util::printStr("Enter allocFreeStart: ");
     
-    MemoryManager<_DescriptorAllocator,__SizeType>          spaces(this->smm);
+    __MemoryManager         spaces(this->smm);
     if(len<=0 || this->isNullManager() )
     {
         spaces.setNull();//ok
     }else{
         this->copyOnAllocation(this->getHead());//保证复制了父节点(当父节点可用于分配但是子节点中没有任何一个节点时，调用此方法）
-        __TreeNode *firstNode=MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::findFirstStart(this->getHead(),start,len);//ok,the information of head is ignored,it's full information is stored in it's sons
+        __TreeNode *firstNode=__MemoryManager::findFirstStart(this->getHead(),start,len);//ok,the information of head is ignored,it's full information is stored in it's sons
         spaces.setHead(this->allocOutNode(firstNode,start,len));//either not found or found,set the new manager
     }
     return spaces;
@@ -310,13 +314,13 @@ MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>
 MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::
 allocFree(__SizeType len) {
     
-    MemoryManager<_DescriptorAllocator,__SizeType>          spaces(this->smm);
+    __MemoryManager         spaces(this->smm);
     if(len<=0 || this->isNullManager() )
     {
         spaces.setNull();//ok
     }else{
         this->copyOnAllocation(this->getHead());//保证复制了父节点
-        __TreeNode *firstNode=MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::findFirstLen(this->getHead(),len);//ok,the information of head is ignored,it's full information is stored in it's sons
+        __TreeNode *firstNode=This::findFirstLen(this->getHead(),len);//ok,the information of head is ignored,it's full information is stored in it's sons
         spaces.setHead(allocOutNode(firstNode,firstNode->getData().getStart(),len));//either not found or found,set the new manager
     }
     return spaces;
@@ -751,15 +755,19 @@ MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::nextAllocable(
 }
 
 //==========class:LinearSourceManager
-template <class _LinearSourceDescriptor,template <class> class _NodeAllocator,typename __SizeType,int __Alignment>
-LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator ,__SizeType,__Alignment>::LinearSourceManager()
+#define __DEF_Template_LinearSourceManager template <class _LinearSourceDescriptor,template <class> class _NodeAllocator,typename __SizeType,int __Alignment>
+#define __DEF_LinearSourceManager LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator,__SizeType,__Alignment>
+
+
+__DEF_Template_LinearSourceManager
+__DEF_LinearSourceManager::LinearSourceManager()
 {
 }
 
-template <class _LinearSourceDescriptor,template <class> class _NodeAllocator,typename __SizeType,int __Alignment>
-LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator ,__SizeType,__Alignment>::LinearSourceManager(__Allocator *smm,
+__DEF_Template_LinearSourceManager
+__DEF_LinearSourceManager::LinearSourceManager(__Allocator *smm,
     __SizeType start,__SizeType size):
-LocateableLinkedList<_LinearSourceDescriptor,Locator<_LinearSourceDescriptor>::DISCARD, _NodeAllocator,__SizeType>(smm),
+Super(smm),
 space(_LinearSourceDescriptor(start,size))
 {
 	auto node=smm->getNew();
@@ -768,14 +776,14 @@ space(_LinearSourceDescriptor(start,size))
 
 }
 
-template <class _LinearSourceDescriptor,template <class> class _NodeAllocator,typename __SizeType,int __Alignment>
+__DEF_Template_LinearSourceManager
 LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator,__SizeType,__Alignment>::~LinearSourceManager()
 {
 
 }
 
-template <class _LinearSourceDescriptor,template <class> class _NodeAllocator,typename __SizeType,int __Alignment>
-void* LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator ,__SizeType,__Alignment>::mnew(__SizeType start,__SizeType size)
+__DEF_Template_LinearSourceManager
+void* __DEF_LinearSourceManager::mnew(__SizeType start,__SizeType size)
 {
     if(!this->checkRange(start,size))return NULL;
 #if defined(CODE64)
@@ -802,7 +810,7 @@ void* LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator ,__SizeType,__A
     return NULL;  
 }
  
-template <class _LinearSourceDescriptor,template <class> class _NodeAllocator,typename __SizeType,int __Alignment>
+__DEF_Template_LinearSourceManager
 void* LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator,__SizeType,__Alignment>::mnew(__SizeType size)
 {
     __ListNode *found=Super::findFirstLen(this->getHead(),size);
@@ -819,7 +827,7 @@ void* LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator,__SizeType,__Al
     Util::printf("found is NULL\n");
     return NULL;
 }
-template <class _LinearSourceDescriptor,template <class> class _NodeAllocator,typename __SizeType,int __Alignment>
+__DEF_Template_LinearSourceManager
 void* LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator,__SizeType,__Alignment>::extend(
 		__SizeType start,__SizeType size,bool addOrReduce,__SizeType extsize,char *realBase,bool moveData)
 {
@@ -862,8 +870,8 @@ void* LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator,__SizeType,__Al
 }
 
     
-template <class _LinearSourceDescriptor,template <class> class _NodeAllocator,typename __SizeType,int __Alignment>
-void LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator ,__SizeType,__Alignment>::mdelete(void* p,__SizeType size)
+__DEF_Template_LinearSourceManager
+void __DEF_LinearSourceManager::mdelete(void* p,__SizeType size)
 {
     if(!this->checkRange((__SizeType)p,size))return;
     __ListNode *found=Super::findFirstStartForInsert(this->getHead(),(__SizeType)p);
@@ -889,8 +897,8 @@ void LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator ,__SizeType,__Al
     }
 
 }
-template <class _LinearSourceDescriptor,template <class> class _NodeAllocator,typename __SizeType,int __Alignment>
- bool LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator ,__SizeType,__Alignment>::mnewLinked(__SizeType size,
+__DEF_Template_LinearSourceManager
+ bool __DEF_LinearSourceManager::mnewLinked(__SizeType size,
 		 __LinkedList&list,__SizeType eachSectionExtraSize)
 {
 //	printf("in mnewlinked,size is %d,this space is %d,%d\n",size,this->space.getStart(),this->space.getLimit());
@@ -951,8 +959,8 @@ template <class _LinearSourceDescriptor,template <class> class _NodeAllocator,ty
 
 
 
-template <class _LinearSourceDescriptor,template <class> class _NodeAllocator,typename __SizeType,int __Alignment>
-void  LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator ,__SizeType,__Alignment>::
+__DEF_Template_LinearSourceManager
+void  __DEF_LinearSourceManager::
 mdeleteLinked(__LinkedList& list)
 {
 	NodeType *p=list.getHead();
@@ -963,25 +971,25 @@ mdeleteLinked(__LinkedList& list)
 	}
 }
 
-template <class _LinearSourceDescriptor,template <class> class _NodeAllocator,typename __SizeType,int __Alignment>
- bool LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator ,__SizeType,__Alignment>::checkRange(__SizeType start,__SizeType size)
+__DEF_Template_LinearSourceManager
+ bool __DEF_LinearSourceManager::checkRange(__SizeType start,__SizeType size)
  {
     return (this->space.getStart() <= start) && (start-this->space.getStart() <= this->space.getLimit() - size );
  }
-template <class _LinearSourceDescriptor,template <class> class _NodeAllocator,typename __SizeType,int __Alignment>
- bool LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator ,__SizeType,__Alignment>::checkRange(__SizeType start)
+__DEF_Template_LinearSourceManager
+ bool __DEF_LinearSourceManager::checkRange(__SizeType start)
  {
     return this->space.getStart() <= start;
  }
 
-template <class _LinearSourceDescriptor,template <class> class _NodeAllocator,typename __SizeType,int __Alignment>
+__DEF_Template_LinearSourceManager
 bool LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator,__SizeType,__Alignment>::checkPrevious(__ListNode *prev,__SizeType start)
 {
     return !prev || (start - prev->getData().getStart() >= prev->getData().getLimit());
 }
 
-template <class _LinearSourceDescriptor,template <class> class _NodeAllocator,typename __SizeType,int __Alignment>
-bool LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator ,__SizeType,__Alignment>::checkNext(__ListNode *nxt,__SizeType start,__SizeType len)
+__DEF_Template_LinearSourceManager
+bool __DEF_LinearSourceManager::checkNext(__ListNode *nxt,__SizeType start,__SizeType len)
 {
     return !nxt || (nxt->getData().getStart() - start >= len );
 }
@@ -991,8 +999,8 @@ bool LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator ,__SizeType,__Al
  *
  *  But currently we don't have that promise,So check the returned node if it havs a positive limit
  */
-template <class _LinearSourceDescriptor,template <class> class _NodeAllocator,typename __SizeType,int __Alignment>
-_LinearSourceDescriptor LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator ,__SizeType,__Alignment>::allocOutNode(__ListNode *avlNode,__SizeType start,__SizeType len)
+__DEF_Template_LinearSourceManager
+_LinearSourceDescriptor __DEF_LinearSourceManager::allocOutNode(__ListNode *avlNode,__SizeType start,__SizeType len)
 {
 	_LinearSourceDescriptor newnode(start,len);
     if(avlNode)
@@ -1026,4 +1034,6 @@ _LinearSourceDescriptor LinearSourceManager<_LinearSourceDescriptor,_NodeAllocat
     return newnode;
 }
     
+#undef __DEF_Template_LinearSourceManager
+#undef __DEF_LinearSourceDescriptor
 

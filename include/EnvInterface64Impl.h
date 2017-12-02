@@ -25,6 +25,7 @@ private:
 	const char *file;
 public:
 	using SizeType = size_t;
+	enum{Alignment = PREFERED_ALIGNMENT};
 
 	EnvInterface64Impl(const char *file=NULL);
 	EnvInterface64Impl(const EnvInterface64Impl &rhs )=delete;
@@ -96,10 +97,23 @@ public:
 public:
 	StdEnv64Impl(const char *file=NULL);
 };
+
+
+//===class FsEnv
+template <class __SizeType,int __Alignment>
+class FsEnv{
+public:
+	using SizeType = __SizeType;
+	enum{Alignment = __Alignment};
+};
+
+
 // ======= template declaration
 template <class T>
 using MallocToSimple64Impl = MallocToSimple<T,EnvInterface64Impl>;
-
+using FsEnv16 = FsEnv<u16_t,2>;
+using FsEnv32 = FsEnv<u32_t,4>;
+using FsEnv64 = FsEnv<size_t,PREFERED_ALIGNMENT>;
 
 
 #endif /* ENVINTERFACE64IMPL_H_ */

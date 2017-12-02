@@ -52,7 +52,7 @@ int main(int argc,char *argv[])
 	// 注意，由于采用单例模式，所以该类只有一个文件指针
 
 	StdEnv64Impl envInstance (imgFile.c_str());
-	FileOperation<StdEnv64Impl,size_t> op(&envInstance,0x80,0x3000);
+	FileOperation<StdEnv64Impl,FsEnv64> op(&envInstance,0x80,0x3000);
 
 
 	// DEBUG

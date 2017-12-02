@@ -44,7 +44,35 @@ gcc的优化有以下几个不可靠的地方：
 20.永远不要手动管理内存，因为你不知道错误发生时要怎么处理有已经分配的资源。感谢C++的析构函数，你可以定义一个资源管理类来帮你做这件事。
 21.return加括号
 22.不要使用errno作为变量名，这是个占用的名称
+23.模板命名标准：模板上声明的符号可以看成和class定义的符号处在同一个级别。以下面的例子为例
+```c++
+template <class __T>
+class Foo:public Bar<String,__T>{
+public:
+    using This = Foo<__T>;
+    using Super = Bar<int,__T>;
+    using __Foo = This;
+    using __Bar = Super;
+    using __String = typename Super::__String; //从父类继承，也可以不写
 
+}
+```
+为例，This Super为定义指向类本身以及类的唯一父类,所有加上两个下划线的名称，都被视为局部名称，也就是仅在类的作用域内起作用（即使他们在全局定义，也在此处被覆盖）
+24.可重构的标准1： 避免直接使用模板，使用内部的名称来代替模板
+在声明和实现分离的设计中，为了避免template改变带来的麻烦，其一必须保证所有的template声明, class::作用域能够使用简单的查找/替换功能修改，其二可选的是，通过宏定义__DEF_Template_Foo, __DEF_Foo来替换上述两个名称，从而避免修改扩散。为了不产生额外影响，在定义结束后使用#undef取消原来的定义。
+```c++
+#define __DEF_X2fsUtil_Template template <class __EnvInterface,typename __SizeType,int __Alignment>
+#define __DEF_X2fsUtil X2fsUtil<__EnvInterface,__SizeType,__Alignment>
+
+/*...*/
+__DEF_X2fsUtil_Template
+typename __DEF_X2fsUtil::FileTree* __DEF_X2fsUtil::getFileTree()
+{
+    return &fileTree;
+}
+#undef __DEF_X2fsUtil_Template
+#undef __DEF_X2fsUtil
+```
 # 建议
 本节给出开发程序的各个方面的建议，包括考虑程序员自身的因素。
 
@@ -55,3 +83,5 @@ gcc的优化有以下几个不可靠的地方：
 5.不要熬夜，防止猝死
 6.使用表格准则法：pre, in/log,post  3个部分进行备注。
 7.如果感到疲惫，就应该停止。
+
+# 书籍

@@ -10,8 +10,8 @@
 
 
 #include <Cache.h>
-//===========function macros
 //========class Cache
+#if defined(CODE32)||defined(CODE32USER)
 template<class K, class V>
 Cache<K, V>::~Cache() {
 }
@@ -57,6 +57,6 @@ typename Cache<K,V>::DEFAULT_GETTER Cache<K, V>::getGetter() const
 	return this->getter;
 }
 
-
+#endif // CODE32*
 
 #endif /* INCLUDE_MACROS_CACHE_MACROS_H_ */

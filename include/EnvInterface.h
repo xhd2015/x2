@@ -20,7 +20,9 @@ private:
 		EnvInterface()=default;
 		virtual ~EnvInterface()=default;
 public:
-	// define SizeType
+	// define SizeType & Alignment
+	using SizeType = size_t;
+	enum{ Alignment = PREFERED_ALIGNMENT};
 
 	enum{
 		/**

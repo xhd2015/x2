@@ -11,24 +11,25 @@
 #include <cstdio>
 #include <List.h>
 #include <MemoryManager.h>
-	template class SourceLocator<LinearSourceDescriptor<size_t>,Locator<LinearSourceDescriptor<size_t> >::LESS,
-			Locator<LinearSourceDescriptor<size_t> >::IGNORE,Locator<LinearSourceDescriptor<size_t> >::IGNORE>;
+	template class SourceLocator<
+				LinearSourceDescriptor<size_t,sizeof(size_t)>,Locator<LinearSourceDescriptor<size_t,sizeof(size_t)> >::LESS,
+			Locator<LinearSourceDescriptor<size_t,sizeof(size_t)> >::IGNORE,Locator<LinearSourceDescriptor<size_t,sizeof(size_t)> >::IGNORE>;
 
 
-	template class SourceLocator<LinearSourceDescriptor<size_t>,Locator<LinearSourceDescriptor<size_t> >::EQUAL,
-			Locator<LinearSourceDescriptor<size_t> >::EQUAL,Locator<LinearSourceDescriptor<size_t> >::IGNORE>;
+	template class SourceLocator<LinearSourceDescriptor<size_t,sizeof(size_t)>,Locator<LinearSourceDescriptor<size_t,sizeof(size_t)> >::EQUAL,
+			Locator<LinearSourceDescriptor<size_t,sizeof(size_t)> >::EQUAL,Locator<LinearSourceDescriptor<size_t,sizeof(size_t)> >::IGNORE>;
 
-	template class SourceLocator<LinearSourceDescriptor<size_t>,Locator<LinearSourceDescriptor<size_t> >::EQUAL,
-			Locator<LinearSourceDescriptor<size_t> >::BIGGER,Locator<LinearSourceDescriptor<size_t> >::IGNORE>;
+	template class SourceLocator<LinearSourceDescriptor<size_t,sizeof(size_t)>,Locator<LinearSourceDescriptor<size_t,sizeof(size_t)> >::EQUAL,
+			Locator<LinearSourceDescriptor<size_t,sizeof(size_t)> >::BIGGER,Locator<LinearSourceDescriptor<size_t,sizeof(size_t)> >::IGNORE>;
 
-	template class SourceLocator<LinearSourceDescriptor<size_t>,Locator<LinearSourceDescriptor<size_t> >::IGNORE,
-			Locator<LinearSourceDescriptor<size_t> >::EQUAL,Locator<LinearSourceDescriptor<size_t> >::IGNORE>;
+	template class SourceLocator<LinearSourceDescriptor<size_t,sizeof(size_t)>,Locator<LinearSourceDescriptor<size_t,sizeof(size_t)> >::IGNORE,
+			Locator<LinearSourceDescriptor<size_t,sizeof(size_t)> >::EQUAL,Locator<LinearSourceDescriptor<size_t,sizeof(size_t)> >::IGNORE>;
 
-	template class SourceLocator<LinearSourceDescriptor<size_t>,Locator<LinearSourceDescriptor<size_t> >::IGNORE,
-			Locator<LinearSourceDescriptor<size_t> >::BIGGER,Locator<LinearSourceDescriptor<size_t> >::IGNORE>;
+	template class SourceLocator<LinearSourceDescriptor<size_t,sizeof(size_t)>,Locator<LinearSourceDescriptor<size_t,sizeof(size_t)> >::IGNORE,
+			Locator<LinearSourceDescriptor<size_t,sizeof(size_t)> >::BIGGER,Locator<LinearSourceDescriptor<size_t,sizeof(size_t)> >::IGNORE>;
 
-	template class SourceLocator<LinearSourceDescriptor<size_t>,Locator<LinearSourceDescriptor<size_t> >::EQUAL,
-			Locator<LinearSourceDescriptor<size_t> >::IGNORE,Locator<LinearSourceDescriptor<size_t> >::IGNORE>;
+	template class SourceLocator<LinearSourceDescriptor<size_t,sizeof(size_t)>,Locator<LinearSourceDescriptor<size_t,sizeof(size_t)> >::EQUAL,
+			Locator<LinearSourceDescriptor<size_t,sizeof(size_t)> >::IGNORE,Locator<LinearSourceDescriptor<size_t,sizeof(size_t)> >::IGNORE>;
 
 #endif
 

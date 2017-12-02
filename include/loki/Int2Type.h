@@ -5,6 +5,7 @@
 template <int V>
 class Int2Type{
 public:
+	Int2Type()=default;
 	enum{value = V};
 };
 

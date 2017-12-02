@@ -105,7 +105,7 @@ public:
 };
 
 
-template <class __StdEnv,class __SizeType>
+template <class __StdEnv,class __FsEnv>
 void process(__StdEnv &env,const ParamMkfs & param);
 
 /**
@@ -121,16 +121,16 @@ int main(int argc,char *argv[])
 
 	if(status==MyPorcessor::RETURN_CONTINUE)
 	{
-		EnvInterface64Impl env(param.imgFile.c_str());
+		StdEnv64Impl env(param.imgFile.c_str());
 		if(param.basicSize==2)
 		{
-//			process<EnvInterface64Impl,u16_t>(env,param);
+			process<StdEnv64Impl,FsEnv16>(env,param);
 			status = MyPorcessor::RETURN_DONE;
 		}else if(param.basicSize==4){
-//			process<EnvInterface64Impl,u32_t>(env,param);
+			process<StdEnv64Impl,FsEnv32>(env,param);
 			status = MyPorcessor::RETURN_DONE;
 		}else if(param.basicSize==8){
-			process<EnvInterface64Impl,size_t>(env, param);
+			process<StdEnv64Impl,FsEnv64>(env, param);
 			status = MyPorcessor::RETURN_DONE;
 		}else{
 			cerr << "Unsupported basic size type:"<<param.basicSize<<endl;
@@ -142,10 +142,12 @@ int main(int argc,char *argv[])
 
 }
 
-template <class __StdEnv,class __SizeType>
+template <class __StdEnv,class __FsEnv>
 void process(__StdEnv &env,const ParamMkfs & param)
 {
-	X2fsMetaInfo<__SizeType> metainfo;
+	using __X2fsUtil = X2fsUtil<__StdEnv,__FsEnv>;
+	using __X2fsMetaInfo = typename __X2fsUtil::__X2fsMetaInfo;
+	__X2fsMetaInfo metainfo;
 	metainfo.lbaStartLow = param.lbaLow;
 	metainfo.lbaStartHigh = param.lbaHigh;
 	metainfo.wholeSecnums =param.wholeSecNum;
@@ -159,18 +161,16 @@ void process(__StdEnv &env,const ParamMkfs & param)
 	metainfo.dumpInfo(&env);
 	std::cout << std::endl;
 
-	if(!X2fsMetaInfo<__SizeType>::checkMetainfo(&metainfo))
+	if(!__X2fsMetaInfo::checkMetainfo(&metainfo))
 		printf("cannot validate metainfo\n");
 	else
-		X2fsUtil<__StdEnv,__SizeType>::mkfs(&env, 0x80, &metainfo);
+		__X2fsUtil::mkfs(&env, 0x80, &metainfo);
 
 	printf("re-reading the information to validate....");
-//	X2fsMetaInfo *buf=(X2fsMetaInfo*)env->malloc(sizeof(X2fsMetaInfo));
-//	X2fsMetaInfo *buf = new X2fsMetaInfo;
 	u8_t *buf = env.malloc(metainfo.metaSec * CONST_SECSIZE);
-	X2fsMetaInfo<size_t> *readMetainfo=(X2fsMetaInfo<size_t>*)buf;
+	__X2fsMetaInfo *readMetainfo=(__X2fsMetaInfo*)buf;
 	env.readSectors(EnvInterface::CUR_SEG, buf,0x80,0x3000+2, 1, 0);
-	if(!X2fsMetaInfo<size_t>::checkMetainfo(readMetainfo))
+	if(!__X2fsMetaInfo::checkMetainfo(readMetainfo))
 	{
 		printf("validating failed!\n");
 	}else{

@@ -40,9 +40,44 @@ __asm__(
 	".int 0,0 \n\t"
 	);
 通过数组就可以实现对该处值的引用。这可以用来解决as中不能交叉定义分区，存放数据；通过在.text区声明一个标号，然后extern外部c引用即可。
+# 语言部分
+偏特化：c++的类支持偏特化
+模板和静态类：类如果具有模板，静态函数也具有模板，则两者不能相同，否则提示：declaration of template parameter 'T' shadows template parameter。可以通过下面的方式调用：Foo<int>::bar<char>();其中Foo是类，bar是具有模板的静态函数或者成员方法。
+  如果需要在外部定义，则类模板先写，函数模板再写
+```c++
+template <class T>
+class V{
+public:
+  template <class M>
+  void foo2()
+  {
+    cout << "foo2"<<endl;
+  }
+  template <class M>
+  static void foo();
 
-# 偏特化
-c++的类支持偏特化
+};
+
+template<class T>
+template <class M>
+inline void V<T>::foo() {
+  cout <<typeid(T).name()<<endl;
+  cout <<typeid(M).name()<<endl;
+
+  cout <<"foo"<<endl;
+}
+
+int main(int argc,char *argv[])
+{
+  V<short>::foo<int>();
+  V<short> v;
+  v.foo2<int>();
+  cout << " "<<endl;
+  return 0;
+}
+```
+
+对齐的概念：一个结构体自身的对齐alignof是其内部字节最大者，以及系统的最大值决定的。对齐还受pack的影响。
 
 # 扩展(动态)内联汇编
 快速参考：http://ericw.ca/notes/a-tiny-guide-to-gcc-inline-assembly.html
