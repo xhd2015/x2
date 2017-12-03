@@ -12,7 +12,7 @@
 
 #if defined(CODE64)
 #include <string>
-struct Param{
+struct ParamRwfile{
 	// 所有要设置的变量
 	enum{
 		READ,WRITE
@@ -25,6 +25,8 @@ struct Param{
 	std::string fsfile;
 	std::string x2file;
 	std::string cdpath;
+	u32_t lbalow;
+	u8_t  basicSize=sizeof(size_t);
 };
 /**
  * 为mkfs.x2fs所用的参数
@@ -45,6 +47,17 @@ struct ParamMkfs{
 			X2fsUtil<EnvInterface64Impl,FsEnv64>::LinkedInfoSectionLen/CONST_SECSIZE,
 	};
 	size_t optional[1]={0};
+
+};
+
+struct ParamMain{
+public:
+	u8_t  basicSize=sizeof(size_t);
+	const std::string spiltor=";";
+	std::string imgFile;
+	std::string cmds;
+	std::string cdpath;
+	u32_t lbalow=0;
 
 };
 #endif

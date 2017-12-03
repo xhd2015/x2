@@ -21,23 +21,6 @@ __asm__(".code32 \n\t");
 	template class MemoryManager<SimpleMemoryManager,u32_t>;
 	template class MemoryManager<KernelSmmWrapper,u32_t>;
 #elif defined(CODE64)
-
-#include <cstdio>
-#include <cstring>
-#include <64/MallocToSimple.h>
-#include <EnvInterface64Impl.h>
-#include <File.h>
-	template class MemoryManager<MallocToSimple64Impl,size_t,PREFERED_ALIGNMENT>;
-	template class MemoryManager<X2fsUtil<EnvInterface64Impl,FsEnv64>::PartialMallocToSimple,size_t,PREFERED_ALIGNMENT>;
-	template class MemoryManager<X2fsUtil<StdEnv64Impl, FsEnv64>::PartialMallocToSimple, size_t,PREFERED_ALIGNMENT>;
-	template class MemoryManager<X2fsUtil<StdEnv64Impl, FsEnv32>::PartialMallocToSimple, size_t,PREFERED_ALIGNMENT>;
-
-	template class LinearSourceManager<
-	LinearSourceDescriptor<size_t,sizeof(size_t)>, MallocToSimple64Impl,size_t,sizeof(size_t)>;
-	template class LinearSourceManager<
-	LinearSourceDescriptor<size_t,sizeof(size_t)>, X2fsUtil<EnvInterface64Impl,FsEnv64>::PartialMallocToSimple,size_t,sizeof(size_t)>;
-	template class LinearSourceManager<
-	LinearSourceDescriptor<size_t,sizeof(size_t)>, X2fsUtil<EnvInterface64Impl,FsEnv32>::PartialMallocToSimple,size_t,sizeof(size_t)>;
 #endif
 //
 //#if defined(CODE32)
@@ -54,16 +37,18 @@ __asm__(".code32 \n\t");
 //#endif
 
 //============class : MemoryManager
-template<template <class> class _DescriptorAllocator,typename __SizeType,int __Alignment>
-MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::
+#define __DEF_Template_MemoryManager template<template <class> class _DescriptorAllocator>
+#define __DEF_MemoryManager MemoryManager<_DescriptorAllocator>
+__DEF_Template_MemoryManager
+__DEF_MemoryManager::
 MemoryManager(__Allocator *smm)
 :
 Super(smm) //调用父类的构造函数
 {
 
 }
-template<template <class> class _DescriptorAllocator,typename __SizeType,int __Alignment>
-MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::MemoryManager(
+__DEF_Template_MemoryManager
+__DEF_MemoryManager::MemoryManager(
 		__Allocator *smm,__SizeType start,__SizeType len,bool fatherAllocable)
 :MemoryManager(smm)
 //:dbg1("MemoryManager 1\n")
@@ -90,8 +75,8 @@ MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::MemoryManager(
     //printf("%x ~ %x\n",this->getHead()->getData().getStart(),this->getHead()->getData().getLimit());
 #endif
 }
-template<template <class> class _DescriptorAllocator,typename __SizeType,int __Alignment>
-MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::
+__DEF_Template_MemoryManager
+__DEF_MemoryManager::
 MemoryManager(__Allocator *smm,__SizeType start,__SizeType len,
 		__SizeType usedList[][2],__SizeType usedLen,bool fatherAllocable):MemoryManager(smm,start,len,fatherAllocable)
 {
@@ -99,8 +84,8 @@ MemoryManager(__Allocator *smm,__SizeType start,__SizeType len,
 		mnew(usedList[i][0], usedList[i][1]);
 }
 
-template<template <class> class _DescriptorAllocator,typename __SizeType,int __Alignment>
-MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::~MemoryManager()
+__DEF_Template_MemoryManager
+__DEF_MemoryManager::~MemoryManager()
 {
     //这里不进行真正的撤销，只是把管理器所使用的节点撤销
     if(this->getHead())
@@ -110,8 +95,8 @@ MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::~MemoryManager()
     this->smm->withdraw(this->root);
 }
 
-template<template <class> class _DescriptorAllocator,typename __SizeType,int __Alignment>
-void MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::withdrawToParent()
+__DEF_Template_MemoryManager
+void __DEF_MemoryManager::withdrawToParent()
 {
     //回收后进行两点之间的检查，如果能够合并就进行合并
     __TreeNode *head=this->getHead();
@@ -139,9 +124,9 @@ void MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::withdrawToParen
 *       means avlNode,start,len should be derived from the inner method
 */
 
-template<template <class> class _DescriptorAllocator,typename __SizeType,int __Alignment>
-typename MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::__TreeNode*
-MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::allocOutNode(__TreeNode *avlNode,__SizeType start,__SizeType len)
+__DEF_Template_MemoryManager
+typename __DEF_MemoryManager::__TreeNode*
+__DEF_MemoryManager::allocOutNode(__TreeNode *avlNode,__SizeType start,__SizeType len)
 {
 
 //	Util::printf("in mm allocOut for %x,%x\n",start,len);
@@ -214,8 +199,8 @@ MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::allocOutNode(__TreeN
 *       exactNode==NULL
 */
 
-template<template <class> class _DescriptorAllocator,typename __SizeType,int __Alignment>
-void MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::withdrawNode(__TreeNode *exactNode)
+__DEF_Template_MemoryManager
+void __DEF_MemoryManager::withdrawNode(__TreeNode *exactNode)
 {
     //先释放其所有子节点
     __TreeNode *p=exactNode->getSon();
@@ -265,8 +250,8 @@ void MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::withdrawNode(__
     }
 
 }
-template<template<class > class _DescriptorAllocator,typename __SizeType,int __Alignment>
-u8_t MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::findExtend(__SizeType start,
+__DEF_Template_MemoryManager
+u8_t __DEF_MemoryManager::findExtend(__SizeType start,
 		__SizeType size, __SizeType extsize,__TreeNode * &rtnode) const
 {
 //	Util::printf("in findExtend,start=%x,size=%x,extsize=%d\n",start,size,extsize);
@@ -292,9 +277,9 @@ u8_t MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::findExtend(__Si
 }
 
 DEVEL_UNTESTED(Douglas_Fulton_Shaw)
-template<template <class> class _DescriptorAllocator,typename __SizeType,int __Alignment>
-MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>
-MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::allocFreeStart(__SizeType start,__SizeType len) {
+__DEF_Template_MemoryManager
+typename __DEF_MemoryManager::__MemoryManager
+__DEF_MemoryManager::allocFreeStart(__SizeType start,__SizeType len) {
     // Util::printStr("Enter allocFreeStart: ");
     
     __MemoryManager         spaces(this->smm);
@@ -309,9 +294,9 @@ MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::allocFreeStart(__Siz
     return spaces;
 }
 
-template<template <class> class _DescriptorAllocator,typename __SizeType,int __Alignment>
-MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>
-MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::
+__DEF_Template_MemoryManager
+typename __DEF_MemoryManager::__MemoryManager
+__DEF_MemoryManager::
 allocFree(__SizeType len) {
     
     __MemoryManager         spaces(this->smm);
@@ -326,13 +311,13 @@ allocFree(__SizeType len) {
     return spaces;
 }
 
-template<template <class> class _DescriptorAllocator,typename __SizeType,int __Alignment>
-void* MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::
+__DEF_Template_MemoryManager
+void* __DEF_MemoryManager::
 mnew(__SizeType start,__SizeType size)
 {
 
     this->copyOnAllocation(this->getHead());//保证复制了父节点
-    __TreeNode *found=MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::findFirstStart(this->getHead(),start,size);
+    __TreeNode *found=__DEF_MemoryManager::findFirstStart(this->getHead(),start,size);
 #if defined(CODE64)
 //    printf("MemoryManager mnew\n");
 //    if(found==NULL)
@@ -353,11 +338,11 @@ mnew(__SizeType start,__SizeType size)
     return NULL;    
 }
 
-template<template <class> class _DescriptorAllocator,typename __SizeType,int __Alignment>
-void* MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::mnew(__SizeType size) {
+__DEF_Template_MemoryManager
+void* __DEF_MemoryManager::mnew(__SizeType size) {
 
     this->copyOnAllocation(this->getHead());//保证复制了父节点
-    __TreeNode *found=MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::findFirstLen(this->getHead(),size);
+    __TreeNode *found=__DEF_MemoryManager::findFirstLen(this->getHead(),size);
 
     if(found)
     {
@@ -370,12 +355,12 @@ void* MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::mnew(__SizeTyp
     }
     return NULL;
 }
-template<template <class> class _DescriptorAllocator,typename __SizeType,int __Alignment>
-void* MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::mnewAlign(__SizeType size,__SizeType alignment) {
+__DEF_Template_MemoryManager
+void* __DEF_MemoryManager::mnewAlign(__SizeType size,__SizeType alignment) {
 
     this->copyOnAllocation(this->getHead());//保证复制了父节点
     size_t extra;
-    __TreeNode *found=MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::findFirstLenAlign(this->getHead(),size,extra,alignment);
+    __TreeNode *found=__DEF_MemoryManager::findFirstLenAlign(this->getHead(),size,extra,alignment);
 
     if(found)
     {
@@ -388,8 +373,8 @@ void* MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::mnewAlign(__Si
     }
     return NULL;
 }
-template<template <class> class _DescriptorAllocator,typename __SizeType,int __Alignment>
-void*   MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::extend(__SizeType start,__SizeType size,int extsize,char *realBase,bool moveData)
+__DEF_Template_MemoryManager
+void*   __DEF_MemoryManager::extend(__SizeType start,__SizeType size,int extsize,char *realBase,bool moveData)
 {
 //	Util::printf("extend arg: start,size,extsize = %d,%d,%d\n",start,size,extsize);
 	if(extsize==0)return (char*)start;
@@ -459,8 +444,8 @@ void*   MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::extend(__Siz
 *
 */
 
-template<template <class> class _DescriptorAllocator,typename __SizeType,int __Alignment>
-void MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::mdelete(void* p, __SizeType size) {
+__DEF_Template_MemoryManager
+void __DEF_MemoryManager::mdelete(void* p, __SizeType size) {
 #if defined(CODE64)
 //	printf("in mdelete,request for %x,%x\n",p,size);
 #endif
@@ -480,10 +465,10 @@ void MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::mdelete(void* p
     }
 }
 
-template<template <class> class _DescriptorAllocator,typename __SizeType,int __Alignment>
-void MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::mdelete(void *p)
+__DEF_Template_MemoryManager
+void __DEF_MemoryManager::mdelete(void *p)
 {
-    __TreeNode* toDeleteNode=MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::locateForDeleteStart(this->getHead(),(__SizeType)p,0);
+    __TreeNode* toDeleteNode=__DEF_MemoryManager::locateForDeleteStart(this->getHead(),(__SizeType)p,0);
     if(toDeleteNode)//if found it
     {
         //Util::printStr("Found delete.   ");
@@ -500,9 +485,9 @@ void MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::mdelete(void *p
 */
 DEVEL_UNTESTED(Douglas_Fulton_Shaw) DEVEL_COMPLETED(Douglas_Fulton_Shaw) DEVEL_LAST(Douglas_Fulton_Shaw,2017-02-21 23:27:31) DEVEL_AUTHOR(Douglas_Fulton_Shaw) DEVEL_DEP(MemoryManager::getData,MemoryDescriptor::getStart)
 
-template<template <class> class _DescriptorAllocator,typename __SizeType,int __Alignment>
-typename MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::__TreeNode *
-MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::findFirstStart(
+__DEF_Template_MemoryManager
+typename __DEF_MemoryManager::__TreeNode *
+__DEF_MemoryManager::findFirstStart(
 		__TreeNode* loc, __SizeType start,__SizeType len)
 {
 	__TreeNode* p=loc->getSon();
@@ -541,9 +526,9 @@ MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::findFirstStart(
 	return p; //NULL or first valid section
 }
 
-template<template <class> class _DescriptorAllocator,typename __SizeType,int __Alignment>
-typename MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::__TreeNode *
-MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::findFirstLen(
+__DEF_Template_MemoryManager
+typename __DEF_MemoryManager::__TreeNode *
+__DEF_MemoryManager::findFirstLen(
 		__TreeNode* loc, __SizeType len) {
 	__TreeNode *p=loc->getSon();
 	if(p && p->getData().isAllocable()==false)
@@ -559,9 +544,9 @@ MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::findFirstLen(
 /**
  * find one such has an alignment and enough space
  */
-template<template <class> class _DescriptorAllocator,typename __SizeType,int __Alignment>
-typename MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::__TreeNode *
- MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::findFirstLenAlign(
+__DEF_Template_MemoryManager
+typename __DEF_MemoryManager::__TreeNode *
+ __DEF_MemoryManager::findFirstLenAlign(
 		__TreeNode* loc, __SizeType len,__SizeType &extra,__SizeType alignment) {
 	if(alignment==0)return NULL;
 	__TreeNode *p=loc->getSon();
@@ -585,19 +570,19 @@ typename MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::__TreeNode 
     }
 	return NULL;
 }
-template<template <class> class _DescriptorAllocator,typename __SizeType,int __Alignment>
-int MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::isNullManager() {
+__DEF_Template_MemoryManager
+int __DEF_MemoryManager::isNullManager() {
 	return this->getHead()==NULL;
 }
 
-template<template <class> class _DescriptorAllocator,typename __SizeType,int __Alignment>
-void  MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::setNull()
+__DEF_Template_MemoryManager
+void  __DEF_MemoryManager::setNull()
 {
     this->setHead(NULL);
 }
 #if defined(CODE32)
-template<template <class> class _DescriptorAllocator,typename __SizeType,int __Alignment>
-void MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::dumpInfo(Printer *p)const
+__DEF_Template_MemoryManager
+void __DEF_MemoryManager::dumpInfo(Printer *p)const
 {
 	if(p!=NULL)
 	{
@@ -622,9 +607,9 @@ void MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::dumpInfo(Printe
 #endif
 
 //确保这条线段是位于两个分割点的缝隙之间，如果不是，返回NULL
-template<template <class> class _DescriptorAllocator,typename __SizeType,int __Alignment>
-typename MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::__TreeNode *
-MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::locateForInsertation(
+__DEF_Template_MemoryManager
+typename __DEF_MemoryManager::__TreeNode *
+__DEF_MemoryManager::locateForInsertation(
 		__TreeNode* loc, __TreeNode* son) {
     if( loc==NULL || son==NULL)return NULL;
     __TreeNode* p=loc;
@@ -658,9 +643,9 @@ MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::locateForInsertation
 /**
 * find for its sons which is exactly the same with passed arguments.
 */
-template<template <class> class _DescriptorAllocator,typename __SizeType,int __Alignment>
-typename MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::__TreeNode *
- MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::locateForDelete(__TreeNode* loc,__SizeType start,__SizeType len,bool allocable)
+__DEF_Template_MemoryManager
+typename __DEF_MemoryManager::__TreeNode *
+ __DEF_MemoryManager::locateForDelete(__TreeNode* loc,__SizeType start,__SizeType len,bool allocable)
 {
     if(loc==NULL||len==0)return NULL;
     __TreeNode* p=loc->getSon();
@@ -679,9 +664,9 @@ typename MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::__TreeNode 
 /**
 * find for its sons which is exactly the same with passed arguments.
 */
-template<template <class> class _DescriptorAllocator,typename __SizeType,int __Alignment>
-typename MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::__TreeNode *
- MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::locateForDeleteStart(__TreeNode* loc,__SizeType start,bool allocable)
+__DEF_Template_MemoryManager
+typename __DEF_MemoryManager::__TreeNode *
+ __DEF_MemoryManager::locateForDeleteStart(__TreeNode* loc,__SizeType start,bool allocable)
 {
     if(loc==NULL)return NULL;
     __TreeNode* p=loc->getSon();
@@ -699,10 +684,10 @@ typename MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::__TreeNode 
 
 
 
-template<template <class> class _DescriptorAllocator,typename __SizeType,int __Alignment>
-int MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::addToTree(__TreeNode* root,
+__DEF_Template_MemoryManager
+int __DEF_MemoryManager::addToTree(__TreeNode* root,
 		__TreeNode* son) {
-            __TreeNode *location=MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::locateForInsertation(root,son);
+            __TreeNode *location=__DEF_MemoryManager::locateForInsertation(root,son);
             if(location)
             {
                 
@@ -713,9 +698,9 @@ int MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::addToTree(__Tree
 /**
 * head mustn't be NULL!!
 */
-template<template <class> class _DescriptorAllocator,typename __SizeType,int __Alignment>
-typename MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::__TreeNode *
-MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::copyOnAllocation(__TreeNode *head)
+__DEF_Template_MemoryManager
+typename __DEF_MemoryManager::__TreeNode *
+__DEF_MemoryManager::copyOnAllocation(__TreeNode *head)
 {
     if(!head->getSon())
     {
@@ -741,9 +726,9 @@ MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::copyOnAllocation(__T
 
 DEVEL_UNTESTED(Douglas_Fulton_Shaw)
 DEVEL_AUTHOR(Douglas_Fulton_Shaw)
-template<template <class> class _DescriptorAllocator,typename __SizeType,int __Alignment>
-typename MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::__TreeNode *
-MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::nextAllocable(
+__DEF_Template_MemoryManager
+typename __DEF_MemoryManager::__TreeNode *
+__DEF_MemoryManager::nextAllocable(
 		__TreeNode* node) {
         if(node)
         {
@@ -753,10 +738,12 @@ MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::nextAllocable(
         }
         return node;
 }
+#undef __DEF_Template_MemoryManager
+#undef __DEF_MemoryManager
 
 //==========class:LinearSourceManager
-#define __DEF_Template_LinearSourceManager template <class _LinearSourceDescriptor,template <class> class _NodeAllocator,typename __SizeType,int __Alignment>
-#define __DEF_LinearSourceManager LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator,__SizeType,__Alignment>
+#define __DEF_Template_LinearSourceManager template <class _LinearSourceDescriptor,template <class> class _NodeAllocator>
+#define __DEF_LinearSourceManager LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator>
 
 
 __DEF_Template_LinearSourceManager
@@ -777,7 +764,7 @@ space(_LinearSourceDescriptor(start,size))
 }
 
 __DEF_Template_LinearSourceManager
-LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator,__SizeType,__Alignment>::~LinearSourceManager()
+__DEF_LinearSourceManager::~LinearSourceManager()
 {
 
 }
@@ -811,7 +798,7 @@ void* __DEF_LinearSourceManager::mnew(__SizeType start,__SizeType size)
 }
  
 __DEF_Template_LinearSourceManager
-void* LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator,__SizeType,__Alignment>::mnew(__SizeType size)
+void* __DEF_LinearSourceManager::mnew(__SizeType size)
 {
     __ListNode *found=Super::findFirstLen(this->getHead(),size);
     Util::printf("in lm,mnew for len %d\n",size);
@@ -828,7 +815,7 @@ void* LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator,__SizeType,__Al
     return NULL;
 }
 __DEF_Template_LinearSourceManager
-void* LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator,__SizeType,__Alignment>::extend(
+void* __DEF_LinearSourceManager::extend(
 		__SizeType start,__SizeType size,bool addOrReduce,__SizeType extsize,char *realBase,bool moveData)
 {
 
@@ -983,7 +970,7 @@ __DEF_Template_LinearSourceManager
  }
 
 __DEF_Template_LinearSourceManager
-bool LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator,__SizeType,__Alignment>::checkPrevious(__ListNode *prev,__SizeType start)
+bool __DEF_LinearSourceManager::checkPrevious(__ListNode *prev,__SizeType start)
 {
     return !prev || (start - prev->getData().getStart() >= prev->getData().getLimit());
 }

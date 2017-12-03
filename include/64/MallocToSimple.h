@@ -23,13 +23,13 @@ public:
 #endif
 		_EnvInterface;
 public:
-	MallocToSimple(_EnvInterface *env);
+	MallocToSimple(_EnvInterface &env);
 	~MallocToSimple();
 	T *getNew();
 	void withdraw(T *t);
 
 protected:
-	_EnvInterface *env;
+	_EnvInterface &env;
 
 };
 

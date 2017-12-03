@@ -284,7 +284,7 @@ $(GEN64)/CMDUtil%.exe:$(GEN64)/lib64.a  $(SRC64)/CMDUtil%.cpp $(SRC)/File.cpp $(
 			$(SRC)/File.cpp $(SRC)/EnvInterface64Impl.cpp $(SRCCOMMON)/Getopt.cpp \
 			$(SRC64)/MallocToSimple.cpp		\
 	-Wl,'-)' -static
-$(GEN64)/conceptual_%.exe:$(INCLUDECONCEPTUAL)/all.h $(SRCCONCEPTUAL)/all.cpp
+$(GEN64)/conceptual_%.exe:$(SRC64)/CMDUtil_%.cpp $(INCLUDECONCEPTUAL)/all.h $(SRCCONCEPTUAL)/all.cpp
 	filename=$$(basename $@|grep -P '.*conceptual_.*\.exe' -o)
 	if [ -z $$filename ];then
 		echo 'filename is invalid'

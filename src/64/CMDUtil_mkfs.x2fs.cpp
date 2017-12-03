@@ -121,7 +121,7 @@ int main(int argc,char *argv[])
 
 	if(status==MyPorcessor::RETURN_CONTINUE)
 	{
-		StdEnv64Impl env(param.imgFile.c_str());
+		StdEnv64Impl env;
 		if(param.basicSize==2)
 		{
 			process<StdEnv64Impl,FsEnv16>(env,param);
@@ -154,22 +154,25 @@ void process(__StdEnv &env,const ParamMkfs & param)
 	for(size_t i=0;i<metainfo.PARTS_REQUIRED;++i)
 		metainfo.secnums[i]=param.secSpaces[i];
 	for(size_t i=0;i<metainfo.PARTS_OPTIONAL;++i)
-			metainfo.optional[i]=param.optional[i];
+		metainfo.optional[i]=param.optional[i];
+
 
 
 	std::cout << "information about metainfo"<<std::endl;
-	metainfo.dumpInfo(&env);
+	metainfo.dumpInfo(env);
 	std::cout << std::endl;
 
+	u8_t driver=env.addFile(param.imgFile,param.lbaLow);
 	if(!__X2fsMetaInfo::checkMetainfo(&metainfo))
 		printf("cannot validate metainfo\n");
 	else
-		__X2fsUtil::mkfs(&env, 0x80, &metainfo);
+		__X2fsUtil::mkfs(env, driver, &metainfo);
 
 	printf("re-reading the information to validate....");
 	u8_t *buf = env.malloc(metainfo.metaSec * CONST_SECSIZE);
 	__X2fsMetaInfo *readMetainfo=(__X2fsMetaInfo*)buf;
-	env.readSectors(EnvInterface::CUR_SEG, buf,0x80,0x3000+2, 1, 0);
+	env.readSectors(EnvInterface::CUR_SEG, buf,driver , param.lbaLow + __X2fsMetaInfo::SECNUM_RESERVED_CONST,
+				__X2fsMetaInfo::SECNUM_META_CONST, 0);
 	if(!__X2fsMetaInfo::checkMetainfo(readMetainfo))
 	{
 		printf("validating failed!\n");

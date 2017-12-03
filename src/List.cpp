@@ -157,30 +157,133 @@ void SimpleMemoryManager<T>::withdraw(T *t)
 
 
 //===========class : ListNode
-#if defined(CODE64)
-#define __DEF_ALIGNMENT sizeof(size_t)
-#include <preprocessor_functions/List.cpp.RAW>
-#endif
+#define __DEF_Template_ListNode template<class T>
+#define __DEF_ListNode ListNode<T>
 
-#if defined(CODE32) ||defined(CODE32USER)|| defined(CODE64)
-#define __DEF_ALIGNMENT 4
-#include <preprocessor_functions/List.cpp.RAW>
-#endif
+__DEF_Template_ListNode
+__DEF_ListNode::ListNode(const T& data,__ListNode* next,__ListNode* previous):
+data(data),
+next(next),
+previous(previous)
+{
+}
+__DEF_Template_ListNode
+__DEF_ListNode::~ListNode()
+{
 
-#if defined(CODE16) || defined(CODE32) ||defined(CODE32USER)|| defined(CODE64)
-#define __DEF_ALIGNMENT 2
-#include <preprocessor_functions/List.cpp.RAW>
-#endif
+}
+
+__DEF_Template_ListNode
+typename __DEF_ListNode::__ListNode* __DEF_ListNode::removeNext()
+{
+    __ListNode* rt=this->getNext();
+    if(this->hasNext())
+    {
+        this->setNext(rt->getNext());
+        if(rt->hasNext())
+        {
+            rt->getNext()->setPrevious(this);
+        }
+    }
+    return rt;
+}
+
+__DEF_Template_ListNode
+typename __DEF_ListNode::__ListNode* __DEF_ListNode::removePrevious()
+{
+    __ListNode* rt=this->getPrevious();
+    if(this->hasPrevious())
+    {
+        this->setPrevious(rt->getPrevious());
+        if(rt->hasPrevious())
+        {
+            rt->getPrevious()->setNext(this);
+        }
+    }
+    return rt;
+}
+
+
+__DEF_Template_ListNode
+void    __DEF_ListNode::insertNext(__ListNode* next)
+{
+    if(next)
+    {
+        __ListNode* temp1;
+        temp1 = this->getNext();
+        if(temp1)
+        {
+            temp1->setPrevious(next);
+        }
+        next->setPrevious(this);
+        next->setNext(temp1);
+        this->setNext(next);
+    }
+
+
+}
+
+__DEF_Template_ListNode
+void    __DEF_ListNode::insertPrevious(__ListNode* previous)
+{
+    if(previous)
+    {
+        __ListNode* prev=this->getPrevious();
+        if(prev)
+        {
+            prev->setNext(previous);
+        }
+        previous->setNext(this);
+        previous->setPrevious(prev);
+        this->setPrevious(previous);
+    }
+}
+__DEF_Template_ListNode
+void   __DEF_ListNode::adjustOffset(ptrdiff_t diff)
+{
+	if(this->next!=NULL)
+		this->next = (__ListNode*)((char*)this->next + diff);
+	if(this->previous!=NULL)
+		this->previous = (__ListNode*)((char*)this->previous + diff);
+}
+__DEF_Template_ListNode
+void   __DEF_ListNode::initToNull()
+{
+	next = previous = NULL;
+}
+__DEF_Template_ListNode
+typename __DEF_ListNode::__ListNode*   __DEF_ListNode::getLast()const
+{
+//	Util::printStr("in ListNode getLast\n");
+    __ListNode* p=(__ListNode*)this;
+    while(p->hasNext())
+    {
+        p=p->getNext();
+    }
+//    Util::printStr("in getLast returning \n");
+    return p;
+}
+__DEF_Template_ListNode
+typename __DEF_ListNode::__ListNode*    __DEF_ListNode::getFirst()const
+{
+    __ListNode *p=(__ListNode*)this;
+    while(p->hasPrevious())
+    {
+        p=p->getPrevious();
+    }
+    return p;
+}
+
+#undef __DEF_Template_ListNode
+#undef __DEF_ListNode
 
 
 //===============class : LinkedList
-//template<class T,template<class> class _Allocator>
-//LinkedList<T,_Allocator >::LinkedList():
-//smm(NULL),root(NULL),last(NULL)
-//{}
+#define __DEF_Template_LinkedList template<class T,template<class> class _Allocator>
+#define __DEF_LinkedList LinkedList<T,_Allocator>
 
-template<class T,template<class> class _Allocator,int __Alignment>
-LinkedList<T,_Allocator,__Alignment>::LinkedList(__Allocator *smm):
+__DEF_Template_LinkedList
+__DEF_LinkedList::LinkedList(__Allocator *smm):
 smm(smm)
 {
 //	Kernel::printer->putsz("in LinkedList init\n");
@@ -202,13 +305,13 @@ smm(smm)
 //	Util::jmpDie();
 }
 
-template<class T,template<class> class _Allocator,int __Alignment>
-LinkedList<T,_Allocator,__Alignment>::~LinkedList()
+__DEF_Template_LinkedList
+__DEF_LinkedList::~LinkedList()
 {
     this->free();
 }
-template<class T,template<class> class _Allocator,int __Alignment>
-void LinkedList<T,_Allocator,__Alignment>::free()
+__DEF_Template_LinkedList
+void __DEF_LinkedList::free()
 {
     this->smm->withdraw(this->last);
 
@@ -218,8 +321,8 @@ void LinkedList<T,_Allocator,__Alignment>::free()
     this->last=NULL;
 
 }
-template<class T,template<class> class _Allocator,int __Alignment>
-void LinkedList<T,_Allocator,__Alignment>::freeNext(__ListNode *t)
+__DEF_Template_LinkedList
+void __DEF_LinkedList::freeNext(__ListNode *t)
 {
     if(!t || t==root || t==last)return;
     __ListNode *p=t;
@@ -234,8 +337,8 @@ void LinkedList<T,_Allocator,__Alignment>::freeNext(__ListNode *t)
 
 }
 
-template<class T,template<class> class _Allocator,int __Alignment>
-void LinkedList<T,_Allocator,__Alignment>::freePrevious(__ListNode *t)
+__DEF_Template_LinkedList
+void __DEF_LinkedList::freePrevious(__ListNode *t)
 {
     if(!t || t==root || t==last)return;
     __ListNode *p=t;
@@ -250,8 +353,8 @@ void LinkedList<T,_Allocator,__Alignment>::freePrevious(__ListNode *t)
         this->last->setNext(NULL);
     }
 }   
-template<class T,template<class> class _Allocator,int __Alignment>
-void    LinkedList<T,_Allocator,__Alignment>::freeNode(__ListNode * node)
+__DEF_Template_LinkedList
+void    __DEF_LinkedList::freeNode(__ListNode * node)
 {
     if(node && node!=root && node!=last)
     {
@@ -269,14 +372,14 @@ void    LinkedList<T,_Allocator,__Alignment>::freeNode(__ListNode * node)
     }
 }
 
-template<class T,template<class> class _Allocator,int __Alignment>
-typename LinkedList<T,_Allocator,__Alignment>::__ListNode*  LinkedList<T,_Allocator,__Alignment>::
+__DEF_Template_LinkedList
+typename __DEF_LinkedList::__ListNode*  __DEF_LinkedList::
 	append(const T& t)
 {
     return append(new (smm->getNew()) __ListNode(t));
 }
-template<class T,template<class> class _Allocator,int __Alignment>
-typename LinkedList<T,_Allocator,__Alignment>::__ListNode*  LinkedList<T,_Allocator,__Alignment>::
+__DEF_Template_LinkedList
+typename __DEF_LinkedList::__ListNode*  __DEF_LinkedList::
 		append(__ListNode* p)
 {
     if(!p)return NULL;
@@ -291,15 +394,15 @@ typename LinkedList<T,_Allocator,__Alignment>::__ListNode*  LinkedList<T,_Alloca
     return p;
 }
 
-template<class T,template<class> class _Allocator,int __Alignment>
-typename LinkedList<T,_Allocator,__Alignment>::__ListNode*  LinkedList<T,_Allocator,__Alignment>::
+__DEF_Template_LinkedList
+typename __DEF_LinkedList::__ListNode*  __DEF_LinkedList::
 		appendHead(const T& t)
 {
     return appendHead(new (smm->getNew()) __ListNode(t));
 }
 
-template<class T,template<class> class _Allocator,int __Alignment>
-typename LinkedList<T,_Allocator,__Alignment>::__ListNode*  LinkedList<T,_Allocator,__Alignment>::
+__DEF_Template_LinkedList
+typename __DEF_LinkedList::__ListNode*  __DEF_LinkedList::
 		appendHead(__ListNode* p)
 {
     if(!p)return NULL;
@@ -310,8 +413,8 @@ typename LinkedList<T,_Allocator,__Alignment>::__ListNode*  LinkedList<T,_Alloca
     }
     return p;
 }
-template<class T,template<class> class _Allocator,int __Alignment>
-typename LinkedList<T,_Allocator,__Alignment>::__ListNode*    LinkedList<T,_Allocator,__Alignment>::
+__DEF_Template_LinkedList
+typename __DEF_LinkedList::__ListNode*    __DEF_LinkedList::
 		remove()
 {
    __ListNode* plast=getLast();
@@ -330,8 +433,8 @@ typename LinkedList<T,_Allocator,__Alignment>::__ListNode*    LinkedList<T,_Allo
 }
 
 
-template<class T,template<class> class _Allocator,int __Alignment>
-void    LinkedList<T,_Allocator,__Alignment>::remove(__ListNode* p)
+__DEF_Template_LinkedList
+void    __DEF_LinkedList::remove(__ListNode* p)
 {
 #if defined(CODE64)
 //    	printf("p->previous=%x,root=%x\n",p->getPrevious(),this->root);
@@ -348,8 +451,8 @@ void    LinkedList<T,_Allocator,__Alignment>::remove(__ListNode* p)
     }
 }
 
-template<class T,template<class> class _Allocator,int __Alignment>
-void	 LinkedList<T,_Allocator,__Alignment>::insertNext(__ListNode* where,__ListNode* p)
+__DEF_Template_LinkedList
+void	 __DEF_LinkedList::insertNext(__ListNode* where,__ListNode* p)
 {
 	if(where==NULL||p==NULL)return;
 	if(where==this->root)
@@ -362,8 +465,8 @@ void	 LinkedList<T,_Allocator,__Alignment>::insertNext(__ListNode* where,__ListN
 		where->insertNext(p);
 	}
 }
-template<class T,template<class> class _Allocator,int __Alignment>
-void	 LinkedList<T,_Allocator,__Alignment>::insertPrevious(__ListNode* where,__ListNode* p)
+__DEF_Template_LinkedList
+void	 __DEF_LinkedList::insertPrevious(__ListNode* where,__ListNode* p)
 {
 	if(where==NULL||where==this->root||p==NULL)return;
 	if(root->getNext()==where)
@@ -374,8 +477,8 @@ void	 LinkedList<T,_Allocator,__Alignment>::insertPrevious(__ListNode* where,__L
 	}
 
 }
-template<class T,template<class> class _Allocator,int __Alignment>
-size_t   LinkedList<T,_Allocator,__Alignment>::getSize()const
+__DEF_Template_LinkedList
+size_t   __DEF_LinkedList::getSize()const
 {
 	size_t size=0;
 	__ListNode* p=root;
@@ -386,8 +489,8 @@ size_t   LinkedList<T,_Allocator,__Alignment>::getSize()const
 	}
 	return size;
 }
-template<class T,template<class> class _Allocator,int __Alignment>
-typename LinkedList<T,_Allocator,__Alignment>::__ListNode*    LinkedList<T,_Allocator,__Alignment>::
+__DEF_Template_LinkedList
+typename __DEF_LinkedList::__ListNode*    __DEF_LinkedList::
 		removeHead()
 {
     __ListNode* p=root->removeNext();
@@ -398,20 +501,23 @@ typename LinkedList<T,_Allocator,__Alignment>::__ListNode*    LinkedList<T,_Allo
     return p;
    
 }
+#undef __DEF_Template_LinkedList
+#undef __DEF_LinkedList
 
 
 
 
 //=============class : LocateableLinkedList
-#define __DEF_LocateableLinkedList LocateableLinkedList<_Locateable,_HowAllocated,_Allocator,__SizeType,__Alignment>
+#define __DEF_Template_LocateableLinkedList template<class _Locateable,int _HowAllocated,template <class> class _Allocator>
+#define __DEF_LocateableLinkedList LocateableLinkedList<_Locateable,_HowAllocated,_Allocator>
 
-template<class _Locateable,int _HowAllocated,template <class> class _Allocator ,typename __SizeType,int __Alignment>
+__DEF_Template_LocateableLinkedList
 __DEF_LocateableLinkedList::LocateableLinkedList(__Allocator *smm ):
 Super(smm)
 {
 
 }
-template<class _Locateable,int _HowAllocated,template <class> class _Allocator ,typename __SizeType,int __Alignment>
+__DEF_Template_LocateableLinkedList
 __DEF_LocateableLinkedList::~LocateableLinkedList()
 {
 
@@ -423,7 +529,7 @@ __DEF_LocateableLinkedList::~LocateableLinkedList()
 *   The 'template argument' combination technique is(maybe that I now say 'often' appears too early) used in an extension system.
 *   The template arguments will cover all the nodes from base to the deepest derived class.
 */
-template<class _Locateable,int _HowAllocated,template <class> class _Allocator ,typename __SizeType,int __Alignment>
+__DEF_Template_LocateableLinkedList
 typename __DEF_LocateableLinkedList::__ListNode*__DEF_LocateableLinkedList::
 findFirstStartLen(__ListNode* startNode,__SizeType start,__SizeType len)
 {
@@ -499,7 +605,7 @@ findFirstStartLen(__ListNode* startNode,__SizeType start,__SizeType len)
     return p;
 }
 
-template<class _Locateable,int _HowAllocated,template <class> class _Allocator,typename __SizeType,int __Alignment>
+__DEF_Template_LocateableLinkedList
 typename __DEF_LocateableLinkedList::__ListNode*__DEF_LocateableLinkedList::findFirstLen(__ListNode* startNode,__SizeType len)
 {
     if(!startNode||len==0)return NULL;
@@ -514,7 +620,7 @@ typename __DEF_LocateableLinkedList::__ListNode*__DEF_LocateableLinkedList::find
     return p;
 }
 
-template<class _Locateable,int _HowAllocated,template <class> class _Allocator ,typename __SizeType,int __Alignment>
+__DEF_Template_LocateableLinkedList
 typename __DEF_LocateableLinkedList::__ListNode*__DEF_LocateableLinkedList::findFirstStart(__ListNode* startNode,__SizeType start)
 {
     if(!startNode)return NULL;
@@ -529,7 +635,7 @@ typename __DEF_LocateableLinkedList::__ListNode*__DEF_LocateableLinkedList::find
         return NULL;
     }
 }
-template<class _Locateable,int _HowAllocated,template <class> class _Allocator ,typename __SizeType,int __Alignment>
+__DEF_Template_LocateableLinkedList
 typename __DEF_LocateableLinkedList::__ListNode*__DEF_LocateableLinkedList::findFirstStartForInsert(__ListNode *startNode,__SizeType start)
 {
     if(!startNode)return NULL;
@@ -549,14 +655,14 @@ typename __DEF_LocateableLinkedList::__ListNode*__DEF_LocateableLinkedList::find
     return p;
 
 }
-template<class _Locateable,int _HowAllocated,template <class> class _Allocator ,typename __SizeType,int __Alignment>
+__DEF_Template_LocateableLinkedList
 typename __DEF_LocateableLinkedList::__ListNode* __DEF_LocateableLinkedList::
 	nextAllocable(__ListNode* startNode)
 {
     return __DEF_LocateableLinkedList::nextAllocable(startNode,Int2Type<_HowAllocated>());
 }
 
-template<class _Locateable,int _HowAllocated,template <class> class _Allocator ,typename __SizeType,int __Alignment>
+__DEF_Template_LocateableLinkedList
 typename __DEF_LocateableLinkedList::__ListNode*
 	__DEF_LocateableLinkedList::
 	nextAllocable(__ListNode* startNode,Int2Type<Locator<_Locateable>::KEEP>)
@@ -570,30 +676,157 @@ typename __DEF_LocateableLinkedList::__ListNode*
         return startNode;
 }
 
-template<class _Locateable,int _HowAllocated,template <class> class _Allocator ,typename __SizeType,int __Alignment>
+__DEF_Template_LocateableLinkedList
 typename __DEF_LocateableLinkedList::__ListNode* __DEF_LocateableLinkedList::
 	nextAllocable(__ListNode* startNode,Int2Type<Locator<_Locateable>::DISCARD>)
 {
     return startNode==NULL?NULL:startNode->getNext();
 }
+#undef __DEF_Template_LocateableLinkedList
+#undef __DEF_LocateableLinkedList
 #undef __DEF_LocateableLinkedList
 
 
 //============class : TreeNode
+#define __DEF_Template_TreeNode template<class T>
+#define __DEF_TreeNode TreeNode<T>
+
+__DEF_Template_TreeNode
+__DEF_TreeNode::TreeNode(const T& data,__TreeNode* father,__TreeNode* son,__TreeNode* next,__TreeNode* previous):
+__ListNode(data,next,previous),
+son(son),
+father(father)
+{
+
+}
+__DEF_Template_TreeNode
+__DEF_TreeNode::~TreeNode() {
+}
+
+//#if defined(CODE64)
+//__DEF_Template_TreeNode
+//__TreeNode* __DEF_TreeNode::getSon() const{
+//#if defined(CODE64)
+//	printf("gettSon not macro\n");
+//#endif
+//	return son;
+//}
+//#endif
+
+
+__DEF_Template_TreeNode
+void __DEF_TreeNode::addSon(__TreeNode* son)
+{
+//	Util::printStr("in TreeNode addSon \n");
+	__TreeNode*	orison=this->getSon();
+	if(orison)
+	{
+		orison->getLast()->insertNext(son);
+	}else{
+		this->setSon(son);
+	}
+}
+__DEF_Template_TreeNode
+void __DEF_TreeNode::insertSon(__TreeNode* son) {
+	if(son!=NULL)
+	{
 #if defined(CODE64)
-#define __DEF_ALIGNMENT sizeof(size_t)
-#include <preprocessor_functions/List_TreeNode.cpp.RAW>
+//	printf("insertSon 0\n");
 #endif
+#if defined(CODE64)
+//	printf("getSon return\n");
+#endif
+		__TreeNode *orison=this->getSon();
+#if defined(CODE64)
+//	printf("insertSon 1\n");
+#endif
+		this->setSon(son);
+#if defined(CODE64)
+//	printf("insertSon 2\n");
+#endif
+		son->setFather(this);
+#if defined(CODE64)
+//	printf("insertSon 3\n");
+#endif
+		son->setSon(orison);
+		if(orison)
+		{
+			orison->setFather(son);
+		}
+	}
+}
 
-#if defined(CODE32) ||defined(CODE32USER)|| defined(CODE64)
-#define __DEF_ALIGNMENT 4
-#include <preprocessor_functions/List_TreeNode.cpp.RAW>
-#endif
+__DEF_Template_TreeNode
+void __DEF_TreeNode::insertFather(__TreeNode* father) {
+	if(father!=NULL)
+	{
+		__TreeNode *orifather=this->getDirectFather();
+		this->setFather(father);
+		father->setSon(this);
+		father->setFather(orifather);
+		if(orifather)
+		{
+			orifather->setSon(father);
+		}
+	}
+}
 
-#if defined(CODE16) || defined(CODE32) ||defined(CODE32USER)|| defined(CODE64)
-#define __DEF_ALIGNMENT 2
-#include <preprocessor_functions/List_TreeNode.cpp.RAW>
-#endif
+__DEF_Template_TreeNode
+typename __DEF_TreeNode::__TreeNode* __DEF_TreeNode::removeSon() {
+	if(this->getSon())
+	{
+		__TreeNode *son=this->getSon()->getSon();
+		this->setSon(son);
+		son->setFather(this);
+		this->getSon()->setFather(NULL);
+		this->getSon()->setSon(NULL);
+
+	}
+	// TODO 改变返回参数，什么都不返回
+	return NULL;
+}
+__DEF_Template_TreeNode
+void 			__DEF_TreeNode::adjustOffset(ptrdiff_t diff)
+{
+	this->Super::adjustOffset(diff);
+	if(this->father!=NULL)
+		this->father = (__TreeNode*)((char*)this->father + diff);
+	if(this->son!=NULL)
+		this->son = (__TreeNode*)((char*)this->son + diff);
+}
+__DEF_Template_TreeNode
+void 			__DEF_TreeNode::initToNull()
+{
+	__ListNode::initToNull();
+	father=son=NULL;
+}
+
+__DEF_Template_TreeNode
+typename __DEF_TreeNode::__TreeNode* __DEF_TreeNode::removeFather() {
+	if(this->getDirectFather())
+	{
+		__TreeNode *father=this->getDirectFather()->getDirectFather();
+		this->setFather(father);
+		father->setSon(this);
+		this->getDirectFather()->setFather(NULL);
+		this->getDirectFather()->setSon(NULL);
+	}
+	//TODO 返回void
+	return NULL;
+}
+
+__DEF_Template_TreeNode
+typename __DEF_TreeNode::__TreeNode* __DEF_TreeNode::getParent()const {//往previous一直遍历，直到是跟，然后返回跟的father
+	__TreeNode *p=(__TreeNode*)this;
+	while(p->hasPrevious())
+	{
+		p=(__TreeNode*)p->getPrevious();
+	}
+	return p->getDirectFather();
+}
+
+#undef __DEF_Template_TreeNode
+#undef __DEF_TreeNode
 
 
 
@@ -601,8 +834,11 @@ typename __DEF_LocateableLinkedList::__ListNode* __DEF_LocateableLinkedList::
 #if defined(CODE64)
 #include <cstdio>
 #endif
-template<class T,template <class> class _Allocator,int __Alignment>
-Tree<T,_Allocator,__Alignment>::Tree(__Allocator* smm,__TreeNode* root):
+
+#define __DEF_Template_Tree template<class T,template <class> class _Allocator>
+#define __DEF_Tree Tree<T,_Allocator>
+__DEF_Template_Tree
+__DEF_Tree::Tree(__Allocator* smm,__TreeNode* root):
 smm(smm)
 {
 #if defined(CODE32)
@@ -642,8 +878,8 @@ smm(smm)
 }
 
 #if defined(CODE32)
-template<class T,template <class> class _Allocator,int __Alignment>
-void Tree<T,_Allocator,__Alignment>::dumpInfo(Printer* p)const
+__DEF_Template_Tree
+void __DEF_Tree::dumpInfo(Printer* p)const
 {
 	if(p!=NULL)
 	{
@@ -654,17 +890,17 @@ void Tree<T,_Allocator,__Alignment>::dumpInfo(Printer* p)const
 }
 #endif
 
-template<class T,template <class> class _Allocator,int __Alignment>
-Tree<T,_Allocator,__Alignment>::Tree()
+__DEF_Template_Tree
+__DEF_Tree::Tree()
 {
 
 }
-template<class T,template <class> class _Allocator,int __Alignment>
-Tree<T,_Allocator,__Alignment>::~Tree() {
+__DEF_Template_Tree
+__DEF_Tree::~Tree() {
 }
 
-template<class T,template <class> class _Allocator,int __Alignment>
-void         Tree<T,_Allocator,__Alignment>::free(__TreeNode *root)
+__DEF_Template_Tree
+void         __DEF_Tree::free(__TreeNode *root)
 {
   if(root)
   {
@@ -678,3 +914,6 @@ void         Tree<T,_Allocator,__Alignment>::free(__TreeNode *root)
     smm->withdraw(root);
   }
 }
+
+#undef __DEF_Template_Tree
+#undef __DEF_Tree

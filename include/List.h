@@ -120,22 +120,46 @@ protected:
 };
 
 //===ListNode的定义
-template<class T,int __Alignment>
-class ListNode{};//模板
-#if defined(CODE64)
-#define __DEF_ALIGNMENT sizeof(size_t)
-#include <preprocessor_functions/List.h.RAW>
-#endif
+template<class T>
+class ListNode{
+public:
+	using This = ListNode<T>;
+	using __ListNode = This;
+public:
+    ListNode(const T& data,__ListNode* next=NULL,__ListNode* previous=NULL);
+    ~ListNode();
 
-#if defined(CODE32) ||defined(CODE32USER)|| defined(CODE64)
-#define __DEF_ALIGNMENT 4
-#include <preprocessor_functions/List.h.RAW>
-#endif
+    AS_MACRO const T& getData()const;
+    AS_MACRO T& getData();
+    AS_MACRO void setData(const T& data);
+    AS_MACRO __ListNode* getNext()const;
+    AS_MACRO __ListNode* getPrevious()const;
+    AS_MACRO void setNext(__ListNode* next);
+    AS_MACRO void  setPrevious(__ListNode* previous);
+    __ListNode* removeNext();
+    __ListNode* removePrevious();
+    void    insertNext(__ListNode* next);
+    void    insertPrevious(__ListNode* previous);
+    AS_MACRO int  hasNext()const;
+    AS_MACRO int  hasPrevious()const;//done
+    /**
+     * @new method since 2017-03-18 21:23:10
+     */
+    void		adjustOffset(ptrdiff_t diff);
+    void		initToNull();
 
-#if defined(CODE16) || defined(CODE32) ||defined(CODE32USER)|| defined(CODE64)
-#define __DEF_ALIGNMENT 2
-#include <preprocessor_functions/List.h.RAW>
-#endif
+
+    __ListNode*    getLast()const;//done
+    __ListNode*    getFirst()const;//done
+    DEPRECATED AS_MACRO static void adjustOffset(char **p,ptrdiff_t off);
+    //指向构造函数的地址
+    //用 new (void*p) 构造函数,俗称placement new
+protected:
+    T   data;//for storage
+    __ListNode *next;
+    __ListNode *previous;
+
+};
 //*****=========ListNode定义完毕
 
 /**
@@ -156,10 +180,10 @@ class ListNode{};//模板
  * @param T 存储的类型
  * @param _Allocator 分配ListNode<T>的分配器
  */
-template<class T,template <class> class _Allocator,int __Alignment>
+template<class T,template <class> class _Allocator>
 class LinkedList{
 public:
-	using __ListNode = ListNode<T,__Alignment>;
+	using __ListNode = ListNode<T>;
 	using __Allocator = _Allocator<__ListNode>;
 public:
 	LinkedList()=default;
@@ -226,18 +250,17 @@ protected:
 *   @param _Allocator	分配器
 */
 template<class _Locateable,int _HowAllocated,
-		template <class> class _Allocator,
-		typename __SizeType,
-		int __Alignment>
-class LocateableLinkedList:public LinkedList<_Locateable,_Allocator,__Alignment>
+		template <class> class _Allocator>
+class LocateableLinkedList:public LinkedList<_Locateable,_Allocator>
 {
 public:
-	using This =  LocateableLinkedList<_Locateable,_HowAllocated,_Allocator,__SizeType,__Alignment>;
-	using Super = LinkedList<_Locateable,_Allocator,__Alignment>;
+	using This =  LocateableLinkedList<_Locateable,_HowAllocated,_Allocator>;
+	using Super = LinkedList<_Locateable,_Allocator>;
 	using __LocateableLinkedList = This;
 	using __LinkedList = Super;
 	using __ListNode = typename Super::__ListNode;
 	using __Allocator = _Allocator<__ListNode>;
+	using __SizeType = size_t;
 public:
 	 LocateableLinkedList()=default;//done
 public:
@@ -281,24 +304,52 @@ protected:
 };
 
 
-//===============TreeNode and Tree
-//	uses "Tree.cpp"
-template <class T,int __Alignment>
-class TreeNode{}; //模板
-#if defined(CODE64)
-#define __DEF_ALIGNMENT sizeof(size_t)
-#include <preprocessor_functions/List_TreeNode.h.RAW>
-#endif
+//===============class TreeNode
+template <class T>
+class TreeNode:public ListNode<T>{
+public:
+	using This = TreeNode<T>;
+	using Super = ListNode<T>;
+	using __ListNode = Super;
+	using __TreeNode = This;
+public:
+	TreeNode()=default;
+    TreeNode(const T& data,__TreeNode* father=NULL,__TreeNode* son=NULL,__TreeNode* next=NULL,__TreeNode* previous=NULL);
+    ~TreeNode();
 
-#if defined(CODE32) ||defined(CODE32USER)|| defined(CODE64)
-#define __DEF_ALIGNMENT 4
-#include <preprocessor_functions/List_TreeNode.h.RAW>
-#endif
+    AS_MACRO __TreeNode* setSon(__TreeNode* son);//done
+    AS_MACRO __TreeNode* setFather(__TreeNode* father);//done
 
-#if defined(CODE16) || defined(CODE32) ||defined(CODE32USER)|| defined(CODE64)
-#define __DEF_ALIGNMENT 2
-#include <preprocessor_functions/List_TreeNode.h.RAW>
-#endif
+//#if defined(CODE64)
+//    __TreeNode* getSon()const;
+//#else
+    AS_MACRO __TreeNode* getSon()const; //done
+//#endif
+    AS_MACRO __TreeNode* getNext()const;
+    AS_MACRO __TreeNode* getPrevious()const;
+
+    AS_MACRO __TreeNode* getDirectFather()const;//direct father,done
+    		void		addSon(__TreeNode* son);
+    AS_MACRO bool		hasSon()const;
+    AS_MACRO bool 		hasFather()const;
+
+    void		insertSon(__TreeNode* son);
+    void		insertFather(__TreeNode* father);
+    __TreeNode*	removeSon();
+	__TreeNode*	removeFather();
+	void 			adjustOffset(ptrdiff_t diff);
+	void			initToNull();
+
+
+    __TreeNode* getParent()const;//往previous一直遍历，直到是根，然后返回根的father,done
+
+protected:
+
+    __TreeNode *son;
+    __TreeNode *father;
+
+};
+
 
 //============class Tree
 /**
@@ -311,12 +362,12 @@ class TreeNode{}; //模板
  *	@param T			节点存储的数据类型
  *	@param _Allocator  分配TreeNode的分配器类型
  */
-template <class T,template <class> class _Allocator,int __Alignment>
+template <class T,template <class> class _Allocator>
 class Tree{
 public:
-	using This = Tree<T,_Allocator,__Alignment>;
+	using This = Tree<T,_Allocator>;
 	using __Tree = This;
-	using __TreeNode=TreeNode<T,__Alignment>;
+	using __TreeNode=TreeNode<T>;
 	using __Allocator = _Allocator<__TreeNode>;
 public:
 //	Tree()=default;

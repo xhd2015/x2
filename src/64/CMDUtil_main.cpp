@@ -17,6 +17,78 @@
 
 using namespace std;
 
+
+
+CommandOptions<StdEnv64Impl> opts{
+			{"-s","--basic-size",true,"文件系统的基本尺寸,默认为系统的sizeof(size_t)"},
+			{"","--16",false,"等价于-s 2"},
+			{"","--32",false,"等价于-s 4"},
+			{"","--64",false,"等价于-s 8"},
+			{"-l","--lbalow",true,"镜像文件的lba低32位地址"},
+			{"-e","--cmd",true,"以;分隔,执行一系列命令,然后退出"},
+			{"-c","--cd",true,"在进行操作之前，x2文件系统先切换到目录下"},
+			{"-h","--help",false,"显示此帮助信息"},
+			{"-v","--version",false,"打印版本号"},
+	};
+string helpMsg = opts.makeHelpMessage("指定镜像文件为x2文件系统,然后打开",
+		"CMDUtil_main [选项]  x2文件系统文件", "");
+
+class MyPorcessor:public CommandProcessor<StdEnv64Impl,ParamMain>
+{
+public:
+	MyPorcessor(StdEnv64Impl &env):CommandProcessor(env){}
+	virtual int onProcessArgOpt(ParamMain &pack,__OptPosIterator itopt,__VS_cit itarg) override{
+		if(itopt->equals("-e")){
+			pack.cmds+=pack.spiltor+ *(itarg+1);
+		}else if(itopt->equals("-c")){
+			pack.cdpath = *(itarg+1);
+		}else	if(itopt->equals("-s")){
+			pack.basicSize = atoi((itarg+1)->c_str());
+		}else if(itopt->equals("--16")){
+			pack.basicSize=2;
+		}else if(itopt->equals("--32")){
+			pack.basicSize=4;
+		}else if(itopt->equals("--64")){
+			pack.basicSize=8;
+		}else if(itopt->equals("-l")){
+			pack.lbalow = atoi( (itarg+1)->c_str());
+		}
+		return ERROR_NO_ERROR;
+	}
+
+	virtual int onProcessArgTarget(ParamMain &pack,__VS_cit itarg)override
+	{
+		pack.imgFile = *itarg;
+		return ERROR_NO_ERROR;
+	}
+
+	virtual int onProcessPost(ParamMain &pack)override
+	{
+		if(pack.imgFile.empty())
+		{
+			return ERROR_ARG_NOT_ENOUGH;
+		}else{
+			return ERROR_NO_ERROR;
+		}
+	}
+
+
+	virtual int onProcessHelp(ParamMain &pack)override
+	{
+		cout << helpMsg << endl;
+		return ERROR_NORMAL_EXIT;
+	}
+	virtual int onProcessVersion(ParamMain &pack)override
+	{
+		cout << "Version 1.0"<<endl;
+		return ERROR_NORMAL_EXIT;
+	}
+};
+
+
+template <class __StdEnv,class __FsEnv>
+void process(__StdEnv &env,ParamMain &p,int& status);
+
 bool prompt(const string &p)
 {
 	cout << p;
@@ -36,109 +108,60 @@ bool prompt(const string &p)
  */
 int main(int argc,char *argv[])
 {
-	string cmd;
-	string imgFile;
-	if(argc<2)
+	vector<string> args(argv+1,argv+argc);
+	// 打印参数
+	for(int i=0;i<argc;++i)
+			cout << argv[i]<< " ";
+		cout << endl;
+
+	StdEnv64Impl env;
+	MyPorcessor prep(env);
+	ParamMain p;
+	int status=prep.processOptions(opts, args.cbegin(),args.cend(), p);
+	if(status==MyPorcessor::RETURN_CONTINUE)
 	{
-		cout << "You must specify an image file,please input a file:";
-		cin >> imgFile;
-	}else{
-		imgFile=argv[1];
-	}
-
-
-//	cout << "DEBUG argv[1] is "<<argv[1]<<endl;
-
-	// 注意，由于采用单例模式，所以该类只有一个文件指针
-
-	StdEnv64Impl envInstance (imgFile.c_str());
-	FileOperation<StdEnv64Impl,FsEnv64> op(&envInstance,0x80,0x3000);
-
-
-	// DEBUG
-//	op.touch("file",2,0);
-//	string content(1024,'d');
-//	op.write("file", 5,content.c_str(), content.length());
-//	op.randwrite("file",4,content.c_str(),content.length());
-//	op.randread("file", 1024, 20);
-//	op.ls();
-//	return 0;
-
-//	string content2("eeeeeeeeeeee");
-//	op.write("file",1,content2.c_str(),content2.length());
-//	op.ls();
-
-//	envInstance->spaceSplit("mkdir yes");
-
-	while(
-			prompt(op.curDir()) &&
-			prompt(">") &&
-			getline(cin,cmd))
-	{
-		//parse all args
-		//将其用正则表达式分解成数组格式
-		vector<string> args=envInstance.spaceSplit(cmd);
-		if(args.size()==0)continue;
-		if(args[0].compare("help")==0)
+		StdEnv64Impl env;
+		if(p.basicSize==2)
 		{
-			op.help();
-		}else if(args[0].compare("ls")==0){
-			op.ls();
-		}else if(args[0].compare("pwd")==0){
-			op.pwd();
-		}else if(args[0].compare("mkdir")==0){
-			op.mkdir(args[1]);
-		}else if(args[0].compare("cd")==0){
-			if(args.size() < 2)
-				continue;
-			else
-				op.cd(args[1]);
-		}else if(args[0].compare("rm")==0){
-			op.rm(args[1]);
-		}else if(args[0].compare("touch")==0){
-			if(args.size() < 4)
-			{
-				cerr << "see help for touch"<<endl;
-			}else{
-				op.touch(args[1], atoi(args[2].c_str()),atoi(args[3].c_str()));
-			}
-		}else if(args[0].compare("write")==0 || args[0].compare("randwrite")==0){
-			if(args.size() < 4)// write file StartSec dddddddddddddd...
-			{
-				cerr << "see help for "<<args[0] << endl;
-			}else{
-				if(args[0].compare("write")==0)
-					op.write(args[1], atoi(args[2].c_str()),args[3].c_str(), args[3].length());
-				else
-					op.randwrite(args[1], atoi(args[2].c_str()),args[3].c_str(), args[3].length());
-			}
-		}else if(args[0].compare("read")==0 || args[0].compare("randread")==0){
-			//read file StartSec ByteNum
-			if(args.size() < 4)
-				cerr << "see help for "<<args[0]<<endl;
-			else
-			{
-				if(args[0].compare("read")==0)
-					op.read(args[1],atoi(args[2].c_str()), atoi(args[3].c_str()));
-				else
-					op.randread(args[1],atoi(args[2].c_str()), atoi(args[3].c_str()));
-			}
-		}else if(args[0].compare("truncate")==0){
-			if(args.size() < 3)
-				cerr << "see help for "<<args[0]<<endl;
-			else{
-				op.truncate(args[1], atoi(args[2].c_str()));
-			}
-
-		}else if(args[0].compare("quit")==0 || args[0].compare("exit")==0){
-			break;
+			process<StdEnv64Impl,FsEnv16>(env,p,status);
+		}else if(p.basicSize==4){
+			process<StdEnv64Impl,FsEnv32>(env,p,status);
+		}else if(p.basicSize==8){
+			process<StdEnv64Impl,FsEnv64>(env, p,status);
 		}else{
-			cout << "Unrecognized command '" << args[0] << "'." << endl;
+			cerr << "Unsupported basic size type:"<<p.basicSize<<endl;
+			status = MyPorcessor::RETURN_ERROR;
 		}
-		fflush(stdout);
 	}
 
-	return 0;
+	return (status!=MyPorcessor::RETURN_ERROR?EXIT_SUCCESS:EXIT_FAILURE);
+}
+
+template <class __StdEnv,class __FsEnv>
+void process(__StdEnv &env,ParamMain &p,int& status)
+{
+	u8_t driver=env.addFile(p.imgFile,p.lbalow);
+	FileOperation<StdEnv64Impl,__FsEnv> op(env,driver,p.lbalow);
+
+	if(p.cdpath.size()>0)
+		op.cd(p.cdpath);
+
+	if(p.cmds.size()>0)
+	{
+		std::vector<string> cmds=env.cmdSplit(p.cmds);
+		for(const std::string &cmd:cmds)
+		{
+			if(!op.eval(cmd))break;
+		}
+		status=MyPorcessor::RETURN_DONE;
+	}else{
+		string cmd;
+		while(
+				prompt(op.curDir()) &&
+				prompt(">") &&
+				getline(std::cin,cmd))
+			if(!op.eval(cmd))break;
+	}
 }
 
 #endif

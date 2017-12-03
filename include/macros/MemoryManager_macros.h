@@ -13,31 +13,79 @@
 
 //========Function Macro
 //==class LinearSourceDescriptor
+#define __DEF_Template_LinearSourceDescriptor
+#define __DEF_LinearSourceDescriptor LinearSourceDescriptor
+
+__DEF_Template_LinearSourceDescriptor
+__DEF_LinearSourceDescriptor::LinearSourceDescriptor(__SizeType start,__SizeType limit):
+ start(start),limit(limit)
+ {
+
+ }
+
+__DEF_LinearSourceDescriptor::~LinearSourceDescriptor() {
+ }
+
+ typename __DEF_LinearSourceDescriptor::__SizeType
+ __DEF_LinearSourceDescriptor::getStart()const
+ {
+    return start;
+ }
+
+ typename  __DEF_LinearSourceDescriptor::__SizeType
+ __DEF_LinearSourceDescriptor::getLimit()const
+ {
+    return limit;
+ }
+
+ void  __DEF_LinearSourceDescriptor::setStart(__SizeType start)
+ {
+    this->start=start;
+ }
+void  __DEF_LinearSourceDescriptor::setLimit(__SizeType limit)
+ {
+    this->limit=limit;
+ }
+
+bool  __DEF_LinearSourceDescriptor::contains(const LinearSourceDescriptor& b)const
+{
+	return contains(b.getStart(),b.getLimit());
+}
+
+bool  __DEF_LinearSourceDescriptor::contains(__SizeType start,__SizeType limit)const
+{
 #if defined(CODE64)
-#define __DEF_SIZE_TYPE u64_t
-#define __DEF_ALIGNMENT sizeof(u64_t)
-#include <preprocessor_functions/MemoryManager_macros.h.RAW>
-#define __DEF_SIZE_TYPE size_t
-#define __DEF_ALIGNMENT sizeof(size_t)
-#include <preprocessor_functions/MemoryManager_macros.h.RAW>
+//	printf("this->start-start>=limit-this->limit   : (%d >= %d = %d)\n",this->start-start,limit-this->limit,(int)(this->start-start)>=(int)(limit-this->limit));
 #endif
+	return (this->start<=start)&&( limit<=this->limit  && (start - this->start)<=(this->limit - limit));
+}
+bool  __DEF_LinearSourceDescriptor::operator==(const __LinearSourceDescriptor& b)const
+{
 
-#if defined(CODE32) ||defined(CODE32USER)|| defined(CODE64)
-#define __DEF_SIZE_TYPE u32_t
-#define __DEF_ALIGNMENT 4
-#include <preprocessor_functions/MemoryManager_macros.h.RAW>
-#endif
+   return this->getStart()==b.getStart() && this->getLimit()==b.getLimit();
+}
+bool  __DEF_LinearSourceDescriptor::operator!=(const __LinearSourceDescriptor& b)const
+{
+    return ! this->operator==(b);
+}
+bool  __DEF_LinearSourceDescriptor::isAllocable()const
+{
+    return true;
+}
 
-#if defined(CODE16) || defined(CODE32) ||defined(CODE32USER)|| defined(CODE64)
-#define __DEF_SIZE_TYPE u16_t
-#define __DEF_ALIGNMENT 2
-#include <preprocessor_functions/MemoryManager_macros.h.RAW>
-#endif
+#undef __DEF_Template_LinearSourceDescriptor
+#undef __DEF_LinearSourceDescriptor
+
+
+
 
  //==========class: MemoryDescriptor
 // TODO 检查下面的声明有什么错误
-template <class __SizeType>
-MemoryDescriptor<__SizeType>::MemoryDescriptor(__SizeType start,__SizeType limit,bool allocable):
+#define __DEF_Template_MemoryDescriptor
+#define __DEF_MemoryDescriptor MemoryDescriptor
+
+__DEF_Template_MemoryDescriptor
+__DEF_MemoryDescriptor::MemoryDescriptor(__SizeType start,__SizeType limit,bool allocable):
 Super(start,limit),allocable(allocable)
 {
 
@@ -46,37 +94,40 @@ Super(start,limit),allocable(allocable)
 
 
 
-template <class __SizeType>
- MemoryDescriptor<__SizeType>::~MemoryDescriptor() {
+__DEF_Template_MemoryDescriptor
+ __DEF_MemoryDescriptor::~MemoryDescriptor() {
  }
-template <class __SizeType>
- void MemoryDescriptor<__SizeType>::setAllocable(bool allocable)
+__DEF_Template_MemoryDescriptor
+ void __DEF_MemoryDescriptor::setAllocable(bool allocable)
 {
     this->allocable=allocable;
 }
 
-template <class __SizeType>
-bool MemoryDescriptor<__SizeType>::isAllocable()const{
+__DEF_Template_MemoryDescriptor
+bool __DEF_MemoryDescriptor::isAllocable()const{
     return allocable;
 }
 
-template <class __SizeType>
- bool MemoryDescriptor<__SizeType>::operator==(const MemoryDescriptor<__SizeType>& b)const
+__DEF_Template_MemoryDescriptor
+ bool __DEF_MemoryDescriptor::operator==(const __MemoryDescriptor& b)const
 {
     return this->__LinearSourceDescriptor::operator==(b) && this->allocable==b.allocable;
 
 }
 
 
-template <class __SizeType>
-bool MemoryDescriptor<__SizeType>::operator!=(const MemoryDescriptor<__SizeType>& b)const
+__DEF_Template_MemoryDescriptor
+bool __DEF_MemoryDescriptor::operator!=(const __MemoryDescriptor& b)const
 {
     return ! this->operator==(b);
 }
 
+#undef __DEF_Template_MemoryDescriptor
+#undef __DEF_MemoryDescriptor
+
 //==============class LinearSourceManager
-#define __DEF_Template_LinearSourceManager template <class _LinearSourceDescriptor,template <class> class _NodeAllocator,typename __SizeType,int __Alignment>
-#define __DEF_LinearSourceManager LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator,__SizeType,__Alignment>
+#define __DEF_Template_LinearSourceManager template <class _LinearSourceDescriptor,template <class> class _NodeAllocator>
+#define __DEF_LinearSourceManager LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator>
 __DEF_Template_LinearSourceManager
 const _LinearSourceDescriptor & __DEF_LinearSourceManager::getSpace()const
 {
@@ -84,16 +135,20 @@ const _LinearSourceDescriptor & __DEF_LinearSourceManager::getSpace()const
 }
 #undef __DEF_Template_LinearSourceManager
 #undef __DEF_LinearSourceManager
+
 //============class MemoryManager<_DescriptorAllocator>
-template<template<class > class _DescriptorAllocator,typename __SizeType,int __Alignment>
-__SizeType MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::getBase() const {
+#define __DEF_Template_MemoryManager template<template<class > class _DescriptorAllocator>
+#define __DEF_MemeoryManager MemoryManager<_DescriptorAllocator>
+__DEF_Template_MemoryManager
+typename __DEF_MemeoryManager::__SizeType __DEF_MemeoryManager::getBase() const {
 	return this->root->getData().getStart();
 }
 
-template<template<class > class _DescriptorAllocator,typename __SizeType,int __Alignment>
-__SizeType MemoryManager<_DescriptorAllocator,__SizeType,__Alignment>::getLimit() const {
+__DEF_Template_MemoryManager
+typename __DEF_MemeoryManager::__SizeType __DEF_MemeoryManager::getLimit() const {
 	return this->root->getData().getLimit();
 }
-
+#undef __DEF_Template_MemoryManager
+#undef __DEF_MemeoryManager
 
 #endif /* INCLUDE_MACROS_MEMORYMANAGER_MACROS_H_ */

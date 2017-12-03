@@ -146,3 +146,15 @@ The behavior is undefined if the mode is not one of the strings listed above. So
 
 # 函数定义
 如果函数声明中已经有了默认参数，函数定义中不能出现默认参数。否则就是重定义。
+
+
+# 编译错误集锦
+explicit specialization in non-namespace scope   
+
+ template declaration cannot appear at block scope  不可以在局部块(如函数内)声明模板，例子
+ ```c++
+ template <class __Env>
+    void print(){
+        template class<__T> using Sizeof=typename __Env::template Sizeof<__T>;
+    }
+```

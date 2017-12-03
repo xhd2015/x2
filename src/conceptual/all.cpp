@@ -27,6 +27,9 @@
 //==from common/
 #include "../common/Getopt.cpp"
 
+//==from conceptual
+#include "../conceptual/Serialize.cpp"
+
 //==from $ROOT
 #include "../AssociatedMemoryManager.cpp"
 //#include "../Cache.cpp"

@@ -2,7 +2,75 @@
 此文件描述了通过一些特别的手段来实现各种比较特殊的要求，其中一些可能十分有技术含量，另一些却看起来平淡无奇。
 但是，无论如何这些技巧都最大化遵循最佳实践原则，并且随着时间会进行改进。
 
+# 通过文件局部命名空间和转发来绕开类内不能特化模板的限制
+```c++
+
+```
+
+```c++
+namespace{
+    template <size_t __HostBit,size_t __TargetBit,class __T>
+    struct __EnvTransfer
+    {
+        enum{Size=sizeof(__T)};
+    };
+    template <>
+    struct __EnvTransfer<64,32,void*>
+    {
+        enum{Size=4};
+    };
+    template <>
+    struct __EnvTransfer<64,32,int>
+    {
+        enum{Size=4};
+    };
+    template <>
+    struct __EnvTransfer<64,32,size_t>
+    {
+        enum{Size=4};
+    };
+}
+
+template <size_t __HostBit,size_t __TargetBit>
+struct EnvTransfer{
+    template <class __T> struct SizeofHostType{
+        enum{Size=__EnvTransfer<__HostBit,__TargetBit,__T>::Size };
+    };
+    template <class __T>
+    constexpr size_t sizeofHostType()
+    {
+        return __EnvTransfer<__HostBit,__TargetBit,__T>::Size;
+    }
+};
+```
+
+但是注意，以下调用都会失败
+```c++
+    /**/
+    return  __EnvTransfer::SizeofHostType<u8_t>::Size+
+            __EnvTransfer::sizeofHostType<__TimeType>();
+
+```
+无论以函数形式还是类形式，编译器无法识别其中各个成分的含义
+只能通过类来调用：
+```c++
+__DEF_Template_FileDescriptor
+template <class __EnvTransfer>
+size_t __DEF_FileDescriptor::getSerializitionSize()
+{
+    // 不能调用模板参数的静态函数
+    // 也不能调用带有实例化的函数：env.sizeofHostType<__SizeType>(0)
+    using u8size=typename __EnvTransfer::template SizeofHostType<u8_t>;
+    using SizeTypeSize = typename __EnvTransfer::template SizeofHostType<__SizeType>;
+    using TimetypeSize = typename __EnvTransfer::template SizeofHostType<__TimeType>;
+
+    return u8size::Size + SizeTypeSize::Size*3 + TimetypeSize::Size*2;
+}
+```
+
+思想：把类当做处理模板的函数即可。
 # 实现结构体按不同字节对齐以及C++代码生成技术
+注：当初提出这个问题是考虑文件系统需要跨系统，所以其结构在不同的主机上有需要相同，而对齐是影响结构的一个主要因素。现在，跨架构使用序列化技术。
 代码生成很重要，不可否认。受boost preprocessor的启发，我对此问题的最新的最优雅的解决方法是：
 ```c++
 

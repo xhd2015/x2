@@ -1,0 +1,2081 @@
+# 1 "src/KernelMemoryConfig.cpp"
+# 1 "/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system//"
+# 1 "<built-in>"
+# 1 "<command-line>"
+# 1 "src/KernelMemoryConfig.cpp"
+
+
+
+
+
+
+
+# 1 "./include/KernelMemoryConfig.h" 1
+# 18 "./include/KernelMemoryConfig.h"
+# 1 "./include/Kernel.h" 1
+
+
+
+
+# 1 "./include/def.h" 1
+# 28 "./include/def.h"
+# 1 "./include/config.h" 1
+# 29 "./include/def.h" 2
+
+
+
+typedef signed int ptrdiff_t;
+typedef unsigned int size_t;
+
+typedef unsigned int u32_t;
+typedef unsigned short u16_t;
+typedef unsigned char u8_t;
+# 6 "./include/Kernel.h" 2
+# 1 "./include/libx2.h" 1
+# 35 "./include/libx2.h"
+class Util{
+
+
+public:
+ static int printf(const char *fmt,...);
+    Util();
+    ~Util();
+
+
+
+    static int x,y;
+
+
+
+    enum { MODE_FL_ON=0x80,
+            MODE_FL_OFF=0x7f,
+            MODE_BG_RED=0b0100000,
+            MODE_BG_GREEN=0b0010000,
+            MODE_BG_BLUE=0b0001000,
+            MODE_BG_WHITE=0b0111000,
+            MODE_BG_RG=0b0110000,
+            MODE_BG_RB=0b0101000,
+            MODE_BG_BG=0b0011000,
+            MODE_BG_BLACK=0b0000000,
+            MODE_FG_RED=0b0000100,
+            MODE_FG_GREEN=0b0000010,
+            MODE_FG_BLUE=0b0000001,
+            MODE_FG_WHITE=0b0000111,
+            MODE_FG_RG=0b0000110,
+            MODE_FG_RB=0b0000101,
+            MODE_FG_BG=0b0000011,
+            MODE_FG_BLACK=0b0000000,
+            MODE_COMMON=(MODE_FL_OFF & MODE_BG_BLACK) | MODE_FG_WHITE
+    };
+
+
+    enum{
+     SCREEN_X = 25,
+  SCREEN_Y = 80
+    };
+
+
+    enum{SEG_CURRENT = 0x10000};
+
+     enum{
+   videoSelector=
+
+
+
+      0x8
+
+
+};
+
+
+
+    static int strSel;
+    inline __attribute__((always_inline)) static void setStrSel(int sel);
+    inline __attribute__((always_inline)) static int getStrSel();
+
+
+    static void printStr(const char* str_addr,int mode=MODE_COMMON);
+    static void printChar(char ch,int mode=MODE_COMMON);
+    static void setCursor(int x,int y);
+    static void newLine();
+    inline __attribute__((always_inline)) static void insertMark(int marker=0x1234);
+
+    static int get(int seg,int off);
+    static void setb(int seg,int off,int byte);
+
+
+
+
+    static void setw(int seg,int off,int halfWord);
+
+
+
+    static void setl(int seg,int off,int word);
+    static void clr();
+    inline __attribute__((always_inline)) static void jmpDie();
+    inline __attribute__((always_inline)) static void jmp(int addr);
+
+
+
+    inline __attribute__((always_inline)) static void reboot();
+    void test();
+
+
+
+
+
+    static void memcopy(int srcSeg,int srcOff,int dstSeg,int dstOff,int len);
+
+
+
+    inline __attribute__((always_inline)) static void memcopyInlineable(int srcSeg,int srcOff,int dstSeg,int dstOff,int len);
+
+
+    inline __attribute__((always_inline)) static void cli();
+    inline __attribute__((always_inline)) static void sti();
+    inline __attribute__((always_inline)) static void enterDs(int seg,int& temp);
+    inline __attribute__((always_inline)) static void leaveDs(int seg,int temp);
+    inline __attribute__((always_inline)) static void enterEs(int seg,int& temp);
+    inline __attribute__((always_inline)) static void leaveEs(int temp);
+    inline __attribute__((always_inline)) static void outb(short port,char data);
+    inline __attribute__((always_inline)) static void outw(short port,short data);
+    inline __attribute__((always_inline)) static char inb(short port);
+    inline __attribute__((always_inline)) static short inw(short port);
+    inline __attribute__((always_inline)) static void ltr(int sel);
+    inline __attribute__((always_inline)) static void lldt(int sel);
+    inline __attribute__((always_inline)) static int getCurrentDs();
+    inline __attribute__((always_inline)) static void setCurrentDs(int ds);
+    inline __attribute__((always_inline)) static int getCurrentSs();
+    inline __attribute__((always_inline)) static void setCurrentSs(int ss);
+    inline __attribute__((always_inline)) static void ljmp(int newcs,int neweip);
+# 160 "./include/libx2.h"
+    inline __attribute__((always_inline)) static void replaceCs(int newcs);
+
+
+
+
+
+    inline __attribute__((always_inline)) static void replaceSS_DS_ES(int newseg);
+
+
+public:
+
+    static void lidt(short len,int address);
+    static void lgdt(short len,int address);
+
+
+    __attribute__((deprecated)) inline __attribute__((always_inline)) static void pusha();
+    __attribute__((deprecated)) inline __attribute__((always_inline)) static void popa();
+# 185 "./include/libx2.h"
+    static short makeSel(int index,int dpl=0b00,int from=0);
+
+    static void changeCPL(int eip,int cs,int eflags,int esp,int ss);
+    static int getEflags();
+    static char getCPL();
+    static char getDPL(int sel);
+# 201 "./include/libx2.h"
+    static int digitToStr(char* save,unsigned int space,int n);
+    static int digitToHex(char* save,unsigned int space,unsigned int n);
+    static int strcmp(const char* a,const char *b);
+    static int strlen(const char *a);
+    static int strcopy(const char *src,char *dst,int len);
+
+
+
+
+
+
+
+    template <typename __SimpleType>
+    inline __attribute__((always_inline)) static __SimpleType min(__SimpleType t1,__SimpleType t2);
+    template <typename __SimpleType>
+    inline __attribute__((always_inline)) static __SimpleType max(__SimpleType t1,__SimpleType t2);
+
+
+    static int sign(int n);
+# 229 "./include/libx2.h"
+    __attribute__((deprecated)) inline __attribute__((always_inline)) static void initTarget(void** target);
+
+    inline __attribute__((always_inline)) static void intReturn();
+# 295 "./include/libx2.h"
+};
+
+
+
+class SimpleCharRotator{
+public:
+    const static char rotateShapes[12];
+
+    SimpleCharRotator(int x,int y,int attr=Util::MODE_COMMON,int direction=1);
+    ~SimpleCharRotator();
+
+    void setPosition(int x,int y);
+    void setAttr(int mode=Util::MODE_COMMON);
+    void run();
+private:
+    int X,Y,Attr;
+    int Status;
+    int Direction;
+};
+
+
+
+
+class Printer{
+public:
+    const static int SCREEN_MAX_X,SCREEN_MAX_Y;
+public:
+    Printer(unsigned int x0=0,unsigned int y0=0,unsigned int rows=Printer::SCREEN_MAX_X,unsigned int cols=Printer::SCREEN_MAX_Y,int mode=Util::MODE_COMMON);
+    ~Printer();
+
+    void putc(int chr);
+
+    void puti(const char* str,int i,const char* strAfter="\n");
+    void putx(const char* str,int i,const char* strAfter="\n");
+    void puti(const char* str,void * i,const char* strAfter="\n");
+    void putx(const char* str,void * i,const char* strAfter="\n");
+
+    void putsz(const char* str);
+    void putsn(const char *str,int n);
+    void setPos(int x,int y);
+    void move(int n);
+    void setMode(int mode);
+    void clr();
+
+
+
+    __attribute__((deprecated)) int isInside(int x,int y);
+
+    inline __attribute__((always_inline)) int getX();
+    inline __attribute__((always_inline)) int getY();
+
+
+
+    __attribute__((deprecated)) Printer getSubPrinter(unsigned int x0,unsigned int y0,unsigned int rows,unsigned int cols,int mode);
+
+protected:
+    int getPos();
+
+
+    unsigned int rows,cols,x0,y0;
+    int x,y;
+    int mode;
+
+
+    Printer *father;
+    Printer *sons[5];
+
+
+    unsigned int sonSize;
+
+private:
+
+
+
+
+
+
+
+    int specailCharProcessor(int chr);
+
+
+
+
+    void __putc(int chr);
+};
+
+
+
+
+
+
+
+class ErrorSaver{
+public:
+ inline __attribute__((always_inline)) ErrorSaver(int errno=0);
+ inline __attribute__((always_inline)) int getErrno()const;
+protected:
+ inline __attribute__((always_inline)) void setErrno(int errno);
+ int errno;
+};
+
+
+
+
+class ClassDebug{
+public:
+ ClassDebug()=default;
+ ClassDebug(const char *msg);
+};
+
+
+
+
+
+
+
+class String{
+public:
+    String(const char* str);
+    ~String();
+
+    int size();
+    char get(int index);
+    void set(int index,int ch);
+
+    static String valueOf(int n);
+protected:
+    char *str;
+
+};
+
+
+template <typename T>
+class Queue{
+public:
+ Queue()=default;
+    Queue(T p[],size_t len);
+    ~Queue();
+
+    T remove();
+    int put(T t);
+
+    inline __attribute__((always_inline)) unsigned int size();
+    inline __attribute__((always_inline)) bool isEmpty();
+    inline __attribute__((always_inline)) bool isFull();
+protected:
+    T *p;
+    unsigned int len;
+    unsigned int curLen;
+    int indexAdd,indexRemove;
+};
+# 7 "./include/Kernel.h" 2
+# 1 "./include/List.h" 1
+
+
+
+
+
+# 1 "./include/loki/Int2Type.h" 1
+
+
+
+
+template <int V>
+class Int2Type{
+public:
+ Int2Type()=default;
+ enum{value = V};
+};
+
+
+template <class T>
+class NullType;
+
+class EmptyType{};
+# 7 "./include/List.h" 2
+# 1 "./include/Locator.h" 1
+
+
+
+
+
+
+
+template <class T>
+class Locator{
+public:
+# 19 "./include/Locator.h"
+ enum{IGNORE=-2,LESS=-1,EQUAL=0,BIGGER=1,DISCARD=-2,KEEP=0};
+public:
+# 33 "./include/Locator.h"
+ bool meetedBy(const T &t);
+
+};
+
+
+
+
+
+
+template <class _Source,int _HowStart,int _HowLength,int _HowAllocable>
+class SourceLocator:public Locator<_Source>
+{
+public:
+ SourceLocator(const _Source& t);
+
+
+
+
+ bool meetedBy(const _Source &t)const;
+
+
+ inline __attribute__((always_inline)) const _Source* getComparator()const;
+
+ enum{
+  RELATION_EQ,RELATION_LS_EQ,RELATION_LS,RELATION_GT,RELATION_GT_EQ,RELATION_IGNORE
+ };
+
+
+
+
+ static bool meeted(u8_t startRelation,u8_t limitRelation,u8_t allocReation,const _Source &left,const _Source &right);
+protected:
+ const _Source* p;
+private:
+
+ bool tellLocation(const _Source& t,Int2Type<Locator<_Source>::EQUAL>)const;
+
+
+
+
+
+ bool tellLocation(const _Source& t,Int2Type<Locator<_Source>::IGNORE>)const;
+};
+# 8 "./include/List.h" 2
+
+
+#pragma pack(push,1)
+class SimpleMemoryNode{
+public:
+    inline __attribute__((always_inline)) SimpleMemoryNode(bool NO=false);
+
+    __attribute__((deprecated)) inline __attribute__((always_inline)) bool getNO();
+    __attribute__((deprecated)) inline __attribute__((always_inline)) void setNO(bool NO);
+
+    __attribute__((deprecated)) inline __attribute__((always_inline)) bool isFree();
+
+    inline __attribute__((always_inline)) bool isAlloced();
+    inline __attribute__((always_inline)) void setAlloced(bool alloced);
+
+    __attribute__((deprecated)) inline __attribute__((always_inline)) void free();
+    __attribute__((deprecated)) inline __attribute__((always_inline)) void unfree();
+
+
+
+public:
+
+
+
+
+    bool alloced;
+};
+#pragma pack(pop)
+# 51 "./include/List.h"
+template <class T>
+class SimpleMemoryManager{
+public:
+    SimpleMemoryManager()=default;
+
+public:
+# 66 "./include/List.h"
+ struct Freeable:public T,public SimpleMemoryNode{
+
+ };
+ typedef struct Freeable FullNode;
+ typedef T DataPart;
+
+
+ typedef void (*ERROR_HANDLER)(SimpleMemoryManager *smm,int errcode);
+ enum{
+  ERR_NO_ERROR=0,
+  ERR_SPACE_IS_FULL,
+  ERR_NODE_NOT_INTERNAL,
+  ERR_GENERAL
+ };
+
+
+
+public:
+
+
+
+
+
+    SimpleMemoryManager(size_t start,size_t limit,bool doInit=true,size_t initSize=0,ERROR_HANDLER errhandler=(0));
+
+
+
+
+
+
+    T* getNew();
+    FullNode *getNewNode();
+    void withdraw(FullNode *t);
+    void withdraw(T *t);
+
+
+    inline __attribute__((always_inline)) bool isFull()const;
+    inline __attribute__((always_inline)) size_t getLen()const;
+    inline __attribute__((always_inline)) size_t getCurSize()const;
+    inline __attribute__((always_inline)) size_t getStart()const;
+    inline __attribute__((always_inline)) size_t getLimit()const;
+    inline __attribute__((always_inline)) static size_t getNodeSize();
+    inline __attribute__((always_inline)) ERROR_HANDLER getErrHandler();
+    inline __attribute__((always_inline)) void setErrHandler(ERROR_HANDLER errhandle);
+protected:
+    inline __attribute__((always_inline)) bool checkIsInternal(FullNode *t);
+    size_t start;
+    size_t limit;
+
+    Freeable *data;
+    size_t curSize,len;
+
+    size_t lastIndex;
+    ERROR_HANDLER errhandle;
+};
+
+
+template<class T>
+class ListNode{
+public:
+ using This = ListNode<T>;
+ using __ListNode = This;
+public:
+    ListNode(const T& data,__ListNode* next=(0),__ListNode* previous=(0));
+    ~ListNode();
+
+    inline __attribute__((always_inline)) const T& getData()const;
+    inline __attribute__((always_inline)) T& getData();
+    inline __attribute__((always_inline)) void setData(const T& data);
+    inline __attribute__((always_inline)) __ListNode* getNext()const;
+    inline __attribute__((always_inline)) __ListNode* getPrevious()const;
+    inline __attribute__((always_inline)) void setNext(__ListNode* next);
+    inline __attribute__((always_inline)) void setPrevious(__ListNode* previous);
+    __ListNode* removeNext();
+    __ListNode* removePrevious();
+    void insertNext(__ListNode* next);
+    void insertPrevious(__ListNode* previous);
+    inline __attribute__((always_inline)) int hasNext()const;
+    inline __attribute__((always_inline)) int hasPrevious()const;
+
+
+
+    void adjustOffset(ptrdiff_t diff);
+    void initToNull();
+
+
+    __ListNode* getLast()const;
+    __ListNode* getFirst()const;
+    __attribute__((deprecated)) inline __attribute__((always_inline)) static void adjustOffset(char **p,ptrdiff_t off);
+
+
+protected:
+    T data;
+    __ListNode *next;
+    __ListNode *previous;
+
+};
+# 183 "./include/List.h"
+template<class T,template <class> class _Allocator>
+class LinkedList{
+public:
+ using __ListNode = ListNode<T>;
+ using __Allocator = _Allocator<__ListNode>;
+public:
+ LinkedList()=default;
+
+public:
+    LinkedList( __Allocator *smm);
+    ~LinkedList();
+
+    inline __attribute__((always_inline)) __ListNode* getHead()const;
+    inline __attribute__((always_inline)) _Allocator<__ListNode > *getMemoryManager()const;
+
+
+    inline __attribute__((always_inline)) __ListNode* getLast()const;
+    __ListNode* append(const T &t);
+    __ListNode* append(__ListNode* p);
+    __ListNode* appendHead(__ListNode* p);
+    __ListNode* appendHead(const T &t);
+    __ListNode* remove();
+    __ListNode* removeHead();
+    void remove(__ListNode* p);
+    void insertNext(__ListNode* where,__ListNode* p);
+    void insertPrevious(__ListNode* where,__ListNode* p);
+    size_t getSize()const;
+    inline __attribute__((always_inline)) bool isEmpty()const;
+
+
+    void freeNode(__ListNode * node);
+    void free();
+    void freeNext(__ListNode *t);
+    void freePrevious(__ListNode *t);
+
+
+protected:
+    _Allocator<__ListNode > *smm;
+
+
+
+
+    __ListNode* root;
+    __ListNode* last;
+
+
+};
+# 252 "./include/List.h"
+template<class _Locateable,int _HowAllocated,
+  template <class> class _Allocator>
+class LocateableLinkedList:public LinkedList<_Locateable,_Allocator>
+{
+public:
+ using This = LocateableLinkedList<_Locateable,_HowAllocated,_Allocator>;
+ using Super = LinkedList<_Locateable,_Allocator>;
+ using __LocateableLinkedList = This;
+ using __LinkedList = Super;
+ using __ListNode = typename Super::__ListNode;
+ using __Allocator = _Allocator<__ListNode>;
+ using __SizeType = size_t;
+public:
+  LocateableLinkedList()=default;
+public:
+
+
+
+    LocateableLinkedList( __Allocator *smm );
+    ~LocateableLinkedList();
+# 281 "./include/List.h"
+    static __ListNode *findFirstStartLen(__ListNode* startNode,__SizeType start,__SizeType len);
+    static __ListNode *findFirstLen(__ListNode* startNode,__SizeType len);
+    static __ListNode *findFirstStart(__ListNode* startNode,__SizeType start);
+
+
+
+
+
+    static __ListNode *findFirstStartForInsert(__ListNode *startNode,__SizeType start);
+
+
+
+
+
+    __attribute__((deprecated)) static __ListNode *locateForDelete(__ListNode* startNode,__SizeType start,__SizeType len,bool allocable);
+    __attribute__((deprecated)) static __ListNode* locateForDeleteStart(__ListNode* startNode,__SizeType start,bool allocable);
+
+
+
+    static __ListNode* nextAllocable(__ListNode* startNode);
+protected:
+    static __ListNode* nextAllocable(__ListNode* startNode,Int2Type<Locator<_Locateable>::KEEP>);
+    static __ListNode* nextAllocable(__ListNode* startNode,Int2Type<Locator<_Locateable>::DISCARD>);
+};
+
+
+
+template <class T>
+class TreeNode:public ListNode<T>{
+public:
+ using This = TreeNode<T>;
+ using Super = ListNode<T>;
+ using __ListNode = Super;
+ using __TreeNode = This;
+public:
+ TreeNode()=default;
+    TreeNode(const T& data,__TreeNode* father=(0),__TreeNode* son=(0),__TreeNode* next=(0),__TreeNode* previous=(0));
+    ~TreeNode();
+
+    inline __attribute__((always_inline)) __TreeNode* setSon(__TreeNode* son);
+    inline __attribute__((always_inline)) __TreeNode* setFather(__TreeNode* father);
+
+
+
+
+    inline __attribute__((always_inline)) __TreeNode* getSon()const;
+
+    inline __attribute__((always_inline)) __TreeNode* getNext()const;
+    inline __attribute__((always_inline)) __TreeNode* getPrevious()const;
+
+    inline __attribute__((always_inline)) __TreeNode* getDirectFather()const;
+      void addSon(__TreeNode* son);
+    inline __attribute__((always_inline)) bool hasSon()const;
+    inline __attribute__((always_inline)) bool hasFather()const;
+
+    void insertSon(__TreeNode* son);
+    void insertFather(__TreeNode* father);
+    __TreeNode* removeSon();
+ __TreeNode* removeFather();
+ void adjustOffset(ptrdiff_t diff);
+ void initToNull();
+
+
+    __TreeNode* getParent()const;
+
+protected:
+
+    __TreeNode *son;
+    __TreeNode *father;
+
+};
+# 365 "./include/List.h"
+template <class T,template <class> class _Allocator>
+class Tree{
+public:
+ using This = Tree<T,_Allocator>;
+ using __Tree = This;
+ using __TreeNode=TreeNode<T>;
+ using __Allocator = _Allocator<__TreeNode>;
+public:
+
+ Tree();
+public:
+    Tree(__Allocator *smm,__TreeNode* root=(0));
+    ~Tree();
+
+    inline __attribute__((always_inline)) __TreeNode *getHead()const;
+    inline __attribute__((always_inline)) void setHead(__TreeNode *head);
+    inline __attribute__((always_inline)) void addRoot(__TreeNode* node);
+    inline __attribute__((always_inline)) bool isEmpty()const;
+    inline __attribute__((always_inline)) __Allocator* getSmm()const;
+    void free(__TreeNode *root);
+
+
+    void dumpInfo(Printer* p)const;
+
+protected:
+    __Allocator *smm;
+# 402 "./include/List.h"
+    __TreeNode *root;
+
+};
+# 8 "./include/Kernel.h" 2
+# 1 "./include/Interrupts.h" 1
+
+
+
+# 1 "./include/def.h" 1
+# 5 "./include/Interrupts.h" 2
+
+extern int *intAddresses;
+extern int intLen;
+
+extern "C" {
+    void int0x0();
+    void int0x1();
+    void int0x2();
+    void int0x3();
+    void int0x4();
+    void int0x5();
+    void int0x6();
+    void int0x7();
+    void int0x8();
+    void int0x9();
+
+    void int0xa();
+    void int0xb();
+    void int0xc();
+    void int0xd();
+    void int0xe();
+    void int0xf();
+    void int0x10();
+    void int0x11();
+    void int0x12();
+    void int0x13();
+
+
+    void int0x14();
+    void int0x15();
+    void int0x16();
+    void int0x17();
+    void int0x18();
+    void int0x19();
+    void int0x1a();
+    void int0x1b();
+    void int0x1c();
+    void int0x1d();
+
+    void int0x1e();
+    void int0x1f();
+
+    void int0x24();
+    void int0x25();
+    void int0x27();
+    void intDefault();
+}
+extern int int0x20,int0x21,int0x30;
+
+class InterruptsManager{
+public:
+    typedef void (*GENERAL_FUNC)();
+public:
+    InterruptsManager();
+    ~InterruptsManager();
+
+    GENERAL_FUNC getIntAddr(unsigned int i);
+    void setIntAddr(unsigned int i);
+
+    static void callInt(unsigned int i);
+
+protected:
+    static GENERAL_FUNC intAddresses[];
+    static unsigned int intLen;
+
+    static GENERAL_FUNC defaultHandler;
+
+
+
+
+};
+# 9 "./include/Kernel.h" 2
+
+# 1 "./include/Descriptor.h" 1
+
+
+
+
+
+
+
+class Descriptor{
+public:
+    Descriptor();
+    ~Descriptor();
+protected:
+
+private:
+
+};
+
+
+
+
+
+#pragma pack(push,1)
+class SegmentDescriptor:public Descriptor{
+public:
+
+ enum{
+      TYPE_U_STACK = 0b0010,
+                  TYPE_U_EXPANEDDOWN=0b0110,
+                  TYPE_U_DATA = 0b0010,
+                  TYPE_U_CODE_NONCONFORMING = 0b1010,
+                  TYPE_U_CODE_CONFORMING = 0b1110,
+                  TYPE_S_UNUSED_1=0b0000,
+      TYPE_S_LDT =0b0010,
+                  TYPE_S_UNUSED_2=0b1000,
+                  TYPE_S_UNUSED_3=0b1010,
+                  TYPE_S_UNUSED_4=0b1101,
+                  TYPE_S_TSS_16_AVL=0b0001,
+                  TYPE_S_TSS_16_BUSY=0b0011,
+                  TYPE_S_TSS_32_AVL=0b1001,
+                  TYPE_S_TSS_32_BUSY=0b1011,
+                  TYPE_S_CALLGATE_16=0b0100,
+                  TYPE_S_CALLGATE_32=0b1100,
+                  TYPE_S_TASKGATE=0b0101,
+                  TYPE_S_INTGATE_16=0b0110,
+                  TYPE_S_TRAPGATE_16=0b0111,
+                  TYPE_S_INTGATE_32=0b1110,
+                  TYPE_S_TRAPGATE_32=0b1111,
+      DPL_0=0x0,
+                  DPL_1=0x1,
+                  DPL_2=0x2,
+                  DPL_3=0x3,
+      S_SYSTEM=0x0,
+      S_USER=0x1,
+      L_LONG_SEGMENT=0x1,
+      L_LEGACY_SEGMENT=0x0 ,
+      P_PRESENT=0x1,
+      P_NON_PRESENT=0x0,
+      G_4KB=0x1,
+      G_1B = 0x0,
+      G_4KB_SCALE=4*1024,
+      D_OPSIZE32=0x1,
+      D_OPSIZE16=0x0,
+      B_UPPER_BOUND32=0x1,
+      B_UPPER_BOUND16=0x0,
+      RESERVED=0,
+
+ };
+
+
+
+protected:
+    short limitLow_16:16;
+    int baseAddrLow_24:24;
+
+public:
+    char type:4;
+    char S:1;
+    char DPL:2;
+    char P:1;
+
+
+
+
+
+
+protected:
+    char limitHigh_4:4;
+public:
+    char AVL:1;
+    char L:1;
+    char D:1;
+    char G:1;
+
+
+
+
+protected:
+ char baseAddrHigh_8:8;
+
+public:
+    inline __attribute__((always_inline)) void setBaseAddr(int baseAddr);
+    inline __attribute__((always_inline)) int getBaseAddr()const;
+    inline __attribute__((always_inline)) int getLimit()const;
+    inline __attribute__((always_inline)) void setLimit(int limit);
+
+
+    SegmentDescriptor(char* baseaddr=0,int limit=0,char g=G_1B,char type=TYPE_U_DATA,
+      char dpl=DPL_0,char s=S_USER,char b=B_UPPER_BOUND32,char p=P_PRESENT);
+    ~SegmentDescriptor();
+
+
+
+
+    bool equals(SegmentDescriptor &sd2);
+    void init(char* baseaddr=0,int limit=0,char type=TYPE_U_DATA,char dpl=DPL_0,char s=1,char b=1,char p=1,char g=0,char l=0,char avl=0);
+
+    void writeToMemory(int seg,char* addr);
+    static void fromMemory(SegmentDescriptor *sd,int seg,char* addr);
+
+
+};
+#pragma pack(pop)
+
+
+
+#pragma pack(push,1)
+
+
+
+
+
+
+class SelectorDescriptor:public Descriptor{
+public:
+ enum{TYPE_INT=0x0600,
+  TYPE_TASK=0x0500,
+  TYPE_TRAP=0x0700,
+  SIZE_16=0,
+  SIZE_32=1
+ };
+public:
+
+    union{char I0[2];char __Offset_low[2]; char __reservedI0[2]; };
+    union{char I1[2]; char __SegmentSelectorInGDTorLDT[2]; char __TSSSelector[2]; char __Selector[2]; char __Sel[2]; };
+    union{char I2[2];};
+    union{char I3[2];char __reservedI3[2];char __Offset_high[2];};
+    SelectorDescriptor();
+    ~SelectorDescriptor();
+    void init(int sel,int offset,int type,int dpl=0,int p=1,int segSize=1);
+    void DPL(int dpl);
+    void P(int p);
+    void D(int d);
+    void Offset(int offset);
+    void Selector(int selector);
+    void Type(int index);
+
+    void writeToMemory(int seg,int off);
+    static void fromMemory(SelectorDescriptor &self,int seg,int off);
+
+
+
+
+
+
+ private:
+
+    char __P,__DPL,__D;
+
+
+};
+#pragma pack(pop)
+# 11 "./include/Kernel.h" 2
+# 1 "./include/AssociatedMemoryManager.h" 1
+# 20 "./include/AssociatedMemoryManager.h"
+template <class T,size_t MaxArrNum=10>
+class AssociatedMemoryManager {
+public:
+ typedef SimpleMemoryNode NodeType;
+ typedef T TargetType;
+public:
+ AssociatedMemoryManager();
+ ~AssociatedMemoryManager();
+
+
+ TargetType* getNew();
+ void withraw(TargetType *t);
+
+ void setMan(size_t index,size_t nstart,size_t tstart,size_t len,bool doinit=true,int *usedList=(0),size_t usedLen=0);
+
+
+
+
+
+ inline __attribute__((always_inline)) size_t getArrNum();
+
+protected:
+
+
+
+ __attribute__((deprecated)) inline __attribute__((always_inline)) TargetType* getTarget(size_t index);
+ __attribute__((deprecated)) inline __attribute__((always_inline)) NodeType* getNode(size_t index);
+ __attribute__((deprecated)) inline __attribute__((always_inline)) size_t getTargetIndex(TargetType* t);
+ __attribute__((deprecated)) inline __attribute__((always_inline)) size_t getNodeIndex(NodeType* n);
+
+ AssociatedMemoryManager<T,1> manArrs[MaxArrNum];
+ size_t lastMan;
+};
+# 65 "./include/AssociatedMemoryManager.h"
+template <class T>
+class AssociatedMemoryManager<T,1>{
+public:
+ typedef SimpleMemoryNode NodeType;
+ typedef T TargetType;
+ typedef AssociatedMemoryManager<T,1> This;
+public:
+ AssociatedMemoryManager();
+# 82 "./include/AssociatedMemoryManager.h"
+ AssociatedMemoryManager(size_t nstart,size_t tstart,size_t len,bool nodeArrInit=true,int *usedList=(0),size_t usedLen=0);
+ ~AssociatedMemoryManager();
+
+    TargetType* getNew();
+
+
+
+ TargetType* getNew(int &index);
+    void withdraw(TargetType *t);
+
+
+
+
+
+
+    int allocContinuousFree(size_t n);
+
+    inline __attribute__((always_inline)) bool isFull()const;
+    inline __attribute__((always_inline)) bool isEmpty()const;
+    inline __attribute__((always_inline)) size_t getLen()const;
+    inline __attribute__((always_inline)) size_t getLeft()const;
+    inline __attribute__((always_inline)) size_t getCurSize()const;
+
+
+
+
+
+
+ inline __attribute__((always_inline)) TargetType* getTarget(size_t index);
+ __attribute__((deprecated)) inline __attribute__((always_inline)) void freeNode(size_t index);
+    void allocNode(size_t index);
+    void withdrawNode(size_t index);
+ __attribute__((deprecated)) inline __attribute__((always_inline)) void unfreeNode(size_t index);
+    inline __attribute__((always_inline)) size_t getTargetIndex(TargetType* t)const;
+ inline __attribute__((always_inline)) size_t getNodeIndex(NodeType* n)const;
+ inline __attribute__((always_inline)) static size_t getEachSize();
+ inline __attribute__((always_inline)) NodeType* getNodeAddress();
+protected:
+ inline __attribute__((always_inline)) NodeType* getNode(size_t index);
+ union{
+  size_t nstart;
+  NodeType *narr;
+ };
+ union{
+  size_t tstart;
+  TargetType *tarr;
+ };
+
+ size_t len;
+
+
+ size_t lastIndex;
+
+
+ size_t curAllocedSize;
+protected:
+# 153 "./include/AssociatedMemoryManager.h"
+};
+# 12 "./include/Kernel.h" 2
+# 30 "./include/Kernel.h"
+template <class T>
+class KernelSmmWrapper{
+protected:
+ friend class Kernel;
+
+public:
+ inline __attribute__((always_inline)) KernelSmmWrapper();
+ inline __attribute__((always_inline)) ~KernelSmmWrapper();
+    inline __attribute__((always_inline)) T* getNew();
+    inline __attribute__((always_inline)) void withdraw(T *t);
+};
+
+
+# 1 "./include/Process.h" 1
+
+
+
+
+# 1 "./include/MemoryManager.h" 1
+# 11 "./include/MemoryManager.h"
+inline __attribute__((always_inline)) void* operator new(size_t size) throw() {return (0);}
+inline __attribute__((always_inline)) void operator delete(void *p){}
+
+
+
+inline __attribute__((always_inline)) void* operator new(size_t, void* __p){ return __p; };
+inline __attribute__((always_inline)) void* operator new[](size_t, void* __p){ return __p; };
+
+
+inline __attribute__((always_inline)) void operator delete (void*, void*){};
+inline __attribute__((always_inline)) void operator delete[](void*, void*){};
+# 36 "./include/MemoryManager.h"
+class LinearSourceDescriptor{
+public:
+
+ using __SizeType = size_t;
+
+
+ using __LinearSourceDescriptor=LinearSourceDescriptor;
+
+public:
+ inline __attribute__((always_inline)) LinearSourceDescriptor()=default;
+public:
+    inline __attribute__((always_inline)) LinearSourceDescriptor(__SizeType start,__SizeType limit);
+
+    inline __attribute__((always_inline)) ~LinearSourceDescriptor();
+    inline __attribute__((always_inline)) __SizeType getStart() const ;
+    inline __attribute__((always_inline)) __SizeType getLimit() const ;
+    inline __attribute__((always_inline)) bool isAllocable() const;
+    inline __attribute__((always_inline)) void setStart(__SizeType start);
+    inline __attribute__((always_inline)) void setLimit(__SizeType limit);
+    inline __attribute__((always_inline)) bool contains(const LinearSourceDescriptor& b)const;
+    inline __attribute__((always_inline)) bool contains(__SizeType start,__SizeType limit)const;
+
+
+
+    inline __attribute__((always_inline)) bool operator==(const __LinearSourceDescriptor& b)const;
+    inline __attribute__((always_inline)) bool operator!=(const __LinearSourceDescriptor& b)const;
+protected:
+
+
+
+    __SizeType start;
+
+
+
+    __SizeType limit;
+};
+
+
+class MemoryDescriptor:public LinearSourceDescriptor{
+public:
+ using This = MemoryDescriptor;
+ using Super = LinearSourceDescriptor;
+ using __LinearSourceDescriptor = Super;
+ using __SizeType = size_t;
+ using __MemoryDescriptor = This;
+
+    inline __attribute__((always_inline)) MemoryDescriptor(__SizeType start,__SizeType limit,bool allocable=true);
+
+    inline __attribute__((always_inline)) ~MemoryDescriptor();
+    inline __attribute__((always_inline)) bool isAllocable()const;
+    inline __attribute__((always_inline)) void setAllocable(bool allocable);
+
+
+    inline __attribute__((always_inline)) bool operator==(const __MemoryDescriptor& b)const;
+    inline __attribute__((always_inline)) bool operator!=(const __MemoryDescriptor& b)const;
+
+protected:
+    bool allocable;
+};
+# 110 "./include/MemoryManager.h"
+template <class _LinearSourceDescriptor,template <class> class _NodeAllocator>
+class LinearSourceManager:
+  public
+  LocateableLinkedList<_LinearSourceDescriptor,Locator<_LinearSourceDescriptor>::DISCARD,_NodeAllocator>{
+public:
+ using This = LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator>;
+ using __LinearSourceManager = This;
+ using Super = LocateableLinkedList<_LinearSourceDescriptor,
+   Locator<_LinearSourceDescriptor>::DISCARD,_NodeAllocator>;
+    using __ListNode = typename Super::__ListNode;
+    using NodeType = __ListNode;
+    using __Allocator = _NodeAllocator<__ListNode>;
+    using __LinkedList = LinkedList<_LinearSourceDescriptor,_NodeAllocator>;
+    using __SizeType = size_t;
+
+ LinearSourceManager();
+public:
+
+
+
+
+    LinearSourceManager(__Allocator *smm,__SizeType start,__SizeType size);
+    ~LinearSourceManager();
+
+    inline __attribute__((always_inline)) const _LinearSourceDescriptor & getSpace()const;
+
+
+
+
+
+
+
+    void* mnew(__SizeType start,__SizeType size);
+
+
+
+
+    void* mnew(__SizeType size);
+# 162 "./include/MemoryManager.h"
+    void* extend(__SizeType start,__SizeType size,bool addOrReduce,__SizeType extsize,char *realBase=(0),bool moveData=false);
+    void mdelete(void* p,__SizeType size);
+
+
+
+
+    __attribute__((deprecated)) void mdelete(void *p);
+# 177 "./include/MemoryManager.h"
+    bool mnewLinked(__SizeType size,
+      __LinkedList &list,__SizeType eachSectionExtraSize=0);
+
+
+
+
+
+
+
+    void mdeleteLinked(__LinkedList &list);
+
+
+protected:
+    _LinearSourceDescriptor allocOutNode(__ListNode *avlNode,__SizeType start,__SizeType len);
+
+
+
+    __attribute__((deprecated)) void withdrawNode(__ListNode *exactNode);
+
+
+    bool checkRange(__SizeType start,__SizeType size);
+    bool checkRange(__SizeType start);
+    static bool checkPrevious(__ListNode *prev, __SizeType start);
+    static bool checkNext(__ListNode* nxt, __SizeType start,__SizeType len);
+
+protected:
+    _LinearSourceDescriptor space;
+};
+# 234 "./include/MemoryManager.h"
+template <template <class> class _DescriptorAllocator>
+class MemoryManager:public Tree<MemoryDescriptor,_DescriptorAllocator>{
+public:
+ using This = MemoryManager<_DescriptorAllocator>;
+ using Super = Tree<MemoryDescriptor,_DescriptorAllocator>;
+
+ using __SizeType = size_t;
+ using __MemoryDescriptor=MemoryDescriptor;
+ using __MemoryManager = This;
+ using __TreeNode = typename Super::__TreeNode;
+ using NodeType = __TreeNode;
+
+ using SimpleAllocator = SimpleMemoryManager<NodeType>;
+ using __Allocator = _DescriptorAllocator<__TreeNode>;
+
+public:
+ MemoryManager()=default;
+    MemoryManager(__Allocator *smm);
+# 260 "./include/MemoryManager.h"
+    MemoryManager(__Allocator *smm,__SizeType start,__SizeType len,bool fatherAllocable=true);
+
+
+
+
+
+
+    MemoryManager(__Allocator *smm,__SizeType start,__SizeType len,
+      __SizeType usedList[][2],__SizeType usedLen,bool fatherAllocable=true);
+
+    ~MemoryManager();
+
+
+    __MemoryManager allocFreeStart(__SizeType start,__SizeType len);
+    __MemoryManager allocFree(__SizeType len);
+
+    __TreeNode *copyOnAllocation(__TreeNode *head);
+
+
+    void* mnew(__SizeType start,__SizeType size);
+    void* mnew(__SizeType size);
+    void* mnewAlign(__SizeType size,__SizeType alignment);
+# 293 "./include/MemoryManager.h"
+    void* extend(__SizeType start,__SizeType size,int extsize,char *realBase=(0),bool moveData=false);
+
+    void mdelete(void* p,__SizeType size);
+    void mdelete(void *p);
+
+    void withdrawToParent();
+
+
+    inline __attribute__((always_inline)) __SizeType getBase()const;
+    inline __attribute__((always_inline)) __SizeType getLimit()const;
+
+
+    static __TreeNode *findFirstStart(__TreeNode* loc,__SizeType start,__SizeType len);
+    static __TreeNode *findFirstLen(__TreeNode* loc,__SizeType len);
+
+
+
+    static __TreeNode*findFirstLenAlign(__TreeNode* loc, __SizeType len,__SizeType &extra,__SizeType alignment);
+    static __TreeNode *locateForInsertation(__TreeNode* loc,__TreeNode *son);
+    static __TreeNode *locateForDelete(__TreeNode * loc,__SizeType start,__SizeType len,bool allocable);
+    static __TreeNode * locateForDeleteStart(__TreeNode * loc,__SizeType start,bool allocable);
+
+
+
+
+
+    static int addToTree(__TreeNode *root,__TreeNode *son);
+    static __TreeNode *nextAllocable(__TreeNode *node);
+
+
+    int isNullManager();
+    void setNull();
+
+
+    void dumpInfo(Printer *p)const;
+
+protected:
+    __TreeNode * allocOutNode(__TreeNode *avlNode,__SizeType start,__SizeType len);
+    void withdrawNode(__TreeNode *exactNode);
+# 340 "./include/MemoryManager.h"
+    u8_t findExtend(__SizeType start,__SizeType size,__SizeType extsize,__TreeNode * &rtnode)const;
+
+protected:
+
+
+private:
+
+};
+
+
+
+
+
+
+template <class T>
+class HighLevelSimpleMemoryManager{
+
+
+};
+# 6 "./include/Process.h" 2
+
+# 1 "./include/TSS.h" 1
+
+
+
+
+class Printer;
+
+#pragma pack(push,1)
+class TSS{
+public:
+        union{ char I0[4]; int PreviousTaskLink:16;int PTL:16; };
+        union{ char I1[4];int ESP0:32;};
+        union{ char I2[4];int SS0:16;};
+        union{ char I3[4];int ESP1:32;};
+        union{ char I4[4];int SS1:16;};
+        union{ char I5[4];int ESP2:32;};
+        union{ char I6[4];int SS2:16;};
+        union{ char I7[4];int CR3:32;int PDBR:32;};
+        union{ char I8[4];int EIP:32;};
+        union{ char I9[4];int EFLAGS:32;};
+        union{ char I10[4];int EAX:32;};
+        union{ char I11[4];int ECX:32;};
+        union{ char I12[4];int EDX:32;};
+        union{ char I13[4];int EBX:32;};
+        union{ char I14[4];int ESP:32;};
+        union{ char I15[4];int EBP:32;};
+        union{ char I16[4];int ESI:32;};
+        union{ char I17[4];int EDI:32;};
+        union{ char I18[4];int ES:16;};
+        union{ char I19[4];int CS:16;};
+        union{ char I20[4];int SS:16;};
+        union{ char I21[4];int DS:16;};
+        union{ char I22[4];int FS:16;};
+        union{ char I23[4];int GS:16;};
+        union{ char I24[4];int LDTSELECTOR:16;int LDTSEL:16;int LDT:16;};
+        union{ char I25[2];char TRAP:1;};
+        union{ char __I25[2];int IOBASE:16;};
+
+
+
+public:
+    TSS();
+    ~TSS();
+
+    void writeToMemory(int seg,int off);
+    __attribute__((deprecated)) void ensureReservedZero();
+    static void fromMemory(TSS &self,int seg,int off);
+
+    void dumpInfo(Printer *p);
+
+protected:
+
+private:
+
+};
+#pragma pack(pop)
+# 8 "./include/Process.h" 2
+
+# 1 "./include/VirtualMemory.h" 1
+# 10 "./include/VirtualMemory.h"
+ class PTE;
+ typedef AssociatedMemoryManager<SegmentDescriptor,1> SegManager;
+ typedef AssociatedMemoryManager<PTE,1> PTEManager;
+
+
+
+#pragma pack(push,1)
+
+struct PageAttributes
+{
+ enum{
+
+  PWT_ALWAYS_UPDATE=1,
+  PWT_CACHE_UPDATE=0,
+  PCD_CACHE_ENABLE=0,
+  PCD_CACHE_DISABLE=1,
+  P_PRESENT=1,
+  P_NON_PRESENT=0,
+  RW_WRITE_ACCESS=1,
+  RW_READONLY=0,
+  US_ALL=1,
+  US_SYSTEM_ONLY=0,
+  A_ACCESSED=1,
+  A_NOT_ACCESSED=0,
+  D_WRITTEN_EVER=1,
+  D_NOT_WRITTEN=0,
+  G_GLOBAL=1,
+  G_LOCAL=0,
+  PAT_SUPPORTED=1,
+  PAT_UNSUPPORTED=0
+ };
+};
+struct CR3{
+ CR3(int base,int pwt ,
+   int pcd=PageAttributes::PCD_CACHE_DISABLE);
+ inline __attribute__((always_inline)) CR3(u32_t cr3);
+ int R0:3;
+ int PWT:1;
+ int PCD:1;
+ int R1:7;
+ int PDE_BASE:20;
+};
+
+struct PDE{
+ PDE(int base,char pwt ,char pcd=PageAttributes::PCD_CACHE_DISABLE,
+   char rw=PageAttributes::RW_WRITE_ACCESS,char us=PageAttributes::US_ALL,char present=PageAttributes::P_PRESENT,
+   char a=PageAttributes::A_NOT_ACCESSED);
+ inline __attribute__((always_inline)) PDE(u32_t pde);
+ int P:1;
+ int RW:1;
+ int US:1;
+ int PWT:1;
+ int PCD:1;
+ int A:1;
+ int R0:1;
+ int R1:1;
+ int R2:4;
+ int PTE_BASE:20;
+};
+struct PTE{
+ PTE(int base,char pwt ,char pcd=PageAttributes::PCD_CACHE_DISABLE,
+   char rw=PageAttributes::RW_WRITE_ACCESS,char us=PageAttributes::US_ALL,char global=PageAttributes::G_LOCAL,
+   char pat=PageAttributes::PAT_UNSUPPORTED,char dirty=PageAttributes::D_WRITTEN_EVER,
+   char present=PageAttributes::P_PRESENT,
+   char a=PageAttributes::A_NOT_ACCESSED);
+ inline __attribute__((always_inline)) PTE(u32_t pte);
+ int P:1;
+ int RW:1;
+ int US:1;
+ int PWT:1;
+ int PCD:1;
+ int A:1;
+ int D:1;
+ int PAT:1;
+ int G:1;
+ int R0:3;
+ int PAGE_BASE:20;
+
+};
+
+struct LinearAddress{
+ int PAGE_OFFSET:12;
+ int PTE_INDEX:10;
+ int PDE_INDEX:10;
+};
+
+#pragma pack(pop)
+
+
+class PDEManager:public AssociatedMemoryManager<PDE,1>{
+public:
+ typedef AssociatedMemoryManager<PDE,1> Father;
+public:
+ PDEManager();
+# 115 "./include/VirtualMemory.h"
+ PDEManager(size_t nstart,size_t tstart,size_t ptemStart,size_t len,
+   bool doinit=true,
+   int *usedList=(0),size_t usedLen=0);
+ ~PDEManager();
+
+
+
+
+
+
+ int prepareVisitPhysical(u32_t phyaddr,size_t size,SegManager &segman);
+
+ inline __attribute__((always_inline)) PTEManager* getPTEManagerRef(int i);
+ inline __attribute__((always_inline)) void setPTEManagerRef(int i,PTEManager * pteman);
+
+
+
+
+
+
+ int allocPDE(size_t n_pte);
+# 144 "./include/VirtualMemory.h"
+ void withdrawPDE(size_t i);
+protected:
+
+
+protected:
+ union{
+  size_t ptemstart;
+
+
+
+
+  PTEManager **ptemans;
+
+ };
+
+};
+
+class VirtualManager{
+public:
+
+
+
+
+ inline __attribute__((always_inline)) static int getL3(int targetPhyAddr);
+ inline __attribute__((always_inline)) static int getL2(int ptePhyAddr);
+ inline __attribute__((always_inline)) static int getL1(int pdePhyAddr);
+ inline __attribute__((always_inline)) static int getLinearAddress(int pdePhyAddr,int ptePhyAddr,int targetPhyAddr);
+ inline __attribute__((always_inline)) static void setVirtualAddress(int pdePhyAddr,int ptePhyAddr,int targetPhyAddr);
+
+ inline __attribute__((always_inline)) static u32_t getIndex(u32_t phyaddr,u32_t reg);
+ inline __attribute__((always_inline)) static u32_t getHighBase(u32_t phyaddr);
+ inline __attribute__((always_inline)) static CR3 getCr3();
+
+
+
+
+ inline __attribute__((always_inline)) static void writeCr3(const CR3& cr3);
+ inline __attribute__((always_inline)) static void enablePaging();
+public:
+
+protected:
+ PDEManager pdeman;
+
+};
+# 10 "./include/Process.h" 2
+
+
+# 1 "./include/Kernel.h" 1
+# 13 "./include/Process.h" 2
+# 39 "./include/Process.h"
+extern "C" {
+ void idle();
+ void process1();
+ void process2();
+}
+# 54 "./include/Process.h"
+ class Process
+
+
+  :public ErrorSaver
+
+
+
+   {
+   public:
+   typedef Process This;
+
+
+
+ typedef AssociatedMemoryManager<SegmentDescriptor,1> SegManager;
+
+
+
+
+ enum{
+  RESERVED_PDE_START = 0,
+  RESERVED_PDE_NUM=10,
+  RESERVED_PTE_START = (RESERVED_PDE_NUM*(sizeof(PDEManager::NodeType) + sizeof(PDEManager::TargetType)) + 4)&0xfffffffc,
+
+
+
+  RESERVED_PTE_NUM=(512 - RESERVED_PTE_START)/(sizeof(PTEManager::NodeType)+sizeof(PTEManager::TargetType)),
+
+  RESERVED_PTE_MANAGER_START = 512,
+  RESERVED_PTE_MANAGER_NUM = RESERVED_PDE_NUM,
+
+
+
+  RESERVED_END = RESERVED_PTE_MANAGER_START + RESERVED_PTE_MANAGER_NUM * sizeof(PTEManager*),
+
+
+
+  ERROR_NO_ERROR=0,
+  ERROR_NO_ENOUGH_PROCESS_SPACE,
+  ERROR_GDT_IS_FULL,
+  ERROR_IDT_IS_FULL,
+  ERROR_GENERAL,
+  PID_IDLE=1,
+  PID_INVALID=0,
+  STAUTS_RUNNING,
+  STATUS_READY,
+  STATUS_STOPPED,
+
+
+  PDE_NUMS=10,
+  PTE0_NUMS=20
+ };
+
+
+
+
+public:
+ Process();
+# 134 "./include/Process.h"
+ Process(
+   unsigned int pid,
+   TSS* ptss,int tssIndex,
+   size_t ldtNStart,size_t ldtTStart,size_t ldtNItems,int ldtIndex,
+   size_t absBase,size_t thisPrcBase ,size_t codeStart,size_t bodySize,
+   size_t codeLimit,size_t dataLimit,size_t stackLimit,
+   char dpl=SegmentDescriptor::DPL_3
+ );
+ ~Process();
+
+ inline __attribute__((always_inline)) unsigned int getPid()const;
+ inline __attribute__((always_inline)) void setStack0(size_t stack0);
+ inline __attribute__((always_inline)) void setStack3(size_t stack3);
+ inline __attribute__((always_inline)) void setSSSel0(int sel);
+ inline __attribute__((always_inline)) void setSSSel3(int sel);
+ inline __attribute__((always_inline)) void setCSSel(int sel);
+ inline __attribute__((always_inline)) void setCodeStart(size_t start);
+ inline __attribute__((always_inline)) size_t getCodeStart()const;
+ inline __attribute__((always_inline)) size_t getStart()const;
+ inline __attribute__((always_inline)) size_t getDataLimit()const;
+ inline __attribute__((always_inline)) size_t getStackLimit()const;
+ inline __attribute__((always_inline)) size_t getCodeLimit()const;
+ inline __attribute__((always_inline)) int getTSSSel()const;
+ inline __attribute__((always_inline)) int getLDTSsel()const;
+ inline __attribute__((always_inline)) int getSatus()const;
+ inline __attribute__((always_inline)) void setStatus(int status);
+ inline __attribute__((always_inline)) int getStatus()const;
+ inline __attribute__((always_inline)) size_t getProcessBase()const;
+ void dump(Printer * printer)const;
+
+
+protected:
+
+
+
+
+ unsigned int pid;
+ int status;
+
+
+
+ TSS *ptss;
+
+
+
+
+ int tssSel;
+
+
+
+
+ int ldtSel;
+
+ SegManager ldtm;
+
+
+
+
+ size_t absBase;
+
+
+
+ size_t processBase;
+
+
+
+
+ KernelSmmWrapper<TreeNode<MemoryDescriptor>> baseKsmm;
+
+
+
+
+ MemoryManager<KernelSmmWrapper> baseMM;
+
+
+
+
+
+
+ PDEManager pdeman;
+
+
+
+
+
+ int genLinearAddr;
+
+
+
+};
+# 44 "./include/Kernel.h" 2
+
+class ProcessManager{
+public:
+ using This = ProcessManager;
+ using __TreeNode_Process = TreeNode<Process*>;
+ using __ListNode_Process = ListNode<__TreeNode_Process>;
+ using __ProcessQueueType = LinkedList<__TreeNode_Process,KernelSmmWrapper> ;
+ using __ProcessTreeType = Tree<Process*,KernelSmmWrapper> ;
+ enum{
+  LDT_ITEMS=10
+ };
+public:
+ ProcessManager();
+ ~ProcessManager();
+# 68 "./include/Kernel.h"
+ Process *createProcess(size_t codeLimit,size_t dataLimit,size_t stackLimit,
+   char dpl=SegmentDescriptor::DPL_3);
+
+
+
+
+
+ inline __attribute__((always_inline)) __TreeNode_Process createProcessWrapper(Process* p);
+ void setFatherProcess(TreeNode<Process*> *p,TreeNode<Process*> *father);
+ inline __attribute__((always_inline)) TreeNode<Process*> * getFatherProcess(TreeNode<Process*> *p);
+ __TreeNode_Process getCurrentProcess()const;
+ void swithcNextProcess();
+
+
+
+ __TreeNode_Process addNewProcess(size_t codeLimit,size_t dataLimit,size_t stackLimit,
+   char dpl=SegmentDescriptor::DPL_3);
+
+
+
+ __attribute__((deprecated)) inline __attribute__((always_inline)) Process* getIdelProcess()const;
+
+
+
+
+ __attribute__((deprecated)) static bool pidComparator(unsigned int p1,unsigned int p2);
+
+protected:
+
+
+
+
+ unsigned int getNewPid();
+ void releasePid(unsigned int pid);
+# 116 "./include/Kernel.h"
+ Process* createProcess(unsigned int pid,size_t prcBase,size_t prcStart,size_t codeLimit,size_t dataLimit,size_t stackLimit,
+   char dpl=SegmentDescriptor::DPL_3);
+ void createIdleProcess();
+ void invokeProcess(Process* p);
+ __TreeNode_Process getByPid(unsigned int pid);
+
+
+
+
+ KernelSmmWrapper<__ListNode_Process > lksmm;
+
+ KernelSmmWrapper<__TreeNode_Process > tksmm;
+ __ProcessQueueType prcsQueue;
+
+ __ProcessTreeType prcsTree;
+ Process *idleProcess;
+
+
+ __TreeNode_Process *curProcess;
+ unsigned int lastValidPID;
+
+
+
+ unsigned int maxPID;
+};
+# 156 "./include/Kernel.h"
+class Kernel{
+public:
+ typedef Kernel This;
+ typedef TreeNode<MemoryDescriptor> MmNodeType;
+ typedef SimpleMemoryManager<MmNodeType> SmmType;
+ typedef SmmType::FullNode FullMMNodeType;
+ typedef MemoryManager<SimpleMemoryManager> MmType;
+ typedef AssociatedMemoryManager<SegmentDescriptor,1> SegManager;
+ using __TreeNode_Process =typename ProcessManager::__TreeNode_Process;
+
+
+
+
+ typedef u16_t InputBufferDataType;
+ enum{
+  LDT_ITEMS=10,
+  VIDEO_SEL=0x8,
+  KERNEL_CS=0x10,
+  KERNEL_DS=0x18,
+  KERNEL_SS=0x20
+ };
+ enum{
+  GPUI_MEM=0,
+  GPUI_PRINT=1
+ };
+ enum{
+  GPUI_MEM_NEW=0,
+  GPUI_MEM_DELETE=1
+ };
+ enum{
+  EOF=0xffffffff,
+ };
+protected:
+
+ static Kernel *theKernel;
+
+public:
+ static Printer *printer;
+ static void initTheKernel(Kernel *theKernel);
+ inline __attribute__((always_inline)) static Kernel* getTheKernel();
+ inline __attribute__((always_inline)) static int makeCR3(int pdePhyAddr,int controlWord_L12=0b11000);
+
+
+
+
+ inline __attribute__((always_inline)) static int makePDE(int ptePhyAddr,int controlWord_L12=0b11011);
+
+
+
+
+ inline __attribute__((always_inline)) static int makePTE(int targetPhyAddr,int controlWord_L12=0b100011011);
+
+protected:
+ ~Kernel();
+public:
+
+ Kernel();
+
+
+
+
+
+ Kernel(size_t smmStart,size_t smmLimit,
+   size_t kmmStart,size_t kmmSize,size_t usedList[][2],size_t usedLen,
+   size_t pmmStart,size_t pmmSize,
+   size_t pde0_start,size_t pde0_size,
+   size_t pte0_start,size_t pte_size,
+   size_t gdtnstart,size_t gdttstart,size_t gdtitems,int *gusedList,size_t gusedLen,
+   size_t idtnstart,size_t idttstart,size_t idtitems,int *iusedList,size_t iusedLen
+   );
+
+
+
+
+
+ inline __attribute__((always_inline)) void* mnewKernel(size_t mmStart,size_t mmSize);
+
+
+
+ inline __attribute__((always_inline)) void* mnewKernel(size_t mmSize);
+
+
+
+ inline __attribute__((always_inline)) void* mnewKernelAlign(size_t mmSize,size_t alignment=1);
+ inline __attribute__((always_inline)) void mdeleteKernel(void *p,size_t mmSize);
+ inline __attribute__((always_inline)) void mdeleteKernel(void* p);
+
+ inline __attribute__((always_inline)) void* mnewProcess(size_t mmStart,size_t mmSize);
+
+
+
+ inline __attribute__((always_inline)) void* mnewProcess(size_t mmSize);
+ inline __attribute__((always_inline)) void* mnewProcessAlign(size_t mmSize,size_t alignment=1);
+ inline __attribute__((always_inline)) void mdeleteProcess(void *p,size_t mmSize);
+ inline __attribute__((always_inline)) void mdeleteProcess(void *p);
+
+
+
+
+
+ inline __attribute__((always_inline)) void switchNextProcess();
+ inline __attribute__((always_inline)) __TreeNode_Process addNewProcess(size_t codeLimit,size_t dataLimit,size_t stackLimit,
+   char dpl=SegmentDescriptor::DPL_3);
+ void suspendProcess(__TreeNode_Process wp);
+ void resumeProcess(__TreeNode_Process wp);
+ void killProcess(__TreeNode_Process wp);
+
+
+
+
+
+ size_t getKernelMMBase()const;
+
+
+
+ size_t getProcessMMBase()const;
+
+
+
+
+
+
+
+ int newgdt(
+    char* baseaddr=0,
+    int limit=0,
+    char g=SegmentDescriptor::G_1B,
+    char type=SegmentDescriptor::TYPE_U_DATA,
+    char dpl=SegmentDescriptor::DPL_0,
+    char s=SegmentDescriptor::S_USER,char b=SegmentDescriptor::B_UPPER_BOUND32,char p=SegmentDescriptor::P_PRESENT);
+ inline __attribute__((always_inline)) void markGdtUsed(int index);
+ inline __attribute__((always_inline)) void markGdtUnused(int index);
+ inline __attribute__((always_inline)) void markIdtUsed(int index);
+ inline __attribute__((always_inline)) void markIdtUnused(int index);
+ inline __attribute__((always_inline)) SegManager& getGdtm();
+ inline __attribute__((always_inline)) SegManager& getIdtm();
+ inline __attribute__((always_inline)) int getCR3();
+ int newidt();
+ inline __attribute__((always_inline)) int allocPDE(size_t n_pte);
+
+
+
+ inline __attribute__((always_inline)) void withdrawPDE(size_t i);
+# 307 "./include/Kernel.h"
+ inline __attribute__((always_inline)) int preparePhysicalMap(size_t physical,size_t size);
+
+
+ __attribute__((deprecated)) void destroyPhysicalMap();
+
+ inline __attribute__((always_inline)) void setInputBuffer(InputBufferDataType *p,size_t len);
+ inline __attribute__((always_inline)) Queue<InputBufferDataType>& getInputBuffer();
+
+
+
+
+ int getChar();
+
+
+
+
+ int getRawChar();
+
+ void dumpInfoInner()const;
+ void dumpInfo()const;
+protected:
+
+
+
+
+
+
+ SmmType smm;
+
+ MmType kernelMM;
+ MmType processMM;
+ InterruptsManager intm;
+ SegManager gdtm;
+ SegManager idtm;
+
+ ProcessManager processMan;
+
+ CR3 cr3;
+ PDEManager pdeman;
+
+
+ Queue<InputBufferDataType> inputBuffer;
+};
+# 19 "./include/KernelMemoryConfig.h" 2
+# 31 "./include/KernelMemoryConfig.h"
+namespace KernelMemoryConfig{
+ enum{
+  INIT_STACK_SZIE = 7680,
+  PDE_NUM = 10,
+  PTE_0_NUM = 1024,
+  PTE_1_NUM = 100,
+  GDT_LEN = 80,
+  IDT_LEN = 80,
+  MMNODE_NUM = 200,
+  INPUT_BUFFER_LEN = 512
+ };
+ extern char mmInitStack[];
+ extern char mmKernel[];
+ extern char mmPDE[] ;
+ extern char mmPTE_0[] ;
+ extern char mmPTE_1[] ;
+ extern char mmGDT[];
+ extern char mmIDT[];
+ extern char mmGDTAssocNode[];
+ extern char mmIDTAssocNode[];
+ extern char mmKernelMMNodes[];
+ extern char mmInputBuffer[];
+};
+# 9 "src/KernelMemoryConfig.cpp" 2
+
+
+ __asm__(".code32 \n\t");
+# 20 "src/KernelMemoryConfig.cpp"
+namespace KernelMemoryConfig{
+
+
+char mmInitStack[KernelMemoryConfig::INIT_STACK_SZIE];
+
+
+
+
+char mmGDT[((size_t)sizeof(SegmentDescriptor)) * KernelMemoryConfig::GDT_LEN] __attribute__ ((aligned (8)));
+char mmIDT[((size_t)sizeof(SegmentDescriptor)) * KernelMemoryConfig::IDT_LEN] __attribute__ ((aligned (8)));
+
+char mmGDTAssocNode[GDT_LEN * ((size_t)sizeof(Kernel::SegManager::NodeType))];
+char mmIDTAssocNode[IDT_LEN * ((size_t)sizeof(Kernel::SegManager::NodeType))];
+# 56 "src/KernelMemoryConfig.cpp"
+char mmKernel[((size_t)sizeof(Kernel))];
+
+
+
+
+
+
+char mmPDE[((size_t)sizeof(PDE)) * KernelMemoryConfig::PDE_NUM] __attribute__ ((aligned (4)));
+char mmPTE_1[((size_t)sizeof(PTE)) * KernelMemoryConfig::PTE_1_NUM] __attribute__ ((aligned (4)));
+
+char mmKernelMMNodes[((size_t)sizeof(Kernel::FullMMNodeType)) * KernelMemoryConfig::MMNODE_NUM];
+char mmInputBuffer[((size_t)sizeof(Kernel::InputBufferDataType)) * KernelMemoryConfig::INPUT_BUFFER_LEN];
+
+char mmPTE_0[((size_t)sizeof(PTE)) * KernelMemoryConfig::PTE_0_NUM] __attribute__ ((aligned (4096)));
+
+};
+
+__asm__(
+  ".data \n\t"
+  ".align 512\n\t"
+  ".bss \n\t"
+  ".align 512 \n\t"
+);

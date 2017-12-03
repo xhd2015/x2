@@ -79,6 +79,8 @@ int main(int argc,char *argv[])
 
 对齐的概念：一个结构体自身的对齐alignof是其内部字节最大者，以及系统的最大值决定的。对齐还受pack的影响。
 
+gcc声明的always_inline的函数,还需要加上inline声明。函数的定义体只要在同一编译过程中出现即可。
+
 # 扩展(动态)内联汇编
 快速参考：http://ericw.ca/notes/a-tiny-guide-to-gcc-inline-assembly.html
 常用形式：

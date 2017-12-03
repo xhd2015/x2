@@ -13,19 +13,39 @@
 
 
 #include <macros/all.h>
-//extern template class TreeNode<FileDescriptor<__SizeType>>;
-//extern template class SimpleMemoryManager<TreeNode<FileDescriptor<__SizeType>> >;
+//===class FileDescriptor
+#define __DEF_Template_FileDescriptor
+#define __DEF_FileDescriptor FileDescriptor
 
-#if defined(CODE64)
-	template class X2fsUtil<EnvInterface64Impl,FsEnv64>;
-	template class X2fsUtil<EnvInterface64Impl,FsEnv32>;
-	template class X2fsUtil<EnvInterface64Impl,FsEnv16>;
+// 序列化函数实现
+template <class __EnvTransfer>
+	SerializerPtr<__EnvTransfer>& operator<<(SerializerPtr<__EnvTransfer> &ptr,const FileDescriptor& fd)
+{
+	return ptr	<< fd.type
+				<< fd.sectionListIndex
+				<< fd.fileLen
+				<< fd.nameStart
+				<< fd.createdTime
+			 	<< fd.lastModefiedTime;
+}
+template <class __EnvTransfer>
+	SerializerPtr<__EnvTransfer>& operator>>(SerializerPtr<__EnvTransfer> &ptr,FileDescriptor &fd)
+{
+	return ptr	>> fd.type
+				>> fd.sectionListIndex
+				>> fd.fileLen
+				>> fd.nameStart
+				>> fd.createdTime
+				>> fd.lastModefiedTime;
+}
 
-	template class X2fsMetaInfo<u16_t>;
-	template class X2fsMetaInfo<u32_t>;
-	template class X2fsMetaInfo<size_t>;
 
-#endif
+#undef __DEF_Template_FileDescriptor
+#undef __DEF_FileDescriptor
+
+
+
+//==class X2fsMetaInfo
 template <typename __SizeType>
 bool X2fsMetaInfo<__SizeType>::checkMetainfo(const X2fsMetaInfo* info)
 {
@@ -39,25 +59,25 @@ bool X2fsMetaInfo<__SizeType>::checkMetainfo(const X2fsMetaInfo* info)
 
 #if defined(CODE64)
 template <typename __SizeType>
-void  X2fsMetaInfo<__SizeType>::dumpInfo(EnvInterface64Impl *env)
+void  X2fsMetaInfo<__SizeType>::dumpInfo(EnvInterface64Impl &env)
 {
 	//每次最多打印3个，这是printf_simple的实现限制
-	env->printf_simple("X2fsMetaInfo{"
+	env.printf_simple("X2fsMetaInfo{"
 			"basic_sizetype:%d, "
 			"reserved:%d, "
 			"metainfo:%d, "
 			,(u32_t)basicSizeType,reservedSec,metaSec);
 
-	env->printf_simple(
+	env.printf_simple(
 			"sec_filename:%d, "
 			"sec_dir:%d, "
 			"sec_freespace:%d, "
 			,secnums[INDEX_NAME],secnums[INDEX_DIR],secnums[INDEX_FREE]);
-	env->printf_simple(
+	env.printf_simple(
 			"sec_link:%d, "
 			"sec_optional_secd:%d, "
 			"lba_low:%d, ",secnums[INDEX_LINK],optional[INDEX_OPTIONAL_SECD],lbaStartLow);
-	env->printf_simple(
+	env.printf_simple(
 			"lba_high:%d, "
 			"total_secs:%d, "
 			"valid_flag:%d "
@@ -75,22 +95,22 @@ void  X2fsMetaInfo<__SizeType>::dumpInfo(EnvInterface64Impl *env)
 #define __DEF_X2fsUtil_Template template <class __EnvInterface,class __FsEnv>
 #define __DEF_X2fsUtil X2fsUtil<__EnvInterface,__FsEnv>
 __DEF_X2fsUtil_Template
-__DEF_X2fsUtil::X2fsUtil(__EnvInterface *env,u8_t driver,u32_t lbaBase):
+__DEF_X2fsUtil::X2fsUtil(__EnvInterface &env,u8_t driver,u32_t lbaBase):
 			env(env),driver(driver),
 			mmnodesmm(env),
 			listnodesmm(env),
 			processErrno(This::ERROR_NOERR)
 	{
 
-		env->printf_simple("reading meta info...\n");
+		env.printf_simple("reading meta info...\n");
 		// 先读取元信息区域
-		metabuf=env->malloc(CONST_SECSIZE);
+		metabuf=env.malloc(CONST_SECSIZE);
 
-		env->readSectors(EnvInterface::CUR_SEG, metabuf, driver,
+		env.readSectors(EnvInterface::CUR_SEG, metabuf, driver,
 				lbaBase + __X2fsMetaInfo::SECNUM_RESERVED_CONST,__X2fsMetaInfo::SECNUM_META_CONST,  0);
 
 		if(metainfo==NULL || !__X2fsMetaInfo::checkMetainfo(metainfo))
-			env->systemAbort("cannot valid metainfo sector", -2);
+			env.systemAbort("cannot valid metainfo sector", -2);
 
 		__FsSizeType wholeSecs=0;
 		for(__FsSizeType i=0;i<metainfo->len ;i++)
@@ -99,12 +119,12 @@ __DEF_X2fsUtil::X2fsUtil(__EnvInterface *env,u8_t driver,u32_t lbaBase):
 		}
 
 		// 分配空间
-		buffers[0]= env->malloc(wholeSecs * CONST_SECSIZE);
+		buffers[0]= env.malloc(wholeSecs * CONST_SECSIZE);
 
 
 		// NOTICE 如果你改变了X2fsMetaInfo的设计，必须保证所有的可选分区在必选分区之后
 		// 此处仅读入必选分区
-		env->readSectors(EnvInterface::CUR_SEG, buffers[0], driver,
+		env.readSectors(EnvInterface::CUR_SEG, buffers[0], driver,
 				lbaBase + __X2fsMetaInfo::SECNUM_RESERVED_CONST+__X2fsMetaInfo::SECNUM_META_CONST,wholeSecs,0);
 
 		// 依次分配每个分区的buffer地址
@@ -122,7 +142,7 @@ __DEF_X2fsUtil::X2fsUtil(__EnvInterface *env,u8_t driver,u32_t lbaBase):
 
 	}
 __DEF_X2fsUtil_Template
-__DEF_X2fsUtil::X2fsUtil(__EnvInterface *env,u8_t driver,__X2fsMetaInfo *metainfo,u8_t *buffers[]):
+__DEF_X2fsUtil::X2fsUtil(__EnvInterface &env,u8_t driver,__X2fsMetaInfo *metainfo,u8_t *buffers[]):
 				env(env),driver(driver),
 				metainfo(metainfo),
 				mmnodesmm(env),
@@ -132,7 +152,7 @@ __DEF_X2fsUtil::X2fsUtil(__EnvInterface *env,u8_t driver,__X2fsMetaInfo *metainf
 
 		{
 			if(metainfo==NULL || !__X2fsMetaInfo::checkMetainfo(metainfo))
-				env->systemAbort("cannot valid metainfo sector", -2);
+				env.systemAbort("cannot valid metainfo sector", -2);
 			for(__FsSizeType i=0;i<metainfo->len;++i)
 				this->buffers[i]=buffers[i];
 			linkarr =(__FsLinearSourceDescriptor*) buffers[__X2fsMetaInfo::INDEX_LINK];
@@ -145,7 +165,7 @@ void __DEF_X2fsUtil::initWithBuffersAlloced()
 		{
 			//	printf("in init\n");
 		//	std::cout << "in init"<<std::endl;
-			env->printf_simple("in init\n");
+			env.printf_simple("in init\n");
 
 
 		//	this->fpimg=fopen(this->imgFile,"r+");
@@ -216,9 +236,9 @@ void __DEF_X2fsUtil::flush() {
 	for(__FsSizeType i=0;i<__X2fsMetaInfo::PARTS_REQUIRED;++i)
 	{
 #if defined(CODE64)
-		env->writeSectors(EnvInterface::CUR_SEG, buffers[i], driver, metainfo->lbaStartLow + off , metainfo->secnums[i], metainfo->lbaStartHigh);
+		env.writeSectors(EnvInterface::CUR_SEG, buffers[i], driver, metainfo->lbaStartLow + off , metainfo->secnums[i], metainfo->lbaStartHigh);
 #else
-		env->writeSectors(EnvInterface::CUR_SEG, buffers[i], driver, metainfo->lbaStartLow + off , metainfo->secnums[i], metainfo->lbaStartHigh);
+		env.writeSectors(EnvInterface::CUR_SEG, buffers[i], driver, metainfo->lbaStartLow + off , metainfo->secnums[i], metainfo->lbaStartHigh);
 #endif
 		off += metainfo->secnums[i];
 	}
@@ -370,7 +390,7 @@ void __DEF_X2fsUtil::retriveLinkedInfoSection() {
 			__FsSizeType checkPointerValid=(__FsSizeType)(__EnvSizeType)linkmm.mnew(lastNonZero,i - lastNonZero + 1);//one more for the trailing 0
 			if(!checkPointerValid)
 			{
-				env->systemAbort("Cannot allocate space for linkmm,so the filesystem cannot be initialized.", -2);
+				env.systemAbort("Cannot allocate space for linkmm,so the filesystem cannot be initialized.", -2);
 			}
 			while(i < this->linkarrLen && this->linkarr[i].getLimit()==0)i++;
 			lastNonZero=i;
@@ -462,16 +482,16 @@ void __DEF_X2fsUtil::printNode(const FileNode* p)const {
 		pname=getFileNameCstr(p->getData(), nlen);
 		if(This::isDirectory(p))
 		{
-			env->printf_simple("Dir:");
-			env->printf_sn(pname,nlen);
-			env->printf_simple("\n");
-//			env->printf_simple("Dir:%.*s\n",nlen,pname);
+			env.printf_simple("Dir:");
+			env.printf_sn(pname,nlen);
+			env.printf_simple("\n");
+//			env.printf_simple("Dir:%.*s\n",nlen,pname);
 		}else if(This::isFile(p))
 		{
 //			printf("File:%.*s %x  %x\n",nlen,pname,p->getData().getSectionStart(),p->getData().getSectionSpan());
-			env->printf_simple("File:");
-			env->printf_sn(pname,nlen);
-			env->printf_simple(" %d  %d\n",p->getData().getSectionListIndex(),p->getData().getFileLen());
+			env.printf_simple("File:");
+			env.printf_sn(pname,nlen);
+			env.printf_simple(" %d  %d\n",p->getData().getSectionListIndex(),p->getData().getFileLen());
 		}
 	}
 }
@@ -486,7 +506,7 @@ void __DEF_X2fsUtil::listOnNode(const FileNode* p,int maxdeepth)const
 		FileNode * pfn=p->getSon();
 		while(pfn)
 		{
-			env->printf_simple("\t");
+			env.printf_simple("\t");
 			this->printNode(pfn);
 			pfn=pfn->getNext();
 		}
@@ -551,14 +571,14 @@ bool __DEF_X2fsUtil::create(FileNode *p,u8_t type,const char *name,__FsSizeType 
 			this->seterrno(This::ERROR_FILEALLOCSPACE);
 			goto error;
 		}
-		env->printf_simple("dump link mm\n");
-		env->printf_simple("space is %d,%d\n",this->linkmm.getSpace().getStart(),this->linkmm.getSpace().getLimit());
+		env.printf_simple("dump link mm\n");
+		env.printf_simple("space is %d,%d\n",this->linkmm.getSpace().getStart(),this->linkmm.getSpace().getLimit());
 
 		// DEBUGINFO
 //		ListNode<LinearSourceDescriptor> *p=this->linkmm.getHead();
 //		while(p)
 //		{
-//			env->printf_simple("(%d,%d)\n",p->getData().getStart(),p->getData().getLimit());
+//			env.printf_simple("(%d,%d)\n",p->getData().getStart(),p->getData().getLimit());
 //			p = p->getNext();
 //		}
 
@@ -568,7 +588,7 @@ bool __DEF_X2fsUtil::create(FileNode *p,u8_t type,const char *name,__FsSizeType 
 		if(linkInode==0)
 		{
 			this->seterrno(This::ERROR_LINKINFO_SPACE_NOT_ENOUGH);
-			env->printf_simple("error linkInode\n");
+			env.printf_simple("error linkInode\n");
 			goto error;
 		}
 	}else if(type==__FileDescriptor::TYPE_DIR){
@@ -578,7 +598,7 @@ bool __DEF_X2fsUtil::create(FileNode *p,u8_t type,const char *name,__FsSizeType 
 		linkInode=0;
 	}
 
-	namelen=env->strlen(name);
+	namelen=env.strlen(name);
 	fnamedst=(char*)this->filenamemm.mnew(namelen+1); //request for name space,the first byte is for length
 //	printf("fdst is %x \n",(__FsSizeType)fdst);
 	if(fnamedst==NULL)
@@ -596,7 +616,7 @@ bool __DEF_X2fsUtil::create(FileNode *p,u8_t type,const char *name,__FsSizeType 
 	//==================Set filename
 	*(unsigned char*)((__EnvSizeType)namebuf+
 			(__FsSizeType)(__EnvSizeType)fnamedst)=namelen;
-	env->strncpy((char*)((__EnvSizeType)namebuf+
+	env.strncpy((char*)((__EnvSizeType)namebuf+
 			(__FsSizeType)(__EnvSizeType)fnamedst+1),name,namelen);
 
 	//===================Set section link info
@@ -651,9 +671,9 @@ void __DEF_X2fsUtil::freeNode(FileNode * node)
 		__FsSizeType plen;
 		char *pname2;
 		pname2=this->getFileNameCstr(node->getData(), plen);
-		env->printf_simple("in free node : ");
-		env->printf_sn(pname2,plen);
-		env->printf_simple("\n");
+		env.printf_simple("in free node : ");
+		env.printf_sn(pname2,plen);
+		env.printf_simple("\n");
 //
 //		printf("type is %d \n",node->getData().getType());
 		if(This::isDirectory(node))
@@ -671,7 +691,7 @@ void __DEF_X2fsUtil::freeNode(FileNode * node)
 //		printf("before memset , len is %d,str is %.*s\n",*pname,*pname,pname + 1);//dirs are not deleted
 //		printf("after , len = %d ,str is \"%.*s\"(may not appear)\n",*pname,*pname,pname + 1);
 		this->filenamemm.mdelete((char*)(__EnvSizeType)off, *pname + 1);
-		env->memset((char*)(__EnvSizeType)pname,0,*pname + 1);
+		env.memset((char*)(__EnvSizeType)pname,0,*pname + 1);
 //		printf("dump filename MM(using MemoryManager<MemoryDescriptor>)\n");
 //		TreeNode<MemoryDescriptor> *ptnode=filenamemm.getHead();
 //		printf("head : %x : %x : %d\n",ptnode->getData().getStart(),ptnode->getData().getLimit(),ptnode->getData().isAllocable());
@@ -687,7 +707,7 @@ void __DEF_X2fsUtil::freeNode(FileNode * node)
 		{
 			__FsSizeType i=node->getData().getSectionListIndex();
 			__FsSizeType linkstart=i;
-			env->printf_simple("link i is %d\n",i);
+			env.printf_simple("link i is %d\n",i);
 			for(;i<this->linkarrLen && this->linkarr[i].getLimit()!=0;i++)
 			{
 				this->freemm.mdelete((char*)(__EnvSizeType)this->linkarr[i].getStart(),this->linkarr[i].getLimit());
@@ -695,7 +715,7 @@ void __DEF_X2fsUtil::freeNode(FileNode * node)
 			}
 			__FsSizeType linklen = i - linkstart + 1;//including the trailing 0.
 			//============free space returned(linked sections)
-			env->printf_simple("linkmm delete %d,%d\n",linkstart,linklen);
+			env.printf_simple("linkmm delete %d,%d\n",linkstart,linklen);
 			this->linkmm.mdelete((char*)(__EnvSizeType)linkstart, linklen);
 		}
 		//==============linked info returned
@@ -758,25 +778,25 @@ bool __DEF_X2fsUtil::rename(FileNode *node,const char *newname)
 //	printf("test getNew \n");
 	this->linkmm.getMemoryManager()->getNew();
 //	printf("test after getNew\n");
-	__FsSizeType newlen=env->strlen(newname);
+	__FsSizeType newlen=env.strlen(newname);
 	__FsSizeType orilen;
 	char *pori;
 	pori=this->getFileNameCstr(node->getData(),orilen);
-	if(env->strncmp(newname,pori,newlen)==0)
+	if(env.strncmp(newname,pori,newlen)==0)
 	{
 		return true;//the names have been the same
 	}
 	//alloc new space
-	env->printf_simple("before extend\n");
+	env.printf_simple("before extend\n");
 	__FsSizeType newoff=(__FsSizeType)(__EnvSizeType)
 			this->filenamemm.extend(node->getData().getNameOffset(),orilen+1, newlen - orilen, (char*)namebuf,false);
 	u8_t *pnew=namebuf + newoff;
-	env->printf_simple("after extend\n");
+	env.printf_simple("after extend\n");
 //	printf("orginal off is %x,new off is %x\n",node->getData().getNameOffset(),newoff);
 	if(pnew)
 	{
 		*pnew = newlen;
-		env->strncpy((char*)pnew + 1,newname,newlen);
+		env.strncpy((char*)pnew + 1,newname,newlen);
 		node->getData().setNameOffset(newoff);
 		return true;
 	}else{
@@ -816,21 +836,21 @@ void __DEF_X2fsUtil::dumpFileInfo(FileNode * fnode)
 	const __FileDescriptor& fd=fnode->getData();
 	__FsSizeType nlen;char *p;
 	p=this->getFileNameCstr(fd, nlen);
-	env->printf_simple("file name : ");
-	env->printf_sn(p,nlen);
-	env->printf_simple("\n");
-	env->printf_simple("linked section list start : %d\nsections are : \n",fd.getSectionListIndex());
+	env.printf_simple("file name : ");
+	env.printf_sn(p,nlen);
+	env.printf_simple("\n");
+	env.printf_simple("linked section list start : %d\nsections are : \n",fd.getSectionListIndex());
 	__FsSizeType i=fd.getSectionListIndex();
 	while(i<this->linkarrLen && this->linkarr[i].getLimit()!=0)
 	{
-		env->printf_simple("(%x,%x)   ",this->linkarr[i].getStart(),this->linkarr[i].getLimit());
+		env.printf_simple("(%x,%x)   ",this->linkarr[i].getStart(),this->linkarr[i].getLimit());
 		i++;
 	}
-	env->printf_simple("\n");
-	env->printf_simple("type : %d\n",fd.getType());
-	env->printf_simple("length : %d \n",fd.getFileLen());
-	env->printf_simple("created time : %d\n",fd.getCreatedTime());
-	env->printf_simple("last modified time : %d\n",fd.getLastModefiedTime());
+	env.printf_simple("\n");
+	env.printf_simple("type : %d\n",fd.getType());
+	env.printf_simple("length : %d \n",fd.getFileLen());
+	env.printf_simple("created time : %d\n",fd.getCreatedTime());
+	env.printf_simple("last modified time : %d\n",fd.getLastModefiedTime());
 }
 
 /**
@@ -918,25 +938,25 @@ bool __DEF_X2fsUtil::createFile(int argc,const char* argv[],int secSpan)
 			/**
 			 * 下面先临时性地改变末尾字符为'\0'，打印后改回来
 			 */
-			env->printf_simple("on node :");
+			env.printf_simple("on node :");
 			char prevLast=filename[plen];
 			filename[plen]='\0';
-			env->printf_simple(filename);
+			env.printf_simple(filename);
 			filename[plen]=prevLast;
-			env->printf_simple(" \t");
-//			env->printf_simple("on node : %.*s \t",plen,filename);
-			env->printf_simple("create file ");
-			env->printf_simple(argv[argc-1]);
-			env->printf_simple("\n");
+			env.printf_simple(" \t");
+//			env.printf_simple("on node : %.*s \t",plen,filename);
+			env.printf_simple("create file ");
+			env.printf_simple(argv[argc-1]);
+			env.printf_simple("\n");
 			bool flag=this->createFile(p, argv[argc-1], secSpan);
 
-			env->printf_simple("after created, node is : ");
+			env.printf_simple("after created, node is : ");
 			char *filename2=getFileNameCstr(p->getData(), plen);
 			prevLast=filename2[plen];
 			filename[plen]='\0';
-			env->printf_simple(filename2);
+			env.printf_simple(filename2);
 			filename2[plen]=prevLast;
-			env->printf_simple(", scceed?%d, errno is %d\n",flag,geterrno());
+			env.printf_simple(", scceed?%d, errno is %d\n",flag,geterrno());
 
 			return flag;
 		}
@@ -961,9 +981,9 @@ bool __DEF_X2fsUtil::createDir(int argc,const char* argv[])
 //			printf("exist already\n");
 			return false;
 		}else{
-			env->printf_simple("mkdir ");
-			env->printf_simple(argv[argc-1]);
-			env->printf_simple("\n");
+			env.printf_simple("mkdir ");
+			env.printf_simple(argv[argc-1]);
+			env.printf_simple("\n");
 			return this->mkdir(p, argv[argc-1]);
 		}
 	}
@@ -1031,7 +1051,7 @@ void __DEF_X2fsUtil::listNode(int argc,const char * argv[],int maxdeepth)const
 				this->listOnNode(pson,maxdeepth);
 			}
 		}else{
-			env->printf_simple("No such file or directory\n");
+			env.printf_simple("No such file or directory\n");
 		}
 	}
 
@@ -1041,7 +1061,7 @@ void __DEF_X2fsUtil::listRoot()const
 {
 	FileNode *pfn=(FileNode *)this->fileTree.getHead();
 
-	env->printf_simple("/:\n");
+	env.printf_simple("/:\n");
 	pfn=(FileNode *)pfn->getSon();
 	__FsSizeType nlen=0;
 	char *pname;
@@ -1052,11 +1072,11 @@ void __DEF_X2fsUtil::listRoot()const
 		if(nlen!=0)
 		{
 //			printf("\t%.*s %x  %x\n",nlen,pname,pfn->getData().getSectionStart(),pfn->getData().getSectionSpan());
-			env->printf_simple("\t");
+			env.printf_simple("\t");
 			savePrev=pname[nlen];
-			env->printf_simple(pname);
+			env.printf_simple(pname);
 			pname[nlen]=savePrev;
-			env->printf_simple(" %d  %d\n",pfn->getData().getSectionListIndex(),pfn->getData().getFileLen());
+			env.printf_simple(" %d  %d\n",pfn->getData().getSectionListIndex(),pfn->getData().getFileLen());
 		}
 		pfn=(FileNode *)pfn->getNext();
 	}
@@ -1077,9 +1097,9 @@ void __DEF_X2fsUtil::listNode(const FileNode* p)const
 		if(nlen!=0)
 		{
 //			printf("\t%.*s %x  %x\n",nlen,pname,pfn->getData().getSectionStart(),pfn->getData().getSectionSpan());
-			env->printf_simple("\t");
-			env->printf_sn(pname, nlen);
-			env->printf_simple(" sectionList=%d  fileLen=%d\n",pfn->getData().getSectionListIndex(),pfn->getData().getFileLen());
+			env.printf_simple("\t");
+			env.printf_sn(pname, nlen);
+			env.printf_simple(" sectionList=%d  fileLen=%d\n",pfn->getData().getSectionListIndex(),pfn->getData().getFileLen());
 		}
 		pfn=(FileNode *)pfn->getNext();
 	}
@@ -1136,16 +1156,20 @@ void __DEF_X2fsUtil::adjustDirbufOffset(ptrdiff_t off) {
 		__FsSizeType dirBufLen = metainfo->secnums[__X2fsMetaInfo::INDEX_DIR]*CONST_SECSIZE;
 		for(__FsSizeType i=1;i*x2sizeof(FullNode) <dirBufLen ; i++ )
 		{
+			// BUG [待修复] 这里，由于32位指针域只有4个字节，而指针域需要容纳64位的地址，因此失败。
+			// 解决方法：1.多预留一点  2.不要原址操作，再申请新的buffer。
+			// 这里也暴露了一个问题，所有需要在高位系统上存储高位系统指针的域，都是不安全的。
+			// 注意，这个bug还没有找到明显的解决方案。
 			if(nodebuffer[i].SimpleMemoryNode::isAlloced()) //已被分配
 			{
 				nodebuffer[i].setFather(
-						(nodebuffer[i].getDirectFather()!=NULL?(FileNode*)((__EnvSizeType)nodebuffer[i].getDirectFather() + (__FsSizeType)off ):(FileNode*)NULL));
+						(nodebuffer[i].getDirectFather()!=NULL?(FileNode*)((__EnvSizeType)nodebuffer[i].getDirectFather() + (__EnvSizeType)off ):(FileNode*)NULL));
 				nodebuffer[i].setNext(
-						(nodebuffer[i].getNext()!=NULL?(FileNode*)((__EnvSizeType)nodebuffer[i].getNext() + (__FsSizeType)off):(FileNode*)NULL) );
+						(nodebuffer[i].getNext()!=NULL?(FileNode*)((__EnvSizeType)nodebuffer[i].getNext() + (__EnvSizeType)off):(FileNode*)NULL) );
 				nodebuffer[i].setPrevious(
-						(nodebuffer[i].getPrevious()!=NULL?(FileNode*)((__EnvSizeType)nodebuffer[i].getPrevious() + (__FsSizeType)off):(FileNode*)NULL ) );
+						(nodebuffer[i].getPrevious()!=NULL?(FileNode*)((__EnvSizeType)nodebuffer[i].getPrevious() + (__EnvSizeType)off):(FileNode*)NULL ) );
 				nodebuffer[i].setSon(
-						(nodebuffer[i].getSon()!=NULL?(FileNode*)((__EnvSizeType)nodebuffer[i].getSon() + (__FsSizeType)off):(FileNode*)NULL) );
+						(nodebuffer[i].getSon()!=NULL?(FileNode*)((__EnvSizeType)nodebuffer[i].getSon() + (__EnvSizeType)off):(FileNode*)NULL) );
 			}
 		}
 }
@@ -1183,7 +1207,7 @@ typename __DEF_X2fsUtil::FileNode * __DEF_X2fsUtil::locatePath(FileNode* base, c
 	{
 		pname = this->getFileNameCstr(p->getData(), len);
 //		printf("cmp %.*s,n is %d\n",len,pname,len);
-		if(len == env->strlen(name)  && env->strncmp(pname,name,len)==0)
+		if(len == env.strlen(name)  && env.strncmp(pname,name,len)==0)
 		{
 			break;
 		}
@@ -1292,7 +1316,7 @@ typename __DEF_X2fsUtil::__FsSizeType  __DEF_X2fsUtil::writeToFile(const char* b
 					0;
 //					fwrite(thisBuf,myobjsize,thisSectionFileLen,this->fpimg);
 
-//			env->writeSectors(EnvInterface::CUR_SEG, (const u8_t*)thisBuf, driver,
+//			env.writeSectors(EnvInterface::CUR_SEG, (const u8_t*)thisBuf, driver,
 //					metainfo->lbaStartLow + thisSec, mynsec, metainfo->lbaStartHigh);
 
 			thisBuf += written;
@@ -1303,7 +1327,7 @@ typename __DEF_X2fsUtil::__FsSizeType  __DEF_X2fsUtil::writeToFile(const char* b
 			{
 				if(ilink == this->linkarrLen || this->linkarr[ilink].getLimit()==0)//require for more space
 				{
-					LinkedList<__EnvLinearSourceDescriptor,PartialMallocToSimple,__EnvAlignment> list(freemm.getMemoryManager());
+					LinkedList<__EnvLinearSourceDescriptor,PartialMallocToSimple> list(freemm.getMemoryManager());
 //					__FsSizeType extraSec=(thisObjLeft / CONST_SECSIZE) ;
 //					if(thisObjLeft % CONST_SECSIZE> 0)
 //					{
@@ -1335,8 +1359,8 @@ typename __DEF_X2fsUtil::__FsSizeType  __DEF_X2fsUtil::writeToFile(const char* b
 //						printf("new ilink is %d\n",newilink);
 						if(newilink != fd.getSectionListIndex())//不相等，需要移动
 						{
-							env->memcpy((char*)(linkarr + newilink),(char*) (linkarr + fd.getSectionListIndex()),ilink - fd.getSectionListIndex() );
-							env->memset((char*)(linkarr + fd.getSectionListIndex()),0,ilink - fd.getSectionListIndex());
+							env.memcpy((char*)(linkarr + newilink),(char*) (linkarr + fd.getSectionListIndex()),ilink - fd.getSectionListIndex() );
+							env.memset((char*)(linkarr + fd.getSectionListIndex()),0,ilink - fd.getSectionListIndex());
 						}
 						__EnvListNode_LinearSourceDescriptor *pnewnode=list.getHead();
 						ilink = newilink + ilink - fd.getSectionListIndex();
@@ -1399,7 +1423,7 @@ typename __DEF_X2fsUtil::__FsSizeType __DEF_X2fsUtil::writeToILink(__FsSizeType 
 		return 0;
 
 	// UNTESTED lba计算可能溢出到高部分
-	env->writeSectors(EnvInterface::CUR_SEG,
+	env.writeSectors(EnvInterface::CUR_SEG,
 			(const u8_t*)src, driver,metainfo->lbaStartLow + linkarr[ilink].getStart()+secPos, secLen, metainfo->lbaStartHigh);
 	return secLen;
 }
@@ -1409,7 +1433,7 @@ bool __DEF_X2fsUtil::extendFileSecNum(FileNode * fileNode,__FsSizeType extraSec,
 {
 	if(fileNode==NULL || extraSec==0)return false;
 
-	LinkedList<__EnvLinearSourceDescriptor,PartialMallocToSimple,__EnvAlignment> list(freemm.getMemoryManager());
+	LinkedList<__EnvLinearSourceDescriptor,PartialMallocToSimple> list(freemm.getMemoryManager());
 	bool flagnewList = freemm.mnewLinked(extraSec, list, 0);
 	__FileDescriptor& fd=fileNode->getData();
 	if(flagnewList)
@@ -1498,7 +1522,7 @@ typename __DEF_X2fsUtil::__FsSizeType __DEF_X2fsUtil::_writeToFile(const char *b
 	__FsSizeType thisLeftSec = nsec;
 	while(true)
 	{
-		env->writeSectors(EnvInterface::CUR_SEG, thisBuf, driver, metainfo->lbaStartLow + linkarr[i].getStart() + thisOff,
+		env.writeSectors(EnvInterface::CUR_SEG, thisBuf, driver, metainfo->lbaStartLow + linkarr[i].getStart() + thisOff,
 						thisLen, metainfo->lbaStartHigh);
 		++i;
 		if(i==linkarrLen || linkarr[i].getLimit()==0)break;
@@ -1534,7 +1558,7 @@ typename __DEF_X2fsUtil::__FsSizeType __DEF_X2fsUtil::_readFromFile(char *buf, _
 	__FsSizeType thisLeftSec = nsec;
 	while(true)
 	{
-		env->readSectors(EnvInterface::CUR_SEG, thisBuf, driver, metainfo->lbaStartLow + linkarr[i].getStart() + thisOff,
+		env.readSectors(EnvInterface::CUR_SEG, thisBuf, driver, metainfo->lbaStartLow + linkarr[i].getStart() + thisOff,
 						thisLen, metainfo->lbaStartHigh);
 
 		thisLeftSec-= thisLen;
@@ -1576,11 +1600,11 @@ typename __DEF_X2fsUtil::__FsSizeType __DEF_X2fsUtil::_randomWriteFile(char *buf
 
 			u8_t *oneUnitBuf=mbuf.getOnlyBuffer(CONST_SECSIZE);
 
-			if( 1!= env->readSectors(EnvInterface::CUR_SEG,
+			if( 1!= env.readSectors(EnvInterface::CUR_SEG,
 					oneUnitBuf, driver, metainfo->lbaStartLow + linkarr[ilink].getStart() + retOff,
 					1, metainfo->lbaStartHigh))
 				return 0;//失败
-			env->memcpy((char*)buf, (const char*)oneUnitBuf, startOff);//复制前面部分
+			env.memcpy((char*)buf, (const char*)oneUnitBuf, startOff);//复制前面部分
 		}
 	}
 	// endOff读补齐, 大部分代码同上，但有些许不同
@@ -1597,7 +1621,7 @@ typename __DEF_X2fsUtil::__FsSizeType __DEF_X2fsUtil::_randomWriteFile(char *buf
 			{
 
 				u8_t *oneUnitBuf=mbuf.getOnlyBuffer(CONST_SECSIZE);
-				if( 1!=env->readSectors(EnvInterface::CUR_SEG,
+				if( 1!=env.readSectors(EnvInterface::CUR_SEG,
 						oneUnitBuf, driver, metainfo->lbaStartLow + linkarr[ilink].getStart()+retOff,
 						1, metainfo->lbaStartHigh))
 					return 0; // 失败
@@ -1608,7 +1632,7 @@ typename __DEF_X2fsUtil::__FsSizeType __DEF_X2fsUtil::_randomWriteFile(char *buf
 		if(oneUnitBuf!=NULL)
 		{
 			__FsSizeType offFromBegin = CONST_SECSIZE - endOff;
-			env->memcpy((char*)buf + (startSec + nsec - 1)*CONST_SECSIZE + offFromBegin,
+			env.memcpy((char*)buf + (startSec + nsec - 1)*CONST_SECSIZE + offFromBegin,
 					(const char*)oneUnitBuf+offFromBegin, endOff);//定位到最后一个扇区，然后补偿写数据
 		}
 	}
@@ -1758,7 +1782,7 @@ bool __DEF_X2fsUtil::truncateFile(FileNode *fnode,__FsSizeType newlen)
 //	}
 //	if(nsecs==0)return nbyte;
 //
-//	__FsSizeType realWrite = env->writeSectors(EnvInterface::CUR_SEG,
+//	__FsSizeType realWrite = env.writeSectors(EnvInterface::CUR_SEG,
 //			(u8_t*)pbase, driver, metainfo->lbaStartLow + startSec,nsecs, metainfo->lbaStartHigh) ;
 //
 //	if(realWrite == nsecs)
@@ -1780,7 +1804,7 @@ bool __DEF_X2fsUtil::truncateFile(FileNode *fnode,__FsSizeType newlen)
 //	char *myBuf=buf;
 //	if(startOff!=0 || endOff!=0)
 //	{
-//		myBuf=(char*)env->malloc(bufSize);
+//		myBuf=(char*)env.malloc(bufSize);
 //		if(myBuf==NULL)return 0;
 //	}
 //	__FsSizeType needSec = bufSize/CONST_SECSIZE;
@@ -1792,7 +1816,7 @@ bool __DEF_X2fsUtil::truncateFile(FileNode *fnode,__FsSizeType newlen)
 //	// EFF 按字节复制低效
 //		for(__FsSizeType i=startOff;i+endOff!=bufSize;++i)
 //			buf[i-startOff]=myBuf[i];
-//		env->free((u8_t*)myBuf);
+//		env.free((u8_t*)myBuf);
 //	}
 //
 //	return readSec*CONST_SECSIZE - startOff - (CONST_SECSIZE -endOff);
@@ -1811,16 +1835,16 @@ bool __DEF_X2fsUtil::truncateFile(FileNode *fnode,__FsSizeType newlen)
 //			char *myBuf=buf;
 //			if(startOff!=0 || endOff!=0)//需要额外的空间
 //			{
-//				myBuf=(char*)env->malloc(bufSize);
+//				myBuf=(char*)env.malloc(bufSize);
 //				if(myBuf==NULL)return 0;//内存不足
 //			}
 //			__FsSizeType needToRead = bufSize / CONST_SECSIZE;
 //
-//			__FsSizeType realRead = env->readSectors(EnvInterface::CUR_SEG,
+//			__FsSizeType realRead = env.readSectors(EnvInterface::CUR_SEG,
 //					(u8_t*)myBuf, driver, metainfo->lbaStartLow + bytePos/CONST_SECSIZE, needToRead, metainfo->lbaStartHigh) ;
 //			if(realRead==0) //读取错误
 //			{
-//				if(myBuf!=buf)env->free((u8_t*)myBuf);
+//				if(myBuf!=buf)env.free((u8_t*)myBuf);
 //				return 0;
 //			}
 //
@@ -1829,7 +1853,7 @@ bool __DEF_X2fsUtil::truncateFile(FileNode *fnode,__FsSizeType newlen)
 //			{
 //				for(__FsSizeType i=startOff; i + endOff!=bufSize ;++i)//按字节复制
 //					buf[i-startOff]=myBuf[i];
-//				env->free((u8_t*)myBuf);
+//				env.free((u8_t*)myBuf);
 //			}
 //			if(realRead == needToRead)
 //				return nbyte;
@@ -1870,7 +1894,7 @@ bool __DEF_X2fsUtil::truncateFile(FileNode *fnode,__FsSizeType newlen)
 //				}
 //				if(nsecs==0)return nbyte;
 //
-//				__FsSizeType realWrite = env->writeSectors(EnvInterface::CUR_SEG,
+//				__FsSizeType realWrite = env.writeSectors(EnvInterface::CUR_SEG,
 //						(u8_t*)pbase, driver, metainfo->lbaStartLow + startSec,nsecs, metainfo->lbaStartHigh) ;
 //
 //				if(realWrite == nsecs)
@@ -1889,30 +1913,30 @@ bool __DEF_X2fsUtil::truncateFile(FileNode *fnode,__FsSizeType newlen)
 //		if(buf==NULL || byteStart>=byteEnd || byteEnd > CONST_SECSIZE )return false;
 //		if(byteEnd - byteStart == CONST_SECSIZE)//可以直接写入
 //		{
-//			return 1 == env->writeSectors(EnvInterface::CUR_SEG,
+//			return 1 == env.writeSectors(EnvInterface::CUR_SEG,
 //				(const u8_t*)buf, driver, metainfo->lbaStartLow + secPos, 1, metainfo->lbaStartHigh) ;
 //		}
 //		// 需要先读入部分，再完整写入
-//		char *oneUnitBuffer=(optBuffer==NULL? (char*)env->malloc(CONST_SECSIZE):optBuffer);
+//		char *oneUnitBuffer=(optBuffer==NULL? (char*)env.malloc(CONST_SECSIZE):optBuffer);
 //		if(oneUnitBuffer==NULL)return false;//程序空间不足
 //
 //
-//		if( 1 != env->readSectors(EnvInterface::CUR_SEG,
+//		if( 1 != env.readSectors(EnvInterface::CUR_SEG,
 //				(u8_t*)oneUnitBuffer, driver, metainfo->lbaStartLow + secPos, 1, metainfo->lbaStartHigh)  )//没有成功
 //			goto ERROR;
 //
 //		// EFF 按字节复制，低效
 //		for(__FsSizeType i=byteStart;i!=byteEnd;++i) //将原来的数据复制到这个扇区，然后写回
 //				oneUnitBuffer[i]=buf[i-byteStart];
-//		if( 1!=env->writeSectors(EnvInterface::CUR_SEG,
+//		if( 1!=env.writeSectors(EnvInterface::CUR_SEG,
 //					(u8_t*)oneUnitBuffer, driver, metainfo->lbaStartLow+secPos, 1, metainfo->lbaStartHigh))
 //			goto ERROR;
 //
-//		if(oneUnitBuffer!=optBuffer)env->free((u8_t*)oneUnitBuffer);
+//		if(oneUnitBuffer!=optBuffer)env.free((u8_t*)oneUnitBuffer);
 //
 //		return true;
 //		ERROR:
-//			if(oneUnitBuffer!=optBuffer)env->free((u8_t*)oneUnitBuffer);
+//			if(oneUnitBuffer!=optBuffer)env.free((u8_t*)oneUnitBuffer);
 //				return false;
 //}
 //__DEF_X2fsUtil_Template
@@ -1922,15 +1946,15 @@ bool __DEF_X2fsUtil::truncateFile(FileNode *fnode,__FsSizeType newlen)
 //	if(buf==NULL || byteStart>=byteEnd || byteEnd > CONST_SECSIZE )return false;
 //		if(byteEnd - byteStart == CONST_SECSIZE)//可以直接写入
 //		{
-//			return 1 == env->readSectors(EnvInterface::CUR_SEG,
+//			return 1 == env.readSectors(EnvInterface::CUR_SEG,
 //				(const u8_t*)buf, driver, metainfo->lbaStartLow + secPos, 1, metainfo->lbaStartHigh) ;
 //		}
 //		// 需要先读入部分，再完整写入
-//		char *oneUnitBuffer=(optBuffer==NULL? (char*)env->malloc(CONST_SECSIZE):optBuffer);
+//		char *oneUnitBuffer=(optBuffer==NULL? (char*)env.malloc(CONST_SECSIZE):optBuffer);
 //		if(oneUnitBuffer==NULL)return false;//程序空间不足
 //
 //
-//		if( 1 != env->readSectors(EnvInterface::CUR_SEG,
+//		if( 1 != env.readSectors(EnvInterface::CUR_SEG,
 //				(u8_t*)oneUnitBuffer, driver, metainfo->lbaStartLow + secPos, 1, metainfo->lbaStartHigh)  )//没有成功
 //			goto ERROR;
 //
@@ -1938,11 +1962,11 @@ bool __DEF_X2fsUtil::truncateFile(FileNode *fnode,__FsSizeType newlen)
 //		for(__FsSizeType i=byteStart;i!=byteEnd;++i) //将原来的数据复制到这个扇区，然后写回
 //			buf[i-byteStart]=oneUnitBuffer[i];
 //
-//		if(oneUnitBuffer!=optBuffer)env->free((u8_t*)oneUnitBuffer);//释放空间
+//		if(oneUnitBuffer!=optBuffer)env.free((u8_t*)oneUnitBuffer);//释放空间
 //
 //		return true;
 //		ERROR:
-//			if(oneUnitBuffer!=optBuffer)env->free((u8_t*)oneUnitBuffer);
+//			if(oneUnitBuffer!=optBuffer)env.free((u8_t*)oneUnitBuffer);
 //				return false;
 //}
 
@@ -2029,7 +2053,7 @@ bool __DEF_X2fsUtil::truncateFile(FileNode *fnode,__FsSizeType newlen)
 
 __DEF_X2fsUtil_Template
 void  __DEF_X2fsUtil::mkfs(
-		__EnvInterface *env,u8_t driver,const X2fsMetaInfo<__FsSizeType> *metainfo)
+		__EnvInterface &env,u8_t driver,const X2fsMetaInfo<__FsSizeType> *metainfo)
 {
 //	using __TargetX2fsUtil = X2fsUtil<__EnvInterface,__TargetSizeType,__TargetAlignment>;
 //	using __TargetX2fsMetaInfo = X2fsMetaInfo<__TargetSizeType>;
@@ -2042,31 +2066,31 @@ void  __DEF_X2fsUtil::mkfs(
 
 	if(!__X2fsMetaInfo::checkMetainfo(metainfo))
 	{
-		env->printf_simple("error metainfo format\n");
+		env.printf_simple("error metainfo format\n");
 		return;
 	}
 
 	//debug information
-	env->printf_simple("sizeof(FullNode)=%d\n",sizeof(FullNode));
+	env.printf_simple("sizeof(FullNode)=%d\n",sizeof(FullNode));
 
 
-	env->printf_simple("sizeof(__FsTreeNode_FileDescriptor)=%d\n",
+	env.printf_simple("sizeof(__FsTreeNode_FileDescriptor)=%d\n",
 			sizeof(__FsTreeNode_FileDescriptor));
-	env->printf_simple("sizeof(SimpleMemoryNode)=%d\n",sizeof(SimpleMemoryNode));
+	env.printf_simple("sizeof(SimpleMemoryNode)=%d\n",sizeof(SimpleMemoryNode));
 
 	FullNode *p=(FullNode*)sizeof(FullNode);
 	__FsTreeNode_FileDescriptor *p2=
 			(__FsTreeNode_FileDescriptor*)p;
 	SimpleMemoryNode *p3=(SimpleMemoryNode*)p;
 
-	env->printf_simple("difference is (pfullnode - ptreenode)=%d\n",(signed int)((char*)p - (char*)p2));
-	env->printf_simple("pfullnode - psimple=%d(should be less than 0)\n",(signed int)((char*)p - (char*)p3));
+	env.printf_simple("difference is (pfullnode - ptreenode)=%d\n",(signed int)((char*)p - (char*)p2));
+	env.printf_simple("pfullnode - psimple=%d(should be less than 0)\n",(signed int)((char*)p - (char*)p3));
 
 	u32_t allSecs=metainfo->metaSec;
 	for(__FsSizeType i=0;i<metainfo->len;i++)
 		allSecs+=metainfo->secnums[i];
 	u32_t allocedSec=allSecs;
-	u8_t *base=env->malloc(allocedSec*CONST_SECSIZE); //分配空间
+	u8_t *base=env.malloc(allocedSec*CONST_SECSIZE); //分配空间
 	allSecs+=metainfo->reservedSec;
 	for(__FsSizeType i=0;i<metainfo->optionalLen;++i)
 		allSecs+=metainfo->optional[i];
@@ -2077,7 +2101,7 @@ void  __DEF_X2fsUtil::mkfs(
 	 */
 	u32_t filenameSecOff = 0;//base is filename
 	u32_t filenameLen = metainfo->secnums[INDEX_NAME] * CONST_SECSIZE;
-	env->memset((char*)base+filenameSecOff,0,filenameLen);
+	env.memset((char*)base+filenameSecOff,0,filenameLen);
 	char *pbase=(char*)base+filenameSecOff;
 	pbase[0]=1;
 	pbase[1]=' ';//根目录的名称是''
@@ -2117,18 +2141,18 @@ void  __DEF_X2fsUtil::mkfs(
 	u32_t linksectionOff = freesectionOff + freesectionLen;
 	u32_t linksectionLen = metainfo->secnums[INDEX_LINK] * CONST_SECSIZE;
 	__FsLinearSourceDescriptor*linkarr=(__FsLinearSourceDescriptor*)((__EnvSizeType)base+linksectionOff);
-	env->memset((char*)linkarr,0,linksectionLen);//set all to 0
+	env.memset((char*)linkarr,0,linksectionLen);//set all to 0
 	// 初始化linkarr的前两项已经分配，这样避免返回0作为下标来标记失败状态
 	new (linkarr) __FsLinearSourceDescriptor(0xaa55,1);//0xaa55 is the verifying information,文件第一个扇区不用，所有的都是第一项不用
 	new (linkarr + 1) __FsLinearSourceDescriptor(0xaa55,0);
 
 
 	//============================flush to storage
-	env->writeSectors(EnvInterface::CUR_SEG, (u8_t*)metainfo,0x80,metainfo->lbaStartLow+metainfo->reservedSec,metainfo->metaSec,metainfo->lbaStartHigh);
-	env->writeSectors(EnvInterface::CUR_SEG, base,0x80,metainfo->lbaStartLow+metainfo->reservedSec+metainfo->metaSec, allocedSec, metainfo->lbaStartHigh);
+	env.writeSectors(EnvInterface::CUR_SEG, (u8_t*)metainfo,driver,metainfo->lbaStartLow+metainfo->reservedSec,metainfo->metaSec,metainfo->lbaStartHigh);
+	env.writeSectors(EnvInterface::CUR_SEG, base,driver,metainfo->lbaStartLow+metainfo->reservedSec+metainfo->metaSec, allocedSec, metainfo->lbaStartHigh);
 
-	env->flushOutputs();
-	env->free(base);
+	env.flushOutputs();
+	env.free(base);
 }
 //template <template <class>class _Allocator>
 //void X2fsUtil::getLinkedList(LinearSourceDescriptor *buffer,int i,LinkedList<LinearSourceDescriptor,_Allocator> &list,__SizeType maxlen)
@@ -2147,7 +2171,7 @@ void  __DEF_X2fsUtil::mkfs(
 #define __DEF_ManagedObject ManagedObject<T,__EnvInterface>
 
 __DEF_Template_ManagedObject
-__DEF_ManagedObject::ManagedObject(__EnvInterface *env):
+__DEF_ManagedObject::ManagedObject(__EnvInterface &env):
 env(env),
 buffer(NULL)
 {}
@@ -2155,8 +2179,8 @@ buffer(NULL)
 __DEF_Template_ManagedObject
 __DEF_ManagedObject::~ManagedObject()
 {
-	if(buffer!=NULL && env!=NULL)
-		env->free((u8_t*)buffer);
+	if(buffer!=NULL)
+		env.free((u8_t*)buffer);
 }
 __DEF_Template_ManagedObject
 void __DEF_ManagedObject::setBufferIfNone(T buffer)
@@ -2174,14 +2198,14 @@ __DEF_Template_ManagedObject
 T __DEF_ManagedObject::getOnlyBuffer(__SizeType size)
 {
 	if(buffer==NULL)
-		buffer=(T)env->malloc(size);
+		buffer=(T)env.malloc(size);
 	return buffer;
 }
 __DEF_Template_ManagedObject
 const T&    __DEF_ManagedObject::getOnlyBufferReference(__SizeType size)const
 {
 	if(buffer==NULL)
-		buffer=(T)env->malloc(size);
+		buffer=(T)env.malloc(size);
 	return buffer;
 }
 #endif

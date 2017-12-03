@@ -25,6 +25,9 @@
 #include <common/Getopt.h>
 #include <common/NoArch.h>
 
+//==from conceptual
+#include <conceptual/Serialize.h>
+
 //==from $root
 #include <AssociatedMemoryManager.h>
 #include <Cache.h>
@@ -47,6 +50,7 @@
 #include <test.h>
 #include <TSS.h>
 #include <VirtualMemory.h>
+
 
 //==lastly,from macros
 #include <macros/all.h>

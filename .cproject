@@ -321,46 +321,6 @@
 				<useDefaultCommand>true</useDefaultCommand>
 				<runAllBuilders>true</runAllBuilders>
 			</target>
-			<target name="File" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
-				<buildCommand>g++</buildCommand>
-				<buildArguments>-c  -Werror -fmax-errors=5 -D NO_CONFIG_ERROR -D CODE64 -Iinclude</buildArguments>
-				<buildTarget>filesystem/verify-in-cygwin/File.cpp -o filesystem/verify-in-cygwin/gen/File.o</buildTarget>
-				<stopOnError>true</stopOnError>
-				<useDefaultCommand>false</useDefaultCommand>
-				<runAllBuilders>true</runAllBuilders>
-			</target>
-			<target name="gen/64/CMDUtil_main.exe" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
-				<buildCommand>make</buildCommand>
-				<buildArguments>-j4</buildArguments>
-				<buildTarget>gen/64/CMDUtil_main.exe DEBUG=true</buildTarget>
-				<stopOnError>true</stopOnError>
-				<useDefaultCommand>true</useDefaultCommand>
-				<runAllBuilders>true</runAllBuilders>
-			</target>
-			<target name="gen/64/CMDUtil_mkfs.x2fs.exe" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
-				<buildCommand>make</buildCommand>
-				<buildArguments>-j4</buildArguments>
-				<buildTarget>gen/64/CMDUtil_mkfs.x2fs.exe DEBUG=true</buildTarget>
-				<stopOnError>true</stopOnError>
-				<useDefaultCommand>true</useDefaultCommand>
-				<runAllBuilders>true</runAllBuilders>
-			</target>
-			<target name="gen/64/CMDUtil_test.exe" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
-				<buildCommand>make</buildCommand>
-				<buildArguments>-j4</buildArguments>
-				<buildTarget>gen/64/CMDUtil_test.exe</buildTarget>
-				<stopOnError>true</stopOnError>
-				<useDefaultCommand>true</useDefaultCommand>
-				<runAllBuilders>true</runAllBuilders>
-			</target>
-			<target name="gen/64/CMDUtil_rwfile.exe" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
-				<buildCommand>make</buildCommand>
-				<buildArguments>-j4</buildArguments>
-				<buildTarget>gen/64/CMDUtil_rwfile.exe DEBUG=true</buildTarget>
-				<stopOnError>true</stopOnError>
-				<useDefaultCommand>true</useDefaultCommand>
-				<runAllBuilders>true</runAllBuilders>
-			</target>
 			<target name="gen/32/libx2.s" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
 				<buildArguments>-j4</buildArguments>
@@ -389,6 +349,14 @@
 				<buildCommand>make</buildCommand>
 				<buildArguments>-j4 DEBUG=true</buildArguments>
 				<buildTarget>gen/64/conceptual_rwfile.exe</buildTarget>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>false</useDefaultCommand>
+				<runAllBuilders>true</runAllBuilders>
+			</target>
+			<target name="gen/64/conceptual_test_serialize.exe" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>make</buildCommand>
+				<buildArguments>-j4 DEBUG=true</buildArguments>
+				<buildTarget>gen/64/conceptual_test_serialize.exe</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>false</useDefaultCommand>
 				<runAllBuilders>true</runAllBuilders>

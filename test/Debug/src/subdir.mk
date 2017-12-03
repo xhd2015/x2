@@ -5,15 +5,15 @@
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
 ../src/test_inc.cpp \
-../src/test_multiple_file_instantiate.cpp 
+../src/test_serialize.cpp 
 
 OBJS += \
 ./src/test_inc.o \
-./src/test_multiple_file_instantiate.o 
+./src/test_serialize.o 
 
 CPP_DEPS += \
 ./src/test_inc.d \
-./src/test_multiple_file_instantiate.d 
+./src/test_serialize.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes

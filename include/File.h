@@ -13,25 +13,101 @@
 #if defined(CODE64)
 #include <EnvInterface64Impl.h>  //impl for dumpInfo
 #endif
+#include <conceptual/Serialize.h>
 
 
-template <typename __SizeType,int __Alignment>
-class FileDescriptor{};//模板
-#if defined(CODE64)
-#define __DEF_ALIGNMENT sizeof(size_t)
-#include <preprocessor_functions/File_FileDescriptor.h.RAW>
-#endif
+//==class FileDescriptor
 
-#if defined(CODE32) ||defined(CODE32USER)|| defined(CODE64)
-#define __DEF_ALIGNMENT 4
-#include <preprocessor_functions/File_FileDescriptor.h.RAW>
-#endif
+/**
+* 支持序列化
+*/
+class FileDescriptor:public SerializationInterface
+{
+	template <class __EnvTransfer>
+	friend SerializerPtr<__EnvTransfer>& operator<<(SerializerPtr<__EnvTransfer> &ptr,const FileDescriptor& fd);
+	template <class __EnvTransfer>
+	friend SerializerPtr<__EnvTransfer>& operator>>(SerializerPtr<__EnvTransfer> &ptr,FileDescriptor &fd);
 
-#if defined(CODE16) || defined(CODE32) ||defined(CODE32USER)|| defined(CODE64)
-#define __DEF_ALIGNMENT 2
-#include <preprocessor_functions/File_FileDescriptor.h.RAW>
-#endif
+public:
+	enum{ TYPE_FILE=0,TYPE_DIR=1,TYPE_EAP=2};
 
+	/**
+	 * 仅仅是__SizeType的别名
+	 */
+	using __SizeType = size_t;
+	using __TimeType = __SizeType;
+public:
+	AS_MACRO FileDescriptor()=default;
+	AS_MACRO FileDescriptor(u8_t type,__SizeType sectionList,
+			__SizeType fileLen,__SizeType nameStart,__TimeType createdTime,__TimeType lastModefiedTime);
+
+	AS_MACRO u8_t getType()const;
+	AS_MACRO void setType(u8_t type);
+
+	AS_MACRO __SizeType getNameOffset()const;
+	AS_MACRO void	setNameOffset(__SizeType off);
+	AS_MACRO __TimeType getCreatedTime() const;
+	AS_MACRO void setCreatedTime(__TimeType createdTime);
+	AS_MACRO __SizeType getFileLen() const;
+	AS_MACRO void setFileLen(__SizeType fileLen);
+	AS_MACRO DEPRECATED __SizeType getFileStart() const;//file will always starts from the beginning
+	AS_MACRO DEPRECATED void setFileStart(__SizeType fileStart);
+	AS_MACRO __TimeType getLastModefiedTime() const;
+	AS_MACRO void setLastModefiedTime(__TimeType lastModefiedTime);
+	AS_MACRO DEPRECATED __SizeType getSectionSpan() const;
+	AS_MACRO DEPRECATED void setSectionSpan(__SizeType sectionSpan);
+	AS_MACRO DEPRECATED __SizeType getSectionStart() const;
+	AS_MACRO DEPRECATED void setSectionStart(__SizeType sectionStart);
+
+
+	AS_MACRO __SizeType getSectionListIndex() const ;
+	AS_MACRO void setSectionListIndex(__SizeType	sectionListIndex);
+
+	/**
+	 * 提供序列化所需的空间大小
+	 */
+	template <class __EnvTransfer>
+	constexpr size_t getSerializitionSize();
+protected:
+	/**
+	 * 类型，文件，文件夹，或者扩展区域（废弃）
+	 */
+	u8_t type;
+
+	/**
+	 * 文件占据的分区链表的下标
+	 */
+	__SizeType /* DEPRECATED sectionStart,sectionSpan,*//*DEPRECATED fileStart */sectionListIndex;
+	/**
+	 * 文件长度
+	 */
+	__SizeType fileLen;
+
+	/**
+	 * 文件名在 name分区中的开始下标
+	 */
+	__SizeType nameStart;
+
+	/**
+	 * 创建时间
+	 */
+	__TimeType createdTime;
+
+	/**
+	 * 最后修改时间
+	 */
+	__TimeType lastModefiedTime;
+
+};
+// 序列化支持
+template <class __EnvTransfer>
+	SerializerPtr<__EnvTransfer>& operator<<(SerializerPtr<__EnvTransfer> &ptr,const FileDescriptor& fd);
+template <class __EnvTransfer>
+	SerializerPtr<__EnvTransfer>& operator>>(SerializerPtr<__EnvTransfer> &ptr,FileDescriptor &fd);
+
+
+
+//==class X2fsMetaInfo
 #pragma pack(push,1)
 
 
@@ -110,7 +186,7 @@ public:
 
 #if defined(CODE64)
 	// TODO 在任意主机上dump都可以
-	void dumpInfo(EnvInterface64Impl *env);
+	void dumpInfo(EnvInterface64Impl &env);
 #endif
 //	__SizeType getDataAllocation
 };
@@ -194,14 +270,15 @@ public:
 
 	using This = X2fsUtil<__EnvInterface,__FsEnv>;
 	using __X2fsMetaInfo = X2fsMetaInfo<__FsSizeType>;
-	using __EnvTreeNode_MemoryDescriptor = TreeNode<MemoryDescriptor<__EnvSizeType>,__EnvAlignment>;
-	using __FsTreeNode_MemoryDescriptor = TreeNode<MemoryDescriptor<__FsSizeType>,__FsAlignment>;
-	using __FsLinearSourceDescriptor = LinearSourceDescriptor<__FsSizeType,__FsAlignment>;
-	using __EnvLinearSourceDescriptor = LinearSourceDescriptor<__EnvSizeType,__EnvAlignment>;
-	using __EnvListNode_LinearSourceDescriptor = ListNode<__EnvLinearSourceDescriptor,__EnvAlignment>;
-	using __FileDescriptor = FileDescriptor<__FsSizeType,__FsAlignment>;
+	using __EnvTreeNode_MemoryDescriptor = TreeNode<MemoryDescriptor>;
+	using __FsTreeNode_MemoryDescriptor = TreeNode<MemoryDescriptor>;
+	using __FsLinearSourceDescriptor = LinearSourceDescriptor;
+	using __EnvLinearSourceDescriptor = LinearSourceDescriptor;
+	using __EnvListNode_LinearSourceDescriptor = ListNode<__EnvLinearSourceDescriptor>;
+	using __FileDescriptor = FileDescriptor;
 	using __FsTimeType = typename __FileDescriptor::__TimeType;
-	using __FsTreeNode_FileDescriptor = TreeNode<__FileDescriptor,__FsAlignment>;
+	using __FsTreeNode_FileDescriptor = TreeNode<__FileDescriptor>;
+//	using __EnvTreeNode_FileDescriptor = TreeNode<__FileDescriptor,__EnvAlignment>;// 文件描述符可以省空间，因为它不与主机交互。但是对齐和大小只能使用主机上的设置值。
 	/**
 	 * 依赖这些类型作为分配器
 	 */
@@ -212,15 +289,17 @@ public:
 	template <class T>
 		using PartialMallocToSimple=MallocToSimple<T,__EnvInterface>;
 
+	// DEPRECATED 必须使用最大的可能的值
 	using FileNodeMM = SimpleMemoryManager<__FsTreeNode_FileDescriptor>;
-	using FileNameMM = MemoryManager<PartialMallocToSimple,__EnvSizeType,__EnvAlignment>;
+//	using FileNodeMM = SimpleMemoryManager<>
+	using FileNameMM = MemoryManager<PartialMallocToSimple>;
 	using FileNode = typename FileNodeMM::DataPart;
 	using FullNode = typename FileNodeMM::FullNode;
-	using FileTree = Tree<__FileDescriptor,SimpleMemoryManager,__FsAlignment>;
+	using FileTree = Tree<__FileDescriptor,SimpleMemoryManager>;
 	using FreeSpaceMM = LinearSourceManager<__EnvLinearSourceDescriptor,
-			PartialMallocToSimple,__EnvSizeType,__EnvAlignment>;
+			PartialMallocToSimple>;
 	using LinkedInfoMM = LinearSourceManager<__EnvLinearSourceDescriptor,
-			PartialMallocToSimple,__EnvSizeType,__EnvAlignment>;
+			PartialMallocToSimple>;
 
 	enum{
 		FileNodeSize=sizeof(FullNode)
@@ -234,8 +313,8 @@ public:
 	 *
 	 * 	metainfo 初始化完毕就可以开始读取了
 	 */
-	X2fsUtil(__EnvInterface *env,u8_t driver,u32_t lbaBase);
-	X2fsUtil(__EnvInterface *env,u8_t driver,__X2fsMetaInfo *metainfo,u8_t *buffers[]);
+	X2fsUtil(__EnvInterface &env,u8_t driver,u32_t lbaBase);
+	X2fsUtil(__EnvInterface &env,u8_t driver,__X2fsMetaInfo *metainfo,u8_t *buffers[]);
 private:
 	void initWithBuffersAlloced();
 public:
@@ -466,7 +545,7 @@ public:
 	 * @param driver			主机上的磁盘
 	 * @param metainfo			目标区域的metainfo
 	 */
-	static void mkfs(__EnvInterface *env,u8_t driver,const X2fsMetaInfo<__FsSizeType> *metainfo);
+	static void mkfs(__EnvInterface &env,u8_t driver,const X2fsMetaInfo<__FsSizeType> *metainfo);
 
 //	template <template <class>class _Allocator>
 //	INCOMPLETE static void getLinkedList(__LinearSourceDescriptor *buffer,
@@ -544,7 +623,7 @@ protected:
 	/**
 	 * 要求操作系统实现提供的功能集
 	 */
-	__EnvInterface *env;
+	__EnvInterface &env;
 	/**
 	 * 驱动器号，在有的操作系统上，可能将驱动器号映射成文件
 	 */
@@ -666,6 +745,7 @@ class FileOperation{
 public:
 #if defined(IDE_MODE)
 	using __StdEnv = StdEnv64Impl;
+	using __FsEnv = FsEnv64;
 #endif
 	//===类型别名
 	using This = FileOperation<__StdEnv,__FsEnv>;
@@ -705,13 +785,14 @@ public:
 
 public:
 	FileOperation()=default;
-	DEPRECATED FileOperation(__StdEnv * env,const __String& img)=delete;
+	DEPRECATED FileOperation(__StdEnv & env,const __String& img)=delete;
 	/**
 	 * @param env  标准环境
 	 * @param driver 磁盘驱动器号，在64位系统上可能映射为文件
 	 * @param lbaAddress  分区的位置
 	 */
-	FileOperation(__StdEnv * env,u8_t driver,u32_t lbaAddress);
+	FileOperation(__StdEnv & env,u8_t driver,u32_t lbaAddress);
+	~FileOperation()=default;
 
 	/**
 	 * 显示help内容
@@ -800,6 +881,10 @@ public:
 	 * 截断文件长度
 	 */
 	void truncate(const __String & fname,__FsSizeType newlen);
+	/**
+	 * @return true继续，false退出
+	 */
+	bool eval(const __String &cmd);
 
 #if defined(CODE64)
 	/** UNTESTED
@@ -833,7 +918,7 @@ private:
 	/**
 	 * 操作系统上下文
 	 */
-	__StdEnv* stdEnv;
+	__StdEnv& stdEnv;
 	/**
 	 * 用于操作文件系统的实用工具类
 	 */
@@ -860,7 +945,7 @@ template <typename T,typename __EnvInterface>
 class ManagedObject{ // 在析构函数时自动调用，相当于unique_ptr
 public:
 	using __SizeType = typename __EnvInterface::SizeType;
-	ManagedObject(__EnvInterface *env);
+	ManagedObject(__EnvInterface &env);
 	~ManagedObject();
 	void setBufferIfNone(T buffer);
 	T	 getOnlyBuffer()const;
@@ -871,7 +956,7 @@ public:
 	 */
 	const T&    getOnlyBufferReference(__SizeType size)const;
 private:
-	__EnvInterface * env;
+	__EnvInterface &env;
 	mutable T buffer;
 };
 
@@ -879,20 +964,93 @@ private:
 
 //=============Function Macros
 //=====class : FileDescriptor
-#if defined(CODE64)
-#define __DEF_ALIGNMENT sizeof(size_t)
-#include <preprocessor_functions/File_FileDescriptor_macros.h.RAW>
-#endif
+#define __DEF_Template_FileDescriptor
+#define __DEF_FileDescriptor FileDescriptor
 
-#if defined(CODE32) ||defined(CODE32USER)|| defined(CODE64)
-#define __DEF_ALIGNMENT 4
-#include <preprocessor_functions/File_FileDescriptor_macros.h.RAW>
-#endif
+__DEF_Template_FileDescriptor
+__DEF_FileDescriptor::FileDescriptor(u8_t type,__SizeType sectionList,__SizeType fileLen,__SizeType nameStart,
+		__TimeType createdTime,__TimeType lastModefiedTime):
+type(type),sectionListIndex(sectionList),fileLen(fileLen),
+nameStart(nameStart),createdTime(createdTime),lastModefiedTime(lastModefiedTime)
+{
+}
 
-#if defined(CODE16) || defined(CODE32) ||defined(CODE32USER)|| defined(CODE64)
-#define __DEF_ALIGNMENT 2
-#include <preprocessor_functions/File_FileDescriptor_macros.h.RAW>
-#endif
+__DEF_Template_FileDescriptor
+typename __DEF_FileDescriptor::__TimeType __DEF_FileDescriptor::getCreatedTime() const
+{
+	return createdTime;
+}
+
+__DEF_Template_FileDescriptor
+void __DEF_FileDescriptor::setCreatedTime(__TimeType createdTime) {
+	this->createdTime = createdTime;
+}
+
+__DEF_Template_FileDescriptor
+typename __DEF_FileDescriptor::__SizeType __DEF_FileDescriptor::getFileLen() const {
+	return fileLen;
+}
+
+__DEF_Template_FileDescriptor
+void __DEF_FileDescriptor::setFileLen(__SizeType fileLen) {
+	this->fileLen = fileLen;
+}
+
+__DEF_Template_FileDescriptor
+typename __DEF_FileDescriptor::__TimeType __DEF_FileDescriptor::getLastModefiedTime() const {
+	return lastModefiedTime;
+}
+__DEF_Template_FileDescriptor
+void __DEF_FileDescriptor::setLastModefiedTime(__TimeType lastModefiedTime) {
+	this->lastModefiedTime = lastModefiedTime;
+}
+__DEF_Template_FileDescriptor
+typename __DEF_FileDescriptor::__SizeType __DEF_FileDescriptor::getSectionListIndex() const
+{
+	return this->sectionListIndex;
+}
+
+__DEF_Template_FileDescriptor
+void __DEF_FileDescriptor::setSectionListIndex(__SizeType	sectionListIndex)
+{
+	this->sectionListIndex = sectionListIndex;
+}
+
+__DEF_Template_FileDescriptor
+template <class __EnvTransfer>
+constexpr size_t __DEF_FileDescriptor::getSerializitionSize()
+{
+	// 不能调用模板参数的静态函数
+	// 也不能调用带有实例化的函数：env.sizeofHostType<__SizeType>(0)
+	using u8size=typename __EnvTransfer::template SizeofHostType<u8_t>;
+	using SizeTypeSize = typename __EnvTransfer::template SizeofHostType<__SizeType>;
+	using TimetypeSize = typename __EnvTransfer::template SizeofHostType<__TimeType>;
+
+	return u8size::Size + SizeTypeSize::Size*3 + TimetypeSize::Size*2;
+
+}
+
+__DEF_Template_FileDescriptor
+u8_t __DEF_FileDescriptor::getType() const {
+	return type;
+}
+__DEF_Template_FileDescriptor
+void __DEF_FileDescriptor::setType(u8_t type) {
+	this->type = type;
+}
+
+__DEF_Template_FileDescriptor
+typename __DEF_FileDescriptor::__SizeType __DEF_FileDescriptor::getNameOffset()const
+{
+	return this->nameStart;
+}
+__DEF_Template_FileDescriptor
+void __DEF_FileDescriptor::setNameOffset(__SizeType off)
+{
+	this->nameStart=off;
+}
+#undef __DEF_Template_FileDescriptor
+#undef __DEF_FileDescriptor
 
 
 

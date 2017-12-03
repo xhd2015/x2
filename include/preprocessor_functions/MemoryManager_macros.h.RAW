@@ -1,12 +1,46 @@
 
-/**
- * @param __DEF_SIZE_TYPE
- * @param __DEF_ALIGNMENT
- */
+///////////////////////////////////
+/////D E P R E C A T E D /////////
+//////////////////////////////////
 
-#if !defined(__DEF_SIZE_TYPE) || !defined(__DEF_ALIGNMENT)
-#error "please define __DEF_SIZE_TYPE and/or __DEF_ALIGNMENT"
-#endif
+//////////////////////////////////////////////////////////////////////////////////////
+////////////F O R       H I S T O R Y       R E A S O N /////////////////////////////
+///////////N E V E R     R E F E R E N C E D ///////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////////
+///// O R I G I N A L       R E F E R E N C E       L O O K S      L I K E  ///////
+///// T H E      F O L L O W I N G //////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////
+//#if defined(CODE64)
+//#define __DEF_SIZE_TYPE u64_t
+//#define __DEF_ALIGNMENT sizeof(u64_t)
+//#include <preprocessor_functions/MemoryManager_macros.h.RAW>
+//#define __DEF_SIZE_TYPE size_t
+//#define __DEF_ALIGNMENT sizeof(size_t)
+//#include <preprocessor_functions/MemoryManager_macros.h.RAW>
+//#endif
+//
+//#if defined(CODE32) ||defined(CODE32USER)|| defined(CODE64)
+//#define __DEF_SIZE_TYPE u32_t
+//#define __DEF_ALIGNMENT 4
+//#include <preprocessor_functions/MemoryManager_macros.h.RAW>
+//#endif
+//
+//#if defined(CODE16) || defined(CODE32) ||defined(CODE32USER)|| defined(CODE64)
+//#define __DEF_SIZE_TYPE u16_t
+//#define __DEF_ALIGNMENT 2
+//#include <preprocessor_functions/MemoryManager_macros.h.RAW>
+//#endif
+
+///**
+// * @param __DEF_SIZE_TYPE
+// * @param __DEF_ALIGNMENT
+// */
+
+//#if !defined(__DEF_SIZE_TYPE) || !defined(__DEF_ALIGNMENT)
+//#error "please define __DEF_SIZE_TYPE and/or __DEF_ALIGNMENT"
+//#endif
 
 #if defined(IDE_MODE)
 #include <MemoryManager.h>

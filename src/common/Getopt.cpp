@@ -18,7 +18,7 @@
 #include <64/CMDUtil.h>
 	template class CommandOption<StdEnv64Impl>;
 	template class CommandOptions<StdEnv64Impl>;
-	template class CommandProcessor<StdEnv64Impl,Param>;
+	template class CommandProcessor<StdEnv64Impl,ParamRwfile>;
 	template class CommandProcessor<StdEnv64Impl,ParamMkfs>;
 #endif
 

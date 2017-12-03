@@ -13,47 +13,82 @@
 #include <cstdio>
 #include <cstring>
 #include <regex>
+#include <utility>
 
 #if defined(CODE64)
 
 
 
-EnvInterface64Impl::EnvInterface64Impl(const char *file):
-	file(file)
+EnvInterface64Impl::EnvInterface64Impl()
 {
-}
-const char* EnvInterface64Impl::getFile() const {
-	return file;
+
 }
 
-void EnvInterface64Impl::setFile(const char* file) {
-	this->file = file;
+u8_t EnvInterface64Impl::addFile(const std::string & file,u32_t lbaBase)
+{
+	u8_t driver;
+	if( (driver=getFileDriver(file))!=0xff)return driver;
+	driver =files.size();
+	if(driver!=0xff)
+	{
+		files.push_back(std::make_pair(file,lbaBase));
+	}
+	return driver;
 }
-
+u8_t EnvInterface64Impl::getFileDriver(const std::string & file)const
+{
+	for(size_t i=0;i!=files.size();++i)
+		if(files[i].first == file)
+			return i;
+	return 0xff;
+}
+const std::string & EnvInterface64Impl::getDriverFile(u8_t driver)const
+{
+	static const std::string nullstr="";
+	if(driver < files.size())
+		return files.at(driver).first;
+	return nullstr;
+}
 
 int EnvInterface64Impl::writeSectors(u32_t srcSeg,const u8_t* srcOff,u8_t driver,u32_t LBAlow,u32_t num,u32_t LBAhigh)
 {
-	FILE *fp=fopen(file,"rb+");
-	if(fp==NULL)
-		fp=fopen(file,"wb+");
-	fseek(fp,(LBAlow - LBABASE)*CONST_SECSIZE,SEEK_SET);
-	size_t n=fwrite(srcOff,CONST_SECSIZE,num,fp);
-	fclose(fp);
-	return n;
+	const std::string &file=getDriverFile(driver);
+	if(file!="")
+	{
+		u32_t lbaBase = files[driver].second;
+		FILE *fp=fopen(file.c_str(),"rb+");
+		if(fp==NULL)
+			fp=fopen(file.c_str(),"wb+");
+		fseek(fp,(LBAlow - lbaBase)*CONST_SECSIZE,SEEK_SET);
+		size_t n=fwrite(srcOff,CONST_SECSIZE,num,fp);
+		fclose(fp);
+		return n;
+	}else{
+		return 0;
+	}
+
 }
 int EnvInterface64Impl::readSectors(u32_t dstSeg,u8_t* dstOff,u8_t driver,u32_t LBAlow,u32_t num,u32_t LBAhigh)
 {
-	FILE *fp=fopen(file,"rb+");
-	if(fp==NULL)
-		fp=fopen(file,"wb+");
-//	fseek(fp,0,SEEK_END);
-//	printf_simple("fp size=%d\n",ftell(fp));
-	fseek(fp,(LBAlow - LBABASE)*CONST_SECSIZE,SEEK_SET); // 如果已有文件不够大，会返回错误
+	const std::string &file=getDriverFile(driver);
+	if(file!="")
+	{
+		u32_t lbaBase = files[driver].second;
+		FILE *fp=fopen(file.c_str(),"rb+");
+			if(fp==NULL)
+				fp=fopen(file.c_str(),"wb+");
+		//	fseek(fp,0,SEEK_END);
+		//	printf_simple("fp size=%d\n",ftell(fp));
+			fseek(fp,(LBAlow - lbaBase)*CONST_SECSIZE,SEEK_SET); // 如果已有文件不够大，会返回错误
 
-//	size_t n=fread(dstOff,CONST_SECSIZE,num,fp);
-	fread(dstOff,CONST_SECSIZE,num,fp); //可能返回0
-	fclose(fp);
-	return num;
+		//	size_t n=fread(dstOff,CONST_SECSIZE,num,fp);
+			fread(dstOff,CONST_SECSIZE,num,fp); //可能返回0
+			fclose(fp);
+			return num;
+	}else{
+		return 0;
+	}
+
 }
 int EnvInterface64Impl::printf_simple(const char *fmt,int arg0,int arg1,int arg2)
 {
@@ -163,9 +198,15 @@ u8_t* EnvInterface64Impl::malloc(size_t size)
 		{
 			return std::move(regexSplit(std::regex("/+"), s));
 		}
-	StdEnv64Impl::StdEnv64Impl(const char *file):EnvInterface64Impl(file){
-
+	std::vector<std::string> StdEnv64Impl::cmdSplit(const std::string& s)
+		{
+			return std::move(regexSplit(std::regex(";+"), s));
+		}
+	int		StdEnv64Impl::atoi(const std::string & s)
+	{
+			return ::atoi(s.c_str());
 	}
+
 
 
 #endif

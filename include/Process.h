@@ -198,12 +198,12 @@ protected:
 	/**
 	 * 用于baseMM的一般内存分配器
 	 */
-	KernelSmmWrapper<TreeNode<MemoryDescriptor<size_t>,4> > baseKsmm;
+	KernelSmmWrapper<TreeNode<MemoryDescriptor>> baseKsmm;
 
 	/**
 	 *
 	 */
-	MemoryManager<KernelSmmWrapper,size_t,PREFERED_ALIGNMENT> baseMM;
+	MemoryManager<KernelSmmWrapper> baseMM;
 
 	/**
 	 * 管理PDE项

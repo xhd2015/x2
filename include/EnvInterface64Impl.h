@@ -12,6 +12,7 @@
 #include <EnvInterface.h>
 #include <string>
 #include <vector>
+#include <utility>
 #include <regex>
 
 
@@ -22,24 +23,35 @@ class EnvInterface64Impl
 #endif
 {
 private:
-	const char *file;
+	/**
+	 * 文件映射到驱动器的一部分，从第二个参数开始
+	 */
+	std::vector<std::pair<std::string,u32_t>> files;
 public:
 	using SizeType = size_t;
 	enum{Alignment = PREFERED_ALIGNMENT};
 
-	EnvInterface64Impl(const char *file=NULL);
+	EnvInterface64Impl();
+	/**
+	 * @return 添加文件，返回其驱动器号
+	 */
+	u8_t addFile(const std::string & file,u32_t lbaBase);
+	/**
+	 * @return 0xff表明文件不存在
+	 */
+	u8_t getFileDriver(const std::string & file)const;
+
+	/**
+	 * @return ""没有查找到
+	 */
+	const std::string & getDriverFile(u8_t driver)const;
+
 	EnvInterface64Impl(const EnvInterface64Impl &rhs )=delete;
-	const char* getFile() const;
-	void setFile(const char* file);
 
 
 
-		enum{
-		/**
-		 * 必须根据磁盘文件的第一个active分区的起始地址设定
-		 */
-		LBABASE = 0x3000,
-	};
+
+
 	/**
 	 * @param dstSeg	总是被忽略
 	 * @param LBAhigh  总是0
@@ -93,9 +105,12 @@ public:
 	std::vector<std::string> regexSplit(const std::regex& re, const std::string& s);
 	std::vector<std::string> spaceSplit(const std::string& s);
 	std::vector<std::string> pathSplit(const std::string& s);
+	std::vector<std::string> cmdSplit(const std::string& s);
+
+	int		atoi(const std::string & s);
 
 public:
-	StdEnv64Impl(const char *file=NULL);
+	StdEnv64Impl()=default;
 };
 
 
@@ -106,6 +121,78 @@ public:
 	using SizeType = __SizeType;
 	enum{Alignment = __Alignment};
 };
+
+
+//== EnvTransfer
+namespace{ // 文件局部的namespace，替代c语言的static
+	template <size_t __TargetBit,class __T>
+	struct __EnvTransfer
+	{
+		enum{Size=sizeof(__T)};//默认情况下和主机一种
+	};
+	template <>
+		struct __EnvTransfer<64,void*>
+		{
+			enum{Size=8};//必须写成8而不是sizeof(void*),因为在32位机器上这样的实际结果就是4
+		};
+		template <>
+		struct __EnvTransfer<64,int>
+		{
+			enum{Size=4};
+		};
+		template <>
+		struct __EnvTransfer<64,size_t> // BUG ??? size_t只是一个别名
+		{
+			enum{Size=8};
+		};
+	template <>
+	struct __EnvTransfer<32,void*>
+	{
+		enum{Size=4};
+	};
+	template <>
+	struct __EnvTransfer<32,int>
+	{
+		enum{Size=4};
+	};
+	template <>
+	struct __EnvTransfer<32,size_t>
+	{
+		enum{Size=4};
+	};
+	template <>
+		struct __EnvTransfer<16,void*>
+		{
+			enum{Size=4};
+		};
+		template <>
+		struct __EnvTransfer<16,int>
+		{
+			enum{Size=4};
+		};
+		template <>
+		struct __EnvTransfer<16,size_t>
+		{
+			enum{Size=4};
+		};
+}
+//== 环境转化器：将某一字面量类型（即书写出来的样子）映射到不同的平台上，计算出它的实际大小
+//比如 void*在64位机器上是8字节，在32位机器上是4字节。
+template <size_t __TargetBit>
+struct EnvTransfer{
+	template <class __T> struct SizeofHostType{ //把类当做处理模板的函数
+		enum{Size=__EnvTransfer<__TargetBit,__T>::Size };
+	};
+	template <class __T>
+	constexpr size_t sizeofHostType()
+	{
+		return __EnvTransfer<__TargetBit,__T>::Size;
+	}//把重写放到外部，这里来处理
+};
+
+
+
+
 
 
 // ======= template declaration

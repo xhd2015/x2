@@ -45,10 +45,10 @@ public:
 class ProcessManager{
 public:
 	using This = ProcessManager;
-	using __TreeNode_Process = TreeNode<Process*,PREFERED_ALIGNMENT>;
-	using __ListNode_Process = ListNode<__TreeNode_Process,PREFERED_ALIGNMENT>;
-	using __ProcessQueueType = LinkedList<__TreeNode_Process,KernelSmmWrapper,PREFERED_ALIGNMENT> ;
-	using __ProcessTreeType = Tree<Process*,KernelSmmWrapper,PREFERED_ALIGNMENT> ;
+	using __TreeNode_Process = TreeNode<Process*>;
+	using __ListNode_Process = ListNode<__TreeNode_Process>;
+	using __ProcessQueueType = LinkedList<__TreeNode_Process,KernelSmmWrapper> ;
+	using __ProcessTreeType = Tree<Process*,KernelSmmWrapper> ;
 	enum{
 		LDT_ITEMS=10
 	};
@@ -73,8 +73,8 @@ public:
 	 * 建立一个指向Process*的TreeNode<Process*>
 	 */
 	AS_MACRO __TreeNode_Process	createProcessWrapper(Process* p);
-	void	setFatherProcess(TreeNode<Process*,4> *p,TreeNode<Process*,4> *father);
-	AS_MACRO TreeNode<Process*,4> *	getFatherProcess(TreeNode<Process*,4> *p);
+	void	setFatherProcess(TreeNode<Process*> *p,TreeNode<Process*> *father);
+	AS_MACRO TreeNode<Process*> *	getFatherProcess(TreeNode<Process*> *p);
 	__TreeNode_Process	getCurrentProcess()const;
 	void				swithcNextProcess();
 	/**
@@ -156,10 +156,10 @@ protected:
 class Kernel{
 public:
 	typedef	Kernel											This;
-	typedef TreeNode<MemoryDescriptor<size_t>,4> 						MmNodeType;
+	typedef TreeNode<MemoryDescriptor> 						MmNodeType;
 	typedef SimpleMemoryManager<MmNodeType>					SmmType;
 	typedef SmmType::FullNode								FullMMNodeType; //使用这个结构来计算占用空间的大小
-	typedef MemoryManager<SimpleMemoryManager,size_t,PREFERED_ALIGNMENT>		 		MmType;
+	typedef MemoryManager<SimpleMemoryManager>		 		MmType;
 	typedef AssociatedMemoryManager<SegmentDescriptor,1>    SegManager;
 	using __TreeNode_Process =typename ProcessManager::__TreeNode_Process;
 	/**

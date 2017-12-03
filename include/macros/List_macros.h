@@ -16,47 +16,92 @@
 
 //============函数宏区
 //=========class : ListNode
-#if defined(CODE64)
-#define __DEF_ALIGNMENT sizeof(size_t)
-#include <preprocessor_functions/List_macros.h.RAW>
-#endif
+#define __DEF_Template_ListNode template<class T>
+#define __DEF_ListNode ListNode<T>
 
-#if defined(CODE32) ||defined(CODE32USER)|| defined(CODE64)
-#define __DEF_ALIGNMENT 4
-#include <preprocessor_functions/List_macros.h.RAW>
-#endif
+__DEF_Template_ListNode
+typename __DEF_ListNode::__ListNode* __DEF_ListNode::getNext()const
+{
+    return next;
+}
 
-#if defined(CODE16) || defined(CODE32) ||defined(CODE32USER)|| defined(CODE64)
-#define __DEF_ALIGNMENT 2
-#include <preprocessor_functions/List_macros.h.RAW>
-#endif
+__DEF_Template_ListNode
+typename __DEF_ListNode::__ListNode* __DEF_ListNode::getPrevious()const
+{
+    return previous;
+}
+__DEF_Template_ListNode
+void __DEF_ListNode::setNext(__ListNode* next)
+{
+    this->next = next;
+}
+
+__DEF_Template_ListNode
+void  __DEF_ListNode::setPrevious(__ListNode* previous)
+{
+    this->previous = previous;
+}
+__DEF_Template_ListNode
+int  __DEF_ListNode::hasPrevious()const
+{
+    return (this->previous!=NULL);
+}
+
+__DEF_Template_ListNode
+int  __DEF_ListNode::hasNext()const
+{
+    return (this->next!=NULL);
+}
+
+__DEF_Template_ListNode
+const T& __DEF_ListNode::getData()const
+{
+    return data;
+}
+__DEF_Template_ListNode
+T& __DEF_ListNode::getData()
+{
+    return data;
+}
+__DEF_Template_ListNode
+void __DEF_ListNode::setData(const T& data)
+{
+    this->data=data;
+}
+#undef __DEF_Template_ListNode
+#undef __DEF_ListNode
 
 
 
 //=============class:LinkedList
-template <class T,template <class> class _Allocator,int __Alignment>
-typename LinkedList<T,_Allocator,__Alignment>::__ListNode*
-LinkedList<T,_Allocator,__Alignment>::getHead()const
+#define __DEF_Template_LinkedList template <class T,template <class> class _Allocator>
+#define __DEF_LinkedList LinkedList<T,_Allocator>
+__DEF_Template_LinkedList
+typename __DEF_LinkedList::__ListNode*
+__DEF_LinkedList::getHead()const
 {
     return root->getNext();
 }
-template <class T,template <class> class _Allocator,int __Alignment>
-typename LinkedList<T,_Allocator,__Alignment>::__ListNode*
-LinkedList<T,_Allocator,__Alignment>::getLast()const
+__DEF_Template_LinkedList
+typename __DEF_LinkedList::__ListNode*
+__DEF_LinkedList::getLast()const
 {
     return last->getNext();
 }
-template <class T,template <class> class _Allocator,int __Alignment>
-bool			LinkedList<T,_Allocator,__Alignment>::isEmpty()const
+__DEF_Template_LinkedList
+bool			__DEF_LinkedList::isEmpty()const
 {
 	return this->getHead()==NULL;
 }
-template <class T,template <class> class _Allocator,int __Alignment>
-_Allocator<typename LinkedList<T,_Allocator,__Alignment>::__ListNode>
-*LinkedList<T,_Allocator,__Alignment>::getMemoryManager()const
+__DEF_Template_LinkedList
+_Allocator<typename __DEF_LinkedList::__ListNode>
+*__DEF_LinkedList::getMemoryManager()const
 {
     return smm;
 }
+#undef __DEF_Template_LinkedList
+#undef __DEF_LinkedList
+
 
 //=====class: SimpleMemoryNode
 SimpleMemoryNode::SimpleMemoryNode(bool NO):
@@ -143,34 +188,86 @@ bool			SimpleMemoryManager<T>::checkIsInternal(FullNode *t)
 	return this->start <= (size_t)t && (size_t)t - (size_t)this->start <= this->limit ;
 }
 //===========class TreeNode
+#define __DEF_Template_TreeNode template<class T>
+#define __DEF_TreeNode TreeNode<T>
+
+__DEF_Template_TreeNode
+typename __DEF_TreeNode::__TreeNode* __DEF_TreeNode::setSon(__TreeNode* son)
+  {
 #if defined(CODE64)
-#define __DEF_ALIGNMENT sizeof(size_t)
-#include <preprocessor_functions/List_TreeNode_macros.h.RAW>
+	//printf("setSon is : %x \n",son);
 #endif
+  	this->son=son;
+  	return this;
+  }
+__DEF_Template_TreeNode
+typename __DEF_TreeNode::__TreeNode* __DEF_TreeNode::setFather(__TreeNode* father) {
+    this->father=father;
+    return this;
+}
 
-#if defined(CODE32) ||defined(CODE32USER)|| defined(CODE64)
-#define __DEF_ALIGNMENT 4
-#include <preprocessor_functions/List_TreeNode_macros.h.RAW>
-#endif
+//#if ! defined(CODE64)
+__DEF_Template_TreeNode
+typename __DEF_TreeNode::__TreeNode* __DEF_TreeNode::getSon() const{
+//#if defined(CODE64)
+//	printf("gettSon \n");
+//#endif
+	return son;
+}
+//#endif
 
-#if defined(CODE16) || defined(CODE32) ||defined(CODE32USER)|| defined(CODE64)
-#define __DEF_ALIGNMENT 2
-#include <preprocessor_functions/List_TreeNode_macros.h.RAW>
+
+__DEF_Template_TreeNode
+typename __DEF_TreeNode::__TreeNode* __DEF_TreeNode::getNext() const{
+	__TreeNode* next=(__TreeNode*)this->__ListNode::getNext();//这种情况下的强制转换一定是正确的，因为TreeNode中只存储TreeNode，而不会存储ListNode
+	return next;
+}
+
+__DEF_Template_TreeNode
+typename __DEF_TreeNode::__TreeNode* __DEF_TreeNode::getPrevious() const{
+	__TreeNode* previous=(__TreeNode*)this->__ListNode::getPrevious();
+	return previous;
+}
+
+
+__DEF_Template_TreeNode
+typename __DEF_TreeNode::__TreeNode* __DEF_TreeNode::getDirectFather()const {//direct father
+#if defined(CODE64)
+//	printf("call direct,this is %x,father is %x\n",this,this->father);
 #endif
+    return father;
+}
+
+__DEF_Template_TreeNode
+bool		 __DEF_TreeNode::hasSon()const
+{
+	return this->son!=NULL;
+}
+__DEF_Template_TreeNode
+bool 		 __DEF_TreeNode::hasFather()const
+{
+	return this->father!=NULL;
+}
+
+
+#undef __DEF_Template_TreeNode
+#undef __DEF_TreeNode
 
 
 
 //======class Tree
-template<class T,template <class> class _Allocator,int __Alignment>
-typename Tree<T,_Allocator,__Alignment>::__TreeNode* Tree<T,_Allocator,__Alignment>::getHead()const {
+#define __DEF_Template_Tree template<class T,template <class> class _Allocator>
+#define __DEF_Tree Tree<T,_Allocator>
+__DEF_Template_Tree
+typename __DEF_Tree::__TreeNode* __DEF_Tree::getHead()const {
 #ifdef CODE64
 //	std::cout << "tree getHead()"<<std::endl;
 #endif
 	return root->getSon();
 }
 
-template<class T,template <class> class _Allocator,int __Alignment>
-void  Tree<T,_Allocator,__Alignment>::setHead(__TreeNode *head)
+__DEF_Template_Tree
+void  __DEF_Tree::setHead(__TreeNode *head)
  {
 #if defined(CODE64)
 	//printf("root : %x  , head : %x\n",root,head);
@@ -184,22 +281,24 @@ void  Tree<T,_Allocator,__Alignment>::setHead(__TreeNode *head)
 #endif
  }
 
-template<class T,template <class> class _Allocator,int __Alignment>
-void		Tree<T,_Allocator,__Alignment>::addRoot(__TreeNode* node)
+__DEF_Template_Tree
+void		__DEF_Tree::addRoot(__TreeNode* node)
 {
 	this->root->addSon(node);
 }
-template<class T,template <class> class _Allocator,int __Alignment>
-bool		Tree<T,_Allocator,__Alignment>::isEmpty()const
+__DEF_Template_Tree
+bool		__DEF_Tree::isEmpty()const
 {
 	return !(this->root->hasSon());
 }
-template<class T,template <class> class _Allocator,int __Alignment>
-typename Tree<T,_Allocator,__Alignment>::__Allocator *Tree<T,_Allocator,__Alignment>::getSmm()const
+__DEF_Template_Tree
+typename __DEF_Tree::__Allocator *__DEF_Tree::getSmm()const
 {
 	return this->smm;
 }
 
+#undef __DEF_Template_Tree
+#undef __DEF_Tree
 
 
 #endif /* INCLUDE_MACROS_LIST_MACROS_H_ */
