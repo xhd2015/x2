@@ -3,24 +3,63 @@
 //=IDE MODE or NO_CONFIG_ERROR=
 #if defined(CODE32) || defined(CODE16)  //only in 16,32 bit will need this
 #if defined(IDE_MODE)||defined(NO_CONFIG_ERROR)
+#if !defined(CONFIG_INIT_STACK_SIZE)
 #define  CONFIG_INIT_STACK_SIZE 0
+#endif
+#if !defined(CONFIG_KERNEL_PDE_NUM)
 #define  CONFIG_KERNEL_PDE_NUM 0
+#endif
+#if !defined(CONFIG_REAL_SECNUMS)
 #define  CONFIG_REAL_SECNUMS 0
+#endif
+#if !defined(CONFIG_INPUT_BUFFER_SIZE)
 #define  CONFIG_INPUT_BUFFER_SIZE 0
+#endif
+#if !defined(CONFIG_KERNEL_FREE_MEM_SIZE)
 #define  CONFIG_KERNEL_FREE_MEM_SIZE 0
+#endif
+#if !defined(CONFIG_USER_PROCESS_EACH_SECNUMS)
 #define  CONFIG_USER_PROCESS_EACH_SECNUMS 0
+#endif
+#if !defined(CONFIG_REAL_LOAD_PROTECTED_SECNUM)
 #define  CONFIG_REAL_LOAD_PROTECTED_SECNUM 0
+#endif
+#if !defined(CONFIG_KERNEL_CODE_SIZE)
 #define  CONFIG_KERNEL_CODE_SIZE 0
+#endif
+#if !defined(CONFIG_MBR_PARTITION_START)
 #define  CONFIG_MBR_PARTITION_START 0
+#endif
+#if !defined(CONFIG_IDT_ITEM_NUM)
 #define  CONFIG_IDT_ITEM_NUM 0
+#endif
+#if !defined(CONFIG_REAL_INIT_STACK_SIZE)
 #define  CONFIG_REAL_INIT_STACK_SIZE 0
+#endif
+#if !defined(CONFIG_PROTECTED_SECNUMS)
 #define  CONFIG_PROTECTED_SECNUMS 0
+#endif
+#if !defined(CONFIG_KERNEL_PTE_0_NUM)
 #define  CONFIG_KERNEL_PTE_0_NUM 0
+#endif
+#if !defined(CONFIG_PREFIX_SIZE)
+#define  CONFIG_PREFIX_SIZE 0
+#endif
+#if !defined(CONFIG_KERNEL_PTE_1_NUM)
 #define  CONFIG_KERNEL_PTE_1_NUM 0
+#endif
+#if !defined(CONFIG_USER_PROCESS_SECNUMS)
 #define  CONFIG_USER_PROCESS_SECNUMS 0
+#endif
+#if !defined(CONFIG_GDT_ITEM_NUM)
 #define  CONFIG_GDT_ITEM_NUM 0
+#endif
+#if !defined(CONFIG_PROCESS_MEM_SIZE)
 #define  CONFIG_PROCESS_MEM_SIZE 0
+#endif
+#if !defined(CONFIG_KERNEL_MMNODE_NUM)
 #define  CONFIG_KERNEL_MMNODE_NUM 0
+#endif
 #endif
 
 
@@ -74,6 +113,10 @@
 
 #if !defined(CONFIG_KERNEL_PTE_0_NUM)
 #error "Please define CONFIG_KERNEL_PTE_0_NUM in Config.makefile"
+#endif
+
+#if !defined(CONFIG_PREFIX_SIZE)
+#error "Please define CONFIG_PREFIX_SIZE in Config.makefile"
 #endif
 
 #if !defined(CONFIG_KERNEL_PTE_1_NUM)

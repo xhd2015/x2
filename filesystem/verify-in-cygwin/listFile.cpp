@@ -36,13 +36,13 @@ int main()
 //	xfu.flush();
 //	printf("end flush \n");
 
-	if(xfu.hasFilename(0,NULL,"new1"))
+	if(xfu.hasFilename(0,nullptr,"new1"))
 	{
 		printf("find new1\n");
 	}else{
 		printf("no new1\n");
 	}
-	if(xfu.hasFilename(0,NULL,"new7"))
+	if(xfu.hasFilename(0,nullptr,"new7"))
 	{
 		printf("find new7\n");
 	}else{
@@ -55,7 +55,7 @@ int main()
 	if(ifmk)
 	{
 		printf("mkdir success\n");
-		printf("has \"dira\"? %d\n",xfu.hasFilename(0,NULL,"dira"));
+		printf("has \"dira\"? %d\n",xfu.hasFilename(0,nullptr,"dira"));
 	}else{
 		printf("mkdir failed\n");
 	}
@@ -131,8 +131,8 @@ int main()
 //	char *const free_section=allbuf+X2fsUtil::FreeSpaceSection;
 //	FILE *const img=fopen(HDD_FILE,"r+");
 //
-//	assert(img!=NULL);
-//	assert(allbuf!=NULL);
+//	assert(img!=nullptr);
+//	assert(allbuf!=nullptr);
 //
 //	fseek(img,X2fsUtil::FileNameSection,SEEK_SET);
 //	fread(filename_section,X2fsUtil::FileNameSectionLen,sizeof(char),img);
@@ -199,21 +199,21 @@ int main()
 //	{
 //		if(i==1)
 //		{
-//			printf("Before adjust,test node[1].getSon()(=%x)==NULL(=%x)? %d\n",nodebuffer[i].getSon(),NULL,nodebuffer[i].getSon()==NULL);
+//			printf("Before adjust,test node[1].getSon()(=%x)==nullptr(=%x)? %d\n",nodebuffer[i].getSon(),nullptr,nodebuffer[i].getSon()==nullptr);
 //		}
 //		if(!nodebuffer[i].SimpleMemoryNode::isFree())
 //		{
 //			nodebuffer[i].setFather((FileNode*)
-//					(nodebuffer[i].getDirectFather()!=NULL?(FileNode*)((size_t)nodebuffer[i].getDirectFather() + (size_t)dir_section ):(FileNode*)NULL));
+//					(nodebuffer[i].getDirectFather()!=nullptr?(FileNode*)((size_t)nodebuffer[i].getDirectFather() + (size_t)dir_section ):(FileNode*)nullptr));
 //			nodebuffer[i].setNext(
 //					(FileNode*)
-//					(nodebuffer[i].getNext()!=NULL?(FileNode*)((size_t)nodebuffer[i].getNext() + (size_t)dir_section):(FileNode*)NULL) );
+//					(nodebuffer[i].getNext()!=nullptr?(FileNode*)((size_t)nodebuffer[i].getNext() + (size_t)dir_section):(FileNode*)nullptr) );
 //			nodebuffer[i].setPrevious(
 //					(FileNode*)
-//					(nodebuffer[i].getPrevious()!=NULL?(FileNode*)((size_t)nodebuffer[i].getPrevious() + (size_t)dir_section):(FileNode*)NULL ) );
+//					(nodebuffer[i].getPrevious()!=nullptr?(FileNode*)((size_t)nodebuffer[i].getPrevious() + (size_t)dir_section):(FileNode*)nullptr ) );
 //			nodebuffer[i].setSon(
 //					(FileNode*)
-//					(nodebuffer[i].getSon()!=NULL?(FileNode*)((size_t)nodebuffer[i].getSon() + (size_t)dir_section):(FileNode*)NULL) );
+//					(nodebuffer[i].getSon()!=nullptr?(FileNode*)((size_t)nodebuffer[i].getSon() + (size_t)dir_section):(FileNode*)nullptr) );
 //
 //			printf("init pointer %d\n",i);
 //		}
@@ -248,7 +248,7 @@ int main()
 //	//上面的总结有错误
 //	//实际上数据总是virtual的，总能正确引用。这是因为无论多继承中继承顺序如何，它总是几个类的集合，每一个类都有自己的分区。而强制指针转换时，
 //	//g++会在指针前面处理确保向上转型正确（即将指针加减使其对齐到强制转换的分区）
-//	//同理，向下转型则会把继承关系中的偏移还原回去，如果仔细观察c++生成的汇编代码，还会发现如果指针是NULL就什么不操作偏移。
+//	//同理，向下转型则会把继承关系中的偏移还原回去，如果仔细观察c++生成的汇编代码，还会发现如果指针是nullptr就什么不操作偏移。
 //
 //	//以上过程说明了强制转换是一个函数过程，只不过该函数使用宏实现。
 //	//如果是简单指针到类指针的转换，就是直接赋值
@@ -369,13 +369,13 @@ int main()
 //	{
 //		nodebuffer[i].setFather(
 //				(FileNode*)
-//				((nodebuffer[i].getDirectFather())!=NULL?(FileNode*)((size_t)nodebuffer[i].getDirectFather() - (size_t)dir_section ):(FileNode*)NULL) );
-//		nodebuffer[i].setNext((FileNode*)(nodebuffer[i].getNext()!=NULL?(FileNode*)((size_t)nodebuffer[i].getNext() - (size_t)dir_section):(FileNode*)NULL) );
+//				((nodebuffer[i].getDirectFather())!=nullptr?(FileNode*)((size_t)nodebuffer[i].getDirectFather() - (size_t)dir_section ):(FileNode*)nullptr) );
+//		nodebuffer[i].setNext((FileNode*)(nodebuffer[i].getNext()!=nullptr?(FileNode*)((size_t)nodebuffer[i].getNext() - (size_t)dir_section):(FileNode*)nullptr) );
 //		nodebuffer[i].setPrevious((FileNode*)
-//				(nodebuffer[i].getPrevious()!=NULL?(FileNode*)((size_t)nodebuffer[i].getPrevious() - (size_t)dir_section):(FileNode*)NULL ));
+//				(nodebuffer[i].getPrevious()!=nullptr?(FileNode*)((size_t)nodebuffer[i].getPrevious() - (size_t)dir_section):(FileNode*)nullptr ));
 //		nodebuffer[i].setSon(
 //				(FileNode*)
-//				(nodebuffer[i].getSon()!=NULL?(FileNode*)((size_t)nodebuffer[i].getSon() - (size_t)dir_section):(FileNode*)NULL ) );
+//				(nodebuffer[i].getSon()!=nullptr?(FileNode*)((size_t)nodebuffer[i].getSon() - (size_t)dir_section):(FileNode*)nullptr ) );
 //	}
 //
 //	//write the buffer back to the image

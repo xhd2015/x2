@@ -1,0 +1,3 @@
+/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/test/cmake/build/CMakeFiles/edit_cache.dir
+/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/test/cmake/build/CMakeFiles/rebuild_cache.dir
+/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/test/cmake/build/CMakeFiles/hello.dir

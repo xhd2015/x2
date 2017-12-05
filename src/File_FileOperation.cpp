@@ -26,11 +26,11 @@ __DEF_Template_FileOperation
 __DEF_FileOperation::FileOperation(__StdEnv & env,u8_t driver,u32_t lbaAddress):
 	stdEnv(env),
 	util(env, driver, lbaAddress),
-	curNode(NULL),
-	lastNode(NULL)
+	curNode(nullptr),
+	lastNode(nullptr)
 {
 	curPath.push_back("");
-	curNode = (FileNode*) util.getFileTree()->getHead();//当前目录为根目录
+	curNode = static_cast<FileNode*>( util.getFileTree()->getHead());//当前目录为根目录
 }
 __DEF_Template_FileOperation
 void __DEF_FileOperation::help()
@@ -94,7 +94,7 @@ __DEF_Template_FileOperation
 bool __DEF_FileOperation::cdFromCur(__Vector_String_cit begin,__Vector_String_cit end)
 {
 	FileNode *tempCur=curNode;
-	FileNode *temp=NULL;
+	FileNode *temp=nullptr;
 	int npushed=0;//记录已经加入path的长度,负数表示需要移除,0表示不变
 	__Vector_String appendPaths;
 
@@ -118,12 +118,12 @@ bool __DEF_FileOperation::cdFromCur(__Vector_String_cit begin,__Vector_String_ci
 				if(npushed>0)
 					appendPaths.pop_back();
 				--npushed;
-				tempCur=(FileNode*)tempCur->getDirectFather();
+				tempCur= reinterpret_cast<FileNode*>(tempCur->getDirectFather());
 			}
 		}else{ //normal locating
 
 			temp=util.locatePath(tempCur, p->c_str());
-			if(temp==NULL)
+			if(temp==nullptr)
 			{
 				stdEnv.printf_simple("directory \"");
 				stdEnv.printf_simple(p->c_str());
@@ -167,7 +167,7 @@ bool __DEF_FileOperation::cdFromCur(__Vector_String_cit begin,__Vector_String_ci
 __DEF_Template_FileOperation
 bool __DEF_FileOperation::cdLast()
 {
-	if(lastNode!=NULL)
+	if(lastNode!=nullptr)
 	{
 		FileNode *temp=curNode;
 		curNode = lastNode;
@@ -414,7 +414,7 @@ typename __DEF_FileOperation::__FsSizeType __DEF_FileOperation::readSysFileToX2F
 							__FsSizeType maxLen)
 {
 	FileNode *fnode=util.locatePath(curNode, x2File.c_str());
-	if(fnode==NULL)
+	if(fnode==nullptr)
 	{
 		// TODO 如果文件不存在就创建
 		stdEnv.printf_simple("error,file in x2 not exists,please create it first\n");
@@ -446,7 +446,7 @@ typename __DEF_FileOperation::__FsSizeType __DEF_FileOperation::readSysFileToX2F
 	ManagedObject<char*,EnvInterface64Impl> mbuf(stdEnv);
 
 	char *buf=mbuf.getOnlyBuffer(headingByte + bufsize);//为了兼容
-	if(buf==NULL)
+	if(buf==nullptr)
 		return 0;
 
 	fs.seekg(sysStart);
@@ -479,7 +479,7 @@ typename __DEF_FileOperation::__FsSizeType __DEF_FileOperation::writeSysFileFrom
 {
 	FileNode *fnode=util.locatePath(curNode, x2File.c_str());
 	__FsSizeType flen;
-	if(fnode==NULL || (flen=fnode->getData().getFileLen()) <= x2Start)
+	if(fnode==nullptr || (flen=fnode->getData().getFileLen()) <= x2Start)
 	{
 		stdEnv.printf_simple("error,file in x2 not exists or no a single byte is"
 				" available at given position\n");
@@ -497,7 +497,7 @@ typename __DEF_FileOperation::__FsSizeType __DEF_FileOperation::writeSysFileFrom
 	ManagedObject<char*,EnvInterface64Impl> mbuf(stdEnv);
 
 	char *buf=mbuf.getOnlyBuffer(headingByte + bufsize);//为了兼容x2随机写的需求
-	if(buf==NULL)
+	if(buf==nullptr)
 		return 0;
 
 	fs.seekp(sysStart);
@@ -547,7 +547,7 @@ __DEF_Template_FileOperation
 bool __DEF_FileOperation::checkExits(const __String & fname,FileNode *&fnode)const
 {
 	fnode = util.locatePath(curNode, fname.c_str());
-	if(fnode==NULL)
+	if(fnode==nullptr)
 	{
 		errorFileNotExits(fname);
 		return false;
@@ -584,7 +584,7 @@ __DEF_Template_FileOperation
 void __DEF_FileOperation::refreshCurrentPath()
 {
 	curPath.clear();
-	FileNode *head=(FileNode*)util.getFileTree()->getHead();
+	FileNode *head= reinterpret_cast<FileNode*>(util.getFileTree()->getHead());
 
 //	TreeNode<FileDescriptor> *ip=tree.getHead();
 
@@ -595,7 +595,7 @@ void __DEF_FileOperation::refreshCurrentPath()
 		__FsSizeType nlen;
 		char* str=util.getFileNameCstr(p->getData(), nlen);
 		curPath.insert(curPath.begin(),__String(str));
-		p = (FileNode*)p->getDirectFather();
+		p = reinterpret_cast<FileNode*>(p->getDirectFather());
 	}
 }
 

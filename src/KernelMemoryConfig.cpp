@@ -35,7 +35,7 @@ char mmIDTAssocNode[IDT_LEN * x2sizeof(Kernel::SegManager::NodeType)];
 /**
  *    初始化内核的基本结构
  *    原则：	内置结构应当作为内核的成员或者指针
- *    		常见可选结构作为指针，当为NULL时表示内核不使用此功能
+ *    		常见可选结构作为指针，当为nullptr时表示内核不使用此功能
  *    		其他非常用可选结构定义在内核的外部
  *
  *      内置：	内核空间内存管理器

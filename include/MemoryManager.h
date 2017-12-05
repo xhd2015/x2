@@ -4,11 +4,12 @@
 #include <List.h>
 #include <Locator.h>
 #include <def.h>
+#include <conceptual/Serialize.h>
 //#include <Kernel.h>
 
 #if defined(CODE32)
 //new & delete
-AS_MACRO void*	operator new(size_t size) throw() {return NULL;}
+AS_MACRO void*	operator new(size_t size) throw() {return nullptr;}
 AS_MACRO void	operator delete(void *p){}
 
 //全局方法: placement new和placement delete
@@ -33,7 +34,8 @@ AS_MACRO void operator delete[](void*, void*){};
 *   This is simple enough,and should not  be modified any longer.
 *
 */
-class LinearSourceDescriptor{
+class LinearSourceDescriptor:public SerializationInterface
+{
 public:
 	//==这是唯一的不同
 	using __SizeType = size_t;
@@ -59,6 +61,13 @@ public:
     */
     AS_MACRO	bool operator==(const __LinearSourceDescriptor& b)const;//done
     AS_MACRO    bool operator!=(const __LinearSourceDescriptor& b)const;//done
+
+    template <class __EnvTransfer>
+    AS_MACRO SerializerPtr<__EnvTransfer>& serialize(SerializerPtr<__EnvTransfer> &ptr)const;
+	template <class __EnvTransfer>
+	AS_MACRO SerializerPtr<__EnvTransfer>& deserialize(SerializerPtr<__EnvTransfer> &ptr);
+	template <class __EnvTransfer>
+	AS_MACRO constexpr size_t getSerializitionSize();
 protected:
     /**
      * 描述对象的起始地址
@@ -88,7 +97,7 @@ public:
 
     AS_MACRO bool operator==(const __MemoryDescriptor& b)const;//done
     AS_MACRO bool operator!=(const __MemoryDescriptor& b)const;//done
-    //const static MemoryDescriptor NULL_DESCRIPTOR;
+    //const static MemoryDescriptor nullptr_DESCRIPTOR;
 protected:
     bool allocable;
 };
@@ -142,11 +151,11 @@ public:
     void* mnew(__SizeType start,__SizeType size);//done
     /**
      * 分配size大小的空间
-     * @return NULL 意味着分配失败，其他成功
+     * @return nullptr 意味着分配失败，其他成功
      */
     void* mnew(__SizeType size);//done
     /**
-     *  TODO 去掉moveData，以realBase是否为NULL判断
+     *  TODO 去掉moveData，以realBase是否为nullptr判断
      *  增加或减少某个已分配指针的长度
      * @param start	已经分配的相对开始地址
      * @param size		分配的指针的长度
@@ -155,11 +164,11 @@ public:
      * @param realBase  用于和moveData配合使用，指定基指针，realBase+start就是数据的真实地址
      * @param moveData	是否移动数据
      *
-     * @return NULL 失败；其他则是寻常指针，可安全转换为__SizeType类型
+     * @return nullptr 失败；其他则是寻常指针，可安全转换为__SizeType类型
      * 			如果成功，并且内存位置发生改变，原来已申请的数据自动失效
      * 			注意，返回的指针是基指针，而不是扩展指针
      */
-    void* extend(__SizeType start,__SizeType size,bool addOrReduce,__SizeType extsize,char *realBase=NULL,bool moveData=false);
+    void* extend(__SizeType start,__SizeType size,bool addOrReduce,__SizeType extsize,char *realBase=nullptr,bool moveData=false);
     void mdelete(void* p,__SizeType size);//done
 
     /**
@@ -290,7 +299,7 @@ public:
      * 		else realloc new space.
      * Note: if realBase=0,it still works.The realBase is used to memory move.
      */
-    void*  extend(__SizeType start,__SizeType size,int extsize,char *realBase=NULL,bool moveData=false);//similar to realloc
+    void*  extend(__SizeType start,__SizeType size,int extsize,char *realBase=nullptr,bool moveData=false);//similar to realloc
 
     void mdelete(void* p,__SizeType size);//查找p开始的连续个大小，看是否能满足要求,使用locateForDelete,withdrawNode协同完成，done
     void mdelete(void *p);//done
@@ -320,8 +329,8 @@ public:
     static __TreeNode  *nextAllocable(__TreeNode  *node);//done
 
 
-    int isNullManager();//done
-    void setNull();//done
+    int isnullptrManager();//done
+    void setnullptr();//done
 
 #if defined(CODE32)
     void dumpInfo(Printer *p)const;

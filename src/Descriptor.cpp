@@ -57,14 +57,16 @@ SegmentDescriptor::~SegmentDescriptor()
 
 }
 SegmentDescriptor::SegmentDescriptor(char* baseaddr,int limit,char g,char type,char dpl,char s,char b,char p)
-:type(type),S(s),DPL(dpl),P(p),AVL(0),L(0),D(b),G(g)
+:limitLow_16(0),baseAddrLow_24(),type(type),
+ S(s),DPL(dpl),P(p),limitHigh_4(),AVL(0),L(0),D(b),G(g),baseAddrHigh_8()
 {
-	this->setBaseAddr((int)(size_t)baseaddr);
+	this->setBaseAddr(reinterpret_cast<size_t>(baseaddr));
 	this->setLimit(limit);
 }
 bool SegmentDescriptor::equals(SegmentDescriptor &sd2)
 {
-		return (*(int*)this == *(int*)&sd2) &&  ((*(int*)this+1)==*((int*)&sd2+1));
+		return (*reinterpret_cast<int*>(this) == *reinterpret_cast<int*>(&sd2)) &&
+				((* (reinterpret_cast<int*>(this)+1)) ==*(reinterpret_cast<int*>(&sd2)+1) );
 //    if(
 //        (*(int*)this->BaseAddr == *(int*)sd2.BaseAddr) &&
 //        ((*(int*)this->Limit & 0xfffff )== (*(short*)sd2.Limit & 0xfffff)) &&
@@ -188,7 +190,7 @@ void SegmentDescriptor::fromMemory(SegmentDescriptor *sd,int seg,char* addr)
 #endif //CODE16&& CODE32
 void SegmentDescriptor::init(char* baseaddr,int limit,char type,char dpl,char s,char b,char p,char g,char l,char avl)
 {
-	this->setBaseAddr((int)(size_t)baseaddr);
+	this->setBaseAddr(static_cast<int>(reinterpret_cast<size_t>(baseaddr)));
 	this->setLimit(limit);
 	this->type = type;
 	this->DPL = dpl;

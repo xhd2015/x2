@@ -30,7 +30,7 @@ public:
 	TargetType*	getNew();
 	void withraw(TargetType *t);
 
-	void			setMan(size_t index,size_t nstart,size_t tstart,size_t len,bool doinit=true,int *usedList=NULL,size_t usedLen=0);
+	void			setMan(size_t index,size_t nstart,size_t tstart,size_t len,bool doinit=true,int *usedList=nullptr,size_t usedLen=0);
 
 
 	/**
@@ -61,6 +61,8 @@ protected:
  * 管理目标数组
  * 这里指出Node和Target的概念：Node是指SimpleMemoryNode， Target是指要管理的目标类型
  * 可以认为，管理器中包括两个数组：Node数组和Target数组
+ *
+ * Update 2017年12月5日16:28:51：实际上，应当在任何情况下都采用关联管理的思想。
  */
 template <class T>
 class AssociatedMemoryManager<T,1>{
@@ -79,7 +81,7 @@ public:
 	 * @param usedList		用于单独确定哪些已经被使用
 	 * @param usedLen		usedList的长度
 	 */
-	AssociatedMemoryManager(size_t nstart,size_t tstart,size_t len,bool nodeArrInit=true,int *usedList=NULL,size_t usedLen=0);
+	AssociatedMemoryManager(size_t nstart,size_t tstart,size_t len,bool nodeArrInit=true,int *usedList=nullptr,size_t usedLen=0);
 	~AssociatedMemoryManager();
 
     TargetType* getNew();
@@ -108,15 +110,13 @@ public:
      * AS_MACRO void			setErrHandler(ERROR_HANDLER errhandle);
      */
 	AS_MACRO	TargetType*	getTarget(size_t index);
-	DEPRECATED AS_MACRO	void		freeNode(size_t index);//DEPRECATED因为含义不清楚
-				void		allocNode(size_t index);
-				void		withdrawNode(size_t index);
-	DEPRECATED AS_MACRO	void		unfreeNode(size_t index);
     AS_MACRO	size_t		getTargetIndex(TargetType* t)const;
 	AS_MACRO	size_t		getNodeIndex(NodeType* n)const;
-	AS_MACRO	static	size_t getEachSize();
+	AS_MACRO	constexpr static	size_t getEachSize();
 	AS_MACRO	NodeType*	getNodeAddress();
-protected:
+private:
+	void		allocNode(size_t index);
+	void		withdrawNode(size_t index);
 	AS_MACRO	NodeType*	getNode(size_t index);
 	union{
 		size_t nstart;

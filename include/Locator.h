@@ -22,7 +22,7 @@ public:
 
 	/**
 	*	if 'this'(I mean the pointer this) should be located in somewhere,but the result
-	*	will yield until meeting some edge node,then it should return NULL,
+	*	will yield until meeting some edge node,then it should return nullptr,
 	*	And if that edge node condition has been met,this method should return it.Then the process of locating stopped.
 	*
 	*/

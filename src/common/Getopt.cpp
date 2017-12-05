@@ -235,7 +235,7 @@ int CommandProcessor<__StdEnvInterface,__ParamPack>::onProcessPre(__ParamPack &p
 template <class __StdEnvInterface,class __ParamPack>
 void CommandProcessor<__StdEnvInterface,__ParamPack>::onErrorExit(int errCode,const __CommandOption *opt)
 {
-	if(opt!=NULL)
+	if(opt!=nullptr)
 	{
 		opt->dump(env);
 		env.printf_simple(":");
@@ -272,7 +272,7 @@ void CommandProcessor<__StdEnvInterface,__ParamPack>::onErrorExit(int errCode,co
 		);
 		break;
 	case ERROR_PROCESS_POST:
-		if(opt!=NULL)
+		if(opt!=nullptr)
 		env.printf_simple(
 #if defined(CODE64)
 				"参数处理错误\n"

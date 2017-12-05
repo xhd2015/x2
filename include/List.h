@@ -6,34 +6,36 @@
 #include <loki/Int2Type.h>
 #include <Locator.h>
 #include <libx2.h>
+#include <conceptual/Serialize.h>
 
-#pragma pack(push,1)
-class SimpleMemoryNode{
+//可以当做基本类型来处理
+/**
+ *  is_pod<SimpleMemoryNode> == true.
+ */
+class SimpleMemoryNode:public SerializationInterface{
 public:
     AS_MACRO SimpleMemoryNode(bool NO=false);//done
- 
-    DEPRECATED AS_MACRO bool getNO();//done
-    DEPRECATED AS_MACRO void setNO(bool NO);//done
-    //含义不明
-    DEPRECATED AS_MACRO bool isFree();//done
-
     AS_MACRO bool isAlloced();
     AS_MACRO void setAlloced(bool alloced);
 
-    DEPRECATED AS_MACRO void free();//done
-    DEPRECATED AS_MACRO void unfree();//done
-    
-    
-//protected:
-public:
+    template <class __EnvTransfer>
+    AS_MACRO SerializerPtr<__EnvTransfer>& serialize(SerializerPtr<__EnvTransfer> &ptr)const
+		{	return ptr << alloced;}
+	template <class __EnvTransfer>
+	AS_MACRO SerializerPtr<__EnvTransfer>& deserialize(SerializerPtr<__EnvTransfer> &ptr)
+		{ return ptr >> alloced;}
+	template <class __EnvTransfer>
+	AS_MACRO constexpr size_t getSerializitionSize()
+		{return __EnvTransfer::template sizeofHostType<decltype(alloced)>();}
+private:
     /**
     *  alloced=true  		已分配
     *		   false		未分配
     */
     bool alloced;
 };
-#pragma pack(pop)
 /**
+ * DEPRECATED 此类已经过时，请使用关联内存管理
 *此管理器管理一个连续的区域，然后每次分配固定大小的内存
 *为链表等结构提供支持
 *
@@ -46,12 +48,12 @@ public:
 *
 *   注意，此管理器不能管理int等类型，除了继承自SimpleMemoryNode的class类型，他别无他能
 *
-*   This is a template for Allocator that will alloc out T
+*   实际上是std::allocator<T>的非标准实现，该类可以由AssociatedMemoryManager替代，因为该类对被管理对象进行了一次耦合，导致实现不“干净”
 */
 template <class T>
 class SimpleMemoryManager{
 public:
-    SimpleMemoryManager()=default;//default constructor that has nothing
+    DEPRECATED SimpleMemoryManager()=default;//default constructor that has nothing
     //~SimpleMemoryManager(); //the only way to free all list is a call to free
 public:
     // DEPRECATED 改善其设计
@@ -74,7 +76,7 @@ public:
 	enum{
 		ERR_NO_ERROR=0,
 		ERR_SPACE_IS_FULL,
-		ERR_NODE_NOT_INTERNAL,//NULL is treated not internal but also not external
+		ERR_NODE_NOT_INTERNAL,//nullptr is treated not internal but also not external
 		ERR_GENERAL /*an error not currently defined*/
 	};/*when it receives an error,it will call the errhandle,after which it will continue normally,but if error condition is
 	not cleared,it will repeatly call errhandle.That means the error is not correctly corrected.
@@ -86,7 +88,7 @@ public:
 	 * @param limit		长度限制，注意这里的limit语义不同，它不是最后一个可以访问的字节，而是总得内存长度
 	 * @param initSize  already used nodes
 	 */
-    SimpleMemoryManager(size_t start,size_t limit,bool doInit=true,size_t initSize=0,ERROR_HANDLER errhandler=NULL);//done
+	DEPRECATED SimpleMemoryManager(size_t start,size_t limit,bool doInit=true,size_t initSize=0,ERROR_HANDLER errhandler=nullptr);//done
     
     /**
      * The following methods may throw exception/may call error handler,after which it executes normally
@@ -107,7 +109,10 @@ public:
     AS_MACRO static size_t getNodeSize();//done
     AS_MACRO ERROR_HANDLER getErrHandler();
     AS_MACRO void			setErrHandler(ERROR_HANDLER errhandle);
-protected:
+private:
+    /**
+     * 检查节点是否在范围内
+     */
     AS_MACRO bool	checkIsInternal(FullNode *t);
     size_t start;
     size_t limit;
@@ -121,12 +126,15 @@ protected:
 
 //===ListNode的定义
 template<class T>
-class ListNode{
+class ListNode:public SerializationInterface
+{
 public:
 	using This = ListNode<T>;
 	using __ListNode = This;
 public:
-    ListNode(const T& data,__ListNode* next=NULL,__ListNode* previous=NULL);
+    ListNode(const T& data,__ListNode* next=nullptr,__ListNode* previous=nullptr);
+    ListNode(const __ListNode &)=default;
+    __ListNode & operator=(const __ListNode &)=default;
     ~ListNode();
 
     AS_MACRO const T& getData()const;
@@ -146,7 +154,7 @@ public:
      * @new method since 2017-03-18 21:23:10
      */
     void		adjustOffset(ptrdiff_t diff);
-    void		initToNull();
+    void		initTonullptr();
 
 
     __ListNode*    getLast()const;//done
@@ -154,6 +162,20 @@ public:
     DEPRECATED AS_MACRO static void adjustOffset(char **p,ptrdiff_t off);
     //指向构造函数的地址
     //用 new (void*p) 构造函数,俗称placement new
+
+    /**
+     * 由环境决定采用哪种序列化指针方案：
+     * 		POLICY_PTR_VALUE,POLICY_PTR_OBJECT
+     */
+    template <class __EnvTransfer>
+    AS_MACRO SerializerPtr<__EnvTransfer>& serialize(SerializerPtr<__EnvTransfer> &ptr)const;
+	template <class __EnvTransfer>
+	AS_MACRO SerializerPtr<__EnvTransfer>& deserialize(SerializerPtr<__EnvTransfer> &ptr);
+	/**
+	 * 要求 T类型也要支持序列化，提供方法getSerializitionSize()
+	 */
+	template <class __EnvTransfer>
+	AS_MACRO size_t getSerializitionSize();
 protected:
     T   data;//for storage
     __ListNode *next;
@@ -183,6 +205,8 @@ protected:
 template<class T,template <class> class _Allocator>
 class LinkedList{
 public:
+	using This = LinkedList<T,_Allocator>;
+	using __LinkedList = This;
 	using __ListNode = ListNode<T>;
 	using __Allocator = _Allocator<__ListNode>;
 public:
@@ -190,6 +214,8 @@ public:
 
 public:
     LinkedList(  __Allocator *smm);
+    LinkedList(const __LinkedList&)=default;
+    __LinkedList & operator=(const __LinkedList&)=default;
     ~LinkedList();
     
     AS_MACRO __ListNode* getHead()const;//done
@@ -211,7 +237,7 @@ public:
 
 
     void freeNode(__ListNode * node);//done
-    void free();//free this list,(equals to destruct) that means free all,then set root&last as NULL.   done
+    void free();//free this list,(equals to destruct) that means free all,then set root&last as nullptr.   done
     void freeNext(__ListNode *t);//forward list free,begin with this                 done
     void freePrevious(__ListNode *t);//backward list free,begin with This            done
     
@@ -283,8 +309,8 @@ public:
     static __ListNode *findFirstStart(__ListNode* startNode,__SizeType start);//done
     /**
     * return the first node whose start equals with or is bigger that argument start.
-    *  If there is no such node(e.g. the above returns NULL),then return the last one who is less.
-    *  If the above two process get NULL,then return NULL,meaning the list is empty.
+    *  If there is no such node(e.g. the above returns nullptr),then return the last one who is less.
+    *  If the above two process get nullptr,then return nullptr,meaning the list is empty.
     */
     static __ListNode *findFirstStartForInsert(__ListNode *startNode,__SizeType start);//done
 
@@ -314,7 +340,11 @@ public:
 	using __TreeNode = This;
 public:
 	TreeNode()=default;
-    TreeNode(const T& data,__TreeNode* father=NULL,__TreeNode* son=NULL,__TreeNode* next=NULL,__TreeNode* previous=NULL);
+	TreeNode(const __TreeNode&)=default;
+	__TreeNode & operator=(const __TreeNode&)=default;
+
+
+    TreeNode(const T& data,__TreeNode* father=nullptr,__TreeNode* son=nullptr,__TreeNode* next=nullptr,__TreeNode* previous=nullptr);
     ~TreeNode();
 
     AS_MACRO __TreeNode* setSon(__TreeNode* son);//done
@@ -338,10 +368,20 @@ public:
     __TreeNode*	removeSon();
 	__TreeNode*	removeFather();
 	void 			adjustOffset(ptrdiff_t diff);
-	void			initToNull();
+	void			initTonullptr();
 
 
     __TreeNode* getParent()const;//往previous一直遍历，直到是根，然后返回根的father,done
+
+    template <class __EnvTransfer>
+    AS_MACRO SerializerPtr<__EnvTransfer>& serialize(SerializerPtr<__EnvTransfer> &ptr)const;
+	template <class __EnvTransfer>
+	AS_MACRO SerializerPtr<__EnvTransfer>& deserialize(SerializerPtr<__EnvTransfer> &ptr);
+	/**
+	 * 要求 T类型也要支持序列化，提供方法getSerializitionSize()
+	 */
+	template <class __EnvTransfer>
+	AS_MACRO size_t getSerializitionSize();
 
 protected:
 
@@ -373,7 +413,10 @@ public:
 //	Tree()=default;
 	Tree();
 public:
-    Tree(__Allocator *smm,__TreeNode* root=NULL);//If give root=NULL,then assign root by smm,else by root.
+    Tree(__Allocator *smm,__TreeNode* root=nullptr);//If give root=nullptr,then assign root by smm,else by root.
+    Tree(const __Tree & )=default;
+    __Tree &operator=(const __Tree & )=default;
+
     ~Tree();
     
     AS_MACRO __TreeNode *getHead()const;//done

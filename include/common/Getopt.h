@@ -35,6 +35,8 @@ public://几个常见的option
 
 public:
 	CommandOption()=default;
+	CommandOption(const __CommandOption &)=default;
+	CommandOption& operator=(const __CommandOption&)=default;
 	CommandOption(const __String &shortOpt,const __String &longOpt,
 			bool needsParam=false,const __String &helpMsg=__String());
 	bool equals(const __String& opt)const;
@@ -42,10 +44,10 @@ public:
 	void dump(__StdEnvInterface &env)const;
 
 public:
-	__String shortOpt;
-	__String longOpt;
-	bool	  needsParam;
-	__String helpMsg;
+	__String shortOpt{};
+	__String longOpt{};
+	bool	  needsParam=false;
+	__String helpMsg{};
 };
 
 template <class __StdEnvInterface>

@@ -216,7 +216,7 @@ void protectedEntryHolder()
 			(int)KernelMemoryConfig::mmPDE,		KernelMemoryConfig::PDE_NUM,
 			(int)KernelMemoryConfig::mmPTE_0,	KernelMemoryConfig::PTE_0_NUM,
 			(int)KernelMemoryConfig::mmGDTAssocNode,(int)KernelMemoryConfig::mmGDT,KernelMemoryConfig::GDT_LEN,gused,arrsizeof(gused),
-			(int)KernelMemoryConfig::mmIDTAssocNode,(int)KernelMemoryConfig::mmIDT,KernelMemoryConfig::IDT_LEN,NULL,0
+			(int)KernelMemoryConfig::mmIDTAssocNode,(int)KernelMemoryConfig::mmIDT,KernelMemoryConfig::IDT_LEN,nullptr,0
     );//初始化一个新的kernel
     pkernel->setInputBuffer((Kernel::InputBufferDataType*)KernelMemoryConfig::mmInputBuffer, KernelMemoryConfig::INPUT_BUFFER_LEN);
     stdp.putsz("after kernel done\n");

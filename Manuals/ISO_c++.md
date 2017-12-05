@@ -1,5 +1,9 @@
 # 此文件
+此文件对标准c++进行介绍
 
+# 参考和资源链接
+http://www.stroustrup.com  stroustrup的个人网站
+https://gcc.gnu.org/onlinedocs/libstdc++/latest-doxygen/  g++的在线文档
 
 # 何时使用virtual
 virtual的实现方式导致其运行效率较低，并不是任何需要接口的地方都可以使用virtual。
@@ -49,6 +53,20 @@ virtual的实现方式导致其运行效率较低，并不是任何需要接口�
 
 # template相关
 声明模板参数和实例化参数的个数必须相同
+# 标准c++各个头文件和常用的函数，类等对应关系
+<memory> 用于动态内存管理 
+        unique_ptr,shared_ptr,weak_ptr,auto_ptr(until c++17)
+        allocator, allocator_traits
+        uninitialized_copy(move,fill)等
+        pointer_traits,addressof,align,to_address
+<filesystem>  c++17,用于支持文件系统
+        path类，
+        absolute,copy_file,exists等
+<utility>   一般性的语言实用工具    
+        swap,exchange,forward,move,move_if_noexcept
+        类tuple,pair,initializer_list
+<initializer_list> 
+
 
 # using的用法
 http://en.cppreference.com/w/cpp/language/type_alias
@@ -61,3 +79,94 @@ using identifier attr(optional) = type-id ;
 
 # virtual语法和=0
 =0必须与virtual联用。
+
+
+# 关于字面量
+c++11中有两条关于字面量的语法，从stroustrup的网站上可以找到：
+R"(...)" 用于表示字面量，但是其实任何R"----(开头的，只要有)----"结尾即可。
+
+自定义字面量通过重载操作符""来完成
+string operator()""s(const char *ch,size_t n){return std::string(ch,n);}
+更多例子参见其网站。
+注意：不以_开头的后缀可能产生“将来用于标准化”的警告，所以自定义的后缀最好以_开头。
+
+# 类内初始化
+类内允许初始化，相当于指定默认值。
+
+# write your own allocator
+64位下，当在c++中写下这样的语句时：
+```c++
+#include <new>
+#include <memory>
+#include <utility>
+#include <cstdlib>
+
+int main()
+{
+        std::malloc(30);
+
+        new char[30];
+}
+```
+汇编：
+`g++ test_new_no_stdlib.cpp -S -o test_new_no_stdlib.s -O0`
+汇编实际生成的调用是：
+```java
+        movl    $30, %ecx
+        call    malloc
+        movl    $30, %ecx
+        call    _Znam
+```
+也就是说，malloc的链接名称就是malloc,而new(内置类型)的名称则是_Znam.
+如果以32位模式编译，
+`g++ test_new_no_stdlib.cpp -S -o test_new_no_stdlib.s -O0 -m32`
+则是：
+```java
+        movl    $30, (%esp)
+        call    _malloc
+        movl    $30, (%esp)
+        call    __Znaj
+```
+不同的编译模式有不同的链接名称。所有的符号都至少生成一个"_",以便使用c语言函数进行链接。
+注意：g++的-nostdlib只影响链接阶段
+https://gcc.gnu.org/onlinedocs/gcc/Link-Options.html
+对于上面的文件，使用-nostdlib可以继续编译成可启动的文件（实际上object文件就够了
+`g++ test_new_no_stdlib.cpp -o test_new_no_stdlib.a -O0 -m32 -nostdlib -static -fno-exceptions`
+则报错
+```java
+/tmp/ccjcQpr3.o:test_new_no_stdlib.cpp:(.text+0xa)：对‘__main’未定义的引用
+/tmp/ccjcQpr3.o:test_new_no_stdlib.cpp:(.text+0x16)：对‘malloc’未定义的引用
+/tmp/ccjcQpr3.o:test_new_no_stdlib.cpp:(.text+0x22)：对‘operator new[](unsigned int)’未定义的引用
+```
+这说明，其实如果自己的库提供了这些函数，根本就不必再使用标准静态库。而标准库大多数头文件都是可以使用的。
+
+而且用这个方法我们可以检测出大多数需要自己定义的东西。方法是仅仅包含一个头文件，然后编译看看产生了什么错误。
+源文件模板如下：
+```c++
+#include <iostream>
+int main()
+{
+
+}
+```
+编译选项如下：
+`g++ test_new_no_stdlib.cpp -o test_new_no_stdlib.a -O0 -m32 -nostdlib -static -fno-exceptions`
+实例错误如下
+```java
+/tmp/ccitCK0V.o:test_new_no_stdlib.cpp:(.text+0x7)：对‘__main’未定义的引用
+/tmp/ccitCK0V.o:test_new_no_stdlib.cpp:(.text+0x2f)：对‘std::ios_base::Init::Init()’未定义的引用
+/tmp/ccitCK0V.o:test_new_no_stdlib.cpp:(.text+0x37)：对‘__dso_handle’未定义的引用
+/tmp/ccitCK0V.o:test_new_no_stdlib.cpp:(.text+0x46)：对‘std::ios_base::Init::~Init()’未定义的引用
+/tmp/ccitCK0V.o:test_new_no_stdlib.cpp:(.text+0x4b)：对‘__cxa_atexit’未定义的引用
+collect2: 错误：ld 返回 1
+```
+ios_base::Init::Init(), __dso_handle,__cxa_atexit都是未定义的符号
+
+string的错误
+        对‘std::basic_string<char, std::char_traits<char>, std::allocator<char> >::basic_string()’未定义的引用
+         对‘std::basic_string<char, std::char_traits<char>, std::allocator<char> >::~basic_string()’未定义的引用
+vector的错误
+        对‘__wrap__ZdlPv’未定义的引用
+regex的错误
+        对std::locale::locale()’未定义的引用
+        对std::locale::~locale()’未定义的引用

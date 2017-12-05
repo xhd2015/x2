@@ -52,7 +52,7 @@ struct EnvTransfer{
 
 ```
 无论以函数形式还是类形式，编译器无法识别其中各个成分的含义
-只能通过类来调用：
+只能通过类来调用（这句话错误了，读过c++ template一书以后，我感觉到应当从编译器的角度理解各种编译错误）：
 ```c++
 __DEF_Template_FileDescriptor
 template <class __EnvTransfer>
@@ -66,6 +66,10 @@ size_t __DEF_FileDescriptor::getSerializitionSize()
 
     return u8size::Size + SizeTypeSize::Size*3 + TimetypeSize::Size*2;
 }
+```
+update:实际上正确调用函数的代码，是说明后面的<符号不是小于符号，而是一个模板开始符号，因此应当如下调用：
+```c++
+return __EnvTransfer::template sizeofHostType<decltype(type)>();
 ```
 
 思想：把类当做处理模板的函数即可。

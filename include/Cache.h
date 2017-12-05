@@ -24,7 +24,7 @@ public:
 	typedef bool (*COMPARATOR)(KeyType k1,KeyType k2);
 	typedef ValueType (*DEFAULT_GETTER)(KeyType k);
 public:
-	Cache(size_t capacity,DEFAULT_GETTER getter,COMPARATOR cmp=NULL);
+	Cache(size_t capacity,DEFAULT_GETTER getter,COMPARATOR cmp=nullptr);
 	AS_MACRO ~Cache();
 
 	ValueType	get(KeyType k);

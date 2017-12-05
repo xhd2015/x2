@@ -114,7 +114,7 @@ public:
 	 */
 	PDEManager(size_t nstart,size_t tstart,size_t ptemStart,size_t len,
 			bool doinit=true,
-			int *usedList=NULL,size_t usedLen=0);
+			int *usedList=nullptr,size_t usedLen=0);
 	~PDEManager();
 
 
