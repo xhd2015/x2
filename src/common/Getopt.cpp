@@ -16,27 +16,25 @@
 #include <vector>
 #include <EnvInterface64Impl.h>
 #include <64/CMDUtil.h>
-	template class CommandOption<StdEnv64Impl>;
-	template class CommandOptions<StdEnv64Impl>;
-	template class CommandProcessor<StdEnv64Impl,ParamRwfile>;
-	template class CommandProcessor<StdEnv64Impl,ParamMkfs>;
 #endif
 
 
 
+//===class CommandOption
+#define __DEF_Template_CommandOption
+#define __DEF_CommandOption CommandOption
 // 几个常见选项
-template<class __StdEnvInterface>
-const CommandOption<__StdEnvInterface> CommandOption<__StdEnvInterface>::helpOption={"-h","--help",false,"显示此帮助信息"};
-template<class __StdEnvInterface>
-const CommandOption<__StdEnvInterface> CommandOption<__StdEnvInterface>::versionOption={"-v","--version",false,"显示版本信息"};
-template<class __StdEnvInterface>
-const CommandOption<__StdEnvInterface> CommandOption<__StdEnvInterface>::stopOption=
-		{"--","--",false,"停止"};
+__DEF_Template_CommandOption
+const __DEF_CommandOption __DEF_CommandOption::helpOption={"-h","--help",false,"显示此帮助信息"};
+__DEF_Template_CommandOption
+const __DEF_CommandOption __DEF_CommandOption::versionOption={"-v","--version",false,"显示版本信息"};
+__DEF_Template_CommandOption
+const __DEF_CommandOption __DEF_CommandOption::stopOption={"--","--",false,"停止"};
 
 
 
-template<class __StdEnvInterface>
-CommandOption<__StdEnvInterface >::CommandOption(
+__DEF_Template_CommandOption
+__DEF_CommandOption::CommandOption(
 		const __String& shortOpt,
 		const __String& longOpt,
 		bool needsParam,
@@ -48,43 +46,44 @@ CommandOption<__StdEnvInterface >::CommandOption(
 
 }
 
-
-
-
-
-template <class __StdEnvInterface>
-bool CommandOption<__StdEnvInterface>::equals(const __String& opt)const
+__DEF_Template_CommandOption
+bool __DEF_CommandOption::equals(const __String& opt)const
 {
 	return shortOpt.compare(opt)==0 ||
 			longOpt.compare(opt)==0;
 }
 
-template <class __StdEnvInterface>
-bool CommandOption<__StdEnvInterface>::equals(const __CommandOption& opt)const
+__DEF_Template_CommandOption
+bool __DEF_CommandOption::equals(const __CommandOption& opt)const
 {
 	return (this->shortOpt.compare(opt.shortOpt)==0 && this->longOpt.compare(opt.longOpt)==0);
 }
-template <class __StdEnvInterface>
-void CommandOption<__StdEnvInterface>::dump(__StdEnvInterface &env)const
+__DEF_Template_CommandOption
+void __DEF_CommandOption::dump()const
 {
 
-	env.printf_simple(shortOpt.c_str());
-	env.printf_simple("/");
-	env.printf_simple(longOpt.c_str());
+	HostEnv::printf_simple(shortOpt.c_str());
+	HostEnv::printf_simple("/");
+	HostEnv::printf_simple(longOpt.c_str());
 }
 
+#undef __DEF_Template_CommandOption
+#undef __DEF_CommandOption
 
-//========= class CommandOptions
 
-template <class __StdEnvInterface>
-CommandOptions<__StdEnvInterface>::CommandOptions(const std::initializer_list<__CommandOption> &il):
+//==class CommandOptions
+#define __DEF_Template_CommandOptions
+#define __DEF_CommandOptions CommandOptions
+
+__DEF_Template_CommandOptions
+__DEF_CommandOptions::CommandOptions(const std::initializer_list<__CommandOption> &il):
 Super(il)
 {
 
 }
-template <class __StdEnvInterface>
-typename CommandOptions<__StdEnvInterface>::__PosIterator
-CommandOptions<__StdEnvInterface>::find(const __String &option)const
+__DEF_Template_CommandOptions
+typename __DEF_CommandOptions::__PosIterator
+__DEF_CommandOptions::find(const __String &option)const
 {
 	// this->必须加上
 	__PosIterator itopt=this->cbegin();
@@ -95,9 +94,9 @@ CommandOptions<__StdEnvInterface>::find(const __String &option)const
 	}
 	return itopt;
 }
-template <class __StdEnvInterface>
-typename CommandOptions<__StdEnvInterface>::__String
-CommandOptions<__StdEnvInterface>::makeHelpMessage(const __String &heading,
+__DEF_Template_CommandOptions
+typename __DEF_CommandOptions::__String
+__DEF_CommandOptions::makeHelpMessage(const __String &heading,
 							const __String &usage,
 							const __String &foot)const
 {
@@ -120,18 +119,20 @@ CommandOptions<__StdEnvInterface>::makeHelpMessage(const __String &heading,
 
 	return (std::move(s));
 }
+#undef __DEF_Template_CommandOptions
+#undef __DEF_CommandOptions
 
 
 //========= class CommandProcessor
-
-template <class __StdEnvInterface,class __ParamPack>
-CommandProcessor<__StdEnvInterface,__ParamPack>::CommandProcessor(__StdEnvInterface &env):
-env(env)
+#define __DEF_Template_CommandProcessor template <class __ParamPack>
+#define __DEF_CommandProcessor CommandProcessor<__ParamPack>
+__DEF_Template_CommandProcessor
+__DEF_CommandProcessor::CommandProcessor()
 {
 
 }
-template <class __StdEnvInterface,class __ParamPack>
-int CommandProcessor<__StdEnvInterface,__ParamPack>::processOptions(
+__DEF_Template_CommandProcessor
+int __DEF_CommandProcessor::processOptions(
 		const __CommandOptions &opt,__VS_cit beg,__VS_cit end, __ParamPack &pack)
 {
 	int errCode=ERROR_NO_ERROR;
@@ -224,26 +225,26 @@ int CommandProcessor<__StdEnvInterface,__ParamPack>::processOptions(
 	return (RETURN_CONTINUE);
 }
 
-template <class __StdEnvInterface,class __ParamPack>
-int CommandProcessor<__StdEnvInterface,__ParamPack>::onProcessPre(__ParamPack &pack)
+__DEF_Template_CommandProcessor
+int __DEF_CommandProcessor::onProcessPre(__ParamPack &pack)
 {
 	return ERROR_NO_ERROR;
 }
 
 
 
-template <class __StdEnvInterface,class __ParamPack>
-void CommandProcessor<__StdEnvInterface,__ParamPack>::onErrorExit(int errCode,const __CommandOption *opt)
+__DEF_Template_CommandProcessor
+void __DEF_CommandProcessor::onErrorExit(int errCode,const __CommandOption *opt)
 {
 	if(opt!=nullptr)
 	{
-		opt->dump(env);
-		env.printf_simple(":");
+		opt->dump();
+		HostEnv::printf_simple(":");
 	}
 	switch(errCode)
 	{
 	case ERROR_UNKNOW_OPTION:
-		env.printf_simple(
+		HostEnv::printf_simple(
 #if defined(CODE64)
 				"未知选项\n"
 #else
@@ -253,7 +254,7 @@ void CommandProcessor<__StdEnvInterface,__ParamPack>::onErrorExit(int errCode,co
 		);
 		break;
 	case ERROR_ARG_NOT_ENOUGH:
-		env.printf_simple(
+		HostEnv::printf_simple(
 #if defined(CODE64)
 				"参数不足\n"
 #else
@@ -263,7 +264,7 @@ void CommandProcessor<__StdEnvInterface,__ParamPack>::onErrorExit(int errCode,co
 		);
 		break;
 	case ERROR_PROCESS_NOT_A_NUMBER:
-		env.printf_simple(
+		HostEnv::printf_simple(
 #if defined(CODE64)
 				"需要一个数字\n"
 #else
@@ -273,7 +274,7 @@ void CommandProcessor<__StdEnvInterface,__ParamPack>::onErrorExit(int errCode,co
 		break;
 	case ERROR_PROCESS_POST:
 		if(opt!=nullptr)
-		env.printf_simple(
+		HostEnv::printf_simple(
 #if defined(CODE64)
 				"参数处理错误\n"
 #else
@@ -282,7 +283,7 @@ void CommandProcessor<__StdEnvInterface,__ParamPack>::onErrorExit(int errCode,co
 		);
 		break;
 	case ERROR_PROCESS_PRE:
-		env.printf_simple(
+		HostEnv::printf_simple(
 #if defined(CODE64)
 				"参数预处理错误\n"
 #else
@@ -296,5 +297,7 @@ void CommandProcessor<__StdEnvInterface,__ParamPack>::onErrorExit(int errCode,co
 	default:
 		break;
 	}
-	env.flushOutputs();
+	HostEnv::flushOutputs();
 }
+#undef __DEF_Template_CommandProcessor
+#undef __DEF_CommandProcessor

@@ -1,0 +1,417 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6"/>
+	<Project>
+		<Option title="x2"/>
+		<Option makefile_is_custom="1"/>
+		<Option compiler="gcc"/>
+		<Option virtualFolders="CMake Files\;"/>
+		<Build>
+			<Target title="all">
+				<Option working_dir="/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/Makefile&quot;  VERBOSE=1 all"/>
+					<CompileFile command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="rebuild_cache">
+				<Option working_dir="/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/Makefile&quot;  VERBOSE=1 rebuild_cache"/>
+					<CompileFile command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="edit_cache">
+				<Option working_dir="/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/Makefile&quot;  VERBOSE=1 edit_cache"/>
+					<CompileFile command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="conceptual_rwfile">
+				<Option output="/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/conceptual_rwfile.exe" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-DCODE64"/>
+					<Add option="-DCMDUTIL=rwfile.cpp"/>
+					<Add directory="/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++"/>
+					<Add directory="/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++/x86_64-pc-cygwin"/>
+					<Add directory="/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include"/>
+					<Add directory="/usr/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/../../../../lib/../include/w32api"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/Makefile&quot;  VERBOSE=1 conceptual_rwfile"/>
+					<CompileFile command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="conceptual_rwfile/fast">
+				<Option output="/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/conceptual_rwfile.exe" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-DCODE64"/>
+					<Add option="-DCMDUTIL=rwfile.cpp"/>
+					<Add directory="/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++"/>
+					<Add directory="/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++/x86_64-pc-cygwin"/>
+					<Add directory="/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include"/>
+					<Add directory="/usr/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/../../../../lib/../include/w32api"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/Makefile&quot;  VERBOSE=1 conceptual_rwfile/fast"/>
+					<CompileFile command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="conceptual_test">
+				<Option output="/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/conceptual_test.exe" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-DCODE64"/>
+					<Add option="-DCMDUTIL=test.cpp"/>
+					<Add directory="/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++"/>
+					<Add directory="/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++/x86_64-pc-cygwin"/>
+					<Add directory="/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include"/>
+					<Add directory="/usr/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/../../../../lib/../include/w32api"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/Makefile&quot;  VERBOSE=1 conceptual_test"/>
+					<CompileFile command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="conceptual_test/fast">
+				<Option output="/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/conceptual_test.exe" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-DCODE64"/>
+					<Add option="-DCMDUTIL=test.cpp"/>
+					<Add directory="/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++"/>
+					<Add directory="/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++/x86_64-pc-cygwin"/>
+					<Add directory="/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include"/>
+					<Add directory="/usr/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/../../../../lib/../include/w32api"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/Makefile&quot;  VERBOSE=1 conceptual_test/fast"/>
+					<CompileFile command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="conceptual_mkfs.x2fs">
+				<Option output="/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/conceptual_mkfs.x2fs.exe" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-DCODE64"/>
+					<Add option="-DCMDUTIL=mkfs.x2fs.cpp"/>
+					<Add directory="/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++"/>
+					<Add directory="/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++/x86_64-pc-cygwin"/>
+					<Add directory="/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include"/>
+					<Add directory="/usr/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/../../../../lib/../include/w32api"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/Makefile&quot;  VERBOSE=1 conceptual_mkfs.x2fs"/>
+					<CompileFile command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="conceptual_mkfs.x2fs/fast">
+				<Option output="/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/conceptual_mkfs.x2fs.exe" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-DCODE64"/>
+					<Add option="-DCMDUTIL=mkfs.x2fs.cpp"/>
+					<Add directory="/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++"/>
+					<Add directory="/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++/x86_64-pc-cygwin"/>
+					<Add directory="/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include"/>
+					<Add directory="/usr/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/../../../../lib/../include/w32api"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/Makefile&quot;  VERBOSE=1 conceptual_mkfs.x2fs/fast"/>
+					<CompileFile command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="conceptual_main">
+				<Option output="/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/conceptual_main.exe" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-DCODE64"/>
+					<Add option="-DCMDUTIL=main.cpp"/>
+					<Add directory="/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++"/>
+					<Add directory="/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++/x86_64-pc-cygwin"/>
+					<Add directory="/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include"/>
+					<Add directory="/usr/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/../../../../lib/../include/w32api"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/Makefile&quot;  VERBOSE=1 conceptual_main"/>
+					<CompileFile command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="conceptual_main/fast">
+				<Option output="/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/conceptual_main.exe" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-DCODE64"/>
+					<Add option="-DCMDUTIL=main.cpp"/>
+					<Add directory="/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++"/>
+					<Add directory="/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++/x86_64-pc-cygwin"/>
+					<Add directory="/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include"/>
+					<Add directory="/usr/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/../../../../lib/../include/w32api"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/Makefile&quot;  VERBOSE=1 conceptual_main/fast"/>
+					<CompileFile command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="conceptual_test_serialize">
+				<Option output="/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/conceptual_test_serialize.exe" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-DCODE64"/>
+					<Add option="-DCMDUTIL=test_serialize.cpp"/>
+					<Add directory="/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++"/>
+					<Add directory="/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++/x86_64-pc-cygwin"/>
+					<Add directory="/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include"/>
+					<Add directory="/usr/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/../../../../lib/../include/w32api"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/Makefile&quot;  VERBOSE=1 conceptual_test_serialize"/>
+					<CompileFile command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="conceptual_test_serialize/fast">
+				<Option output="/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/conceptual_test_serialize.exe" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-DCODE64"/>
+					<Add option="-DCMDUTIL=test_serialize.cpp"/>
+					<Add directory="/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++"/>
+					<Add directory="/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++/x86_64-pc-cygwin"/>
+					<Add directory="/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include"/>
+					<Add directory="/usr/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/../../../../lib/../include/w32api"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/Makefile&quot;  VERBOSE=1 conceptual_test_serialize/fast"/>
+					<CompileFile command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="hello">
+				<Option output="/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/hello.exe" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++"/>
+					<Add directory="/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++/x86_64-pc-cygwin"/>
+					<Add directory="/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include"/>
+					<Add directory="/usr/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/../../../../lib/../include/w32api"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/Makefile&quot;  VERBOSE=1 hello"/>
+					<CompileFile command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="hello/fast">
+				<Option output="/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/hello.exe" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++"/>
+					<Add directory="/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++/x86_64-pc-cygwin"/>
+					<Add directory="/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include"/>
+					<Add directory="/usr/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/../../../../lib/../include/w32api"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/Makefile&quot;  VERBOSE=1 hello/fast"/>
+					<CompileFile command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="debug-cmake">
+				<Option working_dir="/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/Makefile&quot;  VERBOSE=1 debug-cmake"/>
+					<CompileFile command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="lib64">
+				<Option output="/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/liblib64.a" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="2"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-DCODE64"/>
+					<Add directory="/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++"/>
+					<Add directory="/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++/x86_64-pc-cygwin"/>
+					<Add directory="/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include"/>
+					<Add directory="/usr/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/../../../../lib/../include/w32api"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/Makefile&quot;  VERBOSE=1 lib64"/>
+					<CompileFile command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="lib64/fast">
+				<Option output="/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/liblib64.a" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="2"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-DCODE64"/>
+					<Add directory="/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++"/>
+					<Add directory="/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++/x86_64-pc-cygwin"/>
+					<Add directory="/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include"/>
+					<Add directory="/usr/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/../../../../lib/../include/w32api"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/Makefile&quot;  VERBOSE=1 lib64/fast"/>
+					<CompileFile command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+		</Build>
+		<Unit filename="/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/src/AssociatedMemoryManager.cpp">
+			<Option target="lib64"/>
+		</Unit>
+		<Unit filename="/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/src/Descriptor.cpp">
+			<Option target="lib64"/>
+		</Unit>
+		<Unit filename="/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/src/List.cpp">
+			<Option target="lib64"/>
+		</Unit>
+		<Unit filename="/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/src/Locator.cpp">
+			<Option target="lib64"/>
+		</Unit>
+		<Unit filename="/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/src/MemoryManager.cpp">
+			<Option target="lib64"/>
+		</Unit>
+		<Unit filename="/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/src/PMLoader.cpp">
+			<Option target="lib64"/>
+		</Unit>
+		<Unit filename="/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/src/TSS.cpp">
+			<Option target="lib64"/>
+		</Unit>
+		<Unit filename="/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/src/cmake/hello.cpp">
+			<Option target="hello"/>
+		</Unit>
+		<Unit filename="/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/src/conceptual/all.cpp">
+			<Option target="conceptual_rwfile"/>
+			<Option target="conceptual_test"/>
+			<Option target="conceptual_mkfs.x2fs"/>
+			<Option target="conceptual_main"/>
+			<Option target="conceptual_test_serialize"/>
+		</Unit>
+		<Unit filename="/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/src/libx2.cpp">
+			<Option target="lib64"/>
+		</Unit>
+		<Unit filename="/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\"/>
+		</Unit>
+	</Project>
+</CodeBlocks_project_file>

@@ -1,0 +1,2 @@
+/usr/bin/ar.exe qc liblib64.a  CMakeFiles/lib64.dir/src/libx2.cpp.o CMakeFiles/lib64.dir/src/PMLoader.cpp.o CMakeFiles/lib64.dir/src/Descriptor.cpp.o CMakeFiles/lib64.dir/src/TSS.cpp.o CMakeFiles/lib64.dir/src/MemoryManager.cpp.o CMakeFiles/lib64.dir/src/List.cpp.o CMakeFiles/lib64.dir/src/Locator.cpp.o CMakeFiles/lib64.dir/src/AssociatedMemoryManager.cpp.o
+/usr/bin/ranlib.exe liblib64.a

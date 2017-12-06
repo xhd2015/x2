@@ -17,21 +17,16 @@
 
 #include <common/NoArch.h>
 
-template <class __StdEnvInterface>
 struct CommandOption{
 public:
-	using This = CommandOption<__StdEnvInterface>;
-#if defined(IDE_MODE)
-	using __String = std::string;
-#else
-	using __String = typename __StdEnvInterface::String;
-#endif
-	using __CommandOption = CommandOption<__StdEnvInterface>;
+	using This = CommandOption;
+	using __String = HostEnv::String;
+	using __CommandOption = This;
 
 public://几个常见的option
-	static const CommandOption<__StdEnvInterface> helpOption; // -h --help
-	static const CommandOption<__StdEnvInterface> versionOption;// -v --version
-	static const CommandOption<__StdEnvInterface> stopOption;
+	static const CommandOption helpOption; // -h --help
+	static const CommandOption versionOption;// -v --version
+	static const CommandOption stopOption;
 
 public:
 	CommandOption()=default;
@@ -41,7 +36,7 @@ public:
 			bool needsParam=false,const __String &helpMsg=__String());
 	bool equals(const __String& opt)const;
 	bool equals(const __CommandOption& opt)const;
-	void dump(__StdEnvInterface &env)const;
+	void dump()const;
 
 public:
 	__String shortOpt{};
@@ -50,24 +45,19 @@ public:
 	__String helpMsg{};
 };
 
-template <class __StdEnvInterface>
 class CommandOptions:public
-	__StdEnvInterface::template Vector<CommandOption<__StdEnvInterface>>
+	HostEnv::Vector<CommandOption>
 {
 public:
-	using Super =typename __StdEnvInterface::template Vector<CommandOption<__StdEnvInterface>>;
-#if defined(IDE_MODE)
-	using __String = typename std::string;
+	using This = CommandOptions;
+	using Super =HostEnv::Vector<CommandOption>;
+	using __String = HostEnv::String;
 	template <class T>
-		using __Vector =typename  std::vector<T>;
-#else
-	using __String = typename __StdEnvInterface::String;
-	template <class T>
-		using __Vector = typename __StdEnvInterface::template Vector<T>;
-#endif
+		using __Vector =HostEnv::Vector<T>;
 
-	using __CommandOption = CommandOption<__StdEnvInterface>;
-	using __CommandOptions = CommandOptions<__StdEnvInterface>;
+
+	using __CommandOption = CommandOption;
+	using __CommandOptions = This;
 	using __PosIterator = typename __Vector<__CommandOption>::const_iterator;
 
 public:
@@ -108,21 +98,16 @@ private:
  * @param _Vector std::vector的兼容类型
  * @param __ParamPack 一个处理参数包，结构自定义
  */
-template <class __StdEnvInterface,class __ParamPack>
+template <class __ParamPack>
 class CommandProcessor{
 public:
-#if defined(IDE_MODE)
-	using __String = std::string;
+	using This = CommandProcessor<__ParamPack>;
+	using __CommandProcessor = This;
+	using __String =HostEnv::String;
 	template <class T>
-	using __Vector = std::vector<T>;
-#else
-	using __String =typename __StdEnvInterface::String;
-	template <class T>
-			using __Allocator = typename __StdEnvInterface::template Allocator<T>;
-		template <class T>
-			using __Vector = typename  __StdEnvInterface::template Vector <T, __Allocator<T>>;
-#endif
-	using __CommandOptions=CommandOptions<__StdEnvInterface>;
+	using __Vector = HostEnv::Vector<T>;
+
+	using __CommandOptions=CommandOptions;
 	using __CommandOption =typename  __CommandOptions::__CommandOption;
 	using __Vector_String = __Vector<__String>;
 	using __VS_cit = typename __Vector_String::const_iterator;
@@ -145,9 +130,8 @@ public:
 	};
 
 public: // 虚函数还是？
-	CommandProcessor()=delete;
-	CommandProcessor(__StdEnvInterface &env);
-	CommandProcessor(CommandProcessor<__StdEnvInterface,__ParamPack> &)=delete;
+	CommandProcessor();
+	CommandProcessor(__CommandProcessor &)=delete;
 
 	/**
 	 * @return 参数处理出错，-1; 已经处理完，无需下一步,0; 参数处理完毕，请进行下一步处理,1;
@@ -191,8 +175,6 @@ public: // 虚函数还是？
 	 */
 	virtual void onErrorExit(int errCode,const __CommandOption *opt=nullptr);
 
-private:
-	__StdEnvInterface &env;
 
 };
 

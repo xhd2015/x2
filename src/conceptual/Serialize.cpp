@@ -1,5 +1,6 @@
 
 #include <conceptual/Serialize.h>
+#include <type_traits>
 
 
 //==class SerializerPtr
@@ -7,7 +8,7 @@
 #define __DEF_SerializerPtr SerializerPtr<__EnvTransfer>
 
 __DEF_Template_SerializerPtr
-__DEF_SerializerPtr::SerializerPtr(void *p):ptr((u8_t*)p)
+__DEF_SerializerPtr::SerializerPtr(void *p):ptr(static_cast<u8_t*>(p))
 {}
 __DEF_Template_SerializerPtr
 void *__DEF_SerializerPtr::getPtr()const
@@ -22,6 +23,12 @@ __DEF_SerializerPtr::operator=(const SerializerPtr &rhs)
 	return *this;
 }
 __DEF_Template_SerializerPtr
+typename __DEF_SerializerPtr::__SerializerPtr & __DEF_SerializerPtr::operator=(void *p)
+{
+	this->ptr = static_cast<u8_t*>(p);
+	return *this;
+}
+__DEF_Template_SerializerPtr
 __DEF_SerializerPtr::operator bool()const
 {
 	return (ptr!=nullptr);
@@ -31,7 +38,11 @@ __DEF_SerializerPtr::operator void*()const
 {
 	return ptr;
 }
-
+__DEF_Template_SerializerPtr
+__DEF_SerializerPtr::operator void*()
+{
+	return ptr;
+}
 /**
  * 如果指针为nullptr，则仍然返回nullptr
  */
@@ -72,71 +83,168 @@ typename __DEF_SerializerPtr::__SerializerPtr&  __DEF_SerializerPtr::
 }
 
 __DEF_Template_SerializerPtr
-template <class __BasicType,size_t __N,bool __SafeAssign>
-void __DEF_SerializerPtr::serializeByType(__BasicType data)
+template <class __BasicType,size_t __N,int __AssignType>
+void __DEF_SerializerPtr::serializeBasicType(__BasicType data)
 {
-	__serializeByType<__BasicType,__N>(data,Int2Type<__SafeAssign>());
+	static_assert(std::is_pod<__BasicType>(),"must be called with pod/basic/primitive types");
+	__serializeByType<__BasicType,__N>(data,Int2Type<__AssignType>());
 }
 __DEF_Template_SerializerPtr
-template <class __BasicType,size_t __N,bool __SafeAssign>
-void __DEF_SerializerPtr::deserializeByType(__BasicType& data)
+template <class __BasicType,size_t __N,int __AssignType>
+void __DEF_SerializerPtr::deserializeBasicType(__BasicType& data)
 {
-	__deserializeByType<__BasicType,__N>(data,Int2Type<__SafeAssign>());
+	static_assert(std::is_pod<__BasicType>(),"must be called with pod/basic/primitive types");
+	__deserializeByType<__BasicType,__N>(data,Int2Type<__AssignType>());
 }
 
 
+
+__DEF_Template_SerializerPtr
+template <size_t __N,
+		int __AssignType>
+ void __DEF_SerializerPtr::serializeBasicType(/*const*/ void* data,ptrdiff_t diff)
+{
+	static_assert( __EnvTransfer::ptrPolicy()!=__EnvTransfer::POLICY_PTR_OBJECT, // TODO 现在不支持序列化对象，因为还没有论证清除
+			"ptr object policy not supported yet");
+	__serializeByType<const void *,__N>(
+			static_cast<const char*>(data) - diff, // 减去偏移
+			Int2Type<__AssignType>());
+}
+__DEF_Template_SerializerPtr
+template <size_t __N,
+		int __AssignType>
+	void __DEF_SerializerPtr::deserializeBasicType(void* & data,ptrdiff_t diff)
+{
+	static_assert( __EnvTransfer::ptrPolicy()!=__EnvTransfer::POLICY_PTR_OBJECT, // TODO 现在不支持序列化对象，因为还没有论证清除
+			"ptr object policy not supported yet");
+	__deserializeByType<void *,__N>(
+			data,
+			Int2Type<__AssignType>());
+	static_cast<char*&>(data) += diff;//恢复偏移
+}
+
+__DEF_Template_SerializerPtr
+template <class __BasicType,size_t __N,int __AssignType>
+void __DEF_SerializerPtr::serializeBasicType(const __BasicType *data,size_t len)
+{
+	static_assert(std::is_pod<__BasicType>(),"must be called with pod/basic/primitive types");
+	for(size_t i=0;i!=len;++i)
+		__serializeByType<__BasicType,__N>(data[i],Int2Type<__AssignType>());
+}
+
+__DEF_Template_SerializerPtr
+template <class __BasicType,size_t __N,int __AssignType>
+void __DEF_SerializerPtr::deserializeBasicType(__BasicType* data,size_t len)
+{
+	static_assert(std::is_pod<__BasicType>(),"must be called with pod/basic/primitive types");
+	for(size_t i=0;i!=len;++i)
+		__deserializeByType<__BasicType,__N>(data[i],Int2Type<__AssignType>());
+}
+
+
+// 指针走这里
 __DEF_Template_SerializerPtr
 template <class __BasicType,size_t __N>
-void __DEF_SerializerPtr::__serializeByType(__BasicType data,Int2Type<true>)
+void __DEF_SerializerPtr::__serializeByType(__BasicType data,Int2Type<TYPE_BASIC_SAFE>)
 {
 	//可以安全写入
-	*(__BasicType*)ptr=data;
+//	std::cout << "__N" << __N << endl;
+	*reinterpret_cast<__BasicType*>(ptr)=data;
+	ptr+=__N;
+}
+__DEF_Template_SerializerPtr
+template <class __BasicType,size_t __N>
+void __DEF_SerializerPtr::__serializeByType(__BasicType data,Int2Type<TYPE_BASIC_TRUNCATE>)
+{
+	// 截断
+	using __Type = typename Byte2Type<__N>::Type;
+//	std::cout << "__N" << __N << endl;
+	*reinterpret_cast<__Type*>(ptr)=static_cast<__Type>(data);
 	ptr+=__N;
 }
 
 __DEF_Template_SerializerPtr
 template <class __BasicType,size_t __N>
-void __DEF_SerializerPtr::__serializeByType(__BasicType data,Int2Type<false>) // 复制N个字节的数据，一般情况
+void __DEF_SerializerPtr::__serializeByType(__BasicType data,Int2Type<TYPE_POINTER_SAFE>) // 复制N个字节的数据，一般情况
 {
-	using __Type = typename Byte2Type<__N>::Type;
-	*(__Type*)ptr=(__Type)data;
+	static_assert( __EnvTransfer::ptrPolicy()!=__EnvTransfer::POLICY_PTR_OBJECT, // TODO 现在不支持序列化对象，因为还没有论证清除
+			"ptr object policy not supported yet");
+	// DEBUG
+//	std::cout << "__N=" << __N << endl;
+//	std::cout << reinterpret_cast<size_t>(reinterpret_cast<char*>(data)) << std::endl;
+//	std::cout << __EnvTransfer::ptrBase() << std::endl;
+	char *p=reinterpret_cast<char*>(data);
+	*reinterpret_cast<char* *>(ptr) = ( p==nullptr ?
+										nullptr :
+										(p - __EnvTransfer::ptrBase())
+						) ;
 	ptr+=__N;
 }
+
 __DEF_Template_SerializerPtr
 template <class __BasicType,size_t __N>
-void __DEF_SerializerPtr::__deserializeByType(__BasicType& data,Int2Type<true>)
+void __DEF_SerializerPtr::__serializeByType(__BasicType data,Int2Type<TYPE_POINTER_TRUNCATE>) // 复制N个字节的数据，一般情况
+{
+	static_assert( __EnvTransfer::ptrPolicy()!=__EnvTransfer::POLICY_PTR_OBJECT, // TODO 现在不支持序列化对象，因为还没有论证清除
+			"ptr object policy not supported yet");
+//	std::cout << "__N" << __N << endl;
+	using __Type = typename Byte2Type<__N>::Type;
+	const char *p=reinterpret_cast<const char*>(data);
+	*reinterpret_cast<__Type*>(ptr)=static_cast<__Type>(reinterpret_cast<HostEnv::size_t>(
+				p==nullptr?nullptr:(p - __EnvTransfer::ptrBase()))  ) ;
+//	const char *p= reinterpret_cast<const char*>(data) - __EnvTransfer::ptrBase();
+//	cout <<static_cast<int>(reinterpret_cast<size_t>(p));
+//	cout << p;
+	ptr+=__N;
+}
+
+__DEF_Template_SerializerPtr
+template <class __BasicType,size_t __N>
+void __DEF_SerializerPtr::__deserializeByType(__BasicType& data,Int2Type<TYPE_BASIC_SAFE>)
 {
 	//可以安全写入
-	data = *(__BasicType*)ptr;
+	data = *reinterpret_cast<__BasicType*>(ptr);
 	ptr+=__N;
 }
 __DEF_Template_SerializerPtr
 template <class __BasicType,size_t __N>
-void __DEF_SerializerPtr::__deserializeByType(__BasicType& data,Int2Type<false>) // 复制N个字节的数据，一般情况
+void __DEF_SerializerPtr::__deserializeByType(__BasicType& data,Int2Type<TYPE_BASIC_TRUNCATE>) // 复制N个字节的数据，一般情况
 {
 	using __Type = typename Byte2Type<__N>::Type;
-	data = *(__Type*)ptr;
+	data = *reinterpret_cast<__Type*>(ptr);// TODO 调用std::copy实现，同类方法亦然
 	ptr+=__N;
 }
 
 __DEF_Template_SerializerPtr
-template <class __BasicType>
-typename __DEF_SerializerPtr::__SerializerPtr &__DEF_SerializerPtr::
-	operator<<(__BasicType s)
+template <class __BasicType,size_t __N>
+void __DEF_SerializerPtr::__deserializeByType(__BasicType& data,Int2Type<TYPE_POINTER_SAFE>)
 {
-	using SizeHolder = typename __EnvTransfer::template SizeofHostType<__BasicType>;
-	serializeByType<__BasicType,SizeHolder::Size>(s);
-	return *this;
+	static_assert( __EnvTransfer::ptrPolicy()!=__EnvTransfer::POLICY_PTR_OBJECT, // TODO 现在不支持序列化对象，因为还没有论证清除
+			"ptr object policy not supported yet");
+
+	// DEBUG
+//	std::cout << "__N="<<__N<<std::endl;
+//	std::cout << reinterpret_cast<size_t>(*reinterpret_cast<char **>(ptr)) << std::endl;
+//	std::cout << __EnvTransfer::ptrBase() << std::endl;
+	char *p=*reinterpret_cast<char **>(ptr);
+	data = reinterpret_cast<__BasicType>(
+			(p==nullptr?nullptr:(p + __EnvTransfer::ptrBase()))
+			);
+	ptr+=__N;
 }
 __DEF_Template_SerializerPtr
-template <class __BasicType>
-typename __DEF_SerializerPtr::__SerializerPtr &__DEF_SerializerPtr::
-	operator>>(__BasicType& s)
+template <class __BasicType,size_t __N>
+void __DEF_SerializerPtr::__deserializeByType(__BasicType& data,Int2Type<TYPE_POINTER_TRUNCATE>) // 复制N个字节的数据，一般情况
 {
-	using SizeHolder = typename __EnvTransfer::template SizeofHostType<__BasicType>;
-	deserializeByType<__BasicType,SizeHolder::Size>(s);
-	return *this;
+	static_assert( __EnvTransfer::ptrPolicy()!=__EnvTransfer::POLICY_PTR_OBJECT, // TODO 现在不支持序列化对象，因为还没有论证清除
+			"ptr object policy not supported yet");
+	using __Type = typename Byte2Type<__N>::Type;
+	char *p=reinterpret_cast<char*>(*reinterpret_cast<__Type*>(ptr));
+	data = reinterpret_cast<__BasicType>(
+			( p==nullptr?nullptr:(p + __EnvTransfer::ptrBase())));
+	ptr+=__N;
 }
+
 
 #undef __DEF_Template_SerializerPtr
 #undef __DEF_SerializerPtr
@@ -145,16 +253,5 @@ typename __DEF_SerializerPtr::__SerializerPtr &__DEF_SerializerPtr::
 
 
 
-//==globale operator>> & operator<<, semantically
-//template <class __S,class __EnvTransfer>
-//SerializerPtr<__EnvTransfer>& operator<<(SerializerPtr<__EnvTransfer>& p,const __S &s)
-//{
-//	return s.serialize(p);
-//}
-//template <class __S,class __EnvTransfer>
-//SerializerPtr<__EnvTransfer>& operator>>(SerializerPtr<__EnvTransfer>& p,__S &s)
-//{
-//	return s.deserialize(p);
-//}
 
 

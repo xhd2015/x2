@@ -40,8 +40,8 @@ public:
 	//==这是唯一的不同
 	using __SizeType = size_t;
 	//=========
-
-	using __LinearSourceDescriptor=LinearSourceDescriptor;
+	using This = LinearSourceDescriptor;
+	using __LinearSourceDescriptor=This;
 
 public:
 	AS_MACRO LinearSourceDescriptor()=default;
@@ -67,16 +67,16 @@ public:
 	template <class __EnvTransfer>
 	AS_MACRO SerializerPtr<__EnvTransfer>& deserialize(SerializerPtr<__EnvTransfer> &ptr);
 	template <class __EnvTransfer>
-	AS_MACRO constexpr size_t getSerializitionSize();
+	AS_MACRO static constexpr size_t getSerializitionSize();
 protected:
     /**
      * 描述对象的起始地址
      */
-    __SizeType start;
+    __SizeType start {0} ;
     /**
      * 描述对象的所占用的长度
      */
-    __SizeType limit;
+    __SizeType limit {0} ;
 };
 
 //====class MemoryDescriptor
@@ -119,7 +119,8 @@ protected:
 template <class _LinearSourceDescriptor,template <class> class _NodeAllocator>
 class LinearSourceManager:
 		public
-		LocateableLinkedList<_LinearSourceDescriptor,Locator<_LinearSourceDescriptor>::DISCARD,_NodeAllocator>{
+		LocateableLinkedList<_LinearSourceDescriptor,Locator<_LinearSourceDescriptor>::DISCARD,_NodeAllocator>
+		{
 public:
 	using This = LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator>;
 	using __LinearSourceManager = This;
@@ -131,13 +132,14 @@ public:
     using __LinkedList =  LinkedList<_LinearSourceDescriptor,_NodeAllocator>;
     using __SizeType = size_t;
 
-	LinearSourceManager();
+	LinearSourceManager()=delete;
 public:
 
 	/**
 	 * @param start应当不等于0，否则可能返回错误值
 	 */
-    LinearSourceManager(__Allocator *smm,__SizeType start,__SizeType size);//done
+    LinearSourceManager(__Allocator &smm,__SizeType start,__SizeType size);//done
+    LinearSourceManager(__Allocator &smm);//done
     ~LinearSourceManager();//done
     
     AS_MACRO const _LinearSourceDescriptor & getSpace()const;
@@ -194,6 +196,35 @@ public:
      */
     void				mdeleteLinked(__LinkedList &list);
 
+	/**
+	 * @param __EnvTransfer  提供从主机环境到目标环境的类型转换。参见EnvTransfer
+	 *
+	 */
+	template <class __EnvTransfer>
+		SerializerPtr<__EnvTransfer>& serialize(SerializerPtr<__EnvTransfer> &ptr)const
+		{
+			ptr << space;
+			return Super::serialize(ptr);
+		}
+	/**
+	 * @param __EnvTransfer 提供从目标环境到主机环境的类型转换
+	 */
+	template <class __EnvTransfer>
+		SerializerPtr<__EnvTransfer>& deserialize(SerializerPtr<__EnvTransfer> &ptr)
+		{
+			ptr >> space;
+			return Super::deserialize(ptr);
+		}
+
+	/**
+	 * 提供序列化所需的空间大小.
+	 * constexpr是可选的
+	 */
+	template <class __EnvTransfer>
+		size_t getSerializitionSize()
+	{
+		return __EnvTransfer::template sizeofHostType<decltype(space)>() + Super::getSerializitionSize();
+	}
 
 protected:
     _LinearSourceDescriptor  allocOutNode(__ListNode *avlNode,__SizeType start,__SizeType len);//done
@@ -257,7 +288,7 @@ public:
 
 public:
 	MemoryManager()=default;
-    MemoryManager(__Allocator *smm);//done
+    MemoryManager(__Allocator &smm);//done
     /**
      * 初始化一个带有待管理区间的内存管理器，区间范围是[start,start+len)
      * @param smm				节点分配器
@@ -266,14 +297,14 @@ public:
      * @param fatherAllocable	- // TODO 完善参数含义注释
      *
      */
-    MemoryManager(__Allocator *smm,__SizeType start,__SizeType len,bool fatherAllocable=true);
+    MemoryManager(__Allocator &smm,__SizeType start,__SizeType len,bool fatherAllocable=true);
     //以典型的内存描述建立管理器,但这不是唯一的初始化方式，因为开始和结束可以由内部节点指定，实际上开始和结束可以完全没有必要在初始化中指定
 
 
     /**
      * 建立初始管理器，并确定其中已经被分配的片段
      */
-    MemoryManager(__Allocator *smm,__SizeType start,__SizeType len,
+    MemoryManager(__Allocator &smm,__SizeType start,__SizeType len,
     		__SizeType usedList[][2],__SizeType usedLen,bool fatherAllocable=true);
 
     ~MemoryManager(); 

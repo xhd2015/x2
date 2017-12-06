@@ -19,11 +19,36 @@ target_compile_definitions(lib64 PRIVATE CODE64)
 add_executable(hello src/cmake/hello.cpp)
 target_link_libraries(hello c)
 
-add_executable(conceptual_test_serialize src/conceptual/all.cpp)
-target_include_directories(conceptual_test_serialize PRIVATE include)
-target_compile_options(conceptual_test_serialize PRIVATE ${MY_CCFLAGS})
-target_compile_definitions(conceptual_test_serialize PRIVATE CODE64 CMDUTIL=test_serialize.cpp)
+#创建 conceptual_XXX.exe
+foreach(cmdutil test_serialize main mkfs.x2fs rwfile test)
+    add_executable(conceptual_${cmdutil} src/conceptual/all.cpp)
+    target_include_directories(conceptual_${cmdutil} PRIVATE include)
+    target_compile_options(conceptual_${cmdutil} PRIVATE ${MY_CCFLAGS})
+    target_compile_definitions(conceptual_${cmdutil} PRIVATE CODE64 CMDUTIL=${cmdutil}.cpp)
+endforeach()
 
+#用于显示cmake配置和变量信息
+add_custom_target(debug-cmake
+        COMMAND echo CMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}
+        COMMAND echo CMAKE_<CONFIG>_POSTFIX=${CMAKE_DEBUG_POSTFIX}
+        COMMAND echo CMAKE_ABSOLUTE_DESTINATION_FILES=${CMAKE_ABSOLUTE_DESTINATION_FILES}
+        COMMAND echo CMAKE_C_COMPILER=${CMAKE_C_COMPILER}
+        COMMAND echo CMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
+        COMMAND echo CMAKE_ASM-ATT_COMPILER=${CMAKE_ASM-ATT_COMPILER}
+        COMMAND echo CMAKE_CXX_COMPILER_ID=${CMAKE_CXX_COMPILER_ID}
+        COMMAND echo CMAKE_CONFIGURATION_TYPES=${CMAKE_CONFIGURATION_TYPES}
+        COMMAND echo END.
+        VERBATIM
+        )
+
+
+if(IS_ABSOLUTE src)
+message("IS_ABSOLUTE")
+endif()
+
+if("helloworld" MATCHES "(hello)world")
+    message("MATCHES:" ${CMAKE_MATCH_1})
+endif()
 
 
 ####===============================

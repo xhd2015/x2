@@ -108,6 +108,8 @@ extern "C" {
 
 public:
 	Process();
+	Process(const Process&)=delete;
+	Process &operator=(const Process&)=delete;
 	/**
 	 * 初始化进程
 	 *

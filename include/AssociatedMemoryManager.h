@@ -65,7 +65,9 @@ protected:
  * Update 2017年12月5日16:28:51：实际上，应当在任何情况下都采用关联管理的思想。
  */
 template <class T>
-class AssociatedMemoryManager<T,1>{
+class AssociatedMemoryManager<T,1>:public SerializationInterface
+
+{
 public:
 	typedef SimpleMemoryNode 		NodeType;
 	typedef T						TargetType;
@@ -81,8 +83,11 @@ public:
 	 * @param usedList		用于单独确定哪些已经被使用
 	 * @param usedLen		usedList的长度
 	 */
-	AssociatedMemoryManager(size_t nstart,size_t tstart,size_t len,bool nodeArrInit=true,int *usedList=nullptr,size_t usedLen=0);
+	AssociatedMemoryManager(size_t tstart,size_t nstart,size_t len,
+					bool nodeArrInit=true,int *usedList=nullptr,size_t usedLen=0);
 	~AssociatedMemoryManager();
+
+
 
     TargetType* getNew();
     /**
@@ -114,18 +119,55 @@ public:
 	AS_MACRO	size_t		getNodeIndex(NodeType* n)const;
 	AS_MACRO	constexpr static	size_t getEachSize();
 	AS_MACRO	NodeType*	getNodeAddress();
-private:
 	void		allocNode(size_t index);
 	void		withdrawNode(size_t index);
+
+	template <class __EnvTransfer>
+		SerializerPtr<__EnvTransfer>& serialize(SerializerPtr<__EnvTransfer> &ptr)const
+		{
+//			ptr.serializeBasicType(narr);
+			return ptr << tarr
+						<< narr
+						<< len
+						<< lastIndex
+						<< curAllocedSize;
+		}
+	template <class __EnvTransfer>
+		SerializerPtr<__EnvTransfer>& deserialize(SerializerPtr<__EnvTransfer> &ptr)
+		{
+			return ptr  >> tarr
+						>> narr
+						>> len
+						>> lastIndex
+						>> curAllocedSize;
+		}
+	template <class __EnvTransfer>
+		static constexpr size_t getSerializitionSize()
+	{
+		This *p=static_cast<This*>(nullptr); //静态函数中模拟出指针
+#define __DEF_SZOF(prop) __EnvTransfer::template sizeofHostType<decltype(p->prop)>()
+		return __DEF_SZOF(tstart) +
+				__DEF_SZOF(nstart)+
+				__DEF_SZOF(len)+
+				__DEF_SZOF(lastIndex)+
+				__DEF_SZOF(curAllocedSize);
+#undef __DEF_SZOF
+	}
+
+
+private:
 	AS_MACRO	NodeType*	getNode(size_t index);
-	union{
-		size_t nstart;
-		NodeType *narr;
-	};
+
+private:
 	union{
 		size_t tstart;
 		TargetType *tarr;
 	};
+	union{
+		size_t nstart;
+		NodeType *narr;
+	};
+
 
 	size_t len;
 
@@ -134,7 +176,6 @@ private:
 
 	//当前已分配的节点数
 	size_t curAllocedSize;//Synchronized
-protected:
 	/**
 	 * Layout:
 	 *   ___  --> start

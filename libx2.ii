@@ -13,9 +13,11 @@
 
 
 # 1 "include/def.h" 1
-# 28 "include/def.h"
+# 29 "include/def.h"
+# 1 "include/macros/configurations.h" 1
+# 30 "include/def.h" 2
 # 1 "include/config.h" 1
-# 29 "include/def.h" 2
+# 31 "include/def.h" 2
 
 
 
@@ -220,6 +222,8 @@ public:
     const static int SCREEN_MAX_X,SCREEN_MAX_Y;
 public:
     Printer(unsigned int x0=0,unsigned int y0=0,unsigned int rows=Printer::SCREEN_MAX_X,unsigned int cols=Printer::SCREEN_MAX_Y,int mode=Util::MODE_COMMON);
+    Printer(const Printer&)=default;
+    Printer&operator=(const Printer&)=default;
     ~Printer();
 
     void putc(int chr);
@@ -311,6 +315,8 @@ public:
 class String{
 public:
     String(const char* str);
+    String(const String &)=default;
+    String &operator=(const String &)=default;
     ~String();
 
     int size();
@@ -329,6 +335,9 @@ class Queue{
 public:
  Queue()=default;
     Queue(T p[],size_t len);
+    Queue(const Queue &)=delete;
+    Queue &operator=(const Queue &)=delete;
+
     ~Queue();
 
     T remove();
@@ -457,7 +466,11 @@ namespace std
   typedef int ptrdiff_t;
 
 
-  typedef decltype(nullptr) nullptr_t;
+  typedef decltype(
+# 205 "/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++/x86_64-pc-cygwin/bits/c++config.h"
+                  (0)
+# 205 "/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++/x86_64-pc-cygwin/bits/c++config.h" 3
+                         ) nullptr_t;
 
 }
 # 507 "/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++/x86_64-pc-cygwin/bits/c++config.h" 3
@@ -924,23 +937,23 @@ namespace std
 
 
   template<typename>
-    struct __is_nullptr_pointer_helper
+    struct __is_null_pointer_helper
     : public false_type { };
 
   template<>
-    struct __is_nullptr_pointer_helper<std::nullptr_t>
+    struct __is_null_pointer_helper<std::nullptr_t>
     : public true_type { };
 
 
   template<typename _Tp>
-    struct is_nullptr_pointer
-    : public __is_nullptr_pointer_helper<typename remove_cv<_Tp>::type>::type
+    struct is_null_pointer
+    : public __is_null_pointer_helper<typename remove_cv<_Tp>::type>::type
     { };
 
 
   template<typename _Tp>
     struct __is_nullptr_t
-    : public is_nullptr_pointer<_Tp>
+    : public is_null_pointer<_Tp>
     { };
 
 
@@ -962,7 +975,7 @@ namespace std
   template<typename _Tp>
     struct is_fundamental
     : public __or_<is_arithmetic<_Tp>, is_void<_Tp>,
-     is_nullptr_pointer<_Tp>>::type
+     is_null_pointer<_Tp>>::type
     { };
 
 
@@ -979,7 +992,7 @@ namespace std
   template<typename _Tp>
     struct is_scalar
     : public __or_<is_arithmetic<_Tp>, is_enum<_Tp>, is_pointer<_Tp>,
-                   is_member_pointer<_Tp>, is_nullptr_pointer<_Tp>>::type
+                   is_member_pointer<_Tp>, is_null_pointer<_Tp>>::type
     { };
 
 
@@ -2939,10 +2952,17 @@ namespace std
 
 }
 # 14 "include/conceptual/Serialize.h" 2
+# 1 "include/EnvInterface.h" 1
+# 26 "include/EnvInterface.h"
+
+# 26 "include/EnvInterface.h"
+namespace HostEnv{
+ enum{CUR_SEG = 0x10000u };
+# 267 "include/EnvInterface.h"
+};
+# 15 "include/conceptual/Serialize.h" 2
 
 
-
-# 16 "include/conceptual/Serialize.h"
 template <size_t __N>
 class Byte2Type{
 public:
@@ -2965,7 +2985,7 @@ class Byte2Type<4>{
 public:
  using Type=u32_t;
 };
-# 57 "include/conceptual/Serialize.h"
+# 58 "include/conceptual/Serialize.h"
 template <class __EnvTransfer>
 class SerializerPtr{
 public:
@@ -2989,23 +3009,41 @@ public:
         inline __attribute__((always_inline)) __SerializerPtr operator-(ptrdiff_t pdiff)const;
         inline __attribute__((always_inline)) __SerializerPtr& operator+=(ptrdiff_t pdiff);
         inline __attribute__((always_inline)) __SerializerPtr& operator-=(ptrdiff_t pdiff);
-# 88 "include/conceptual/Serialize.h"
+# 89 "include/conceptual/Serialize.h"
         template <class __BasicType,size_t __N=__EnvTransfer::template sizeofHostType<__BasicType>(),
           bool __SafeAssign=(sizeof(__BasicType)<=__N)>
-         inline __attribute__((always_inline)) void serializeByType(__BasicType data);
+         inline __attribute__((always_inline)) void serializeBasicType(__BasicType data);
 
         template <class __BasicType,size_t __N=__EnvTransfer::template sizeofHostType<__BasicType>(),
           bool __SafeAssign=(sizeof(__BasicType)<=__N)>
-         inline __attribute__((always_inline)) void deserializeByType(__BasicType& data);
+         inline __attribute__((always_inline)) void deserializeBasicType(__BasicType& data);
+
+
+        template <size_t __N=__EnvTransfer::template sizeofHostType<const void*>(),
+          bool __SafeAssign=(sizeof(const void*)<=__N)>
+         inline __attribute__((always_inline)) void serializeBasicType(const void* data);
+
+        template <size_t __N=__EnvTransfer::template sizeofHostType<void*>(),
+          bool __SafeAssign=(sizeof(void*)<=__N)>
+         inline __attribute__((always_inline)) void deserializeBasicType(void* & data);
+
+
+        template <size_t __N=__EnvTransfer::template sizeofHostType<const void*>(),
+          bool __SafeAssign=(sizeof(const void*)<=__N)>
+         inline __attribute__((always_inline)) void serializeBasicType(const void* data,ptrdiff_t diff);
+
+        template <size_t __N=__EnvTransfer::template sizeofHostType<void*>(),
+          bool __SafeAssign=(sizeof(void*)<=__N)>
+         inline __attribute__((always_inline)) void deserializeBasicType(void* & data,ptrdiff_t diff);
 
 
         template <class __BasicType,size_t __N=__EnvTransfer::template sizeofHostType<__BasicType>(),
    bool __SafeAssign=(sizeof(__BasicType)<=__N)>
-         inline __attribute__((always_inline)) void serializeByType(const __BasicType *data,size_t len);
+         inline __attribute__((always_inline)) void serializeBasicType(const __BasicType *data,size_t len);
 
         template <class __BasicType,size_t __N=__EnvTransfer::template sizeofHostType<__BasicType>(),
    bool __SafeAssign=(sizeof(__BasicType)<=__N)>
-         inline __attribute__((always_inline)) void deserializeByType(__BasicType *data,size_t len);
+         inline __attribute__((always_inline)) void deserializeBasicType(__BasicType *data,size_t len);
 private:
 
 
@@ -3029,17 +3067,19 @@ private:
          inline __attribute__((always_inline)) void
      __deserializeByType(__BasicType& data,Int2Type<false>);
 
-public:
-
-
-
 private:
+
+
+
+
+
+
         u8_t *ptr;
 };
-# 144 "include/conceptual/Serialize.h"
+# 165 "include/conceptual/Serialize.h"
 class SerializationInterface{
 public:
-# 166 "include/conceptual/Serialize.h"
+# 187 "include/conceptual/Serialize.h"
 };
 
 namespace{
@@ -3049,7 +3089,7 @@ namespace{
   inline __attribute__((always_inline)) SerializerPtr<__EnvTransfer>&
    __serializeHelper(SerializerPtr<__EnvTransfer>& p,const __S &s,Int2Type<true>)
   {
-   p.serializeByType(s);
+   p.serializeBasicType(s);
    return p;
   }
 
@@ -3064,7 +3104,7 @@ namespace{
   inline __attribute__((always_inline)) SerializerPtr<__EnvTransfer>&
    __deserializeHelper(SerializerPtr<__EnvTransfer>& p,__S &s,Int2Type<true>)
   {
-   p.deserializeByType(s);
+   p.deserializeBasicType(s);
    return p;
   }
 
@@ -3077,7 +3117,7 @@ namespace{
 
 
 }
-# 211 "include/conceptual/Serialize.h"
+# 232 "include/conceptual/Serialize.h"
 template <class __S,class __EnvTransfer>
 inline __attribute__((always_inline)) SerializerPtr<__EnvTransfer>& operator<<(SerializerPtr<__EnvTransfer>& p,const __S &s)
 {
@@ -3094,13 +3134,36 @@ inline __attribute__((always_inline)) SerializerPtr<__EnvTransfer>& operator>>(S
 {
  return __deserializeHelper<__S,__EnvTransfer>(p, s,Int2Type<std::is_pod<__S>::value>());
 }
+
+
+
+template <class __EnvTransfer,class T>
+inline __attribute__((always_inline)) SerializerPtr<__EnvTransfer>& operator<<(SerializerPtr<__EnvTransfer>& p,const HostEnv::Vector<T> &s)
+{
+ p << s.size();
+ for(auto & i : s)
+  p << i;
+ return p;
+}
+template <class __S,class __EnvTransfer,class T>
+inline __attribute__((always_inline)) SerializerPtr<__EnvTransfer>& operator>>(SerializerPtr<__EnvTransfer>& p,HostEnv::Vector<T> &s)
+{
+ decltype(s.size()) size=0;
+ p >> size;
+ s.resize(size);
+ for(decltype(size) i=0;i!=size;++i)
+  p >> s[i];
+ return p;
+}
 # 10 "include/List.h" 2
 
-#pragma pack(push,1)
+
+
+
 
 class SimpleMemoryNode:public SerializationInterface{
 public:
-    inline __attribute__((always_inline)) SimpleMemoryNode(bool NO=false);
+    inline __attribute__((always_inline)) SimpleMemoryNode(bool alloced=false);
     inline __attribute__((always_inline)) bool isAlloced();
     inline __attribute__((always_inline)) void setAlloced(bool alloced);
 
@@ -3113,22 +3176,21 @@ public:
  template <class __EnvTransfer>
  inline __attribute__((always_inline)) constexpr size_t getSerializitionSize()
   {return __EnvTransfer::template sizeofHostType<decltype(alloced)>();}
-public:
+private:
 
 
 
 
     bool alloced;
 };
-#pragma pack(pop)
-# 51 "include/List.h"
+# 53 "include/List.h"
 template <class T>
 class SimpleMemoryManager{
 public:
-    SimpleMemoryManager()=default;
+    __attribute__((deprecated)) SimpleMemoryManager()=default;
 
 public:
-# 66 "include/List.h"
+# 68 "include/List.h"
  struct Freeable:public T,public SimpleMemoryNode{
 
  };
@@ -3152,7 +3214,7 @@ public:
 
 
 
-    SimpleMemoryManager(size_t start,size_t limit,bool doInit=true,size_t initSize=0,ERROR_HANDLER errhandler=(0));
+ __attribute__((deprecated)) SimpleMemoryManager(size_t start,size_t limit,bool doInit=true,size_t initSize=0,ERROR_HANDLER errhandler=(0));
 
 
 
@@ -3173,7 +3235,10 @@ public:
     inline __attribute__((always_inline)) static size_t getNodeSize();
     inline __attribute__((always_inline)) ERROR_HANDLER getErrHandler();
     inline __attribute__((always_inline)) void setErrHandler(ERROR_HANDLER errhandle);
-protected:
+private:
+
+
+
     inline __attribute__((always_inline)) bool checkIsInternal(FullNode *t);
     size_t start;
     size_t limit;
@@ -3194,6 +3259,8 @@ public:
  using __ListNode = This;
 public:
     ListNode(const T& data,__ListNode* next=(0),__ListNode* previous=(0));
+    ListNode(const __ListNode &)=default;
+    __ListNode & operator=(const __ListNode &)=default;
     ~ListNode();
 
     inline __attribute__((always_inline)) const T& getData()const;
@@ -3213,7 +3280,7 @@ public:
 
 
     void adjustOffset(ptrdiff_t diff);
-    void initTonullptr();
+    void initToNull();
 
 
     __ListNode* getLast()const;
@@ -3241,21 +3308,28 @@ protected:
     __ListNode *previous;
 
 };
-# 198 "include/List.h"
+# 205 "include/List.h"
 template<class T,template <class> class _Allocator>
-class LinkedList{
+class LinkedList : public SerializationInterface
+{
 public:
+ using This = LinkedList<T,_Allocator>;
+ using __LinkedList = This;
  using __ListNode = ListNode<T>;
  using __Allocator = _Allocator<__ListNode>;
 public:
- LinkedList()=default;
+
+
+ LinkedList()=delete;
 
 public:
-    LinkedList( __Allocator *smm);
+    LinkedList( __Allocator &smm);
+    LinkedList(const __LinkedList&)=default;
+    __LinkedList & operator=(const __LinkedList&)=default;
     ~LinkedList();
 
     inline __attribute__((always_inline)) __ListNode* getHead()const;
-    inline __attribute__((always_inline)) _Allocator<__ListNode > *getMemoryManager()const;
+    inline __attribute__((always_inline)) _Allocator<__ListNode > &getMemoryManager()const;
 
 
     inline __attribute__((always_inline)) __ListNode* getLast()const;
@@ -3278,8 +3352,45 @@ public:
     void freePrevious(__ListNode *t);
 
 
+
+
+ template <class __EnvTransfer>
+  SerializerPtr<__EnvTransfer>& serialize(SerializerPtr<__EnvTransfer> &ptr)const
+  {
+   SerializerPtr<__EnvTransfer> ptrStart=ptr;
+   size_t n=0;
+   ptr >> n;
+   for(__ListNode *p=root->getNext();p!=last;p=p->getNext(),++n)
+      ptr << p->getData();
+   ptrStart << n;
+   return ptr;
+  }
+ template <class __EnvTransfer>
+  SerializerPtr<__EnvTransfer>& deserialize(SerializerPtr<__EnvTransfer> &ptr)
+  {
+   size_t n=0;
+   ptr >> n;
+   for(size_t i=0;i!=n;++i)
+   {
+    __ListNode *p=smm.getNew();
+    p->initToNull();
+    ptr >> p->getData();
+    this->append(p);
+   }
+   return ptr;
+  }
+
+
+
+
+
+ template <class __EnvTransfer>
+  size_t getSerializitionSize()
+ {
+  return __EnvTransfer::template sizeofHostType<decltype(root->getData())>() * getSize();
+ }
 protected:
-    _Allocator<__ListNode > *smm;
+    _Allocator<__ListNode > &smm;
 
 
 
@@ -3289,7 +3400,7 @@ protected:
 
 
 };
-# 267 "include/List.h"
+# 318 "include/List.h"
 template<class _Locateable,int _HowAllocated,
   template <class> class _Allocator>
 class LocateableLinkedList:public LinkedList<_Locateable,_Allocator>
@@ -3303,14 +3414,14 @@ public:
  using __Allocator = _Allocator<__ListNode>;
  using __SizeType = size_t;
 public:
-  LocateableLinkedList()=default;
+  LocateableLinkedList()=delete;
 public:
 
 
 
-    LocateableLinkedList( __Allocator *smm );
+    LocateableLinkedList( __Allocator &smm );
     ~LocateableLinkedList();
-# 296 "include/List.h"
+# 347 "include/List.h"
     static __ListNode *findFirstStartLen(__ListNode* startNode,__SizeType start,__SizeType len);
     static __ListNode *findFirstLen(__ListNode* startNode,__SizeType len);
     static __ListNode *findFirstStart(__ListNode* startNode,__SizeType start);
@@ -3347,7 +3458,15 @@ public:
  using __TreeNode = This;
 public:
  TreeNode()=default;
-    TreeNode(const T& data,__TreeNode* father=(0),__TreeNode* son=(0),__TreeNode* next=(0),__TreeNode* previous=(0));
+ TreeNode(const __TreeNode&)=default;
+ __TreeNode & operator=(const __TreeNode&)=default;
+
+
+    TreeNode(const T& data,
+      __TreeNode* father=(0),
+   __TreeNode* son=(0),
+   __TreeNode* next=(0),
+   __TreeNode* previous=(0));
     ~TreeNode();
 
     inline __attribute__((always_inline)) __TreeNode* setSon(__TreeNode* son);
@@ -3371,7 +3490,7 @@ public:
     __TreeNode* removeSon();
  __TreeNode* removeFather();
  void adjustOffset(ptrdiff_t diff);
- void initTonullptr();
+ void initToNull();
 
 
     __TreeNode* getParent()const;
@@ -3392,7 +3511,7 @@ protected:
     __TreeNode *father;
 
 };
-# 390 "include/List.h"
+# 449 "include/List.h"
 template <class T,template <class> class _Allocator>
 class Tree{
 public:
@@ -3402,9 +3521,12 @@ public:
  using __Allocator = _Allocator<__TreeNode>;
 public:
 
- Tree();
+ Tree()=delete;
 public:
-    Tree(__Allocator *smm,__TreeNode* root=(0));
+    Tree(__Allocator &smm,__TreeNode* root=(0));
+    Tree(const __Tree & )=default;
+    __Tree &operator=(const __Tree & )=default;
+
     ~Tree();
 
     inline __attribute__((always_inline)) __TreeNode *getHead()const;
@@ -3418,8 +3540,8 @@ public:
     void dumpInfo(Printer* p)const;
 
 protected:
-    __Allocator *smm;
-# 427 "include/List.h"
+    __Allocator &smm;
+# 489 "include/List.h"
     __TreeNode *root;
 
 };
@@ -3711,18 +3833,23 @@ protected:
  AssociatedMemoryManager<T,1> manArrs[MaxArrNum];
  size_t lastMan;
 };
-# 65 "include/AssociatedMemoryManager.h"
+# 67 "include/AssociatedMemoryManager.h"
 template <class T>
-class AssociatedMemoryManager<T,1>{
+class AssociatedMemoryManager<T,1>:public SerializationInterface
+
+{
 public:
  typedef SimpleMemoryNode NodeType;
  typedef T TargetType;
  typedef AssociatedMemoryManager<T,1> This;
 public:
  AssociatedMemoryManager();
-# 82 "include/AssociatedMemoryManager.h"
- AssociatedMemoryManager(size_t nstart,size_t tstart,size_t len,bool nodeArrInit=true,int *usedList=(0),size_t usedLen=0);
+# 86 "include/AssociatedMemoryManager.h"
+ AssociatedMemoryManager(size_t nstart,size_t tstart,size_t len,
+     bool nodeArrInit=true,int *usedList=(0),size_t usedLen=0);
  ~AssociatedMemoryManager();
+
+
 
     TargetType* getNew();
 
@@ -3750,14 +3877,41 @@ public:
 
 
  inline __attribute__((always_inline)) TargetType* getTarget(size_t index);
-    void allocNode(size_t index);
-    void withdrawNode(size_t index);
     inline __attribute__((always_inline)) size_t getTargetIndex(TargetType* t)const;
  inline __attribute__((always_inline)) size_t getNodeIndex(NodeType* n)const;
- inline __attribute__((always_inline)) static size_t getEachSize();
+ inline __attribute__((always_inline)) constexpr static size_t getEachSize();
  inline __attribute__((always_inline)) NodeType* getNodeAddress();
-protected:
+ void allocNode(size_t index);
+ void withdrawNode(size_t index);
+
+ template <class __EnvTransfer>
+  SerializerPtr<__EnvTransfer>& serialize(SerializerPtr<__EnvTransfer> &ptr)const
+  {
+   return ptr << narr << tarr << len << lastIndex << curAllocedSize;
+  }
+ template <class __EnvTransfer>
+  SerializerPtr<__EnvTransfer>& deserialize(SerializerPtr<__EnvTransfer> &ptr)
+  {
+   return ptr >>narr >> tarr >> len >> lastIndex >> curAllocedSize;
+  }
+ template <class __EnvTransfer>
+  static constexpr size_t getSerializitionSize()
+ {
+  This *p=static_cast<This*>((0));
+
+  return __EnvTransfer::template sizeofHostType<decltype(p->nstart)>() +
+    __EnvTransfer::template sizeofHostType<decltype(p->tstart)>()+
+    __EnvTransfer::template sizeofHostType<decltype(p->len)>()+
+    __EnvTransfer::template sizeofHostType<decltype(p->lastIndex)>()+
+    __EnvTransfer::template sizeofHostType<decltype(p->curAllocedSize)>();
+
+ }
+
+
+private:
  inline __attribute__((always_inline)) NodeType* getNode(size_t index);
+
+private:
  union{
   size_t nstart;
   NodeType *narr;
@@ -3774,8 +3928,7 @@ protected:
 
 
  size_t curAllocedSize;
-protected:
-# 151 "include/AssociatedMemoryManager.h"
+# 184 "include/AssociatedMemoryManager.h"
 };
 # 12 "include/Kernel.h" 2
 # 30 "include/Kernel.h"
@@ -3882,7 +4035,8 @@ protected:
 template <class _LinearSourceDescriptor,template <class> class _NodeAllocator>
 class LinearSourceManager:
   public
-  LocateableLinkedList<_LinearSourceDescriptor,Locator<_LinearSourceDescriptor>::DISCARD,_NodeAllocator>{
+  LocateableLinkedList<_LinearSourceDescriptor,Locator<_LinearSourceDescriptor>::DISCARD,_NodeAllocator>
+  {
 public:
  using This = LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator>;
  using __LinearSourceManager = This;
@@ -3894,13 +4048,13 @@ public:
     using __LinkedList = LinkedList<_LinearSourceDescriptor,_NodeAllocator>;
     using __SizeType = size_t;
 
- LinearSourceManager();
+ LinearSourceManager()=delete;
 public:
 
 
 
 
-    LinearSourceManager(__Allocator *smm,__SizeType start,__SizeType size);
+    LinearSourceManager(__Allocator &smm,__SizeType start,__SizeType size);
     ~LinearSourceManager();
 
     inline __attribute__((always_inline)) const _LinearSourceDescriptor & getSpace()const;
@@ -3917,7 +4071,7 @@ public:
 
 
     void* mnew(__SizeType size);
-# 171 "include/MemoryManager.h"
+# 172 "include/MemoryManager.h"
     void* extend(__SizeType start,__SizeType size,bool addOrReduce,__SizeType extsize,char *realBase=(0),bool moveData=false);
     void mdelete(void* p,__SizeType size);
 
@@ -3925,7 +4079,7 @@ public:
 
 
     __attribute__((deprecated)) void mdelete(void *p);
-# 186 "include/MemoryManager.h"
+# 187 "include/MemoryManager.h"
     bool mnewLinked(__SizeType size,
       __LinkedList &list,__SizeType eachSectionExtraSize=0);
 
@@ -3937,6 +4091,35 @@ public:
 
     void mdeleteLinked(__LinkedList &list);
 
+
+
+
+
+ template <class __EnvTransfer>
+  SerializerPtr<__EnvTransfer>& serialize(SerializerPtr<__EnvTransfer> &ptr)const
+  {
+   ptr << space;
+   return Super::serialize(ptr);
+  }
+
+
+
+ template <class __EnvTransfer>
+  SerializerPtr<__EnvTransfer>& deserialize(SerializerPtr<__EnvTransfer> &ptr)
+  {
+   ptr >> space;
+   return Super::deserialize(ptr);
+  }
+
+
+
+
+
+ template <class __EnvTransfer>
+  size_t getSerializitionSize()
+ {
+  return __EnvTransfer::template sizeofHostType<decltype(space)>() + Super::getSerializitionSize();
+ }
 
 protected:
     _LinearSourceDescriptor allocOutNode(__ListNode *avlNode,__SizeType start,__SizeType len);
@@ -3954,7 +4137,7 @@ protected:
 protected:
     _LinearSourceDescriptor space;
 };
-# 243 "include/MemoryManager.h"
+# 273 "include/MemoryManager.h"
 template <template <class> class _DescriptorAllocator>
 class MemoryManager:public Tree<MemoryDescriptor,_DescriptorAllocator>{
 public:
@@ -3972,16 +4155,16 @@ public:
 
 public:
  MemoryManager()=default;
-    MemoryManager(__Allocator *smm);
-# 269 "include/MemoryManager.h"
-    MemoryManager(__Allocator *smm,__SizeType start,__SizeType len,bool fatherAllocable=true);
+    MemoryManager(__Allocator &smm);
+# 299 "include/MemoryManager.h"
+    MemoryManager(__Allocator &smm,__SizeType start,__SizeType len,bool fatherAllocable=true);
 
 
 
 
 
 
-    MemoryManager(__Allocator *smm,__SizeType start,__SizeType len,
+    MemoryManager(__Allocator &smm,__SizeType start,__SizeType len,
       __SizeType usedList[][2],__SizeType usedLen,bool fatherAllocable=true);
 
     ~MemoryManager();
@@ -3996,7 +4179,7 @@ public:
     void* mnew(__SizeType start,__SizeType size);
     void* mnew(__SizeType size);
     void* mnewAlign(__SizeType size,__SizeType alignment);
-# 302 "include/MemoryManager.h"
+# 332 "include/MemoryManager.h"
     void* extend(__SizeType start,__SizeType size,int extsize,char *realBase=(0),bool moveData=false);
 
     void mdelete(void* p,__SizeType size);
@@ -4036,7 +4219,7 @@ public:
 protected:
     __TreeNode * allocOutNode(__TreeNode *avlNode,__SizeType start,__SizeType len);
     void withdrawNode(__TreeNode *exactNode);
-# 349 "include/MemoryManager.h"
+# 379 "include/MemoryManager.h"
     u8_t findExtend(__SizeType start,__SizeType size,__SizeType extsize,__TreeNode * &rtnode)const;
 
 protected:
@@ -4348,7 +4531,9 @@ extern "C" {
 
 public:
  Process();
-# 134 "include/Process.h"
+ Process(const Process&)=delete;
+ Process &operator=(const Process&)=delete;
+# 136 "include/Process.h"
  Process(
    unsigned int pid,
    TSS* ptss,int tssIndex,
@@ -4453,8 +4638,10 @@ public:
  };
 public:
  ProcessManager();
+ ProcessManager(const ProcessManager&)=delete;
+ ProcessManager& operator=(const ProcessManager&)=delete;
  ~ProcessManager();
-# 68 "include/Kernel.h"
+# 70 "include/Kernel.h"
  Process *createProcess(size_t codeLimit,size_t dataLimit,size_t stackLimit,
    char dpl=SegmentDescriptor::DPL_3);
 
@@ -4489,7 +4676,7 @@ protected:
 
  unsigned int getNewPid();
  void releasePid(unsigned int pid);
-# 116 "include/Kernel.h"
+# 118 "include/Kernel.h"
  Process* createProcess(unsigned int pid,size_t prcBase,size_t prcStart,size_t codeLimit,size_t dataLimit,size_t stackLimit,
    char dpl=SegmentDescriptor::DPL_3);
  void createIdleProcess();
@@ -4515,7 +4702,7 @@ protected:
 
  unsigned int maxPID;
 };
-# 156 "include/Kernel.h"
+# 158 "include/Kernel.h"
 class Kernel{
 public:
  typedef Kernel This;
@@ -4659,7 +4846,7 @@ public:
 
 
  inline __attribute__((always_inline)) void withdrawPDE(size_t i);
-# 307 "include/Kernel.h"
+# 309 "include/Kernel.h"
  inline __attribute__((always_inline)) int preparePhysicalMap(size_t physical,size_t size);
 
 
@@ -5538,7 +5725,7 @@ void Printer::putsz(const char* str)
 void Printer::puti(const char *str,int i,const char* strAfter)
 {
  char buf[10];
- Util::digitToStr(buf, (((size_t)sizeof(buf))/((size_t)sizeof((buf)[0]))), i);
+ Util::digitToStr(buf, ((static_cast<size_t>(sizeof(buf)))/(static_cast<size_t>(sizeof((buf)[0])))), i);
  putsz(str);
  putsz(buf);
  if(strAfter)
@@ -5549,7 +5736,7 @@ void Printer::puti(const char *str,int i,const char* strAfter)
 void Printer::putx(const char* str,int i,const char* strAfter)
 {
  char buf[10];
- Util::digitToHex(buf, (((size_t)sizeof(buf))/((size_t)sizeof((buf)[0]))), i);
+ Util::digitToHex(buf, ((static_cast<size_t>(sizeof(buf)))/(static_cast<size_t>(sizeof((buf)[0])))), i);
  putsz(str);
  putsz(buf);
  if(strAfter)
@@ -5557,11 +5744,11 @@ void Printer::putx(const char* str,int i,const char* strAfter)
 }
 void Printer::puti(const char* str,void * i,const char* strAfter)
 {
- puti(str,(int)i,strAfter);
+ puti(str,reinterpret_cast<int>(i),strAfter);
 }
 void Printer::putx(const char* str,void * i,const char* strAfter)
 {
- putx(str,(int)i,strAfter);
+ putx(str,reinterpret_cast<int>(i),strAfter);
 }
 
 
@@ -5653,7 +5840,7 @@ void Printer::clr()
 Printer Printer::getSubPrinter(unsigned int x0,unsigned int y0,unsigned int rows,unsigned int cols,int mode)
 {
  char spaces[sizeof(Printer)];
-    Printer* target=(Printer*)spaces;
+    Printer* target=reinterpret_cast<Printer*>(spaces);
     target->rows = rows > this->rows?this->rows:rows;
     target->cols = cols > this->cols? this->cols: cols;
     target->x0 = this->x0 + ((x0+target->rows) > this->rows?0:x0);
@@ -5733,7 +5920,7 @@ T Queue<T>::remove()
         rt = p[indexRemove];
         indexRemove++;
         curLen--;
-        if(indexRemove==(int)len)indexRemove=0;
+        if(indexRemove==reinterpret_cast<int>(len))indexRemove=0;
     }
     return rt;
 }
@@ -5747,7 +5934,7 @@ int Queue<T>::put(T t)
         this->p[indexAdd]=t;
         indexAdd++;
         curLen++;
-        if(indexAdd == (int)len)indexAdd=0;
+        if(indexAdd == reinterpret_cast<int>(len))indexAdd=0;
     }
     return 1;
 

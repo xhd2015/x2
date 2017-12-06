@@ -78,7 +78,7 @@
 template <class T>
 SimpleMemoryManager<T>::SimpleMemoryManager(size_t start,size_t limit,bool doInit,size_t initSize,SimpleMemoryManager<T>::ERROR_HANDLER errhandle):
 start(start),limit(limit),
-data((FullNode*)start),curSize(initSize),len(limit/x2sizeof(FullNode)),
+data(reinterpret_cast<FullNode*>(start)),curSize(initSize),len(limit/x2sizeof(FullNode)),
 lastIndex(0),
 errhandle(errhandle)
 {
@@ -99,7 +99,7 @@ errhandle(errhandle)
 
 //template <class T>
 //SimpleMemoryManager<T>::SimpleMemoryManager():
-//start(-1),limit(0),data(NULL),len(0),curSize(0),lastIndex(0),errhandle(NULL)
+//start(-1),limit(0),data(nullptr),len(0),curSize(0),lastIndex(0),errhandle(nullptr)
 //{
 //
 //
@@ -109,14 +109,14 @@ errhandle(errhandle)
 template <class T>
 T* SimpleMemoryManager<T>::getNew()
 {
-	return (T*)this->getNewNode();
+	return static_cast<T*>(this->getNewNode());
 }
 
 template <class T>
 typename SimpleMemoryManager<T>::FullNode *SimpleMemoryManager<T>::getNewNode()
 {
 	//Kernel::printer->putsz("in getNewNode\n");
-    FullNode *rt=NULL;
+    FullNode *rt=nullptr;
     if(!isFull())
     {
         for(size_t i=0;i!=len;i++)
@@ -140,19 +140,19 @@ typename SimpleMemoryManager<T>::FullNode *SimpleMemoryManager<T>::getNewNode()
 template <class T>
 void SimpleMemoryManager<T>::withdraw(SimpleMemoryManager<T>::FullNode *t)
 {
-	FullNode* _t=(FullNode*)t;
+	FullNode* _t=reinterpret_cast<FullNode*>(t);
     if(_t && _t->isAlloced())
     {
         _t->setAlloced(false); //如果被标记为可用，就用lastIndex指向之
         curSize--;
-        lastIndex = (size_t)(((size_t)_t - (size_t)start)/sizeof(FullNode)) % len;
+        lastIndex = ((_t - start)/sizeof(FullNode)) % len;
     }
 }
 
 template <class T>
 void SimpleMemoryManager<T>::withdraw(T *t)
 {
-	this->withdraw((FullNode*)t);
+	this->withdraw(reinterpret_cast<FullNode*>(t));
 }
 
 
@@ -241,21 +241,21 @@ void    __DEF_ListNode::insertPrevious(__ListNode* previous)
 __DEF_Template_ListNode
 void   __DEF_ListNode::adjustOffset(ptrdiff_t diff)
 {
-	if(this->next!=NULL)
-		this->next = (__ListNode*)((char*)this->next + diff);
-	if(this->previous!=NULL)
-		this->previous = (__ListNode*)((char*)this->previous + diff);
+	if(this->next!=nullptr)
+		this->next = reinterpret_cast<__ListNode*>(this->next + diff);
+	if(this->previous!=nullptr)
+		this->previous = reinterpret_cast<__ListNode*>(this->previous + diff);
 }
 __DEF_Template_ListNode
 void   __DEF_ListNode::initToNull()
 {
-	next = previous = NULL;
+	next = previous = nullptr;
 }
 __DEF_Template_ListNode
 typename __DEF_ListNode::__ListNode*   __DEF_ListNode::getLast()const
 {
 //	Util::printStr("in ListNode getLast\n");
-    __ListNode* p=(__ListNode*)this;
+    __ListNode* p= static_cast<__ListNode*>(this);
     while(p->hasNext())
     {
         p=p->getNext();
@@ -266,7 +266,7 @@ typename __DEF_ListNode::__ListNode*   __DEF_ListNode::getLast()const
 __DEF_Template_ListNode
 typename __DEF_ListNode::__ListNode*    __DEF_ListNode::getFirst()const
 {
-    __ListNode *p=(__ListNode*)this;
+    __ListNode *p=reinterpret_cast<__ListNode*>(this);
     while(p->hasPrevious())
     {
         p=p->getPrevious();
@@ -283,24 +283,24 @@ typename __DEF_ListNode::__ListNode*    __DEF_ListNode::getFirst()const
 #define __DEF_LinkedList LinkedList<T,_Allocator>
 
 __DEF_Template_LinkedList
-__DEF_LinkedList::LinkedList(__Allocator *smm):
-smm(smm)
+__DEF_LinkedList::LinkedList(__Allocator &smm):
+smm(smm),root(nullptr),last(nullptr)
 {
 //	Kernel::printer->putsz("in LinkedList init\n");
 //	Kernel::printer->putx("sizeof(ListNode<T>)=",x2sizeof(ListNode<T>));
 //	Kernel::getTheKernel()->dumpInfo();
     char temp[sizeof(T)];
-    __ListNode *node1=smm->getNew();
+    __ListNode *node1=smm.getNew();
 //    Kernel::printer->putx("node1=",(int)node1);
 //	Kernel::getTheKernel()->dumpInfo();
 
-    __ListNode *node2=smm->getNew();
+    __ListNode *node2=smm.getNew();
 //    Kernel::printer->putx("node2=",(int)node2);
 //	Kernel::getTheKernel()->dumpInfo();
 
 //	Util::insertMark(0x270270);
-    this->root = new (node1) __ListNode(*(T*)temp,NULL,NULL);
-    this->last = new (node2) __ListNode(*(T*)temp,NULL,NULL);
+    this->root = new (node1) __ListNode(*reinterpret_cast<T*>(temp),nullptr,nullptr);
+    this->last = new (node2) __ListNode(*reinterpret_cast<T*>(temp),nullptr,nullptr);
 //	Kernel::printer->putsz("in LinkedList init return\n");
 //	Util::jmpDie();
 }
@@ -313,12 +313,14 @@ __DEF_LinkedList::~LinkedList()
 __DEF_Template_LinkedList
 void __DEF_LinkedList::free()
 {
-    this->smm->withdraw(this->last);
+	if(root)
+		this->freeNext(root->getNext());
 
-    this->freeNext(this->root);
+	this->smm.withdraw(this->root);
+    this->smm.withdraw(this->last);
 
-    this->root=NULL;
-    this->last=NULL;
+    this->root=nullptr;
+    this->last=nullptr;
 
 }
 __DEF_Template_LinkedList
@@ -326,14 +328,16 @@ void __DEF_LinkedList::freeNext(__ListNode *t)
 {
     if(!t || t==root || t==last)return;
     __ListNode *p=t;
+    __ListNode *prev=t->getPrevious();
     while(p)
     {
-        smm->withdraw(p);
+        smm.withdraw(p);
         p=p->getNext();
     }
-
-    t->getPrevious()->setNext(NULL);
-    this->last->setNext(t->getPrevious()==root?NULL:t->getPrevious());   
+    if(prev)
+    	prev->setNext(nullptr);
+    if(last)
+    	last->setNext(prev==root? nullptr : prev);
 
 }
 
@@ -350,7 +354,7 @@ void __DEF_LinkedList::freePrevious(__ListNode *t)
     root->insertNext(t->getNext());
     if(t==getLast())
     {
-        this->last->setNext(NULL);
+        this->last->setNext(nullptr);
     }
 }   
 __DEF_Template_LinkedList
@@ -362,7 +366,7 @@ void    __DEF_LinkedList::freeNode(__ListNode * node)
         {
             if(node==getHead())
             {
-                last->setNext(NULL);
+                last->setNext(nullptr);
             }else{
                 last->setNext(node->getPrevious());
             }
@@ -382,9 +386,9 @@ __DEF_Template_LinkedList
 typename __DEF_LinkedList::__ListNode*  __DEF_LinkedList::
 		append(__ListNode* p)
 {
-    if(!p)return NULL;
+    if(!p)return nullptr;
     __ListNode* rlast=getLast();
-    if(rlast==NULL)
+    if(rlast==nullptr)
     {
         rlast=this->root;
     }
@@ -398,16 +402,16 @@ __DEF_Template_LinkedList
 typename __DEF_LinkedList::__ListNode*  __DEF_LinkedList::
 		appendHead(const T& t)
 {
-    return appendHead(new (smm->getNew()) __ListNode(t));
+    return appendHead(new (smm.getNew()) __ListNode(t));
 }
 
 __DEF_Template_LinkedList
 typename __DEF_LinkedList::__ListNode*  __DEF_LinkedList::
 		appendHead(__ListNode* p)
 {
-    if(!p)return NULL;
+    if(!p)return nullptr;
     root->insertNext(p);
-    if(getLast()==NULL)
+    if(getLast()==nullptr)
     {
         last->setNext(p);
     }
@@ -420,10 +424,10 @@ typename __DEF_LinkedList::__ListNode*    __DEF_LinkedList::
    __ListNode* plast=getLast();
    if(plast)
    {
-    plast->getPrevious()->setNext(NULL);
+    plast->getPrevious()->setNext(nullptr);
     if(root->getNext() == last->getNext() )
     {
-        last->setNext(NULL);
+        last->setNext(nullptr);
     } else{
         last->setNext(plast->getPrevious());
     }
@@ -454,7 +458,7 @@ void    __DEF_LinkedList::remove(__ListNode* p)
 __DEF_Template_LinkedList
 void	 __DEF_LinkedList::insertNext(__ListNode* where,__ListNode* p)
 {
-	if(where==NULL||p==NULL)return;
+	if(where==nullptr||p==nullptr)return;
 	if(where==this->root)
 	{
 		this->appendHead(p);
@@ -468,7 +472,7 @@ void	 __DEF_LinkedList::insertNext(__ListNode* where,__ListNode* p)
 __DEF_Template_LinkedList
 void	 __DEF_LinkedList::insertPrevious(__ListNode* where,__ListNode* p)
 {
-	if(where==NULL||where==this->root||p==NULL)return;
+	if(where==nullptr||where==this->root||p==nullptr)return;
 	if(root->getNext()==where)
 	{
 		this->appendHead(p);
@@ -496,7 +500,7 @@ typename __DEF_LinkedList::__ListNode*    __DEF_LinkedList::
     __ListNode* p=root->removeNext();
     if(p==getLast())
     {
-        last->setNext(NULL);
+        last->setNext(nullptr);
     }
     return p;
    
@@ -512,7 +516,7 @@ typename __DEF_LinkedList::__ListNode*    __DEF_LinkedList::
 #define __DEF_LocateableLinkedList LocateableLinkedList<_Locateable,_HowAllocated,_Allocator>
 
 __DEF_Template_LocateableLinkedList
-__DEF_LocateableLinkedList::LocateableLinkedList(__Allocator *smm ):
+__DEF_LocateableLinkedList::LocateableLinkedList(__Allocator &smm ):
 Super(smm)
 {
 
@@ -533,7 +537,7 @@ __DEF_Template_LocateableLinkedList
 typename __DEF_LocateableLinkedList::__ListNode*__DEF_LocateableLinkedList::
 findFirstStartLen(__ListNode* startNode,__SizeType start,__SizeType len)
 {
-    if(!startNode||len==0)return NULL;
+    if(!startNode||len==0)return nullptr;
 #if defined(CODE64)
 //    printf("findFirstStartLen for (%x,%x)\n",start,len);
 #endif
@@ -542,7 +546,7 @@ findFirstStartLen(__ListNode* startNode,__SizeType start,__SizeType len)
 
      // start要小于，长度忽略,可分配性忽略
     // 即p.start < tloc.start 其他忽略
-    // (x,y)  (a0,b0)-->(a1,b1)-->(a2,b2)-->NULL
+    // (x,y)  (a0,b0)-->(a1,b1)-->(a2,b2)-->nullptr
     // 先找到(x,y)所在的合适区间，即x最接近的那个ai,x>ai,x==ai均可，所以当x<ai时，应当跳过
 //    SourceLocator<_Locateable,Locator<_Locateable>::LESS,Locator<_Locateable>::IGNORE,Locator<_Locateable>::IGNORE> lessLocator(tloc);
 #if defined(CODE64)
@@ -595,9 +599,9 @@ findFirstStartLen(__ListNode* startNode,__SizeType start,__SizeType len)
 #endif
 #if defined(CODE64)
 //    printf("end of findFirstStartLen,result is ");
-//    if(p==NULL)
+//    if(p==nullptr)
 //    {
-//    	printf("NULL\n");
+//    	printf("nullptr\n");
 //    }else{
 //    	printf("(%x,%x) \n",p->getData().getStart(),p->getData().getLimit());
 //    }
@@ -608,7 +612,7 @@ findFirstStartLen(__ListNode* startNode,__SizeType start,__SizeType len)
 __DEF_Template_LocateableLinkedList
 typename __DEF_LocateableLinkedList::__ListNode*__DEF_LocateableLinkedList::findFirstLen(__ListNode* startNode,__SizeType len)
 {
-    if(!startNode||len==0)return NULL;
+    if(!startNode||len==0)return nullptr;
     __ListNode* p=startNode;
     _Locateable tloc(0,len);
     SourceLocator<_Locateable,Locator<_Locateable>::IGNORE,Locator<_Locateable>::EQUAL,Locator<_Locateable>::IGNORE> equLocator(tloc);
@@ -623,7 +627,7 @@ typename __DEF_LocateableLinkedList::__ListNode*__DEF_LocateableLinkedList::find
 __DEF_Template_LocateableLinkedList
 typename __DEF_LocateableLinkedList::__ListNode*__DEF_LocateableLinkedList::findFirstStart(__ListNode* startNode,__SizeType start)
 {
-    if(!startNode)return NULL;
+    if(!startNode)return nullptr;
 
     _Locateable tloc(start,0);
     __ListNode* p=__DEF_LocateableLinkedList::findFirstStartForInsert(startNode,start);
@@ -632,13 +636,13 @@ typename __DEF_LocateableLinkedList::__ListNode*__DEF_LocateableLinkedList::find
     {
         return p;
     }else{
-        return NULL;
+        return nullptr;
     }
 }
 __DEF_Template_LocateableLinkedList
 typename __DEF_LocateableLinkedList::__ListNode*__DEF_LocateableLinkedList::findFirstStartForInsert(__ListNode *startNode,__SizeType start)
 {
-    if(!startNode)return NULL;
+    if(!startNode)return nullptr;
     __ListNode *p=startNode,*last=startNode;
     _Locateable tloc(start,0);
     SourceLocator<_Locateable,Locator<_Locateable>::LESS,Locator<_Locateable>::IGNORE,Locator<_Locateable>::IGNORE> lessLocator(tloc);
@@ -648,7 +652,7 @@ typename __DEF_LocateableLinkedList::__ListNode*__DEF_LocateableLinkedList::find
             startNode=p;
             p=__DEF_LocateableLinkedList::nextAllocable(p);
         }
-    if(p==NULL)
+    if(p==nullptr)
     {
         return last;
     }
@@ -680,7 +684,7 @@ __DEF_Template_LocateableLinkedList
 typename __DEF_LocateableLinkedList::__ListNode* __DEF_LocateableLinkedList::
 	nextAllocable(__ListNode* startNode,Int2Type<Locator<_Locateable>::DISCARD>)
 {
-    return startNode==NULL?NULL:startNode->getNext();
+    return startNode==nullptr?nullptr:startNode->getNext();
 }
 #undef __DEF_Template_LocateableLinkedList
 #undef __DEF_LocateableLinkedList
@@ -728,7 +732,7 @@ void __DEF_TreeNode::addSon(__TreeNode* son)
 }
 __DEF_Template_TreeNode
 void __DEF_TreeNode::insertSon(__TreeNode* son) {
-	if(son!=NULL)
+	if(son!=nullptr)
 	{
 #if defined(CODE64)
 //	printf("insertSon 0\n");
@@ -758,7 +762,7 @@ void __DEF_TreeNode::insertSon(__TreeNode* son) {
 
 __DEF_Template_TreeNode
 void __DEF_TreeNode::insertFather(__TreeNode* father) {
-	if(father!=NULL)
+	if(father!=nullptr)
 	{
 		__TreeNode *orifather=this->getDirectFather();
 		this->setFather(father);
@@ -778,27 +782,27 @@ typename __DEF_TreeNode::__TreeNode* __DEF_TreeNode::removeSon() {
 		__TreeNode *son=this->getSon()->getSon();
 		this->setSon(son);
 		son->setFather(this);
-		this->getSon()->setFather(NULL);
-		this->getSon()->setSon(NULL);
+		this->getSon()->setFather(nullptr);
+		this->getSon()->setSon(nullptr);
 
 	}
 	// TODO 改变返回参数，什么都不返回
-	return NULL;
+	return nullptr;
 }
 __DEF_Template_TreeNode
 void 			__DEF_TreeNode::adjustOffset(ptrdiff_t diff)
 {
 	this->Super::adjustOffset(diff);
-	if(this->father!=NULL)
-		this->father = (__TreeNode*)((char*)this->father + diff);
-	if(this->son!=NULL)
-		this->son = (__TreeNode*)((char*)this->son + diff);
+	if(this->father!=nullptr)
+		this->father = reinterpret_cast<__TreeNode*>(this->father + diff);
+	if(this->son!=nullptr)
+		this->son = reinterpret_cast<__TreeNode*>(this->son + diff);
 }
 __DEF_Template_TreeNode
 void 			__DEF_TreeNode::initToNull()
 {
 	__ListNode::initToNull();
-	father=son=NULL;
+	father=son=nullptr;
 }
 
 __DEF_Template_TreeNode
@@ -808,19 +812,19 @@ typename __DEF_TreeNode::__TreeNode* __DEF_TreeNode::removeFather() {
 		__TreeNode *father=this->getDirectFather()->getDirectFather();
 		this->setFather(father);
 		father->setSon(this);
-		this->getDirectFather()->setFather(NULL);
-		this->getDirectFather()->setSon(NULL);
+		this->getDirectFather()->setFather(nullptr);
+		this->getDirectFather()->setSon(nullptr);
 	}
 	//TODO 返回void
-	return NULL;
+	return nullptr;
 }
 
 __DEF_Template_TreeNode
 typename __DEF_TreeNode::__TreeNode* __DEF_TreeNode::getParent()const {//往previous一直遍历，直到是跟，然后返回跟的father
-	__TreeNode *p=(__TreeNode*)this;
+	__TreeNode *p=reinterpret_cast<__TreeNode*>(this);
 	while(p->hasPrevious())
 	{
-		p=(__TreeNode*)p->getPrevious();
+		p=reinterpret_cast<__TreeNode*>(p->getPrevious());
 	}
 	return p->getDirectFather();
 }
@@ -838,8 +842,8 @@ typename __DEF_TreeNode::__TreeNode* __DEF_TreeNode::getParent()const {//往prev
 #define __DEF_Template_Tree template<class T,template <class> class _Allocator>
 #define __DEF_Tree Tree<T,_Allocator>
 __DEF_Template_Tree
-__DEF_Tree::Tree(__Allocator* smm,__TreeNode* root):
-smm(smm)
+__DEF_Tree::Tree(__Allocator& smm,__TreeNode* root):
+smm(smm),root(root)
 {
 #if defined(CODE32)
 	Kernel::printer->putsz("in Tree init.");
@@ -851,11 +855,15 @@ smm(smm)
 #endif
 
 	// TODO 恢复下面的代码
-	__TreeNode *node=smm->getNew();
+	__TreeNode *node=nullptr;
+	if(root==nullptr && (node=smm.getNew())!=nullptr)
+	{
+		node->initToNull();
+		this->root=node;
+	}
+
 //	Kernel::getTheKernel()->dumpInfo();
-//	__TreeNode *node=(__TreeNode*)Kernel::getTheKernel()->mnewKernel(x2sizeof(__TreeNode));
-	node->initToNull();
-	this->root=(root==NULL?node:root);
+//	__TreeNode *node=reinterpret_cast<__TreeNode*>(Kernel::getTheKernel())->mnewKernel(x2sizeof(__TreeNode));
 
 #if defined(CODE32)
 	Kernel::printer->putsz("in Tree init return\n");
@@ -881,7 +889,7 @@ smm(smm)
 __DEF_Template_Tree
 void __DEF_Tree::dumpInfo(Printer* p)const
 {
-	if(p!=NULL)
+	if(p!=nullptr)
 	{
 		p->putsz("Tree{");
 
@@ -891,12 +899,10 @@ void __DEF_Tree::dumpInfo(Printer* p)const
 #endif
 
 __DEF_Template_Tree
-__DEF_Tree::Tree()
-{
-
-}
-__DEF_Template_Tree
 __DEF_Tree::~Tree() {
+	 // 所有节点应当被撤销
+//	free(this->root);
+
 }
 
 __DEF_Template_Tree
@@ -911,7 +917,7 @@ void         __DEF_Tree::free(__TreeNode *root)
         this->free(p);
         p = next;
     }//OK,all the sons are free
-    smm->withdraw(root);
+    smm.withdraw(root);
   }
 }
 

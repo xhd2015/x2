@@ -320,6 +320,8 @@ public:
     const static int SCREEN_MAX_X,SCREEN_MAX_Y;
 public:
     Printer(unsigned int x0=0,unsigned int y0=0,unsigned int rows=Printer::SCREEN_MAX_X,unsigned int cols=Printer::SCREEN_MAX_Y,int mode=Util::MODE_COMMON);
+    Printer(const Printer&)=default;
+    Printer&operator=(const Printer&)=default;
     ~Printer();
     
     void putc(int chr);
@@ -366,7 +368,7 @@ private:
     /**
     *处理特殊字符
     *   1 --    已经处理
-    *   -1 --   是NULL字符
+    *   -1 --   是nullptr字符
     *   0   --  正常打印
     *
     */
@@ -411,6 +413,8 @@ public:
 class String{
 public:
     String(const char* str);
+    String(const String &)=default;
+    String &operator=(const String &)=default;
     ~String();
     
     int size();
@@ -429,6 +433,9 @@ class Queue{
 public:
 	Queue()=default;//可能需要使用replacement new来重新初始化
     Queue(T p[],size_t len);//掌管指针
+    Queue(const Queue &)=delete;
+    Queue &operator=(const Queue &)=delete;
+
     ~Queue();
     
     T remove();

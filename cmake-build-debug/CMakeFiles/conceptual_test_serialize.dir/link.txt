@@ -1,0 +1,1 @@
+/usr/bin/c++.exe -g  -Wl,--enable-auto-import CMakeFiles/conceptual_test_serialize.dir/src/conceptual/all.cpp.o  -o conceptual_test_serialize.exe -Wl,--out-implib,libconceptual_test_serialize.dll.a -Wl,--major-image-version,0,--minor-image-version,0 

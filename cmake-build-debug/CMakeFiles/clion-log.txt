@@ -1,1 +1,5 @@
-CMakeLists.txt not found in C:\Users\13774\Desktop\old_desktop\bochs\devel\x2-system
+C:\Users\13774\.CLion2017.3\system\cygwin_cmake\bin\cmake.exe -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles" /cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system
+MATCHES:hello
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug

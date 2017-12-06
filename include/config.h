@@ -42,9 +42,6 @@
 #if !defined(CONFIG_KERNEL_PTE_0_NUM)
 #define  CONFIG_KERNEL_PTE_0_NUM 0
 #endif
-#if !defined(CONFIG_PREFIX_SIZE)
-#define  CONFIG_PREFIX_SIZE 0
-#endif
 #if !defined(CONFIG_KERNEL_PTE_1_NUM)
 #define  CONFIG_KERNEL_PTE_1_NUM 0
 #endif
@@ -113,10 +110,6 @@
 
 #if !defined(CONFIG_KERNEL_PTE_0_NUM)
 #error "Please define CONFIG_KERNEL_PTE_0_NUM in Config.makefile"
-#endif
-
-#if !defined(CONFIG_PREFIX_SIZE)
-#error "Please define CONFIG_PREFIX_SIZE in Config.makefile"
 #endif
 
 #if !defined(CONFIG_KERNEL_PTE_1_NUM)

@@ -99,7 +99,7 @@ genLinearAddr(0)
 		//==============init LDT====
 		/**
 		 *  0		1 		2 		3		4			5
-		 *  NULL	code	data	stack	sysStack	kernelds
+		 *  nullptr	code	data	stack	sysStack	kernelds
 		 */
 		ldtm.allocNode(0);//---> 0 is not used also
 		ldtm.allocNode(1);

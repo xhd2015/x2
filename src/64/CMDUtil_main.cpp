@@ -8,9 +8,10 @@
 #include <exception>
 #include <EnvInterface64Impl.h>
 #include <File.h>
+#include <64/CMDUtil.h>
+#include <common/Getopt.h>
 
 #include <macros/all.h>
-
 
 
 #if defined(CODE64)
@@ -19,7 +20,7 @@ using namespace std;
 
 
 
-CommandOptions<StdEnv64Impl> opts{
+CommandOptions opts{
 			{"-s","--basic-size",true,"文件系统的基本尺寸,默认为系统的sizeof(size_t)"},
 			{"","--16",false,"等价于-s 2"},
 			{"","--32",false,"等价于-s 4"},
@@ -33,10 +34,10 @@ CommandOptions<StdEnv64Impl> opts{
 string helpMsg = opts.makeHelpMessage("指定镜像文件为x2文件系统,然后打开",
 		"CMDUtil_main [选项]  x2文件系统文件", "");
 
-class MyPorcessor:public CommandProcessor<StdEnv64Impl,ParamMain>
+class MyPorcessor:public CommandProcessor<ParamMain>
 {
 public:
-	MyPorcessor(StdEnv64Impl &env):CommandProcessor(env){}
+	MyPorcessor()=default;
 	virtual int onProcessArgOpt(ParamMain &pack,__OptPosIterator itopt,__VS_cit itarg) override{
 		if(itopt->equals("-e")){
 			pack.cmds+=pack.spiltor+ *(itarg+1);
@@ -86,8 +87,8 @@ public:
 };
 
 
-template <class __StdEnv,class __FsEnv>
-void process(__StdEnv &env,ParamMain &p,int& status);
+template <class __FsEnv>
+void process(ParamMain &p,int& status);
 
 bool prompt(const string &p)
 {
@@ -114,20 +115,18 @@ int main(int argc,char *argv[])
 			cout << argv[i]<< " ";
 		cout << endl;
 
-	StdEnv64Impl env;
-	MyPorcessor prep(env);
+	MyPorcessor prep;
 	ParamMain p;
 	int status=prep.processOptions(opts, args.cbegin(),args.cend(), p);
 	if(status==MyPorcessor::RETURN_CONTINUE)
 	{
-		StdEnv64Impl env;
 		if(p.basicSize==2)
 		{
-			process<StdEnv64Impl,FsEnv16>(env,p,status);
+			process<EnvTransfer<16>>(p,status);
 		}else if(p.basicSize==4){
-			process<StdEnv64Impl,FsEnv32>(env,p,status);
+			process<EnvTransfer<32>>(p,status);
 		}else if(p.basicSize==8){
-			process<StdEnv64Impl,FsEnv64>(env, p,status);
+			process<EnvTransfer<64>>( p,status);
 		}else{
 			cerr << "Unsupported basic size type:"<<p.basicSize<<endl;
 			status = MyPorcessor::RETURN_ERROR;
@@ -137,18 +136,22 @@ int main(int argc,char *argv[])
 	return (status!=MyPorcessor::RETURN_ERROR?EXIT_SUCCESS:EXIT_FAILURE);
 }
 
-template <class __StdEnv,class __FsEnv>
-void process(__StdEnv &env,ParamMain &p,int& status)
+template <class __FsEnv>
+void process(ParamMain &p,int& status)
 {
-	u8_t driver=env.addFile(p.imgFile,p.lbalow);
-	FileOperation<StdEnv64Impl,__FsEnv> op(env,driver,p.lbalow);
+	u8_t driver=HostEnv::addFile(p.imgFile,p.lbalow);
+	FileOperation<__FsEnv> op(driver,p.lbalow);
+
+//	op.touch("file", 4,0);
+//	return;
+
 
 	if(p.cdpath.size()>0)
 		op.cd(p.cdpath);
 
 	if(p.cmds.size()>0)
 	{
-		std::vector<string> cmds=env.cmdSplit(p.cmds);
+		std::vector<string> cmds=HostEnv::cmdSplit(p.cmds);
 		for(const std::string &cmd:cmds)
 		{
 			if(!op.eval(cmd))break;

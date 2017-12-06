@@ -48,7 +48,7 @@ typename AssociatedMemoryManager<T,MaxArrNum>::TargetType* AssociatedMemoryManag
 			this->lastMan = (this->lastMan+1)%MaxArrNum;
 		}
 	}
-	return NULL;
+	return nullptr;
 }
 
 template<class T, size_t MaxArrNum>
@@ -78,18 +78,20 @@ void			AssociatedMemoryManager<T,MaxArrNum>::setMan(size_t index,size_t nstart,s
 //============class  AssociatedMemoryManager<T,1>
 template<class T>
 AssociatedMemoryManager<T, 1>::AssociatedMemoryManager():
-nstart(0),tstart(0),len(0),
+tstart(0),
+nstart(0),
+len(0),
 lastIndex(0),
 curAllocedSize(0)
 {
 }
 template<class T>
-AssociatedMemoryManager<T, 1>::AssociatedMemoryManager(size_t nstart,size_t tstart,size_t len,bool nodeArrInit,int *usedList,size_t usedLen):
-nstart(nstart),
+AssociatedMemoryManager<T, 1>::AssociatedMemoryManager(size_t tstart,size_t nstart,size_t len,bool nodeArrInit,int *usedList,size_t usedLen):
 tstart(tstart),
+nstart(nstart),
 len(len),
 lastIndex(0),
-curAllocedSize(usedLen)
+curAllocedSize(nodeArrInit?usedLen:0)
 {
 //	Kernel::printer->putsz("in AssociatedMemoryManager init\n");
 	if(nodeArrInit)
@@ -103,7 +105,6 @@ curAllocedSize(usedLen)
 	{
 		narr[usedList[i]].setAlloced(true);
 	}
-
 //	Kernel::printer->putsz("in AssociatedMemoryManager init return\n");
 }
 template<class T>
@@ -113,15 +114,15 @@ AssociatedMemoryManager<T, 1>::~AssociatedMemoryManager()
 template <class T>
 typename AssociatedMemoryManager<T,1>::TargetType *AssociatedMemoryManager<T,1>::getNew()
 {
-    TargetType *rt=NULL;
+    TargetType *rt=nullptr;
     if(!this->isFull())
     {
         for(size_t i=0;i!=this->len;i++)
         {
-            if(this->narr[this->lastIndex].isFree())
+            if(!this->narr[this->lastIndex].isAlloced())
             {
                 rt=&tarr[lastIndex];
-                (narr[lastIndex]).unfree();
+                (narr[lastIndex]).setAlloced(true);
                 this->curAllocedSize++;
                 this->lastIndex = (this->lastIndex + 1 ) % this->len;
                 break;
@@ -149,10 +150,10 @@ void AssociatedMemoryManager<T,1>::withdraw(TargetType *t)
 {
 	if(this->isEmpty())return;
 	size_t index=this->getTargetIndex(t);
-	NodeType*	n=NULL;
-    if(index < this->len && (n=this->getNode(index))&&!n->isFree())
+	NodeType*	n=nullptr;
+    if(index < this->len && (n=this->getNode(index))&&n->isAlloced())
     {
-        n->free(); //如果被标记为可用，就用lastIndex指向之
+        n->setAlloced(false); //如果被标记为可用，就用lastIndex指向之
         this->curAllocedSize--;
         this->lastIndex = index;
     }
@@ -172,7 +173,7 @@ int AssociatedMemoryManager<T, 1>::allocContinuousFree(size_t n)
 			size_t curCon=0;
 			for(size_t j=0;j<n;j++)
 			{
-				if(narr[i+j].isFree())curCon++;
+				if(!narr[i+j].isAlloced())curCon++;
 				else break;
 			}
 			if(curCon == n)
@@ -191,7 +192,7 @@ template<class T>
 void AssociatedMemoryManager<T, 1>::allocNode(size_t index)
 {
 	NodeType *p;
-	if( (p=this->getNode(index))!=NULL && !p->isAlloced())
+	if( (p=this->getNode(index))!=nullptr && !p->isAlloced())
 	{
 		p->setAlloced(true);
 		this->curAllocedSize++;
@@ -201,7 +202,7 @@ template<class T>
 void AssociatedMemoryManager<T, 1>::withdrawNode(size_t index)
 {
 	NodeType *p;
-	if( (p=this->getNode(index))!=NULL && p->isAlloced())
+	if( (p=this->getNode(index))!=nullptr && p->isAlloced())
 	{
 		p->setAlloced(false);
 		this->curAllocedSize--;

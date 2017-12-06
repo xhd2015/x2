@@ -68,6 +68,22 @@ bool  __DEF_LinearSourceDescriptor::operator!=(const __LinearSourceDescriptor& b
 {
     return ! this->operator==(b);
 }
+template <class __EnvTransfer>
+SerializerPtr<__EnvTransfer>& __DEF_LinearSourceDescriptor::serialize(SerializerPtr<__EnvTransfer> &ptr)const
+{
+	return ptr << start << limit;
+}
+template <class __EnvTransfer>
+SerializerPtr<__EnvTransfer>& __DEF_LinearSourceDescriptor::deserialize(SerializerPtr<__EnvTransfer> &ptr)
+{
+	return ptr >> start >> limit;
+}
+template <class __EnvTransfer>
+constexpr size_t __DEF_LinearSourceDescriptor::getSerializitionSize()
+{
+	return __EnvTransfer::template sizeofHostType<decltype(reinterpret_cast<This*>(nullptr)->start)>()+
+			__EnvTransfer::template sizeofHostType<decltype(reinterpret_cast<This*>(nullptr)->limit)>();
+}
 bool  __DEF_LinearSourceDescriptor::isAllocable()const
 {
     return true;

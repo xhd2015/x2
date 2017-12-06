@@ -14,7 +14,7 @@
  */
 class SimpleMemoryNode:public SerializationInterface{
 public:
-    AS_MACRO SimpleMemoryNode(bool NO=false);//done
+    AS_MACRO SimpleMemoryNode(bool alloced=false);//done
     AS_MACRO bool isAlloced();
     AS_MACRO void setAlloced(bool alloced);
 
@@ -154,7 +154,7 @@ public:
      * @new method since 2017-03-18 21:23:10
      */
     void		adjustOffset(ptrdiff_t diff);
-    void		initTonullptr();
+    void		initToNull();
 
 
     __ListNode*    getLast()const;//done
@@ -203,23 +203,26 @@ protected:
  * @param _Allocator 分配ListNode<T>的分配器
  */
 template<class T,template <class> class _Allocator>
-class LinkedList{
+class LinkedList : public SerializationInterface
+{
 public:
 	using This = LinkedList<T,_Allocator>;
 	using __LinkedList = This;
 	using __ListNode = ListNode<T>;
 	using __Allocator = _Allocator<__ListNode>;
 public:
-	LinkedList()=default;
+	//初始化必须指定引用smm,否则后面的工作不能正常进行
+	// TODO 总结一条关于使用引用的合适时机
+	LinkedList()=delete;
 
 public:
-    LinkedList(  __Allocator *smm);
+    LinkedList(  __Allocator &smm);
     LinkedList(const __LinkedList&)=default;
     __LinkedList & operator=(const __LinkedList&)=default;
     ~LinkedList();
     
     AS_MACRO __ListNode* getHead()const;//done
-    AS_MACRO _Allocator<__ListNode > *getMemoryManager()const;//done
+    AS_MACRO _Allocator<__ListNode > &getMemoryManager()const;//done
 
 
     AS_MACRO __ListNode*    getLast()const;//done
@@ -242,13 +245,50 @@ public:
     void freePrevious(__ListNode *t);//backward list free,begin with This            done
     
 
+    // smm不会被序列化，所以你必须自己指定smm的值，而root,last将会由smm分配
+    // 在反序列化之前，你必须首先已经指定smm，因为涉及空间分配
+	template <class __EnvTransfer>
+		SerializerPtr<__EnvTransfer>& serialize(SerializerPtr<__EnvTransfer> &ptr)const
+		{
+			SerializerPtr<__EnvTransfer> ptrStart=ptr;
+			size_t n=0;
+			ptr << n; //写入0，后面会更正过来
+			for(__ListNode *p=root->getNext();p;p=p->getNext(),++n)
+						ptr << p->getData(); //仅仅写入数据
+			ptrStart << n; //写入数目
+			return ptr;
+		}
+	template <class __EnvTransfer>
+		SerializerPtr<__EnvTransfer>& deserialize(SerializerPtr<__EnvTransfer> &ptr)
+		{
+			size_t n=0;
+			ptr >> n;
+			for(size_t i=0;i!=n;++i)
+			{
+				__ListNode *p=smm.getNew();
+				p->initToNull();
+				ptr >> p->getData();//写入数据
+				this->append(p);
+			}
+			return ptr;
+		}
+
+	/**
+	 * 提供序列化所需的空间大小.
+	 * constexpr是可选的
+	 */
+	template <class __EnvTransfer>
+		size_t getSerializitionSize()
+	{
+		return __EnvTransfer::template sizeofHostType<decltype(root->getData())>() * getSize();
+	}
 protected:
-    _Allocator<__ListNode > *smm; //空间分配代理器
+    _Allocator<__ListNode > &smm; //共享空间分配代理器
 
     /**
     *Designing them as pointer is the best choice I've ever made.
     */
-    __ListNode* root;
+    __ListNode* root; //root存在的意义不是
     __ListNode* last; //next指向最后一个
     
     
@@ -288,12 +328,12 @@ public:
 	using __Allocator = _Allocator<__ListNode>;
 	using __SizeType = size_t;
 public:
-	 LocateableLinkedList()=default;//done
+	 LocateableLinkedList()=delete;//done
 public:
 	/**
 	 * @param smm   一个能否分配器ListNode<_Locateable>类型的分配器
 	 */
-    LocateableLinkedList( __Allocator *smm );//done
+    LocateableLinkedList( __Allocator &smm );//done
     ~LocateableLinkedList();//done
     /**
     * What should they return?The location,or a near location that can be later used to insert a node?
@@ -344,7 +384,11 @@ public:
 	__TreeNode & operator=(const __TreeNode&)=default;
 
 
-    TreeNode(const T& data,__TreeNode* father=nullptr,__TreeNode* son=nullptr,__TreeNode* next=nullptr,__TreeNode* previous=nullptr);
+    TreeNode(const T& data,
+    		__TreeNode* father=nullptr,
+			__TreeNode* son=nullptr,
+			__TreeNode* next=nullptr,
+			__TreeNode* previous=nullptr);
     ~TreeNode();
 
     AS_MACRO __TreeNode* setSon(__TreeNode* son);//done
@@ -368,7 +412,7 @@ public:
     __TreeNode*	removeSon();
 	__TreeNode*	removeFather();
 	void 			adjustOffset(ptrdiff_t diff);
-	void			initTonullptr();
+	void			initToNull();
 
 
     __TreeNode* getParent()const;//往previous一直遍历，直到是根，然后返回根的father,done
@@ -399,6 +443,9 @@ protected:
  * 	树节点是TreeNode，意味着允许其往四个方向扩展。需要注意的一点是，树的root节点为冗余节点，这是为了支持对head节点的删除操作。root节点永不删除。
  *	树的所占用的空间仅仅包含两个指针：root指针，smm指针
  *
+ *	不变式：
+ *		该类一旦初始化：root不为nullptr, smm有引用存在。 如果构造时违反，就抛出异常
+ *
  *	@param T			节点存储的数据类型
  *	@param _Allocator  分配TreeNode的分配器类型
  */
@@ -411,9 +458,9 @@ public:
 	using __Allocator = _Allocator<__TreeNode>;
 public:
 //	Tree()=default;
-	Tree();
+	Tree()=delete;
 public:
-    Tree(__Allocator *smm,__TreeNode* root=nullptr);//If give root=nullptr,then assign root by smm,else by root.
+    Tree(__Allocator &smm,__TreeNode* root=nullptr);//If give root=nullptr,then assign root by smm,else by root.
     Tree(const __Tree & )=default;
     __Tree &operator=(const __Tree & )=default;
 
@@ -423,14 +470,14 @@ public:
     AS_MACRO void 		setHead(__TreeNode *head);  //返回其自身,done
     AS_MACRO void		addRoot(__TreeNode* node);
     AS_MACRO bool		isEmpty()const;
-    AS_MACRO	__Allocator*	getSmm()const;
+    AS_MACRO	__Allocator&	getSmm()const;
     void         free(__TreeNode *root);//将root自身和所有子节点都释放掉，== withdraw all nodes recursively  done
 
 #if defined(CODE32)
     void		dumpInfo(Printer* p)const;
 #endif
 protected:
-    __Allocator *smm;
+    __Allocator &smm;
     // 0
     // 1 
     // 2

@@ -24,7 +24,7 @@ ProcessManager::ProcessManager():
 
 		prcsQueue(&this->lksmm),
 		prcsTree(&this->tksmm),
-curProcess(NULL),
+curProcess(nullptr),
 lastValidPID(Process::PID_INVALID),
 maxPID(1)
 {
@@ -76,9 +76,9 @@ void	ProcessManager::swithcNextProcess()
 {
 	Util::cli();
 	ListNode<TreeNode<Process*>* >* lnode;
-	if(this->curProcess==NULL)
+	if(this->curProcess==nullptr)
 	{
-		Kernel::printer->putsz("curProcess is NULL\n");
+		Kernel::printer->putsz("curProcess is nullptr\n");
 		if(this->prcsQueue.isEmpty())
 		{
 
@@ -91,7 +91,7 @@ void	ProcessManager::swithcNextProcess()
 			 *  idle-->process1
 			 */
 			lnode= this->prcsQueue.removeHead();
-//			Util::printStr("current is null,remove head from process Queue\n");
+//			Util::printStr("current is nullptr,remove head from process Queue\n");
 //			Util::printStr("process queue size is ");Util::digitToStr(saver, 10, this->prcsQueue.getSize());
 //			Util::printStr(saver);
 //			Util::printStr("\n");
@@ -139,15 +139,15 @@ TreeNode<Process*>* ProcessManager::addNewProcess(size_t codeLimit, size_t dataL
 	{
 		TreeNode<Process*> *newprcs=this->createProcessWrapper(p);
 		bool tEmp=this->prcsTree.isEmpty();
-		bool curNull=(this->curProcess==NULL);
-		if(!curNull)
+		bool curnullptr=(this->curProcess==nullptr);
+		if(!curnullptr)
 		{
 			this->curProcess->addSon(newprcs);
 			if(tEmp) //empty,current is not in tree,add it
 			{
 				this->prcsTree.addRoot(this->curProcess);
 			}
-		}else{  //current is NULL,add to root
+		}else{  //current is nullptr,add to root
 			this->prcsTree.addRoot(newprcs);
 		}
 //		Util::printStr("before append\n");
@@ -158,7 +158,7 @@ TreeNode<Process*>* ProcessManager::addNewProcess(size_t codeLimit, size_t dataL
 //		Util::printStr("after append\n");
 		return newprcs;
 	}else{
-		return NULL;
+		return nullptr;
 	}
 }
 //bool ProcessManager::pidComparator(unsigned int p1,unsigned int p2)
@@ -256,7 +256,7 @@ void	ProcessManager::invokeProcess(Process* p)
 {
 	Util::printStr("in invoke ");
 	if(!p){
-		Util::printStr("p is NULL  ");
+		Util::printStr("p is nullptr  ");
 		return;
 	}
 	if(p->getStatus()==Process::STATUS_READY) //use long jmp
@@ -305,11 +305,11 @@ TreeNode<Process*>*		ProcessManager::getByPid(unsigned int pid)
 			p = p->getNext();
 		}
 	}
-	return NULL;
+	return nullptr;
 }
 //================class Kernel
-Kernel*		Kernel::theKernel=NULL;
-Printer* 	Kernel::printer=NULL;
+Kernel*		Kernel::theKernel=nullptr;
+Printer* 	Kernel::printer=nullptr;
 
 Kernel::Kernel(
 		size_t smmStart,size_t smmLimit,
@@ -450,7 +450,7 @@ void Kernel::dumpInfo()const
 
 void Kernel::initTheKernel(Kernel* theKernel)
 {
-	if(theKernel!=NULL && This::theKernel==NULL)
+	if(theKernel!=nullptr && This::theKernel==nullptr)
 	{
 		This::theKernel=theKernel;
 	}

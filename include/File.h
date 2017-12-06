@@ -10,10 +10,12 @@
 #include <MemoryManager.h>
 #include <List.h>
 #include <EnvInterface.h>
-#if defined(CODE64)
-#include <EnvInterface64Impl.h>  //impl for dumpInfo
-#endif
+//#if defined(CODE64)
+//#include <EnvInterface64Impl.h>  //impl for dumpInfo
+//#endif
 #include <conceptual/Serialize.h>
+//#include <initializer_list>
+//using std::initializer_list;
 
 
 //==class FileDescriptor
@@ -23,102 +25,94 @@
 */
 class FileDescriptor:public SerializationInterface
 {
-	template <class __EnvTransfer>
-	friend SerializerPtr<__EnvTransfer>& operator<<(SerializerPtr<__EnvTransfer> &ptr,const FileDescriptor& fd);
-	template <class __EnvTransfer>
-	friend SerializerPtr<__EnvTransfer>& operator>>(SerializerPtr<__EnvTransfer> &ptr,FileDescriptor &fd);
-
 public:
 	enum{ TYPE_FILE=0,TYPE_DIR=1,TYPE_EAP=2};
 
 	/**
-	 * 仅仅是__SizeType的别名
+	 * 仅仅是size_t的别名
 	 */
-	using __SizeType = size_t;
-	using __TimeType = __SizeType;
+	using size_t = HostEnv::size_t;
+	using __TimeType = size_t;
 public:
 	AS_MACRO FileDescriptor()=default;
-	AS_MACRO FileDescriptor(u8_t type,__SizeType sectionList,
-			__SizeType fileLen,__SizeType nameStart,__TimeType createdTime,__TimeType lastModefiedTime);
+	AS_MACRO FileDescriptor(u8_t type,size_t sectionList,
+			size_t fileLen,size_t nameStart,__TimeType createdTime,__TimeType lastModefiedTime);
 
 	AS_MACRO u8_t getType()const;
 	AS_MACRO void setType(u8_t type);
 
-	AS_MACRO __SizeType getNameOffset()const;
-	AS_MACRO void	setNameOffset(__SizeType off);
+	AS_MACRO size_t getNameOffset()const;
+	AS_MACRO void	setNameOffset(size_t off);
 	AS_MACRO __TimeType getCreatedTime() const;
 	AS_MACRO void setCreatedTime(__TimeType createdTime);
-	AS_MACRO __SizeType getFileLen() const;
-	AS_MACRO void setFileLen(__SizeType fileLen);
-	AS_MACRO DEPRECATED __SizeType getFileStart() const;//file will always starts from the beginning
-	AS_MACRO DEPRECATED void setFileStart(__SizeType fileStart);
+	AS_MACRO size_t getFileLen() const;
+	AS_MACRO void setFileLen(size_t fileLen);
+	AS_MACRO DEPRECATED size_t getFileStart() const;//file will always starts from the beginning
+	AS_MACRO DEPRECATED void setFileStart(size_t fileStart);
 	AS_MACRO __TimeType getLastModefiedTime() const;
 	AS_MACRO void setLastModefiedTime(__TimeType lastModefiedTime);
-	AS_MACRO DEPRECATED __SizeType getSectionSpan() const;
-	AS_MACRO DEPRECATED void setSectionSpan(__SizeType sectionSpan);
-	AS_MACRO DEPRECATED __SizeType getSectionStart() const;
-	AS_MACRO DEPRECATED void setSectionStart(__SizeType sectionStart);
+	AS_MACRO DEPRECATED size_t getSectionSpan() const;
+	AS_MACRO DEPRECATED void setSectionSpan(size_t sectionSpan);
+	AS_MACRO DEPRECATED size_t getSectionStart() const;
+	AS_MACRO DEPRECATED void setSectionStart(size_t sectionStart);
 
 
-	AS_MACRO __SizeType getSectionListIndex() const ;
-	AS_MACRO void setSectionListIndex(__SizeType	sectionListIndex);
+	AS_MACRO size_t getSectionListIndex() const ;
+	AS_MACRO void setSectionListIndex(size_t	sectionListIndex);
 
-	/**
-	 * 提供序列化所需的空间大小
-	 */
+
 	template <class __EnvTransfer>
-	constexpr size_t getSerializitionSize();
-protected:
+		SerializerPtr<__EnvTransfer>& serialize(SerializerPtr<__EnvTransfer> &ptr)const;
+	template <class __EnvTransfer>
+		SerializerPtr<__EnvTransfer>& deserialize(SerializerPtr<__EnvTransfer> &ptr);
+	template <class __EnvTransfer>
+		constexpr size_t getSerializitionSize();
+private:
 	/**
 	 * 类型，文件，文件夹，或者扩展区域（废弃）
 	 */
-	u8_t type;
+	u8_t type=TYPE_FILE;
 
 	/**
 	 * 文件占据的分区链表的下标
 	 */
-	__SizeType /* DEPRECATED sectionStart,sectionSpan,*//*DEPRECATED fileStart */sectionListIndex;
+	size_t /* DEPRECATED sectionStart,sectionSpan,*//*DEPRECATED fileStart */sectionListIndex=0;
 	/**
 	 * 文件长度
 	 */
-	__SizeType fileLen;
+	size_t fileLen=0;
 
 	/**
 	 * 文件名在 name分区中的开始下标
 	 */
-	__SizeType nameStart;
+	size_t nameStart=0;
 
 	/**
 	 * 创建时间
 	 */
-	__TimeType createdTime;
+	__TimeType createdTime=0;
 
 	/**
 	 * 最后修改时间
 	 */
-	__TimeType lastModefiedTime;
+	__TimeType lastModefiedTime=0;
 
 };
-// 序列化支持
-template <class __EnvTransfer>
-	SerializerPtr<__EnvTransfer>& operator<<(SerializerPtr<__EnvTransfer> &ptr,const FileDescriptor& fd);
-template <class __EnvTransfer>
-	SerializerPtr<__EnvTransfer>& operator>>(SerializerPtr<__EnvTransfer> &ptr,FileDescriptor &fd);
 
 
 
 //==class X2fsMetaInfo
-#pragma pack(push,1)
-
-
 /**
  * 从一个扇区初始化
  *
  * 注意，该结构必须在所有架构上一致，因此采用uXX_t来定义各个域
+ *
+ * 实现：序列化接口
  */
-template <typename __SizeType>
-class X2fsMetaInfo{
+class X2fsMetaInfo:public SerializationInterface
+{
 public:
+
 	enum __ENUMS{
 		SECNUM_RESERVED_CONST=2,
 		SECNUM_META_CONST=1,
@@ -134,64 +128,88 @@ public:
 		PARTS_REQUIRED=4,
 		PARTS_OPTIONAL=1,
 
-		BASIC_SIZE_TYPE =  sizeof(__SizeType),
+		BASIC_SIZE_TYPE =  sizeof(size_t),
 
 
 		INDEX_OPTIONAL_SECD=0
 	};
+	enum{SecSize=512,KiB=2*SecSize,MiB=1024*KiB,GiB=1024*MiB};
+	enum{
+		 ReservedSection=0,ReservedSectionLen=2*SecSize,
+		 FileNameSection=2*SecSize,FileNameSectionLen=5*SecSize,
+		 DirSection=FileNameSection+FileNameSectionLen,DirSectionLen=15*SecSize,
+		 FreeSpaceSection=DirSection+DirSectionLen,FreeSpaceSectionLen=5*SecSize,
+		 /*NEW @ 2017-03-12 16:19:43*/LinkedInfoSection=FreeSpaceSection + FreeSpaceSectionLen, LinkedInfoSectionLen=5*SecSize,
+		 	 	 	 	 	 	 	 FileAllocSection=LinkedInfoSection+LinkedInfoSectionLen
+		// DEPRECATED,use sizeof(SECTION_TRAIL) SectoinPointerSize = sizeof(size_t),SectionLengthSize = sizeof(size_t)/*the end of the section has the two trailing numbers*/
+		//DEPRECATED SectionTrailSize = sizeof(LinearSourceDescriptor)
+
+	};
+
 	X2fsMetaInfo()=default;
+
+
 
 public:
 	/**
-	 *  记录文件系统的__SizeType的基本长度
+	 *  记录文件系统的size_t的基本长度
 	 *  注意：该域必须放在开始，以便一个位置系统读取之后能够根据第一个字节判断出该文件系统的尺寸基本类型
 	 *  取值：1,2,4,...
 	 */
-	const u8_t	basicSizeType = BASIC_SIZE_TYPE;
+	u8_t	basicSizeType = BASIC_SIZE_TYPE;
 
+	// mutable因为可能通过反序列化设置
+	size_t reservedSec=SECNUM_RESERVED_CONST;//2
+	size_t metaSec=SECNUM_META_CONST;
 
-	const __SizeType reservedSec=SECNUM_RESERVED_CONST;//2
-	const __SizeType metaSec=SECNUM_META_CONST;
+	//长度必须放在上面，以便进行序列化
+	u8_t len=PARTS_REQUIRED;//上面数组的长度
 	/**
 	 * 	name dir free file link secd
 	 *
 	 * 	=0表示该分区不分配。通常用于一些可选分区
 	 */
-	__SizeType secnums[PARTS_REQUIRED];
-	const u8_t len=PARTS_REQUIRED;//上面数组的长度
+	size_t secnums[PARTS_REQUIRED];
 
-	__SizeType optional[PARTS_OPTIONAL];
-	const u8_t optionalLen=PARTS_OPTIONAL;
+	u8_t optionalLen=PARTS_OPTIONAL;
+	size_t optional[PARTS_OPTIONAL];
+
 
 	/**
 	 * 记录该分区的lba起始地址
 	 * 与mbr中的信息重复
 	 */
-	u32_t lbaStartLow;
-	u32_t lbaStartHigh;
+	u32_t lbaStartLow=0;
+	u32_t lbaStartHigh=0;
 
 	/**
 	 * 记录该分区的总的扇区数
 	 * 与mbr中的信息重复
 	 */
-	__SizeType wholeSecnums;
+	size_t wholeSecnums=0;
 
-	const u16_t	validFlag=VALID_FLAG;
+	u16_t	validFlag=VALID_FLAG;
 
 public:
 	/**
 	 *  校验metainfo是否符合结构
 	 */
-	static bool checkMetainfo(const X2fsMetaInfo<__SizeType>* info);
+	static bool checkMetainfo(const X2fsMetaInfo& info);
 
-#if defined(CODE64)
-	// TODO 在任意主机上dump都可以
-	void dumpInfo(EnvInterface64Impl &env);
-#endif
-//	__SizeType getDataAllocation
+	//序列化接口
+	template <class __EnvTransfer>
+		SerializerPtr<__EnvTransfer>& serialize(SerializerPtr<__EnvTransfer> &ptr)const;
+	template <class __EnvTransfer>
+		SerializerPtr<__EnvTransfer>& deserialize(SerializerPtr<__EnvTransfer> &ptr);
+	template <class __EnvTransfer>
+		size_t getSerializitionSize();
+	void dumpInfo();
+//	size_t getDataAllocation
 };
 
-#pragma pack(pop)
+
+
+//************X2fsMetaInfo 定义结束
 
 /**
  *  about offset: relative to the beginning of that partition
@@ -207,48 +225,32 @@ public:
  *
  *	性能分析：因为解析路径名需要从根遍历树，很耗费时间。
  *
+ *	@param __FsEnv 参见EnvTransfer
+ *
  */
-template <class __EnvInterface,class __FsEnv>
+template <class __FsEnv>
 class X2fsUtil{
 public:
-#if defined(IDE_MODE)
-//	using __EnvInterface = EnvInterface;
-#endif
-
-	using __EnvSizeType = typename __EnvInterface::SizeType;
-	enum{__EnvAlignment = __EnvInterface::Alignment};
-	using __FsSizeType = typename __FsEnv::SizeType;
-	enum{ __FsAlignment =  __FsEnv::Alignment};
+	using __SizeType = HostEnv::size_t;
+	// DEPRECATED  对齐因为序列化技术提出，已经过时
+//	enum{ __FsAlignment =  __FsEnv::Alignment};
+	using __X2fsMetaInfo = X2fsMetaInfo;
+	using __SerializerPtr = SerializerPtr<__FsEnv>;
 
 public:
 	enum{
 		// 顺序一致
-		INDEX_NAME=X2fsMetaInfo<__FsSizeType>::INDEX_NAME,
-		INDEX_DIR= X2fsMetaInfo<__FsSizeType>::INDEX_DIR,
-		INDEX_FREE=X2fsMetaInfo<__FsSizeType>::INDEX_FREE,
-		INDEX_LINK=X2fsMetaInfo<__FsSizeType>::INDEX_LINK,
-		INDEX_OPTIONAL_SECD=X2fsMetaInfo<__FsSizeType>::INDEX_OPTIONAL_SECD,
-	};
-
-	// DEPRECATED
-	enum{SecSize=512,KiB=2*SecSize,MiB=1024*KiB,GiB=1024*MiB};
-	enum{ // DEPRECATED
-		 ReservedSection=0,ReservedSectionLen=2*SecSize,
-		 FileNameSection=2*SecSize,FileNameSectionLen=5*SecSize,
-		 DirSection=FileNameSection+FileNameSectionLen,DirSectionLen=15*SecSize,
-		 FreeSpaceSection=DirSection+DirSectionLen,FreeSpaceSectionLen=5*SecSize,
-		 /*NEW @ 2017-03-12 16:19:43*/LinkedInfoSection=FreeSpaceSection + FreeSpaceSectionLen, LinkedInfoSectionLen=5*SecSize,
-		 	 	 	 	 	 	 	 FileAllocSection=LinkedInfoSection+LinkedInfoSectionLen
-		// DEPRECATED,use sizeof(SECTION_TRAIL) SectoinPointerSize = sizeof(__SizeType),SectionLengthSize = sizeof(__SizeType)/*the end of the section has the two trailing numbers*/
-		//DEPRECATED SectionTrailSize = sizeof(LinearSourceDescriptor)
-
+		INDEX_NAME=__X2fsMetaInfo::INDEX_NAME,
+		INDEX_DIR=__X2fsMetaInfo::INDEX_DIR,
+		INDEX_FREE=__X2fsMetaInfo::INDEX_FREE,
+		INDEX_LINK=__X2fsMetaInfo::INDEX_LINK,
+		INDEX_OPTIONAL_SECD=__X2fsMetaInfo::INDEX_OPTIONAL_SECD,
 	};
 	enum{
 		ERROR_FILENAMESPACE,
 		ERROR_DIRTREESPACE,
 		ERROR_FREESPACE,
 		ERROR_LINKINFO_SPACE_NOT_ENOUGH,
-
 		//
 		ERROR_FILEALLOCSPACE,
 		ERROR_FILE_ALREDY_EXIST,
@@ -268,44 +270,42 @@ public:
 	};
 
 
-	using This = X2fsUtil<__EnvInterface,__FsEnv>;
-	using __X2fsMetaInfo = X2fsMetaInfo<__FsSizeType>;
-	using __EnvTreeNode_MemoryDescriptor = TreeNode<MemoryDescriptor>;
-	using __FsTreeNode_MemoryDescriptor = TreeNode<MemoryDescriptor>;
-	using __FsLinearSourceDescriptor = LinearSourceDescriptor;
-	using __EnvLinearSourceDescriptor = LinearSourceDescriptor;
-	using __EnvListNode_LinearSourceDescriptor = ListNode<__EnvLinearSourceDescriptor>;
+	using This = X2fsUtil<__FsEnv>;
+	using __X2fsUtil = This;
+
+	using __TreeNode_MemoryDescriptor = TreeNode<MemoryDescriptor>;
+	using __LinearSourceDescriptor = LinearSourceDescriptor;
+	using __ListNode_LinearSourceDescriptor = ListNode<__LinearSourceDescriptor>;
 	using __FileDescriptor = FileDescriptor;
-	using __FsTimeType = typename __FileDescriptor::__TimeType;
-	using __FsTreeNode_FileDescriptor = TreeNode<__FileDescriptor>;
-//	using __EnvTreeNode_FileDescriptor = TreeNode<__FileDescriptor,__EnvAlignment>;// 文件描述符可以省空间，因为它不与主机交互。但是对齐和大小只能使用主机上的设置值。
+	using __TimeType = typename __FileDescriptor::__TimeType;
+	using __TreeNode_FileDescriptor = TreeNode<__FileDescriptor>;
 	/**
 	 * 依赖这些类型作为分配器
 	 */
-	using TMSmm = MallocToSimple<__EnvTreeNode_MemoryDescriptor,__EnvInterface>;
-	using LLSmm = MallocToSimple<__EnvListNode_LinearSourceDescriptor,__EnvInterface>;
-
+	using TMSmm = MallocToSimple<__TreeNode_MemoryDescriptor>;
+	using LLSmm = MallocToSimple<__ListNode_LinearSourceDescriptor>;
 
 	template <class T>
-		using PartialMallocToSimple=MallocToSimple<T,__EnvInterface>;
+			using __SimpleAssociated = AssociatedMemoryManager<T,1>;
+	// DEPRECATED 启用SimpleMemoryManager
+//	using FileNodeMM = SimpleMemoryManager<__FsTreeNode_FileDescriptor>;
+	using FileNodeMM = __SimpleAssociated<__TreeNode_FileDescriptor>;
+	using FileNameMM = MemoryManager<MallocToSimple>;
+	using FileNode = typename FileNodeMM::TargetType;
 
-	// DEPRECATED 必须使用最大的可能的值
-	using FileNodeMM = SimpleMemoryManager<__FsTreeNode_FileDescriptor>;
-//	using FileNodeMM = SimpleMemoryManager<>
-	using FileNameMM = MemoryManager<PartialMallocToSimple>;
-	using FileNode = typename FileNodeMM::DataPart;
-	using FullNode = typename FileNodeMM::FullNode;
-	using FileTree = Tree<__FileDescriptor,SimpleMemoryManager>;
-	using FreeSpaceMM = LinearSourceManager<__EnvLinearSourceDescriptor,
-			PartialMallocToSimple>;
-	using LinkedInfoMM = LinearSourceManager<__EnvLinearSourceDescriptor,
-			PartialMallocToSimple>;
+	using FileTree = Tree<__FileDescriptor,__SimpleAssociated>;
+	using FreeSpaceMM = LinearSourceManager<__LinearSourceDescriptor,
+			MallocToSimple>;
+	using LinkedInfoMM = LinearSourceManager<__LinearSourceDescriptor,
+			MallocToSimple>;
 
 	enum{
-		FileNodeSize=sizeof(FullNode)
+		FileNodeSize=sizeof(FileNode) + sizeof(SimpleMemoryNode)
 	};
 public:
 	X2fsUtil()=default;
+	X2fsUtil(const __X2fsUtil &)=delete;
+	__X2fsUtil& operator=(const __X2fsUtil &)=delete;
 	/**
 	 * 两种初始化情况：
 	 * 	1.需要从驱动器上读取数据，分配缓冲区，然后初始化
@@ -313,8 +313,8 @@ public:
 	 *
 	 * 	metainfo 初始化完毕就可以开始读取了
 	 */
-	X2fsUtil(__EnvInterface &env,u8_t driver,u32_t lbaBase);
-	X2fsUtil(__EnvInterface &env,u8_t driver,__X2fsMetaInfo *metainfo,u8_t *buffers[]);
+	X2fsUtil(u8_t driver,u32_t lbaBase);
+	X2fsUtil(u8_t driver,const __X2fsMetaInfo &metainfo,u8_t *buffers[]);
 private:
 	void initWithBuffersAlloced();
 public:
@@ -324,7 +324,7 @@ public:
 	 * @name   文件名
 	 * @secNum 文件占据的扇区大小
 	 */
-	bool createFileInRoot(const char *name,__FsSizeType secNum);//reserved number of sectors
+	bool createFileInRoot(const char *name,__SizeType secNum);//reserved number of sectors
 	DEPRECATED bool hasFilename(const char *name)const;
 	bool hasFilename(int argc,const char *argv[],const char *name)const;
 
@@ -337,7 +337,7 @@ public:
 	bool createDir(int argc,const char* argv[]);
 	bool deleteFile(int argc,const char * argv[]);
 	bool rename(int argc,const char *argv[],const char *newname);
-	bool move(int argcSrc,const char *argvSrc[],int argcDst,const char *argvDst[],const char *newname=NULL);
+	bool move(int argcSrc,const char *argvSrc[],int argcDst,const char *argvDst[],const char *newname=nullptr);
 	void dumpFileInfo(int argc,const char *argv[]);
 	/**
 	 * if exist return PATH_XXX,else return ERROR_XXX
@@ -345,8 +345,8 @@ public:
 	int	 tellType(int argc,const char * argv[])const;
 	void listNode(int argc,const char * argv[],int maxdeepth=1)const;
 
-	DEPRECATED __FsSizeType writeToFile(const char *buf,__FsSizeType objsize,__FsSizeType nobj,int argc,const char *argv[],__FsSizeType foff=0);
-	DEPRECATED __FsSizeType r__SizeTypemFile(char *buf,__FsSizeType objsize, __FsSizeType nobj,int argc,const char *argv[],FileNode *fnode,__FsSizeType foff=0);
+	DEPRECATED __SizeType writeToFile(const char *buf,__SizeType objsize,__SizeType nobj,int argc,const char *argv[],__SizeType foff=0);
+	DEPRECATED __SizeType rsize_tmFile(char *buf,__SizeType objsize, __SizeType nobj,int argc,const char *argv[],FileNode *fnode,__SizeType foff=0);
 
 	void listRoot()const;
 	void listNode(const FileNode* p)const;
@@ -356,10 +356,9 @@ public:
 	 */
 	void flush();//write the buffered content back to file
 	AS_MACRO int geterrno()const;
-	AS_MACRO void setEnvInterface(__EnvInterface *env);
 
 public:
-	char *getFileNameCstr(const __FileDescriptor &fd,__FsSizeType &nlen)const;
+	char *getFileNameCstr(const __FileDescriptor &fd,__SizeType &nlen)const;
 //	std::string getFileName(const FileNode *p)const;
 
 //	UNTESTED
@@ -368,8 +367,8 @@ public:
 	void listOnNode(const FileNode *p,int maxdeepth=1)const;
 
 	bool hasFilename(FileNode * fnode,const char *name)const;
-	bool create(FileNode *p,u8_t type,const char *name,__FsSizeType secSpan=2,__FsTimeType ctime=0);
-	bool createFile(FileNode *p,const char *name,__FsSizeType secNum);
+	bool create(FileNode *p,u8_t type,const char *name,__SizeType secSpan=2,__TimeType ctime=0);
+	bool createFile(FileNode *p,const char *name,__SizeType secNum);
 	bool mkdir(FileNode * fatherDir,const char *dirname);
 	void freeNode(FileNode * node);//free all,not just a single.This is generally used in dir & file
 	void insertNode(FileNode *dst,FileNode *fnode);
@@ -380,7 +379,7 @@ public:
 	// UNTESTED
 	bool deleteFile(FileNode* fnode);
 	bool rename(FileNode *node,const char *newname);
-	bool move(FileNode *p,FileNode* dstDir,const char *newname=NULL);
+	bool move(FileNode *p,FileNode* dstDir,const char *newname=nullptr);
 	void dumpFileInfo(FileNode * fnode);
 	/**
 	 * If not found,return the index that fails
@@ -392,7 +391,7 @@ public:
 	FileNode * locatePath(FileNode *base,int argc,const char *argv[],int &errorLevel)const;
 	/**
 	 *
-	 * @return NULL to indicate failure
+	 * @return nullptr to indicate failure
 	 */
 	FileNode * locatePath(FileNode *base,const char *name)const;
 	FileNode * getPathParentNode(int argc,const char * argv[])const;
@@ -409,7 +408,7 @@ public:
 	 * @param	foff	写到文件的偏移位置
 	 */
 //	INCOMPLETE
-	DEPRECATED __FsSizeType writeToFile(const char *buf,__FsSizeType objsize, __FsSizeType nobj,FileNode *fnode,__FsSizeType foff=0);
+	DEPRECATED __SizeType writeToFile(const char *buf,__SizeType objsize, __SizeType nobj,FileNode *fnode,__SizeType foff=0);
 
 	// UNTESTED
 	/**
@@ -424,7 +423,7 @@ public:
 	 * 		  最后一个查找的ilink; 如果此ilink 长度(limit)为0，则表明空间不足以定位到该处；此时ilink就是最后一个起始分区
 	 * 		   其他，则一定保证retOff小于该区的limit，也就是说refOff一定在该区的范围内。
 	 */
-	__FsSizeType locateILink(__FsSizeType startILink,__FsSizeType secPos,__FsSizeType & retOff);
+	__SizeType locateILink(__SizeType startILink,__SizeType secPos,__SizeType & retOff);
 
 	/**
 	 * 按扇区写数据到ilink所指示的区间中，从secPos开始写，写secLen个
@@ -432,7 +431,7 @@ public:
 	 * @return  如果ilink无效，或者所写的数据范围超过该ilink，则不执行写操作，并且返回0；
 	 * 			写成功则返回实际写入的分区长度(secLen=0时返回实际长度)
 	 */
-	__FsSizeType		writeToILink(__FsSizeType ilink,const char *src,__FsSizeType secPos,__FsSizeType secLen);
+	__SizeType		writeToILink(__SizeType ilink,const char *src,__SizeType secPos,__SizeType secLen);
 
 	/**
 	 * 扩展文件实际占用的扇区数目
@@ -442,22 +441,22 @@ public:
 	 *
 	 * @return 如果extraSec = 0则无影响； 如果不能增加，则返回false，源文件节点状态不变；否则，可能改变ilink的位置
 	 */
-	bool			extendFileSecNum(FileNode * fileNode,__FsSizeType extraSec,bool addFileLength=false);
+	bool			extendFileSecNum(FileNode * fileNode,__SizeType extraSec,bool addFileLength=false);
 
 	/**
 	 * 返回最后一个ILink的位置，即(0,0)处
 	 * @return 0 失败，其他成功
 	 */
-	__FsSizeType		getEndILink(FileNode *fileNode)const;
+	__SizeType		getEndILink(FileNode *fileNode)const;
 
 	// TODO 添加完整文档注释
 	/**
 	 * 实现相对于文件的随机位置扇区的读写
 	 * @param updateFileLen 当文件长度不足时，是否更新文件的长度
 	 */
-	__FsSizeType _writeToFile(const char *buf, __FsSizeType nsec,FileNode *fnode,__FsSizeType secPos=0,
+	__SizeType _writeToFile(const char *buf, __SizeType nsec,FileNode *fnode,__SizeType secPos=0,
 			bool updateFileLen=true);
-	__FsSizeType _readFromFile(char *buf,__FsSizeType nsec,FileNode *fnode,__FsSizeType secPos=0);
+	__SizeType _readFromFile(char *buf,__SizeType nsec,FileNode *fnode,__SizeType secPos=0);
 	/** UNTESTED
 	 * 对文件进行按字节随机写
 	 * 前置条件：buf是扇区的整数倍, byteStart%CONST_SIZE是相对于buf的开始
@@ -469,12 +468,12 @@ public:
 	 *
 	 * @return 实际写入的字节数目
 	 */
-	__FsSizeType _randomWriteFile(char *buf, __FsSizeType nbyte,FileNode *fnode,__FsSizeType byteStart=0);
+	__SizeType _randomWriteFile(char *buf, __SizeType nbyte,FileNode *fnode,__SizeType byteStart=0);
 	/** UNTESTED
 	 * 条件同上
 	 * 此函数的实现不需要补齐，返回值的buf+(byteStart%CONST_SECSIZE)为有效数据
 	 */
-	__FsSizeType _randomReadFile(char *buf, __FsSizeType nbyte,FileNode *fnode,__FsSizeType byteStart=0);
+	__SizeType _randomReadFile(char *buf, __SizeType nbyte,FileNode *fnode,__SizeType byteStart=0);
 
 
 	/** INCOMPLETE
@@ -485,26 +484,26 @@ public:
 	 *
 	 * @return 成功返回true，其他错误返回false
 	 */
-	bool truncateFile(FileNode *fnode,__FsSizeType newlen);
+	bool truncateFile(FileNode *fnode,__SizeType newlen);
 
 	// EFF 使用自动管理的数组效果更佳
 	/**
 	 * 基于字节的随机位置读写
 	 * 长度会扩展
 	 */
-	DEPRECATED __FsSizeType randomWriteFile(const char *buf, __FsSizeType nbyte,FileNode *fnode,__FsSizeType byteStart=0);
+	DEPRECATED __SizeType randomWriteFile(const char *buf, __SizeType nbyte,FileNode *fnode,__SizeType byteStart=0);
 	/**
 	 * 长度可能不足以读取，返回实际读取的长度
 	 */
-	DEPRECATED __FsSizeType randomReadFile(char *buf,__FsSizeType nbyte,FileNode *fnode,__FsSizeType byteStart=0);
+	DEPRECATED __SizeType randomReadFile(char *buf,__SizeType nbyte,FileNode *fnode,__SizeType byteStart=0);
 
 	/**
 	 * 实现连续多个扇区的随机读写
 	 * TODO:应当使用vector来替代char，这样就无需手动管理内存了
 	 *
 	 */
-	DEPRECATED __FsSizeType randomReadSector(char *buf,__FsSizeType nbyte,__FsSizeType bytePos);
-	DEPRECATED __FsSizeType randomWriteSector(const char *buf,__FsSizeType nbyte,__FsSizeType bytePos);
+	DEPRECATED __SizeType randomReadSector(char *buf,__SizeType nbyte,__SizeType bytePos);
+	DEPRECATED __SizeType randomWriteSector(const char *buf,__SizeType nbyte,__SizeType bytePos);
 	/**
 	 * 随机读写一个扇区
 	 * 前置条件： 0<=byteStart<byteEnd<=CONST_SECSIZE;
@@ -512,26 +511,26 @@ public:
 	 * @param secPos  要写的扇区
 	 * @param byteStart 起始位置
 	 * @param byteEnd    结束位置,注意：使用的是闭区间形式，[byteStart,byteEnd)
-	 * @param optBuffer 一个用于暂存数据的buffer，如果为NULL，函数会自己申请一个；其中的数据会改变
+	 * @param optBuffer 一个用于暂存数据的buffer，如果为nullptr，函数会自己申请一个；其中的数据会改变
 	 *
 	 * @return 成功返回true，失败返回false
 	 */
-	DEPRECATED bool randomWriteOneUnit(const char *buf,__FsSizeType secPos,__FsSizeType byteStart,
-			__FsSizeType byteEnd,char *optBuffer=NULL);
-	DEPRECATED bool randomReadOneUnit(char *buf,__FsSizeType secPos,__FsSizeType byteStart,
-			__FsSizeType byteEnd,char *optBuffer=NULL);
+	DEPRECATED bool randomWriteOneUnit(const char *buf,__SizeType secPos,__SizeType byteStart,
+			__SizeType byteEnd,char *optBuffer=nullptr);
+	DEPRECATED bool randomReadOneUnit(char *buf,__SizeType secPos,__SizeType byteStart,
+			__SizeType byteEnd,char *optBuffer=nullptr);
 
 	/**
 	 *
 	 */
 	DEPRECATED bool randomWriteFileOneUnit(const char *buf,
 			FileNode *fnode,
-			__FsSizeType secPos,
-			__FsSizeType byteStart,
-			__FsSizeType byteEnd,char *optBuffer=NULL);
+			__SizeType secPos,
+			__SizeType byteStart,
+			__SizeType byteEnd,char *optBuffer=nullptr);
 
 
-	DEPRECATED __FsSizeType readFromFile(char *buf,__FsSizeType objsize, __FsSizeType nobj,FileNode *fnode,__FsSizeType foff=0);
+	DEPRECATED __SizeType readFromFile(char *buf,__SizeType objsize, __SizeType nobj,FileNode *fnode,__SizeType foff=0);
 	AS_MACRO void seterrno(int processErrno)const;
 	AS_MACRO void seterrno(int processErrno);
 	AS_MACRO FileNode * getRootBase()const;
@@ -545,13 +544,13 @@ public:
 	 * @param driver			主机上的磁盘
 	 * @param metainfo			目标区域的metainfo
 	 */
-	static void mkfs(__EnvInterface &env,u8_t driver,const X2fsMetaInfo<__FsSizeType> *metainfo);
+	static void mkfs(u8_t driver,const __X2fsMetaInfo  &metainfo);
 
 //	template <template <class>class _Allocator>
 //	INCOMPLETE static void getLinkedList(__LinearSourceDescriptor *buffer,
-//			__FsSizeType i,LinkedList<LinearSourceDescriptor<__FsSizeType>,_Allocator> &list,__FsSizeType maxlen);
+//			__SizeType i,LinkedList<LinearSourceDescriptor<__SizeType>,_Allocator> &list,__SizeType maxlen);
 
-	DEPRECATED static void createFile_old(void *base,const char* name,__FsSizeType secNum);//default length=0,start=0,span=secNum
+	DEPRECATED static void createFile_old(void *base,const char* name,__SizeType secNum);//default length=0,start=0,span=secNum
 
 	AS_MACRO FileTree* getFileTree();
 
@@ -560,16 +559,16 @@ public:
 	 * 通过该函数，可以将对磁盘字节的随机读写变换成按磁盘单位（扇区）的读写
 	 * @param startByte  开始位置
 	 * @param numbyte    字节数量
-	 * @param startDiff  返回值，设置start的距离开始的偏移，范围[0,unit); NULL不设置
-	 * @param endDiff    返回值,设置end的距离末尾的偏移，范围[0,unit); NULL不设置
+	 * @param startDiff  返回值，设置start的距离开始的偏移，范围[0,unit); nullptr不设置
+	 * @param endDiff    返回值,设置end的距离末尾的偏移，范围[0,unit); nullptr不设置
 	 * @param unit		单元大小
 	 *
 	 * @return 返回所需的buffer数量，是unit的整数倍，以byte为单位
 	 */
-	static __FsSizeType calculateRandomBufferSize(__FsSizeType startByte,__FsSizeType numebyte,
-			__FsSizeType *startDiff=NULL,
-			__FsSizeType *endDiff=NULL,
-			__FsSizeType unit=CONST_SECSIZE);
+	static __SizeType calculateRandomBufferSize(__SizeType startByte,__SizeType numebyte,
+			__SizeType *startDiff=nullptr,
+			__SizeType *endDiff=nullptr,
+			__SizeType unit=CONST_SECSIZE);
 
 
 
@@ -581,7 +580,7 @@ protected:
 		 * 调试了半天。。。
 		 */
 		// old version ---> void adjustDirbufOffset(int off);//positive or negative
-		void adjustDirbufOffset(ptrdiff_t off);
+		DEPRECATED void adjustDirbufOffset(ptrdiff_t off);
 
 
 		/**
@@ -618,33 +617,36 @@ protected:
 		 */
 		void saveDirSection();
 
-
-protected:
+private:
 	/**
+	 *  DEPRECATED  现在统一使用命名空间HostEnv
 	 * 要求操作系统实现提供的功能集
 	 */
-	__EnvInterface &env;
+//	__EnvInterface &env;
 	/**
 	 * 驱动器号，在有的操作系统上，可能将驱动器号映射成文件
 	 */
-	u8_t	driver;
+	u8_t	driver{};
 
 	/**
 	 * 元信息区域
 	 */
-	union{
-		u8_t 		 *metabuf;
-		__X2fsMetaInfo *metainfo;
-	};
+	u8_t * metainfoRAW{};
+	__X2fsMetaInfo metainfo{};
 
 	/**
+	 *  buffers[INDEX_NAME]  文件名区域。直接操纵
 	 *	buffers[INDEX_FREE]  该区的开始位置存放两个节点，节点0描述了总体的信息(数据区开始，长度），节点1是(0,0)
 	 * 						其中数据区开始是相对于该文件分区的起点，如果文件有10个用于元信息的区域，则开始就是10，以扇区为单位
 	 * 						所有的数据以(0,0)结尾
-	 * 	buffers[INDEX_LINK]
-	 * 	buffers[INDEX_FREE]  该分区是一个供管理使用的分区，其上的数据并不
+	 * 	buffers[INDEX_LINK]  间接操纵，布局：
+	 * 	buffers[INDEX_DIR]   间接操纵，布局：dirsmm  FileNode*N  SMMNode*N,  需要序列化
 	 */
-	u8_t *buffers[__X2fsMetaInfo::PARTS_REQUIRED];
+	u8_t *buffersRAW[__X2fsMetaInfo::PARTS_REQUIRED];
+	/**
+	 * 存放buffers[INDEX_DIR]的反序列化对象，用于内存直接操作。
+	 */
+	u8_t *buffersDir{};
 
 	/** DEPRECATED
 	 * 将link分区看成是一个LineaerSourceDescriptor数组
@@ -656,9 +658,11 @@ protected:
 	 * 文件占用的扇区不连续，可能如下： (2,3)-->(7,2)-->(0,0) 表示文件占用2扇区开始的3个扇区，7扇区开始的2个扇区
 	 * 该数组实际上是freespace分区的别名，也就是说linkarr的首地址指向了内存中freespace分区的开始
 	 *
+	 *  UPDATE:使用Vector自动内存管理
+	 *
 	 */
-	__FsLinearSourceDescriptor *linkarr;
-	__FsSizeType linkarrLen;
+	HostEnv::Vector<__LinearSourceDescriptor> linkarr{};
+
 
 
 	// TODO 检查下面的设计是否符合松耦合结构设计
@@ -676,16 +680,18 @@ protected:
 	 */
 
 
-	TMSmm mmnodesmm;
+	TMSmm mmnodesmm{};
 	/**
 	 * 管理文件名的MemoryManager
+	 *
+	 * 可以根据文件名区重建，不需要序列化
 	 */
 	FileNameMM filenamemm;
 
 	/**
 	 * 为linkmm，分配管理节点
 	 */
-	LLSmm listnodesmm;
+	LLSmm listnodesmm{};
 
 
 	/**
@@ -693,12 +699,12 @@ protected:
 	 * 用于分配树节点
 	 * 此管理器管理的区域是buffers[INDEX_DIR]
 	 */
-	FileNodeMM dirsmm;
+	FileNodeMM dirsmm{};
 
 	/**
 	 * 一棵树，其全部分配的节点在dirsmm中
 	 */
-	FileTree fileTree;
+	FileTree fileTree{};
 
 	/**
 	 * 一个数值区间管理器，初始数值区间是  [数据区开始，数据区开始+数据区长度)
@@ -708,8 +714,10 @@ protected:
 	 *
 	 * 管理freespace空闲空间的信息，链表实现
 	 * 当分配空间后，该段空间就从链表中取消
+	 *
+	 * 可以被决定安全地反序列化，只要设置了smm即可
 	 */
-	FreeSpaceMM freemm;
+	FreeSpaceMM freemm{};
 
 
 	/**
@@ -718,16 +726,15 @@ protected:
 	 * 使用listnodesmm作为节点分配器，在retriveLinkeInfoSection()方法中初始化
 	 *
 	 */
-	LinkedInfoMM linkmm;
+	LinkedInfoMM linkmm{};
 
 
 	/**
 	 * 存放错误信息
 	 */
-	mutable int processErrno;/*can be used in both const & non-const method*/
+	mutable int processErrno{};/*can be used in both const & non-const method*/
 
-	// 不再加载可选分区
-//	/** DEPRECATED
+//	/** DEPRECATED 不再加载可选分区
 //	 * 二级加载器是否载入
 //	 */
 //	bool secdLoaded;
@@ -737,45 +744,28 @@ protected:
 
 
 /**
+ *  TODO 更新帮助下面的注释
  *  属性：一个表示状态的当前目录，上一个目录
  *  方法：help ls cd rm mkdir touch cat pwd plwd(-last-)
  */
-template <class __StdEnv,class __FsEnv>
+template <class __FsEnv>
 class FileOperation{
 public:
-#if defined(IDE_MODE)
-	using __StdEnv = StdEnv64Impl;
-	using __FsEnv = FsEnv64;
-#endif
+
 	//===类型别名
-	using This = FileOperation<__StdEnv,__FsEnv>;
-	using __EnvSizeType =typename __StdEnv::SizeType;
-	using __FsSizeType = typename __FsEnv::SizeType;
-	enum{
-		__FsAlignment = __FsEnv::Alignment,
-		__EnvAlignment = __StdEnv::Alignment,
-	};
-	using __X2fsUtil  = X2fsUtil<__StdEnv,__FsEnv>;
+	using This = FileOperation<__FsEnv>;
+    using __FileOperation =This;
+	using __SizeType = HostEnv::size_t;
+	using __X2fsUtil  = X2fsUtil<__FsEnv>;
 	using FileNode = typename __X2fsUtil::FileNode;
 	using __FileDescriptor = typename __X2fsUtil::__FileDescriptor;
 	using __FsTimeType = typename __FileDescriptor::__TimeType;
 
 	//===============接口约束
-	// require __StdEnv::splitBySpaces;
-#if defined(IDE_MODE) //将__StdEnv换成std,以便IDE进行语法检查
-	using __String = typename std::string;
-	template <class T>
-		using __Allocator = typename std::template allocator<T>;
-	template <class T>
-		using __Vector = typename  std::template vector <T, __Allocator<T>>;
-#else
-	using __String =typename __StdEnv::String;
-	template <class T>
-			using __Allocator = typename __StdEnv::template Allocator<T>;
-	template <class T>
-			using __Vector = typename __StdEnv::template Vector <T, __Allocator<T>>;
-#endif
 
+	template <class T>
+		using __Vector = typename  HostEnv::template Vector <T>;
+	using __String = HostEnv::String;
 
 	using __Vector_String =__Vector<__String>;
 	using __Vector_String_cit = typename __Vector_String::const_iterator;// cit = const_iterator
@@ -785,13 +775,15 @@ public:
 
 public:
 	FileOperation()=default;
-	DEPRECATED FileOperation(__StdEnv & env,const __String& img)=delete;
+    FileOperation(const __FileOperation &)= default;
+    __FileOperation  &operator=(const __FileOperation&)= default;
+	DEPRECATED FileOperation(const __String& img)=delete;
 	/**
 	 * @param env  标准环境
 	 * @param driver 磁盘驱动器号，在64位系统上可能映射为文件
 	 * @param lbaAddress  分区的位置
 	 */
-	FileOperation(__StdEnv & env,u8_t driver,u32_t lbaAddress);
+	FileOperation(u8_t driver,u32_t lbaAddress);
 	~FileOperation()=default;
 
 	/**
@@ -842,7 +834,7 @@ public:
 	/**
 	 * 创建文件，指定大小和时间，内容为空
 	 */
-	void touch(const __String & fname,__FsSizeType secNum,__FsTimeType ctime);
+	void touch(const __String & fname,__SizeType secNum,__FsTimeType ctime);
 	/**
 	 * 尚未实现，使用read
 	 */
@@ -863,24 +855,24 @@ public:
 	/**
 	 * read并打印出来
 	 */
-	void read(const __String& fname,__FsSizeType secStart,__FsSizeType byteLen);
+	void read(const __String& fname,__SizeType secStart,__SizeType byteLen);
 	/**
 	 * TODO 创建文件，不存在的
 	 * 如果文件不存在，则创建
 	 */
-	void write(const __String& fname,__FsSizeType start,const char* content,__FsSizeType len);
+	void write(const __String& fname,__SizeType start,const char* content,__SizeType len);
 
 
 	/**
 	 * 按字节随机写文件
 	 */
-	void randwrite(const __String& fname,__FsSizeType byteStart,const char* content,__FsSizeType byteLen);
-	void randread(const __String& fname,__FsSizeType byteStart,__FsSizeType byteLen);
+	void randwrite(const __String& fname,__SizeType byteStart,const char* content,__SizeType byteLen);
+	void randread(const __String& fname,__SizeType byteStart,__SizeType byteLen);
 
 	/**
 	 * 截断文件长度
 	 */
-	void truncate(const __String & fname,__FsSizeType newlen);
+	void truncate(const __String & fname,__SizeType newlen);
 	/**
 	 * @return true继续，false退出
 	 */
@@ -892,15 +884,15 @@ public:
 	 *
 	 *  @param maxLen 最大长度，如果设置成0，则表示读取sysFile的剩余长度
 	 */
-	__FsSizeType readSysFileToX2File(const __String &sysFile,__FsSizeType sysStart,
-								const __String &x2File,__FsSizeType x2Start,
-								__FsSizeType maxLen);
+	__SizeType readSysFileToX2File(const __String &sysFile,__SizeType sysStart,
+								const __String &x2File,__SizeType x2Start,
+								__SizeType maxLen);
 	/** UNTESTED
 	 * @param maxLen 最大长度，如果设为0，则表示读取x2File的剩余长度
 	 */
-	__FsSizeType writeSysFileFromX2File(const __String &sysFile,__FsSizeType sysStart,
-								const __String &x2File,__FsSizeType x2Start,
-								__FsSizeType maxLen);
+	__SizeType writeSysFileFromX2File(const __String &sysFile,__SizeType sysStart,
+								const __String &x2File,__SizeType x2Start,
+								__SizeType maxLen);
 #endif
 
 	bool checkIsFile(const __String & fname,FileNode *&fnode)const;
@@ -915,25 +907,22 @@ private:
 	 */
 	void refreshCurrentPath();
 
-	/**
-	 * 操作系统上下文
-	 */
-	__StdEnv& stdEnv;
+private://成员
 	/**
 	 * 用于操作文件系统的实用工具类
 	 */
-	__X2fsUtil util;
+	__X2fsUtil util{};
 
-	FileNode *curNode;
+	FileNode *curNode{nullptr};
 	/**
-	 *  当lastNode为NULL时，表明没有上一个目录
+	 *  当lastNode为nullptr时，表明没有上一个目录
 	 */
-	FileNode *lastNode;
+	FileNode *lastNode{nullptr};
 
 	/**
 	 * 当前的路径数组
 	 */
-	__Vector_String curPath;
+	__Vector_String curPath{};
 
 };
 
@@ -941,11 +930,17 @@ private:
  * 管理一个唯一的已分配对象
  * 如果重复请求，则总是返回第一次分配的对象
  */
-template <typename T,typename __EnvInterface>
+template <typename T>
 class ManagedObject{ // 在析构函数时自动调用，相当于unique_ptr
 public:
-	using __SizeType = typename __EnvInterface::SizeType;
-	ManagedObject(__EnvInterface &env);
+	using This = ManagedObject<T>;
+	using __ManagedObject = This;
+	using __SizeType = HostEnv::size_t;
+
+
+	explicit ManagedObject();
+    ManagedObject(const __ManagedObject &)=default;
+    ManagedObject & operator=(const __ManagedObject &)=default;
 	~ManagedObject();
 	void setBufferIfNone(T buffer);
 	T	 getOnlyBuffer()const;
@@ -955,8 +950,12 @@ public:
 	 * 防止对其指向进行修改
 	 */
 	const T&    getOnlyBufferReference(__SizeType size)const;
+
+    bool operator==(const __ManagedObject &rhs) const;
+
+    bool operator!=(const __ManagedObject &rhs) const;
+
 private:
-	__EnvInterface &env;
 	mutable T buffer;
 };
 
@@ -968,7 +967,7 @@ private:
 #define __DEF_FileDescriptor FileDescriptor
 
 __DEF_Template_FileDescriptor
-__DEF_FileDescriptor::FileDescriptor(u8_t type,__SizeType sectionList,__SizeType fileLen,__SizeType nameStart,
+__DEF_FileDescriptor::FileDescriptor(u8_t type,size_t sectionList,size_t fileLen,size_t nameStart,
 		__TimeType createdTime,__TimeType lastModefiedTime):
 type(type),sectionListIndex(sectionList),fileLen(fileLen),
 nameStart(nameStart),createdTime(createdTime),lastModefiedTime(lastModefiedTime)
@@ -987,12 +986,12 @@ void __DEF_FileDescriptor::setCreatedTime(__TimeType createdTime) {
 }
 
 __DEF_Template_FileDescriptor
-typename __DEF_FileDescriptor::__SizeType __DEF_FileDescriptor::getFileLen() const {
+typename __DEF_FileDescriptor::size_t __DEF_FileDescriptor::getFileLen() const {
 	return fileLen;
 }
 
 __DEF_Template_FileDescriptor
-void __DEF_FileDescriptor::setFileLen(__SizeType fileLen) {
+void __DEF_FileDescriptor::setFileLen(size_t fileLen) {
 	this->fileLen = fileLen;
 }
 
@@ -1005,13 +1004,13 @@ void __DEF_FileDescriptor::setLastModefiedTime(__TimeType lastModefiedTime) {
 	this->lastModefiedTime = lastModefiedTime;
 }
 __DEF_Template_FileDescriptor
-typename __DEF_FileDescriptor::__SizeType __DEF_FileDescriptor::getSectionListIndex() const
+typename __DEF_FileDescriptor::size_t __DEF_FileDescriptor::getSectionListIndex() const
 {
 	return this->sectionListIndex;
 }
 
 __DEF_Template_FileDescriptor
-void __DEF_FileDescriptor::setSectionListIndex(__SizeType	sectionListIndex)
+void __DEF_FileDescriptor::setSectionListIndex(size_t	sectionListIndex)
 {
 	this->sectionListIndex = sectionListIndex;
 }
@@ -1020,14 +1019,19 @@ __DEF_Template_FileDescriptor
 template <class __EnvTransfer>
 constexpr size_t __DEF_FileDescriptor::getSerializitionSize()
 {
-	// 不能调用模板参数的静态函数
-	// 也不能调用带有实例化的函数：env.sizeofHostType<__SizeType>(0)
-	using u8size=typename __EnvTransfer::template SizeofHostType<u8_t>;
-	using SizeTypeSize = typename __EnvTransfer::template SizeofHostType<__SizeType>;
-	using TimetypeSize = typename __EnvTransfer::template SizeofHostType<__TimeType>;
+	// DEPRECATED Old code: call through funcion-like class .
+//	using u8size=typename __EnvTransfer::template SizeofHostType<u8_t>;
+//	using SizeTypeSize = typename __EnvTransfer::template SizeofHostType<size_t>;
+//	using TimetypeSize = typename __EnvTransfer::template SizeofHostType<__TimeType>;
+//	return u8size::Size + SizeTypeSize::Size*3 + TimetypeSize::Size*2;
 
-	return u8size::Size + SizeTypeSize::Size*3 + TimetypeSize::Size*2;
 
+	return __EnvTransfer::template sizeofHostType<decltype(this->type)>()+
+			__EnvTransfer::template sizeofHostType<decltype(this->sectionListIndex)>()+
+			__EnvTransfer::template sizeofHostType<decltype(this->fileLen)>()+
+			__EnvTransfer::template sizeofHostType<decltype(this->nameStart)>()+
+			__EnvTransfer::template sizeofHostType<decltype(this->createdTime)>()+
+			__EnvTransfer::template sizeofHostType<decltype(this->lastModefiedTime)>();
 }
 
 __DEF_Template_FileDescriptor
@@ -1040,12 +1044,12 @@ void __DEF_FileDescriptor::setType(u8_t type) {
 }
 
 __DEF_Template_FileDescriptor
-typename __DEF_FileDescriptor::__SizeType __DEF_FileDescriptor::getNameOffset()const
+typename __DEF_FileDescriptor::size_t __DEF_FileDescriptor::getNameOffset()const
 {
 	return this->nameStart;
 }
 __DEF_Template_FileDescriptor
-void __DEF_FileDescriptor::setNameOffset(__SizeType off)
+void __DEF_FileDescriptor::setNameOffset(size_t off)
 {
 	this->nameStart=off;
 }
@@ -1055,17 +1059,12 @@ void __DEF_FileDescriptor::setNameOffset(__SizeType off)
 
 
 //=========class X2fsUtil
-#define __DEF_X2fsUtil_Template template <class __EnvInterface,class __FsEnv>
-#define __DEF_X2fsUtil X2fsUtil<__EnvInterface,__FsEnv>
+#define __DEF_X2fsUtil_Template template <class __FsEnv>
+#define __DEF_X2fsUtil X2fsUtil<__FsEnv>
 __DEF_X2fsUtil_Template
 int __DEF_X2fsUtil::geterrno()const
 {
 	return this->processErrno;
-}
-__DEF_X2fsUtil_Template
-void __DEF_X2fsUtil::setEnvInterface(__EnvInterface *env)
-{
-	this->env=env;
 }
 __DEF_X2fsUtil_Template
 void __DEF_X2fsUtil::seterrno(int processErrno)const
@@ -1081,12 +1080,12 @@ void __DEF_X2fsUtil::seterrno(int processErrno)
 __DEF_X2fsUtil_Template
 typename __DEF_X2fsUtil::FileNode *__DEF_X2fsUtil::getRootBase()const
 {
-		return (FileNode *)this->fileTree.getHead();
+		return static_cast<FileNode *>(this->fileTree.getHead());
 }
 __DEF_X2fsUtil_Template
 typename __DEF_X2fsUtil::FileNode *__DEF_X2fsUtil::getRootBase()
 {
-		return (FileNode *)this->fileTree.getHead();
+		return static_cast<FileNode *>(this->fileTree.getHead());
 }
 __DEF_X2fsUtil_Template
 bool __DEF_X2fsUtil::isDirectory(const FileNode *p)
@@ -1108,7 +1107,7 @@ typename __DEF_X2fsUtil::FileTree* __DEF_X2fsUtil::getFileTree()
 
 //template<template<class > class _Allocator>
 //void X2fsUtil::getLinkedList(LinearSourceDescriptor* buffer,
-//		LinkedList<LinearSourceDescriptor, _Allocator>& list, __SizeType maxlen) {
+//		LinkedList<LinearSourceDescriptor, _Allocator>& list, size_t maxlen) {
 //}
 
 

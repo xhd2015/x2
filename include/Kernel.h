@@ -54,6 +54,8 @@ public:
 	};
 public:
 	ProcessManager();
+	ProcessManager(const ProcessManager&)=delete;
+	ProcessManager& operator=(const ProcessManager&)=delete;
 	~ProcessManager();
 	/**
 	 * 根据进程的大小建立进程

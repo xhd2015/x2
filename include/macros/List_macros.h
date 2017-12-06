@@ -44,13 +44,13 @@ void  __DEF_ListNode::setPrevious(__ListNode* previous)
 __DEF_Template_ListNode
 int  __DEF_ListNode::hasPrevious()const
 {
-    return (this->previous!=NULL);
+    return (this->previous!=nullptr);
 }
 
 __DEF_Template_ListNode
 int  __DEF_ListNode::hasNext()const
 {
-    return (this->next!=NULL);
+    return (this->next!=nullptr);
 }
 
 __DEF_Template_ListNode
@@ -67,6 +67,36 @@ __DEF_Template_ListNode
 void __DEF_ListNode::setData(const T& data)
 {
     this->data=data;
+}
+
+__DEF_Template_ListNode
+template <class __EnvTransfer>
+SerializerPtr<__EnvTransfer>& __DEF_ListNode::serialize(SerializerPtr<__EnvTransfer> &ptr)const
+{
+	return ptr 	<< data
+				<< next
+				<< previous;
+}
+
+__DEF_Template_ListNode
+template <class __EnvTransfer>
+SerializerPtr<__EnvTransfer>& __DEF_ListNode::deserialize(SerializerPtr<__EnvTransfer> &ptr)
+{
+	static_assert( __EnvTransfer::ptrPolicy()!=__EnvTransfer::POLICY_PTR_OBJECT,"ptr object policy not supported yet");
+	ptr >> data
+			>>next
+			>>previous;
+	return ptr;
+}
+
+__DEF_Template_ListNode
+template <class __EnvTransfer>
+size_t __DEF_ListNode::getSerializitionSize()
+{
+	static_assert( __EnvTransfer::ptrPolicy()!=__EnvTransfer::POLICY_PTR_OBJECT,"ptr object policy not supported yet");
+	return data.getSerializitionSize<__EnvTransfer>()+
+			__EnvTransfer::template sizeofHostType<decltype(this->next)>()+
+			__EnvTransfer::template sizeofHostType<decltype(this->previous)>();
 }
 #undef __DEF_Template_ListNode
 #undef __DEF_ListNode
@@ -91,11 +121,11 @@ __DEF_LinkedList::getLast()const
 __DEF_Template_LinkedList
 bool			__DEF_LinkedList::isEmpty()const
 {
-	return this->getHead()==NULL;
+	return this->getHead()==nullptr;
 }
 __DEF_Template_LinkedList
 _Allocator<typename __DEF_LinkedList::__ListNode>
-*__DEF_LinkedList::getMemoryManager()const
+&__DEF_LinkedList::getMemoryManager()const
 {
     return smm;
 }
@@ -104,19 +134,11 @@ _Allocator<typename __DEF_LinkedList::__ListNode>
 
 
 //=====class: SimpleMemoryNode
-SimpleMemoryNode::SimpleMemoryNode(bool NO):
-alloced(NO)
+SimpleMemoryNode::SimpleMemoryNode(bool alloced):
+alloced(alloced)
 {
+}
 
-}
-bool SimpleMemoryNode::getNO()
-{
-    return this->alloced;
-}
-bool SimpleMemoryNode::isFree()
-{
-    return this->alloced==false;
-}
 bool SimpleMemoryNode::isAlloced()
 {
 	return alloced;
@@ -125,19 +147,7 @@ void SimpleMemoryNode::setAlloced(bool alloced)
 {
 	this->alloced=alloced;
 }
-void SimpleMemoryNode::free()
-{
-    this->alloced=false;
-}
-void SimpleMemoryNode::unfree()
-{
-//	printf("offset of No is %x\n",(char*)&(this->NO)-(char*)this);
-    this->alloced=true;
-}
-void SimpleMemoryNode::setNO(bool NO)
-{
-    this->alloced = NO;
-}
+
 
 //=====class:SimpleMemoryManager
 template<class T>
@@ -185,7 +195,8 @@ void			SimpleMemoryManager<T>::setErrHandler(SimpleMemoryManager<T>::ERROR_HANDL
 template<class T>
 bool			SimpleMemoryManager<T>::checkIsInternal(FullNode *t)
 {
-	return this->start <= (size_t)t && (size_t)t - (size_t)this->start <= this->limit ;
+	return this->start <= static_cast<size_t>(t) && static_cast<size_t>(t) -
+						static_cast<size_t>(this->start) <= this->limit ;
 }
 //===========class TreeNode
 #define __DEF_Template_TreeNode template<class T>
@@ -219,13 +230,13 @@ typename __DEF_TreeNode::__TreeNode* __DEF_TreeNode::getSon() const{
 
 __DEF_Template_TreeNode
 typename __DEF_TreeNode::__TreeNode* __DEF_TreeNode::getNext() const{
-	__TreeNode* next=(__TreeNode*)this->__ListNode::getNext();//这种情况下的强制转换一定是正确的，因为TreeNode中只存储TreeNode，而不会存储ListNode
+	__TreeNode* next=static_cast<__TreeNode*>(this->__ListNode::getNext());//这种情况下的强制转换一定是正确的，因为TreeNode中只存储TreeNode，而不会存储ListNode
 	return next;
 }
 
 __DEF_Template_TreeNode
 typename __DEF_TreeNode::__TreeNode* __DEF_TreeNode::getPrevious() const{
-	__TreeNode* previous=(__TreeNode*)this->__ListNode::getPrevious();
+	__TreeNode* previous=static_cast<__TreeNode*>(this->__ListNode::getPrevious());
 	return previous;
 }
 
@@ -241,14 +252,44 @@ typename __DEF_TreeNode::__TreeNode* __DEF_TreeNode::getDirectFather()const {//d
 __DEF_Template_TreeNode
 bool		 __DEF_TreeNode::hasSon()const
 {
-	return this->son!=NULL;
+	return this->son!=nullptr;
 }
 __DEF_Template_TreeNode
 bool 		 __DEF_TreeNode::hasFather()const
 {
-	return this->father!=NULL;
+	return this->father!=nullptr;
+}
+__DEF_Template_TreeNode
+template <class __EnvTransfer>
+SerializerPtr<__EnvTransfer>& __DEF_TreeNode::serialize(SerializerPtr<__EnvTransfer> &ptr)const
+{
+	// TODO 修改下面的指针序列化
+	// 调用父类的serialize,然后自己的
+	this->Super::template serialize<__EnvTransfer>(ptr)
+				<<son
+				<<father;
+	return ptr;
 }
 
+__DEF_Template_TreeNode
+template <class __EnvTransfer>
+SerializerPtr<__EnvTransfer>& __DEF_TreeNode::deserialize(SerializerPtr<__EnvTransfer> &ptr)
+{
+	this->Super::template deserialize<__EnvTransfer>(ptr)
+						>>son
+						>>father;
+	return ptr;
+}
+
+__DEF_Template_TreeNode
+template <class __EnvTransfer>
+size_t __DEF_TreeNode::getSerializitionSize()
+{
+	static_assert( __EnvTransfer::ptrPolicy()!=__EnvTransfer::POLICY_PTR_OBJECT,"ptr object policy not supported yet");
+	return this->Super::template getSerializitionSize<__EnvTransfer>()+
+			__EnvTransfer::template sizeofHostType<decltype(this->son)>()+
+			__EnvTransfer::template sizeofHostType<decltype(this->father)>();
+}
 
 #undef __DEF_Template_TreeNode
 #undef __DEF_TreeNode
@@ -292,7 +333,7 @@ bool		__DEF_Tree::isEmpty()const
 	return !(this->root->hasSon());
 }
 __DEF_Template_Tree
-typename __DEF_Tree::__Allocator *__DEF_Tree::getSmm()const
+typename __DEF_Tree::__Allocator &__DEF_Tree::getSmm()const
 {
 	return this->smm;
 }

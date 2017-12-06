@@ -15,7 +15,7 @@
 
 using namespace std;
 
-CommandOptions<StdEnv64Impl> opts{
+CommandOptions opts{
 			{"-s","--basic-size",true,"文件系统的基本尺寸,默认为系统的sizeof(size_t)"},
 			{"","--16",false,"等价于-s 2"},
 			{"","--32",false,"等价于-s 4"},
@@ -35,10 +35,10 @@ CommandOptions<StdEnv64Impl> opts{
 string helpMsg = opts.makeHelpMessage("从命令行指定文件，读取或者写入到x2的文件系统",
 		"CMDUtil_rwfile [选项]  x2文件系统文件", "");
 
-class MyPorcessor:public CommandProcessor<StdEnv64Impl,ParamRwfile>
+class MyPorcessor:public CommandProcessor<ParamRwfile>
 {
 public:
-	MyPorcessor(StdEnv64Impl &env):CommandProcessor(env){}
+	MyPorcessor()=default;
 	virtual int onProcessArgOpt(ParamRwfile &pack,__OptPosIterator itopt,__VS_cit itarg) override{
 		if(itopt->equals("-s"))
 		{
@@ -103,8 +103,8 @@ public:
 };
 
 
-template <class __StdEnv,class __FsEnv>
-void process(__StdEnv &env,ParamRwfile &p,int& status);
+template <class __FsEnv>
+void process(ParamRwfile &p,int& status);
 
 
 // 高度特华的不需要模板
@@ -117,8 +117,7 @@ int main(int argc,char *argv[])
 			cout << argv[i]<< " ";
 		cout << endl;
 
-	StdEnv64Impl env;
-	MyPorcessor prep(env);
+	MyPorcessor prep;
 	ParamRwfile p;
 	int status=prep.processOptions(opts, args.cbegin(),args.cend(), p);
 	// 参数处理完毕
@@ -133,15 +132,13 @@ int main(int argc,char *argv[])
 				<<endl;
 	if(status==MyPorcessor::RETURN_CONTINUE)
 	{
-
-		StdEnv64Impl env;
 		if(p.basicSize==2)
 		{
-			process<StdEnv64Impl,FsEnv16>(env,p,status);
+			process<EnvTransfer<16>>(p,status);
 		}else if(p.basicSize==4){
-			process<StdEnv64Impl,FsEnv32>(env,p,status);
+			process<EnvTransfer<32>>(p,status);
 		}else if(p.basicSize==8){
-			process<StdEnv64Impl,FsEnv64>(env, p,status);
+			process<EnvTransfer<64>>(p,status);
 		}else{
 			cerr << "Unsupported basic size type:"<<p.basicSize<<endl;
 			status = MyPorcessor::RETURN_ERROR;
@@ -153,12 +150,12 @@ int main(int argc,char *argv[])
 }
 
 
-template <class __StdEnv,class __FsEnv>
-void process(__StdEnv &env,ParamRwfile &p,int& status)
+template <class __FsEnv>
+void process(ParamRwfile &p,int& status)
 {
-	u8_t driver=env.addFile(p.hddfile,p.lbalow);
+	u8_t driver=HostEnv::addFile(p.hddfile,p.lbalow);
 	// TODO 对磁盘和驱动器号进行映射
-	FileOperation<StdEnv64Impl,__FsEnv> fop(env,driver,p.lbalow);
+	FileOperation<__FsEnv> fop(driver,p.lbalow);
 	if(p.cdpath.size()==0 || fop.cd(p.cdpath) )
 	{
 		if(p.mode==p.READ)

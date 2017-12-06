@@ -1,0 +1,1 @@
+/usr/bin/c++.exe -g  -Wl,--enable-auto-import CMakeFiles/conceptual_mkfs.x2fs.dir/src/conceptual/all.cpp.o  -o conceptual_mkfs.x2fs.exe -Wl,--out-implib,libconceptual_mkfs.x2fs.dll.a -Wl,--major-image-version,0,--minor-image-version,0 

@@ -55,7 +55,7 @@ void TSS::fromMemory(TSS &self,int seg,int off)
 }
 void TSS::dumpInfo(Printer *p)
 {
-	if(p!=NULL)
+	if(p!=nullptr)
 	{
 		p->putsz("TSS{");
 		p->putx("LDTSEL:",this->LDTSEL,",");

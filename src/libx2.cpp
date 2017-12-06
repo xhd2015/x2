@@ -90,7 +90,7 @@ void Util::printStr(const char* str_addr,int mode)
 //	Util::jmpDie(); //Very OK
 #endif
 #if defined(CODE32) || defined(CODE16)
-	if(str_addr==NULL)return;
+	if(str_addr==nullptr)return;
 	char ch;
 //    while( (ch=(char)Util::get(Util::strSel,(int)str_addr++))!=0 )
 	while( (ch=*str_addr++) != '\0')
@@ -470,7 +470,7 @@ x0(x0+this->rows>=Printer::SCREEN_MAX_X?0:x0),
 y0(y0+this->cols>=Printer::SCREEN_MAX_Y?0:y0),
 x(0),y(0),
 mode(mode),
-father(NULL),sonSize(0)
+father(nullptr),sonSize(0)
 {
      
 }
@@ -562,11 +562,11 @@ void Printer::putx(const char* str,int i,const char* strAfter)
 }
 void Printer::puti(const char* str,void * i,const char* strAfter)
 {
-	puti(str,(int)i,strAfter);
+	puti(str,reinterpret_cast<int>(i),strAfter);
 }
 void Printer::putx(const char* str,void * i,const char* strAfter)
 {
-	putx(str,(int)i,strAfter);
+	putx(str,reinterpret_cast<int>(i),strAfter);
 }
 #endif
 
@@ -658,7 +658,7 @@ void Printer::clr()
 Printer  Printer::getSubPrinter(unsigned int x0,unsigned int y0,unsigned int rows,unsigned int cols,int mode)
 {
 	char spaces[sizeof(Printer)];
-    Printer* target=(Printer*)spaces;
+    Printer* target=reinterpret_cast<Printer*>(spaces);
     target->rows = rows > this->rows?this->rows:rows;
     target->cols = cols > this->cols? this->cols: cols;
     target->x0   = this->x0 + ((x0+target->rows) >  this->rows?0:x0);
@@ -677,7 +677,7 @@ Printer  Printer::getSubPrinter(unsigned int x0,unsigned int y0,unsigned int row
 ClassDebug::ClassDebug(const char *msg)
 {
 #if defined(CODE32)
-//	if(Kernel::printer!=NULL)
+//	if(Kernel::printer!=nullptr)
 //		Kernel::printer->putsz(msg);
 #endif
 }
@@ -687,7 +687,7 @@ ClassDebug::ClassDebug(const char *msg)
 #if defined(CODE32) || defined(CODE64)
 //==========class : String
 String::String(const char* str):
-		str(NULL)
+		str(nullptr)
 {
     
 }
@@ -711,7 +711,7 @@ void String::set(int index,int ch)
 
 String String::valueOf(int n)
 {
-    return String(NULL);
+    return String(nullptr);
 }
 
 //============class : Queue<T>
@@ -745,7 +745,7 @@ T Queue<T>::remove()
         rt = p[indexRemove];
         indexRemove++;
         curLen--;
-        if(indexRemove==(int)len)indexRemove=0;
+        if(indexRemove==reinterpret_cast<int>(len))indexRemove=0;
     }
     return rt;
 }
@@ -759,7 +759,7 @@ int Queue<T>::put(T t)
         this->p[indexAdd]=t;
         indexAdd++;
         curLen++;
-        if(indexAdd == (int)len)indexAdd=0;
+        if(indexAdd == reinterpret_cast<int>(len))indexAdd=0;
     }
     return 1;
     

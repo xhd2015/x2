@@ -86,8 +86,8 @@ int PDEManager::prepareVisitPhysical(u32_t phyaddr, size_t size,
 	// DEBUG
 	Kernel::printer->putsz("in prepareVisit\n");
 
-	PTE *pte_p1=NULL;
-	PDE *pde_p0=NULL;
+	PTE *pte_p1=nullptr;
+	PDE *pde_p0=nullptr;
 	bool pde_written=false;
 
 	/**
@@ -119,7 +119,7 @@ int PDEManager::prepareVisitPhysical(u32_t phyaddr, size_t size,
 			Kernel::printer->putx("alloced=",narr[i].isAlloced()," \n");
 		}
 
-		if(!narr[i].isAlloced() && ptemans[i]!=NULL)//exist a PDE
+		if(!narr[i].isAlloced() && ptemans[i]!=nullptr)//exist a PDE
 		{
 //			Kernel::printer->putx("i=",i," ");
 //			Kernel::printer->putx("left=",ptemans[i]->getLeft()," \n");
@@ -132,16 +132,16 @@ int PDEManager::prepareVisitPhysical(u32_t phyaddr, size_t size,
 				{
 					pde_p0=getTarget(i);
 					pte_p1=ptemans[i]->getTarget(istart);
-					pde_written=true;//如果一个PTEManager不为NULL，那么肯定保证了它的PDE已经指向了第一个PTE
+					pde_written=true;//如果一个PTEManager不为nullptr，那么肯定保证了它的PDE已经指向了第一个PTE
 					break;
 				}
 			}
 		}
 	}
-	Kernel::printer->putx("find pde==NULL?", pde_p0==NULL);
+	Kernel::printer->putx("find pde==nullptr?", pde_p0==nullptr);
 
 	// TODO 调试下面这段代码，确保正确性
-	if(pde_p0==NULL)//not find such pde,then new one for it
+	if(pde_p0==nullptr)//not find such pde,then new one for it
 	{
 		int index=-1;
 		pde_p0=this->getNew(index);
@@ -151,7 +151,7 @@ int PDEManager::prepareVisitPhysical(u32_t phyaddr, size_t size,
 			size_t ptetstart=(size_t)Kernel::getTheKernel()->mnewKernelAlign(nptes  * x2sizeof(PTEManager::TargetType),4);
 			this->ptemans[index] = (PTEManager*)
 					Kernel::getTheKernel()->mnewKernel(x2sizeof(PTEManager));
-			if(this->ptemans[index]!=NULL && ptenstart!=0 && ptetstart!=0)
+			if(this->ptemans[index]!=nullptr && ptenstart!=0 && ptetstart!=0)
 			{
 				new (this->ptemans[index]) PTEManager(ptenstart,ptetstart,nptes);
 				pte_p1=(PTE*)ptetstart;
@@ -180,7 +180,7 @@ int PDEManager::prepareVisitPhysical(u32_t phyaddr, size_t size,
 		*((u32_t*)pte_p1+i) = Kernel::makePTE(phyaddr + i*4*1024);
 	}
 
-	if(pte_p1!=NULL && pde_p0!=NULL) //they are all fine
+	if(pte_p1!=nullptr && pde_p0!=nullptr) //they are all fine
 	{
 		u32_t lineAddr = VirtualManager::getLinearAddress((int)pde_p0, (int)pte_p1, phyaddr);
 		int	 	selIndex;
@@ -216,7 +216,7 @@ int PDEManager::prepareVisitPhysical(u32_t phyaddr, size_t size,
 
 int	PDEManager::allocPDE(size_t n_pte)
 {
-	if(curAllocedSize == len || ptemans == NULL )return -1;
+	if(curAllocedSize == len || ptemans == nullptr )return -1;
 	int index;
 	PDEManager::TargetType* targetPDE=getNew(index);//alloced
 
@@ -226,7 +226,7 @@ int	PDEManager::allocPDE(size_t n_pte)
 		// EFF 4*1024,这个要求似乎有点高
 		PTE*		ptes = (PTE*)Kernel::getTheKernel()->mnewKernelAlign(x2sizeof(PTE)*n_pte, 4*1024); //对齐到4KB区开始
 		PTEManager::NodeType*	ptesAssocNodes =(PTEManager::NodeType*) Kernel::getTheKernel()->mnewKernel(x2sizeof(PTEManager::NodeType) * n_pte);
-		if(pteman == NULL || ptes == NULL || ptesAssocNodes==NULL)
+		if(pteman == nullptr || ptes == nullptr || ptesAssocNodes==nullptr)
 			goto Failed;
 
 		new (pteman) PTEManager((int)ptesAssocNodes,(int)ptes, n_pte);
@@ -236,9 +236,9 @@ int	PDEManager::allocPDE(size_t n_pte)
 
 		Failed:
 			withdraw(targetPDE);
-			if(pteman!=NULL) Kernel::getTheKernel()->mdeleteKernel(pteman, x2sizeof(pteman));
-			if(ptes != NULL) Kernel::getTheKernel()->mdeleteKernel(ptes,x2sizeof(PTE)*n_pte);
-			if(ptesAssocNodes == NULL) Kernel::getTheKernel()->mdeleteKernel(ptesAssocNodes,x2sizeof(PTEManager::NodeType)*n_pte);
+			if(pteman!=nullptr) Kernel::getTheKernel()->mdeleteKernel(pteman, x2sizeof(pteman));
+			if(ptes != nullptr) Kernel::getTheKernel()->mdeleteKernel(ptes,x2sizeof(PTE)*n_pte);
+			if(ptesAssocNodes == nullptr) Kernel::getTheKernel()->mdeleteKernel(ptesAssocNodes,x2sizeof(PTEManager::NodeType)*n_pte);
 			return -1;
 	}else
 		return -1;
@@ -247,7 +247,7 @@ int	PDEManager::allocPDE(size_t n_pte)
 
 void PDEManager::withdrawPDE(size_t i)
 {
-	if(curAllocedSize==0 || i>=len || getPTEManagerRef(i)==NULL)return;
+	if(curAllocedSize==0 || i>=len || getPTEManagerRef(i)==nullptr)return;
 
 	PTEManager *pteman=getPTEManagerRef(i);
 

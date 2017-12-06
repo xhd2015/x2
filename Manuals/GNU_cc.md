@@ -81,6 +81,62 @@ int main(int argc,char *argv[])
 
 gcc声明的always_inline的函数,还需要加上inline声明。函数的定义体只要在同一编译过程中出现即可。
 
+using声明
+  using具有两方面的作用并且具有两种不同的形式，第一种形式是using =,也就是定义别名； 第二种不含等号，这种情况下，如果使用using一个命名空间，意味着可以不用使用命名空间限定符(std::),如果using一个类，则这个类必须是该类的基类，using可用于引入静态函数；如果是private继承，可以更改访问权限。
+
+# 语法层面上的空结构与运行时开销
+```c++
+//空结构
+class int2type{
+  
+}
+
+void test_int2type(int i,int2type,int j)
+{
+  cout << ((char*)&j - (char*)&i) << endl;
+}
+void test_int2type(int i,int j)
+{
+  cout << ((char*)&j-(char*)&i)<<endl;
+}
+```
+两个函数的结果分别是：16,8。这就意味着在64位机器上无论传入什么参数，总是按照最长位数一次压入的，这也比较容易理解：因为寄存器的长度就是这么长。
+这个测试对于那些使用分发技术的函数而言，可能会稍微增加一点运行时开销（或者编译器可以直接优化为仅仅将栈指针增加而不压入数，因为这个变量没有被引用），但是这种开销其实算不了什么。
+
+# sizeof
+64位机器上，下面三个是等价的：
+```c++
+  cout <<sizeof(long)<<endl;
+  cout <<sizeof(long int)<<endl;
+  cout <<sizeof(long long)<<endl;
+```
+都是8
+
+
+# 编译效率和预编译文件（未完成）
+使用预编译头部：链接
+选项 -Winvalid-pch  开启关于使用预编译头部的警告
+
+生成预编译头部：g++ xx.h
+xx.h的要求：存放一些不经常变动的引入。记住，使用预编译头部的作用是为了防止初次编译后再次编译的慢速。如果一个文件经常改动，也就意味着没有初次编译即可用的特性。
+
+预编译头的适用范围是什么？必须放在哪里使用？
+不同的编译选项能够产生不同的预编译文件，对某个特定的编译选项，如何指定使用某个特定的预编译版本？（可能通过文件夹的方式区分）
+
+这些有待测试
+
+
+# 为什么g++要有链接时附加库而不是从源文件直接产生
+1. 头文件可以给出模板的声明和定义，可以给出非模板的声明。但是如果一个函数不是模板，就一定要生成代码（无论有没有引用）。如果多个文件分别编译，就会产生多份代码，导致链接时冲突
+2. 预先编译好的库可以节省编译时间，因为标准库通常很少变化，一次编译后即可使用
+3. 使用这些库来*补偿*编译过程。注意这里说的是补偿，编译过程中可以不使用这个补偿(-nostdlib),代价要么自己加入标准库实现文件一起编译，要么自己手动编写函数，要么接受链接错误
+4. 当然，你可以使用自己编写的附加库，只有能够*补偿*编译过程即可。 
+
+# 编译器预定义宏函数和宏常量
+_GLIBCXX_EXPORT_TEMPLATE  是否使用export template.通常而言，该值未定义，也就意味着没有提供export关键字的支持
+__is_trivial(type) 注意，这是宏函数，因此能够以类型作为参数调用
+__is_pod(type)
+__builtin_abort()  无参宏函数
 # 扩展(动态)内联汇编
 快速参考：http://ericw.ca/notes/a-tiny-guide-to-gcc-inline-assembly.html
 常用形式：
@@ -143,7 +199,7 @@ vector<int> blah(const vector<int> &);
 ```
 生成的符号是：_Z4blahRSt6vectorIiSaIiEE
 
-# 注意
+# 注意关于中间汇编生成和直接生成
 直接使用g++生成object文件会包含__exit等注册类函数，在主机上最好先生成汇编代码，然后使用as编译后再生成目标文件，这样就不会含有不必要的注册函数。
 
 # C++ 特殊语法
@@ -155,6 +211,28 @@ g++/gcc在没有开启优化选项的情况下不会inline任何函数，即使�
 
 
 
+# 链接器选项
+https://gcc.gnu.org/onlinedocs/gcc/Link-Options.html
+```java
+-nostartfiles
+Do not use the standard system startup files when linking. The standard system libraries are used normally, unless -nostdlib or -nodefaultlibs is used.
+
+-nodefaultlibs
+Do not use the standard system libraries when linking. Only the libraries you specify are passed to the linker, and options specifying linkage of the system libraries, such as -static-libgcc or -shared-libgcc, are ignored. The standard startup files are used normally, unless -nostartfiles is used.
+
+The compiler may generate calls to memcmp, memset, memcpy and memmove. These entries are usually resolved by entries in libc. These entry points should be supplied through some other mechanism when this option is specified.
+
+-nostdlib
+Do not use the standard system startup files or libraries when linking. No startup files and only the libraries you specify are passed to the linker, and options specifying linkage of the system libraries, such as -static-libgcc or -shared-libgcc, are ignored.
+
+The compiler may generate calls to memcmp, memset, memcpy and memmove. These entries are usually resolved by entries in libc. These entry points should be supplied through some other mechanism when this option is specified.
+
+One of the standard libraries bypassed by -nostdlib and -nodefaultlibs is libgcc.a, a library of internal subroutines which GCC uses to overcome shortcomings of particular machines, or special needs for some languages. (See Interfacing to GCC Output in GNU Compiler Collection (GCC) Internals, for more discussion of libgcc.a.) In most cases, you need libgcc.a even when you want to avoid other standard libraries. In other words, when you specify -nostdlib or -nodefaultlibs you should usually specify -lgcc as well. This ensures that you have no unresolved references to internal GCC library subroutines. (An example of such an internal subroutine is __main, used to ensure C++ constructors are called; see collect2 in GNU Compiler Collection (GCC) Internals.)
+```
+
+-nostartfiles
+-nodefaultlibs
+-nostdlib   等于上面两个一起使用。如果禁用了libc，则编译器生成的对于memcmp, memset, memcpy和memmove的调用必须在其他库中以等价的方式提供。
 # 能够动态设置段超越前缀吗？
 默认情况下所有的数据都是通过ds来访问的，有没有办法让g++将段超越前缀修改成es?
 
@@ -173,6 +251,19 @@ g++/gcc在没有开启优化选项的情况下不会inline任何函数，即使�
 '-Wnonnull'   和函数的属性nonnull配合使用
 '-Wno-deprecated'   不对deprecated函数警告
 -Wunused-variable   未使用的变量
+-Weffc++           如果违背了Effective C++的准则，就警告
+ -Wfloat-equal    浮点数比较是否相等时警告
+  -Wignored-qualifiers  类型限定符如果被忽略就警告
+  -Winvalid-pch   如果找到预编译文件但是未使用，就警告
+   -Wlogical-op  如果该符号不起作用，警告
+    -Wlogical-not-parentheses   未加括号
+  -Wmisleading-indentation  缩进不正确
+  -Wnarrowing  c++统一初始化操作{}中发生向窄转换时
+  -Wnon-virtual-dtor  非虚析构函数
+  -Wold-style-cast  c强制转换
+  -Wold-style-declaration  老式声明
+  -Wprotocol   如果继承方法未被实现
+  -Wreorder    当代码块被重新安排时
 
 
 
@@ -184,6 +275,10 @@ g++/gcc在没有开启优化选项的情况下不会inline任何函数，即使�
 '#pragma GCC push_options'
 '#pragma GCC pop_options'  把当前选项压入栈
 '#pragma GCC reset_options'  重置由target,optimize指定的选项，恢复命令行选项
+
+'#pragma GCC system_header'
+所谓System Header指定是，操作系统和运行时库的代码通常不能用一致(conforming)的C语言写出来，因此在g++中可能出现warning。 g++给与这些文件特殊对待，所有warning信息（除了#warning)会被屏蔽掉。
+通常, -isystem -idirafter  以及上面的#pragma指令都会令一个文件成为System Header.
 
 # 附录：\_\_attribute\_\_属性集合
 参考：https://gcc.gnu.org/onlinedocs/gcc/Attribute-Syntax.html
@@ -239,6 +334,33 @@ returns_nonnull	函数不会返回NULL
 used		标注一个函数会被使用，所以它的代码一定会被生成而不是优化掉
 malloc    表明这是一个类似于malloc的函数
 optimize  指定对该函数的优化或者其他选项，如果参数是数字A，等价于-O A；如果参数是字符串，且以O开头，则等价于其自身；其他的，考虑为-f开头。可以使用#pragma GCC optimize来优化多个函数
+externally_visible 该类函数不会成为static函数。默认情况下所有函数都具有此属性，但是对于不同的链接器，一个显示的该声明是必须的
+```
+'-fwhole-program'
+     Assume that the current compilation unit represents the whole
+     program being compiled.  All public functions and variables with
+     the exception of 'main' and those merged by attribute
+     'externally_visible' become static functions and in effect are
+     optimized more aggressively by interprocedural optimizers.
+
+     This option should not be used in combination with '-flto'.
+     Instead relying on a linker plugin should provide safer and more
+     precise information.
+
+...
+'externally_visible'
+     This attribute, attached to a global variable or function,
+     nullifies the effect of the '-fwhole-program' command-line option,
+     so the object remains visible outside the current compilation unit.
+
+     If '-fwhole-program' is used together with '-flto' and 'gold' is
+     used as the linker plugin, 'externally_visible' attributes are
+     automatically added to functions (not variable yet due to a current
+     'gold' issue) that are accessed outside of LTO objects according to
+     resolution file produced by 'gold'.  For other linkers that cannot
+     generate resolution file, explicit 'externally_visible' attributes
+     are still necessary.
+```
 
 # 下面是x86专用的
 cdel  假设调用一个函数时，函数内部会将堆栈平衡
@@ -260,9 +382,15 @@ stdcall 对于固定参数，自动平衡堆栈；对于可变参数，不平衡
           -P  -fdebug-cpp -ftrack-macro-expansion -fworking-directory
           -remap -trigraphs  -undef  -UMACRO
           -Wp,OPTION -Xpreprocessor OPTION -no-integrated-cpp
+'-imacros FILE'
+      同-include，但是只会保留宏定义。所有的-imacros在-iinclude之前处理
+'-idirafter DIR' 将DIR加入include搜索路径，但是出于系统路径和-I指定的路径之后
+'-fdollars-in-identifiers'  允许美元符号出现在标识符中
+'-fextended-identifiers'  允许任意字符（如果python）用作标识符，默认启用
+'-fpreprocessed' 暗示输入文件已经预处理，因此编译器不再执行宏展开等众多指令。如果文件本身具有.i,.ii,.mi结尾，那么这个选项默认启用。
+'-fdebug-cpp'   显示CPP的调试信息
 
-
-# 附录：-O选项
+# 附录：-O优化选项
 '-O0'  减少编译所需的时间。默认选项
 '-O'或者'-O1'  编译器尝试减少代码的数量和执行时间，但是不优化编译所需的时间.'-O'开启了下面这些选项：
           -fauto-inc-dec
@@ -330,6 +458,7 @@ stdcall 对于固定参数，自动平衡堆栈；对于可变参数，不平衡
 -fsigned-char|-funsigned-char   设定char类型的默认值。当然，使用char时最好指定前缀类型，没人知道你是什么意思。
 
 
+
 # 优化选项
 <!-- 注意：不要尝试与-On联合使用，比如-fomit-frame-pointer与-O1就不能真正把堆栈框架取消掉，-O3可以 -->
 '-fomit-frame-pointer'  不生成堆栈框架；这个选项在编写中断或者其他程序时非常有用
@@ -364,3 +493,19 @@ stdcall 对于固定参数，自动平衡堆栈；对于可变参数，不平衡
 -ffunction-sections
 -fdata-sections
   使用函数或者数据自身的名称作为区名。
+# -M系列选项
+-M  不生成预处理结果文件，而是生成适合make使用的规则。 -M本身包含-E。
+-MM 同-M，但是不包含系统文件
+-MF 指定-M系列的输出文件。如果未指定，为标准输出
+-MP  为每个头文件生成必要的phony目标，比如
+```make
+          test.o: test.c test.h
+
+          test.h:
+```
+'-MT TARGET' 改变规则中的target部分的名称
+-MD  =>-M -MF FILE，但是不启用-E，因此-E需要自己开启
+-MMD  同-MD但是系统头文件不被含入。
+'-fpch-deps'  待注释
+'-fpreprocessed'
+'-fpch-preprocess'

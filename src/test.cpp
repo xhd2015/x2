@@ -77,7 +77,7 @@ Test::~Test()
 //            p=(TreeNode<MemoryDescriptor>*)p->getNext();
 //        }
 //    }else{
-//        Util::printStr("NULL \n");
+//        Util::printStr("nullptr \n");
 //    }
 //
 //}

@@ -30,12 +30,12 @@ typename  Cache<K, V>::ValueType Cache<K, V>::get(KeyType k)
 	int unused=0;
 	for(int i=0;i!=this->capacity;i++)
 	{
-		if(this->varr[i]==NULL)
+		if(this->varr[i]==nullptr)
 		{
 			unused=i;
 		}else{
 			bool bcmp;
-			if(this->cmp==NULL) //select comparator
+			if(this->cmp==nullptr) //select comparator
 				bcmp = (k==this->karr[i]);
 			else
 				bcmp = this->cmp(k,this->karr[i]);
@@ -48,12 +48,12 @@ typename  Cache<K, V>::ValueType Cache<K, V>::get(KeyType k)
 		}
 	}
 	ValueType v;
-	if( (v=this->getter(k))!=NULL  )//update cache,select unused index else select 0
+	if( (v=this->getter(k))!=nullptr  )//update cache,select unused index else select 0
 	{
 		this->karr[unused]=v;
 		return v;
 	}
-	return NULL; //not found both in cache and in original container
+	return nullptr; //not found both in cache and in original container
 }
 
 #endif

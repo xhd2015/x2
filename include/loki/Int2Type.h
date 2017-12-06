@@ -11,7 +11,7 @@ public:
 
 
 template <class T>
-class NullType;
+class nullptrType;
 
 class EmptyType{};
 

@@ -1,0 +1,10 @@
+/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/CMakeFiles/edit_cache.dir
+/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/CMakeFiles/conceptual_rwfile.dir
+/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/CMakeFiles/conceptual_test.dir
+/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/CMakeFiles/conceptual_mkfs.x2fs.dir
+/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/CMakeFiles/conceptual_main.dir
+/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/CMakeFiles/conceptual_test_serialize.dir
+/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/CMakeFiles/hello.dir
+/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/CMakeFiles/debug-cmake.dir
+/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system/cmake-build-debug/CMakeFiles/lib64.dir

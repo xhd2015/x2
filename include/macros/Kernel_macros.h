@@ -38,8 +38,8 @@ TreeNode<Process*>*	ProcessManager::getFatherProcess(TreeNode<Process*> *p)
 {
 	TreeNode<Process*> *pyield;
 	return p?
-			((pyield=p->getParent())==this->prcsTree.getHead()?NULL:pyield):
-			NULL;
+			((pyield=p->getParent())==this->prcsTree.getHead()?nullptr:pyield):
+			nullptr;
 }
 //Process*	ProcessManager::getIdelProcess()const
 //{

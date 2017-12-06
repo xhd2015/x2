@@ -1,0 +1,7108 @@
+# 1 "src/protected_main.cpp"
+# 1 "<built-in>"
+# 1 "<command-line>"
+# 1 "./include/macros/configurations.h" 1
+# 1 "<command-line>" 2
+# 1 "src/protected_main.cpp"
+# 1 "include/Kernel.h" 1
+
+
+
+
+# 1 "include/def.h" 1
+# 29 "include/def.h"
+# 1 "include/macros/configurations.h" 1
+# 30 "include/def.h" 2
+# 1 "include/config.h" 1
+# 31 "include/def.h" 2
+
+
+
+typedef signed int ptrdiff_t;
+typedef unsigned int size_t;
+
+typedef unsigned int u32_t;
+typedef unsigned short u16_t;
+typedef unsigned char u8_t;
+# 6 "include/Kernel.h" 2
+# 1 "include/libx2.h" 1
+# 35 "include/libx2.h"
+class Util{
+
+
+public:
+ static int printf(const char *fmt,...);
+    Util();
+    ~Util();
+
+
+
+    static int x,y;
+
+
+
+    enum { MODE_FL_ON=0x80,
+            MODE_FL_OFF=0x7f,
+            MODE_BG_RED=0b0100000,
+            MODE_BG_GREEN=0b0010000,
+            MODE_BG_BLUE=0b0001000,
+            MODE_BG_WHITE=0b0111000,
+            MODE_BG_RG=0b0110000,
+            MODE_BG_RB=0b0101000,
+            MODE_BG_BG=0b0011000,
+            MODE_BG_BLACK=0b0000000,
+            MODE_FG_RED=0b0000100,
+            MODE_FG_GREEN=0b0000010,
+            MODE_FG_BLUE=0b0000001,
+            MODE_FG_WHITE=0b0000111,
+            MODE_FG_RG=0b0000110,
+            MODE_FG_RB=0b0000101,
+            MODE_FG_BG=0b0000011,
+            MODE_FG_BLACK=0b0000000,
+            MODE_COMMON=(MODE_FL_OFF & MODE_BG_BLACK) | MODE_FG_WHITE
+    };
+
+
+    enum{
+     SCREEN_X = 25,
+  SCREEN_Y = 80
+    };
+
+
+    enum{SEG_CURRENT = 0x10000};
+
+     enum{
+   videoSelector=
+
+
+
+      0x8
+
+
+};
+
+
+
+    static int strSel;
+    inline __attribute__((always_inline)) static void setStrSel(int sel);
+    inline __attribute__((always_inline)) static int getStrSel();
+
+
+    static void printStr(const char* str_addr,int mode=MODE_COMMON);
+    static void printChar(char ch,int mode=MODE_COMMON);
+    static void setCursor(int x,int y);
+    static void newLine();
+    inline __attribute__((always_inline)) static void insertMark(int marker=0x1234);
+
+    static int get(int seg,int off);
+    static void setb(int seg,int off,int byte);
+
+
+
+
+    static void setw(int seg,int off,int halfWord);
+
+
+
+    static void setl(int seg,int off,int word);
+    static void clr();
+    inline __attribute__((always_inline)) static void jmpDie();
+    inline __attribute__((always_inline)) static void jmp(int addr);
+
+
+
+    inline __attribute__((always_inline)) static void reboot();
+    void test();
+
+
+
+
+
+    static void memcopy(int srcSeg,int srcOff,int dstSeg,int dstOff,int len);
+
+
+
+    inline __attribute__((always_inline)) static void memcopyInlineable(int srcSeg,int srcOff,int dstSeg,int dstOff,int len);
+
+
+    inline __attribute__((always_inline)) static void cli();
+    inline __attribute__((always_inline)) static void sti();
+    inline __attribute__((always_inline)) static void enterDs(int seg,int& temp);
+    inline __attribute__((always_inline)) static void leaveDs(int seg,int temp);
+    inline __attribute__((always_inline)) static void enterEs(int seg,int& temp);
+    inline __attribute__((always_inline)) static void leaveEs(int temp);
+    inline __attribute__((always_inline)) static void outb(short port,char data);
+    inline __attribute__((always_inline)) static void outw(short port,short data);
+    inline __attribute__((always_inline)) static char inb(short port);
+    inline __attribute__((always_inline)) static short inw(short port);
+    inline __attribute__((always_inline)) static void ltr(int sel);
+    inline __attribute__((always_inline)) static void lldt(int sel);
+    inline __attribute__((always_inline)) static int getCurrentDs();
+    inline __attribute__((always_inline)) static void setCurrentDs(int ds);
+    inline __attribute__((always_inline)) static int getCurrentSs();
+    inline __attribute__((always_inline)) static void setCurrentSs(int ss);
+    inline __attribute__((always_inline)) static void ljmp(int newcs,int neweip);
+# 160 "include/libx2.h"
+    inline __attribute__((always_inline)) static void replaceCs(int newcs);
+
+
+
+
+
+    inline __attribute__((always_inline)) static void replaceSS_DS_ES(int newseg);
+
+
+public:
+
+    static void lidt(short len,int address);
+    static void lgdt(short len,int address);
+
+
+    __attribute__((deprecated)) inline __attribute__((always_inline)) static void pusha();
+    __attribute__((deprecated)) inline __attribute__((always_inline)) static void popa();
+# 185 "include/libx2.h"
+    static short makeSel(int index,int dpl=0b00,int from=0);
+
+    static void changeCPL(int eip,int cs,int eflags,int esp,int ss);
+    static int getEflags();
+    static char getCPL();
+    static char getDPL(int sel);
+# 201 "include/libx2.h"
+    static int digitToStr(char* save,unsigned int space,int n);
+    static int digitToHex(char* save,unsigned int space,unsigned int n);
+    static int strcmp(const char* a,const char *b);
+    static int strlen(const char *a);
+    static int strcopy(const char *src,char *dst,int len);
+
+
+
+
+
+
+
+    template <typename __SimpleType>
+    inline __attribute__((always_inline)) static __SimpleType min(__SimpleType t1,__SimpleType t2);
+    template <typename __SimpleType>
+    inline __attribute__((always_inline)) static __SimpleType max(__SimpleType t1,__SimpleType t2);
+
+
+    static int sign(int n);
+# 229 "include/libx2.h"
+    __attribute__((deprecated)) inline __attribute__((always_inline)) static void initTarget(void** target);
+
+    inline __attribute__((always_inline)) static void intReturn();
+# 295 "include/libx2.h"
+};
+
+
+
+class SimpleCharRotator{
+public:
+    const static char rotateShapes[12];
+
+    SimpleCharRotator(int x,int y,int attr=Util::MODE_COMMON,int direction=1);
+    ~SimpleCharRotator();
+
+    void setPosition(int x,int y);
+    void setAttr(int mode=Util::MODE_COMMON);
+    void run();
+private:
+    int X,Y,Attr;
+    int Status;
+    int Direction;
+};
+
+
+
+
+class Printer{
+public:
+    const static int SCREEN_MAX_X,SCREEN_MAX_Y;
+public:
+    Printer(unsigned int x0=0,unsigned int y0=0,unsigned int rows=Printer::SCREEN_MAX_X,unsigned int cols=Printer::SCREEN_MAX_Y,int mode=Util::MODE_COMMON);
+    Printer(const Printer&)=default;
+    Printer&operator=(const Printer&)=default;
+    ~Printer();
+
+    void putc(int chr);
+
+    void puti(const char* str,int i,const char* strAfter="\n");
+    void putx(const char* str,int i,const char* strAfter="\n");
+    void puti(const char* str,void * i,const char* strAfter="\n");
+    void putx(const char* str,void * i,const char* strAfter="\n");
+
+    void putsz(const char* str);
+    void putsn(const char *str,int n);
+    void setPos(int x,int y);
+    void move(int n);
+    void setMode(int mode);
+    void clr();
+
+
+
+    __attribute__((deprecated)) int isInside(int x,int y);
+
+    inline __attribute__((always_inline)) int getX();
+    inline __attribute__((always_inline)) int getY();
+
+
+
+    __attribute__((deprecated)) Printer getSubPrinter(unsigned int x0,unsigned int y0,unsigned int rows,unsigned int cols,int mode);
+
+protected:
+    int getPos();
+
+
+    unsigned int rows,cols,x0,y0;
+    int x,y;
+    int mode;
+
+
+    Printer *father;
+    Printer *sons[5];
+
+
+    unsigned int sonSize;
+
+private:
+
+
+
+
+
+
+
+    int specailCharProcessor(int chr);
+
+
+
+
+    void __putc(int chr);
+};
+
+
+
+
+
+
+
+class ErrorSaver{
+public:
+ inline __attribute__((always_inline)) ErrorSaver(int errno=0);
+ inline __attribute__((always_inline)) int getErrno()const;
+protected:
+ inline __attribute__((always_inline)) void setErrno(int errno);
+ int errno;
+};
+
+
+
+
+class ClassDebug{
+public:
+ ClassDebug()=default;
+ ClassDebug(const char *msg);
+};
+
+
+
+
+
+
+
+class String{
+public:
+    String(const char* str);
+    String(const String &)=default;
+    String &operator=(const String &)=default;
+    ~String();
+
+    int size();
+    char get(int index);
+    void set(int index,int ch);
+
+    static String valueOf(int n);
+protected:
+    char *str;
+
+};
+
+
+template <typename T>
+class Queue{
+public:
+ Queue()=default;
+    Queue(T p[],size_t len);
+    Queue(const Queue &)=delete;
+    Queue &operator=(const Queue &)=delete;
+
+    ~Queue();
+
+    T remove();
+    int put(T t);
+
+    inline __attribute__((always_inline)) unsigned int size();
+    inline __attribute__((always_inline)) bool isEmpty();
+    inline __attribute__((always_inline)) bool isFull();
+protected:
+    T *p;
+    unsigned int len;
+    unsigned int curLen;
+    int indexAdd,indexRemove;
+};
+# 7 "include/Kernel.h" 2
+# 1 "include/List.h" 1
+
+
+
+
+
+# 1 "include/loki/Int2Type.h" 1
+
+
+
+
+template <int V>
+class Int2Type{
+public:
+ Int2Type()=default;
+ enum{value = V};
+};
+
+
+template <class T>
+class nullptrType;
+
+class EmptyType{};
+# 7 "include/List.h" 2
+# 1 "include/Locator.h" 1
+
+
+
+
+
+
+
+template <class T>
+class Locator{
+public:
+# 19 "include/Locator.h"
+ enum{IGNORE=-2,LESS=-1,EQUAL=0,BIGGER=1,DISCARD=-2,KEEP=0};
+public:
+# 33 "include/Locator.h"
+ bool meetedBy(const T &t);
+
+};
+
+
+
+
+
+
+template <class _Source,int _HowStart,int _HowLength,int _HowAllocable>
+class SourceLocator:public Locator<_Source>
+{
+public:
+ SourceLocator(const _Source& t);
+
+
+
+
+ bool meetedBy(const _Source &t)const;
+
+
+ inline __attribute__((always_inline)) const _Source* getComparator()const;
+
+ enum{
+  RELATION_EQ,RELATION_LS_EQ,RELATION_LS,RELATION_GT,RELATION_GT_EQ,RELATION_IGNORE
+ };
+
+
+
+
+ static bool meeted(u8_t startRelation,u8_t limitRelation,u8_t allocReation,const _Source &left,const _Source &right);
+protected:
+ const _Source* p;
+private:
+
+ bool tellLocation(const _Source& t,Int2Type<Locator<_Source>::EQUAL>)const;
+
+
+
+
+
+ bool tellLocation(const _Source& t,Int2Type<Locator<_Source>::IGNORE>)const;
+};
+# 8 "include/List.h" 2
+
+# 1 "include/conceptual/Serialize.h" 1
+# 13 "include/conceptual/Serialize.h"
+# 1 "/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++/type_traits" 1 3
+# 32 "/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++/type_traits" 3
+       
+# 33 "/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++/type_traits" 3
+
+
+
+
+
+# 1 "/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++/x86_64-pc-cygwin/bits/c++config.h" 1 3
+# 199 "/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++/x86_64-pc-cygwin/bits/c++config.h" 3
+
+# 199 "/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++/x86_64-pc-cygwin/bits/c++config.h" 3
+namespace std
+{
+  typedef unsigned int size_t;
+  typedef int ptrdiff_t;
+
+
+  typedef decltype(
+# 205 "/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++/x86_64-pc-cygwin/bits/c++config.h"
+                  (0)
+# 205 "/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++/x86_64-pc-cygwin/bits/c++config.h" 3
+                         ) nullptr_t;
+
+}
+# 507 "/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++/x86_64-pc-cygwin/bits/c++config.h" 3
+# 1 "/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++/x86_64-pc-cygwin/bits/os_defines.h" 1 3
+# 508 "/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++/x86_64-pc-cygwin/bits/c++config.h" 2 3
+
+
+# 1 "/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++/x86_64-pc-cygwin/bits/cpu_defines.h" 1 3
+# 511 "/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++/x86_64-pc-cygwin/bits/c++config.h" 2 3
+# 39 "/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++/type_traits" 2 3
+
+
+
+namespace std
+{
+  typedef short unsigned int uint_least16_t;
+  typedef unsigned int uint_least32_t;
+}
+
+
+
+
+
+namespace std
+{
+
+# 68 "/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++/type_traits" 3
+  template<typename _Tp, _Tp __v>
+    struct integral_constant
+    {
+      static constexpr _Tp value = __v;
+      typedef _Tp value_type;
+      typedef integral_constant<_Tp, __v> type;
+      constexpr operator value_type() const { return value; }
+
+
+
+
+      constexpr value_type operator()() const { return value; }
+
+    };
+
+  template<typename _Tp, _Tp __v>
+    constexpr _Tp integral_constant<_Tp, __v>::value;
+
+
+  typedef integral_constant<bool, true> true_type;
+
+
+  typedef integral_constant<bool, false> false_type;
+
+  template<bool __v>
+    using __bool_constant = integral_constant<bool, __v>;
+
+
+
+  template<bool __v>
+    using bool_constant = integral_constant<bool, __v>;
+
+
+
+
+  template<bool, typename, typename>
+    struct conditional;
+
+  template<typename...>
+    struct __or_;
+
+  template<>
+    struct __or_<>
+    : public false_type
+    { };
+
+  template<typename _B1>
+    struct __or_<_B1>
+    : public _B1
+    { };
+
+  template<typename _B1, typename _B2>
+    struct __or_<_B1, _B2>
+    : public conditional<_B1::value, _B1, _B2>::type
+    { };
+
+  template<typename _B1, typename _B2, typename _B3, typename... _Bn>
+    struct __or_<_B1, _B2, _B3, _Bn...>
+    : public conditional<_B1::value, _B1, __or_<_B2, _B3, _Bn...>>::type
+    { };
+
+  template<typename...>
+    struct __and_;
+
+  template<>
+    struct __and_<>
+    : public true_type
+    { };
+
+  template<typename _B1>
+    struct __and_<_B1>
+    : public _B1
+    { };
+
+  template<typename _B1, typename _B2>
+    struct __and_<_B1, _B2>
+    : public conditional<_B1::value, _B2, _B1>::type
+    { };
+
+  template<typename _B1, typename _B2, typename _B3, typename... _Bn>
+    struct __and_<_B1, _B2, _B3, _Bn...>
+    : public conditional<_B1::value, __and_<_B2, _B3, _Bn...>, _B1>::type
+    { };
+
+  template<typename _Pp>
+    struct __not_
+    : public integral_constant<bool, !_Pp::value>
+    { };
+
+  struct __nonesuch {
+    __nonesuch() = delete;
+    ~__nonesuch() = delete;
+    __nonesuch(__nonesuch const&) = delete;
+    void operator=(__nonesuch const&) = delete;
+  };
+
+
+
+
+
+  template<typename... _Bn>
+    struct conjunction
+    : __and_<_Bn...>
+    { };
+
+  template<typename... _Bn>
+    struct disjunction
+    : __or_<_Bn...>
+    { };
+
+  template<typename _Pp>
+    struct negation
+    : __not_<_Pp>
+    { };
+
+
+
+
+
+
+
+  template<typename _Tp>
+    struct __success_type
+    { typedef _Tp type; };
+
+  struct __failure_type
+  { };
+
+
+
+  template<typename>
+    struct remove_cv;
+
+  template<typename>
+    struct __is_void_helper
+    : public false_type { };
+
+  template<>
+    struct __is_void_helper<void>
+    : public true_type { };
+
+
+  template<typename _Tp>
+    struct is_void
+    : public __is_void_helper<typename remove_cv<_Tp>::type>::type
+    { };
+
+  template<typename>
+    struct __is_integral_helper
+    : public false_type { };
+
+  template<>
+    struct __is_integral_helper<bool>
+    : public true_type { };
+
+  template<>
+    struct __is_integral_helper<char>
+    : public true_type { };
+
+  template<>
+    struct __is_integral_helper<signed char>
+    : public true_type { };
+
+  template<>
+    struct __is_integral_helper<unsigned char>
+    : public true_type { };
+
+
+  template<>
+    struct __is_integral_helper<wchar_t>
+    : public true_type { };
+
+
+  template<>
+    struct __is_integral_helper<char16_t>
+    : public true_type { };
+
+  template<>
+    struct __is_integral_helper<char32_t>
+    : public true_type { };
+
+  template<>
+    struct __is_integral_helper<short>
+    : public true_type { };
+
+  template<>
+    struct __is_integral_helper<unsigned short>
+    : public true_type { };
+
+  template<>
+    struct __is_integral_helper<int>
+    : public true_type { };
+
+  template<>
+    struct __is_integral_helper<unsigned int>
+    : public true_type { };
+
+  template<>
+    struct __is_integral_helper<long>
+    : public true_type { };
+
+  template<>
+    struct __is_integral_helper<unsigned long>
+    : public true_type { };
+
+  template<>
+    struct __is_integral_helper<long long>
+    : public true_type { };
+
+  template<>
+    struct __is_integral_helper<unsigned long long>
+    : public true_type { };
+# 321 "/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++/type_traits" 3
+  template<typename _Tp>
+    struct is_integral
+    : public __is_integral_helper<typename remove_cv<_Tp>::type>::type
+    { };
+
+  template<typename>
+    struct __is_floating_point_helper
+    : public false_type { };
+
+  template<>
+    struct __is_floating_point_helper<float>
+    : public true_type { };
+
+  template<>
+    struct __is_floating_point_helper<double>
+    : public true_type { };
+
+  template<>
+    struct __is_floating_point_helper<long double>
+    : public true_type { };
+# 349 "/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++/type_traits" 3
+  template<typename _Tp>
+    struct is_floating_point
+    : public __is_floating_point_helper<typename remove_cv<_Tp>::type>::type
+    { };
+
+
+  template<typename>
+    struct is_array
+    : public false_type { };
+
+  template<typename _Tp, std::size_t _Size>
+    struct is_array<_Tp[_Size]>
+    : public true_type { };
+
+  template<typename _Tp>
+    struct is_array<_Tp[]>
+    : public true_type { };
+
+  template<typename>
+    struct __is_pointer_helper
+    : public false_type { };
+
+  template<typename _Tp>
+    struct __is_pointer_helper<_Tp*>
+    : public true_type { };
+
+
+  template<typename _Tp>
+    struct is_pointer
+    : public __is_pointer_helper<typename remove_cv<_Tp>::type>::type
+    { };
+
+
+  template<typename>
+    struct is_lvalue_reference
+    : public false_type { };
+
+  template<typename _Tp>
+    struct is_lvalue_reference<_Tp&>
+    : public true_type { };
+
+
+  template<typename>
+    struct is_rvalue_reference
+    : public false_type { };
+
+  template<typename _Tp>
+    struct is_rvalue_reference<_Tp&&>
+    : public true_type { };
+
+  template<typename>
+    struct is_function;
+
+  template<typename>
+    struct __is_member_object_pointer_helper
+    : public false_type { };
+
+  template<typename _Tp, typename _Cp>
+    struct __is_member_object_pointer_helper<_Tp _Cp::*>
+    : public integral_constant<bool, !is_function<_Tp>::value> { };
+
+
+  template<typename _Tp>
+    struct is_member_object_pointer
+    : public __is_member_object_pointer_helper<
+    typename remove_cv<_Tp>::type>::type
+    { };
+
+  template<typename>
+    struct __is_member_function_pointer_helper
+    : public false_type { };
+
+  template<typename _Tp, typename _Cp>
+    struct __is_member_function_pointer_helper<_Tp _Cp::*>
+    : public integral_constant<bool, is_function<_Tp>::value> { };
+
+
+  template<typename _Tp>
+    struct is_member_function_pointer
+    : public __is_member_function_pointer_helper<
+    typename remove_cv<_Tp>::type>::type
+    { };
+
+
+  template<typename _Tp>
+    struct is_enum
+    : public integral_constant<bool, __is_enum(_Tp)>
+    { };
+
+
+  template<typename _Tp>
+    struct is_union
+    : public integral_constant<bool, __is_union(_Tp)>
+    { };
+
+
+  template<typename _Tp>
+    struct is_class
+    : public integral_constant<bool, __is_class(_Tp)>
+    { };
+
+
+  template<typename>
+    struct is_function
+    : public false_type { };
+
+  template<typename _Res, typename... _ArgTypes>
+    struct is_function<_Res(_ArgTypes...)>
+    : public true_type { };
+
+  template<typename _Res, typename... _ArgTypes>
+    struct is_function<_Res(_ArgTypes...) &>
+    : public true_type { };
+
+  template<typename _Res, typename... _ArgTypes>
+    struct is_function<_Res(_ArgTypes...) &&>
+    : public true_type { };
+
+  template<typename _Res, typename... _ArgTypes>
+    struct is_function<_Res(_ArgTypes......)>
+    : public true_type { };
+
+  template<typename _Res, typename... _ArgTypes>
+    struct is_function<_Res(_ArgTypes......) &>
+    : public true_type { };
+
+  template<typename _Res, typename... _ArgTypes>
+    struct is_function<_Res(_ArgTypes......) &&>
+    : public true_type { };
+
+  template<typename _Res, typename... _ArgTypes>
+    struct is_function<_Res(_ArgTypes...) const>
+    : public true_type { };
+
+  template<typename _Res, typename... _ArgTypes>
+    struct is_function<_Res(_ArgTypes...) const &>
+    : public true_type { };
+
+  template<typename _Res, typename... _ArgTypes>
+    struct is_function<_Res(_ArgTypes...) const &&>
+    : public true_type { };
+
+  template<typename _Res, typename... _ArgTypes>
+    struct is_function<_Res(_ArgTypes......) const>
+    : public true_type { };
+
+  template<typename _Res, typename... _ArgTypes>
+    struct is_function<_Res(_ArgTypes......) const &>
+    : public true_type { };
+
+  template<typename _Res, typename... _ArgTypes>
+    struct is_function<_Res(_ArgTypes......) const &&>
+    : public true_type { };
+
+  template<typename _Res, typename... _ArgTypes>
+    struct is_function<_Res(_ArgTypes...) volatile>
+    : public true_type { };
+
+  template<typename _Res, typename... _ArgTypes>
+    struct is_function<_Res(_ArgTypes...) volatile &>
+    : public true_type { };
+
+  template<typename _Res, typename... _ArgTypes>
+    struct is_function<_Res(_ArgTypes...) volatile &&>
+    : public true_type { };
+
+  template<typename _Res, typename... _ArgTypes>
+    struct is_function<_Res(_ArgTypes......) volatile>
+    : public true_type { };
+
+  template<typename _Res, typename... _ArgTypes>
+    struct is_function<_Res(_ArgTypes......) volatile &>
+    : public true_type { };
+
+  template<typename _Res, typename... _ArgTypes>
+    struct is_function<_Res(_ArgTypes......) volatile &&>
+    : public true_type { };
+
+  template<typename _Res, typename... _ArgTypes>
+    struct is_function<_Res(_ArgTypes...) const volatile>
+    : public true_type { };
+
+  template<typename _Res, typename... _ArgTypes>
+    struct is_function<_Res(_ArgTypes...) const volatile &>
+    : public true_type { };
+
+  template<typename _Res, typename... _ArgTypes>
+    struct is_function<_Res(_ArgTypes...) const volatile &&>
+    : public true_type { };
+
+  template<typename _Res, typename... _ArgTypes>
+    struct is_function<_Res(_ArgTypes......) const volatile>
+    : public true_type { };
+
+  template<typename _Res, typename... _ArgTypes>
+    struct is_function<_Res(_ArgTypes......) const volatile &>
+    : public true_type { };
+
+  template<typename _Res, typename... _ArgTypes>
+    struct is_function<_Res(_ArgTypes......) const volatile &&>
+    : public true_type { };
+
+
+
+  template<typename>
+    struct __is_null_pointer_helper
+    : public false_type { };
+
+  template<>
+    struct __is_null_pointer_helper<std::nullptr_t>
+    : public true_type { };
+
+
+  template<typename _Tp>
+    struct is_null_pointer
+    : public __is_null_pointer_helper<typename remove_cv<_Tp>::type>::type
+    { };
+
+
+  template<typename _Tp>
+    struct __is_nullptr_t
+    : public is_null_pointer<_Tp>
+    { };
+
+
+
+
+  template<typename _Tp>
+    struct is_reference
+    : public __or_<is_lvalue_reference<_Tp>,
+                   is_rvalue_reference<_Tp>>::type
+    { };
+
+
+  template<typename _Tp>
+    struct is_arithmetic
+    : public __or_<is_integral<_Tp>, is_floating_point<_Tp>>::type
+    { };
+
+
+  template<typename _Tp>
+    struct is_fundamental
+    : public __or_<is_arithmetic<_Tp>, is_void<_Tp>,
+     is_null_pointer<_Tp>>::type
+    { };
+
+
+  template<typename _Tp>
+    struct is_object
+    : public __not_<__or_<is_function<_Tp>, is_reference<_Tp>,
+                          is_void<_Tp>>>::type
+    { };
+
+  template<typename>
+    struct is_member_pointer;
+
+
+  template<typename _Tp>
+    struct is_scalar
+    : public __or_<is_arithmetic<_Tp>, is_enum<_Tp>, is_pointer<_Tp>,
+                   is_member_pointer<_Tp>, is_null_pointer<_Tp>>::type
+    { };
+
+
+  template<typename _Tp>
+    struct is_compound
+    : public integral_constant<bool, !is_fundamental<_Tp>::value> { };
+
+  template<typename _Tp>
+    struct __is_member_pointer_helper
+    : public false_type { };
+
+  template<typename _Tp, typename _Cp>
+    struct __is_member_pointer_helper<_Tp _Cp::*>
+    : public true_type { };
+
+
+  template<typename _Tp>
+    struct is_member_pointer
+    : public __is_member_pointer_helper<typename remove_cv<_Tp>::type>::type
+    { };
+
+
+
+  template<typename _Tp>
+    struct __is_referenceable
+    : public __or_<is_object<_Tp>, is_reference<_Tp>>::type
+    { };
+
+  template<typename _Res, typename... _Args>
+    struct __is_referenceable<_Res(_Args...)>
+    : public true_type
+    { };
+
+  template<typename _Res, typename... _Args>
+    struct __is_referenceable<_Res(_Args......)>
+    : public true_type
+    { };
+
+
+
+
+  template<typename>
+    struct is_const
+    : public false_type { };
+
+  template<typename _Tp>
+    struct is_const<_Tp const>
+    : public true_type { };
+
+
+  template<typename>
+    struct is_volatile
+    : public false_type { };
+
+  template<typename _Tp>
+    struct is_volatile<_Tp volatile>
+    : public true_type { };
+
+
+  template<typename _Tp>
+    struct is_trivial
+    : public integral_constant<bool, __is_trivial(_Tp)>
+    { };
+
+
+  template<typename _Tp>
+    struct is_trivially_copyable
+    : public integral_constant<bool, __is_trivially_copyable(_Tp)>
+    { };
+
+
+  template<typename _Tp>
+    struct is_standard_layout
+    : public integral_constant<bool, __is_standard_layout(_Tp)>
+    { };
+
+
+
+  template<typename _Tp>
+    struct is_pod
+    : public integral_constant<bool, __is_pod(_Tp)>
+    { };
+
+
+  template<typename _Tp>
+    struct is_literal_type
+    : public integral_constant<bool, __is_literal_type(_Tp)>
+    { };
+
+
+  template<typename _Tp>
+    struct is_empty
+    : public integral_constant<bool, __is_empty(_Tp)>
+    { };
+
+
+  template<typename _Tp>
+    struct is_polymorphic
+    : public integral_constant<bool, __is_polymorphic(_Tp)>
+    { };
+
+
+
+
+  template<typename _Tp>
+    struct is_final
+    : public integral_constant<bool, __is_final(_Tp)>
+    { };
+
+
+
+  template<typename _Tp>
+    struct is_abstract
+    : public integral_constant<bool, __is_abstract(_Tp)>
+    { };
+
+  template<typename _Tp,
+    bool = is_arithmetic<_Tp>::value>
+    struct __is_signed_helper
+    : public false_type { };
+
+  template<typename _Tp>
+    struct __is_signed_helper<_Tp, true>
+    : public integral_constant<bool, _Tp(-1) < _Tp(0)>
+    { };
+
+
+  template<typename _Tp>
+    struct is_signed
+    : public __is_signed_helper<_Tp>::type
+    { };
+
+
+  template<typename _Tp>
+    struct is_unsigned
+    : public __and_<is_arithmetic<_Tp>, __not_<is_signed<_Tp>>>
+    { };
+
+
+
+
+  template<typename>
+    struct add_rvalue_reference;
+
+
+
+
+
+  template<typename _Tp>
+    typename add_rvalue_reference<_Tp>::type declval() noexcept;
+
+  template<typename, unsigned = 0>
+    struct extent;
+
+  template<typename>
+    struct remove_all_extents;
+
+  template<typename _Tp>
+    struct __is_array_known_bounds
+    : public integral_constant<bool, (extent<_Tp>::value > 0)>
+    { };
+
+  template<typename _Tp>
+    struct __is_array_unknown_bounds
+    : public __and_<is_array<_Tp>, __not_<extent<_Tp>>>
+    { };
+
+
+
+
+
+
+  struct __do_is_destructible_impl
+  {
+    template<typename _Tp, typename = decltype(declval<_Tp&>().~_Tp())>
+      static true_type __test(int);
+
+    template<typename>
+      static false_type __test(...);
+  };
+
+  template<typename _Tp>
+    struct __is_destructible_impl
+    : public __do_is_destructible_impl
+    {
+      typedef decltype(__test<_Tp>(0)) type;
+    };
+
+  template<typename _Tp,
+           bool = __or_<is_void<_Tp>,
+                        __is_array_unknown_bounds<_Tp>,
+                        is_function<_Tp>>::value,
+           bool = __or_<is_reference<_Tp>, is_scalar<_Tp>>::value>
+    struct __is_destructible_safe;
+
+  template<typename _Tp>
+    struct __is_destructible_safe<_Tp, false, false>
+    : public __is_destructible_impl<typename
+               remove_all_extents<_Tp>::type>::type
+    { };
+
+  template<typename _Tp>
+    struct __is_destructible_safe<_Tp, true, false>
+    : public false_type { };
+
+  template<typename _Tp>
+    struct __is_destructible_safe<_Tp, false, true>
+    : public true_type { };
+
+
+  template<typename _Tp>
+    struct is_destructible
+    : public __is_destructible_safe<_Tp>::type
+    { };
+
+
+
+
+
+  struct __do_is_nt_destructible_impl
+  {
+    template<typename _Tp>
+      static integral_constant<bool, noexcept(declval<_Tp&>().~_Tp())>
+        __test(int);
+
+    template<typename>
+      static false_type __test(...);
+  };
+
+  template<typename _Tp>
+    struct __is_nt_destructible_impl
+    : public __do_is_nt_destructible_impl
+    {
+      typedef decltype(__test<_Tp>(0)) type;
+    };
+
+  template<typename _Tp,
+           bool = __or_<is_void<_Tp>,
+                        __is_array_unknown_bounds<_Tp>,
+                        is_function<_Tp>>::value,
+           bool = __or_<is_reference<_Tp>, is_scalar<_Tp>>::value>
+    struct __is_nt_destructible_safe;
+
+  template<typename _Tp>
+    struct __is_nt_destructible_safe<_Tp, false, false>
+    : public __is_nt_destructible_impl<typename
+               remove_all_extents<_Tp>::type>::type
+    { };
+
+  template<typename _Tp>
+    struct __is_nt_destructible_safe<_Tp, true, false>
+    : public false_type { };
+
+  template<typename _Tp>
+    struct __is_nt_destructible_safe<_Tp, false, true>
+    : public true_type { };
+
+
+  template<typename _Tp>
+    struct is_nothrow_destructible
+    : public __is_nt_destructible_safe<_Tp>::type
+    { };
+
+  struct __do_is_default_constructible_impl
+  {
+    template<typename _Tp, typename = decltype(_Tp())>
+      static true_type __test(int);
+
+    template<typename>
+      static false_type __test(...);
+  };
+
+  template<typename _Tp>
+    struct __is_default_constructible_impl
+    : public __do_is_default_constructible_impl
+    {
+      typedef decltype(__test<_Tp>(0)) type;
+    };
+
+  template<typename _Tp>
+    struct __is_default_constructible_atom
+    : public __and_<__not_<is_void<_Tp>>,
+                    __is_default_constructible_impl<_Tp>>
+    { };
+
+  template<typename _Tp, bool = is_array<_Tp>::value>
+    struct __is_default_constructible_safe;
+
+
+
+
+
+
+  template<typename _Tp>
+    struct __is_default_constructible_safe<_Tp, true>
+    : public __and_<__is_array_known_bounds<_Tp>,
+      __is_default_constructible_atom<typename
+                      remove_all_extents<_Tp>::type>>
+    { };
+
+  template<typename _Tp>
+    struct __is_default_constructible_safe<_Tp, false>
+    : public __is_default_constructible_atom<_Tp>::type
+    { };
+
+
+  template<typename _Tp>
+    struct is_default_constructible
+    : public __is_default_constructible_safe<_Tp>::type
+    { };
+# 933 "/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++/type_traits" 3
+  struct __do_is_static_castable_impl
+  {
+    template<typename _From, typename _To, typename
+             = decltype(static_cast<_To>(declval<_From>()))>
+      static true_type __test(int);
+
+    template<typename, typename>
+      static false_type __test(...);
+  };
+
+  template<typename _From, typename _To>
+    struct __is_static_castable_impl
+    : public __do_is_static_castable_impl
+    {
+      typedef decltype(__test<_From, _To>(0)) type;
+    };
+
+  template<typename _From, typename _To>
+    struct __is_static_castable_safe
+    : public __is_static_castable_impl<_From, _To>::type
+    { };
+
+
+  template<typename _From, typename _To>
+    struct __is_static_castable
+    : public integral_constant<bool, (__is_static_castable_safe<
+          _From, _To>::value)>
+    { };
+
+
+
+
+
+
+  struct __do_is_direct_constructible_impl
+  {
+    template<typename _Tp, typename _Arg, typename
+      = decltype(::new _Tp(declval<_Arg>()))>
+      static true_type __test(int);
+
+    template<typename, typename>
+      static false_type __test(...);
+  };
+
+  template<typename _Tp, typename _Arg>
+    struct __is_direct_constructible_impl
+    : public __do_is_direct_constructible_impl
+    {
+      typedef decltype(__test<_Tp, _Arg>(0)) type;
+    };
+
+  template<typename _Tp, typename _Arg>
+    struct __is_direct_constructible_new_safe
+    : public __and_<is_destructible<_Tp>,
+                    __is_direct_constructible_impl<_Tp, _Arg>>
+    { };
+
+  template<typename, typename>
+    struct is_same;
+
+  template<typename, typename>
+    struct is_base_of;
+
+  template<typename>
+    struct remove_reference;
+
+  template<typename _From, typename _To, bool
+           = __not_<__or_<is_void<_From>,
+                          is_function<_From>>>::value>
+    struct __is_base_to_derived_ref;
+
+  template<typename _Tp, typename... _Args>
+    struct is_constructible;
+
+
+
+  template<typename _From, typename _To>
+    struct __is_base_to_derived_ref<_From, _To, true>
+    {
+      typedef typename remove_cv<typename remove_reference<_From
+        >::type>::type __src_t;
+      typedef typename remove_cv<typename remove_reference<_To
+        >::type>::type __dst_t;
+      typedef __and_<__not_<is_same<__src_t, __dst_t>>,
+       is_base_of<__src_t, __dst_t>,
+       __not_<is_constructible<__dst_t, _From>>> type;
+      static constexpr bool value = type::value;
+    };
+
+  template<typename _From, typename _To>
+    struct __is_base_to_derived_ref<_From, _To, false>
+    : public false_type
+    { };
+
+  template<typename _From, typename _To, bool
+           = __and_<is_lvalue_reference<_From>,
+                    is_rvalue_reference<_To>>::value>
+    struct __is_lvalue_to_rvalue_ref;
+
+
+
+  template<typename _From, typename _To>
+    struct __is_lvalue_to_rvalue_ref<_From, _To, true>
+    {
+      typedef typename remove_cv<typename remove_reference<
+        _From>::type>::type __src_t;
+      typedef typename remove_cv<typename remove_reference<
+        _To>::type>::type __dst_t;
+      typedef __and_<__not_<is_function<__src_t>>,
+        __or_<is_same<__src_t, __dst_t>,
+      is_base_of<__dst_t, __src_t>>> type;
+      static constexpr bool value = type::value;
+    };
+
+  template<typename _From, typename _To>
+    struct __is_lvalue_to_rvalue_ref<_From, _To, false>
+    : public false_type
+    { };
+
+
+
+
+
+
+
+  template<typename _Tp, typename _Arg>
+    struct __is_direct_constructible_ref_cast
+    : public __and_<__is_static_castable<_Arg, _Tp>,
+                    __not_<__or_<__is_base_to_derived_ref<_Arg, _Tp>,
+                                 __is_lvalue_to_rvalue_ref<_Arg, _Tp>
+                   >>>
+    { };
+
+  template<typename _Tp, typename _Arg>
+    struct __is_direct_constructible_new
+    : public conditional<is_reference<_Tp>::value,
+    __is_direct_constructible_ref_cast<_Tp, _Arg>,
+    __is_direct_constructible_new_safe<_Tp, _Arg>
+    >::type
+    { };
+
+  template<typename _Tp, typename _Arg>
+    struct __is_direct_constructible
+    : public __is_direct_constructible_new<_Tp, _Arg>::type
+    { };
+
+
+
+
+
+
+  struct __do_is_nary_constructible_impl
+  {
+    template<typename _Tp, typename... _Args, typename
+             = decltype(_Tp(declval<_Args>()...))>
+      static true_type __test(int);
+
+    template<typename, typename...>
+      static false_type __test(...);
+  };
+
+  template<typename _Tp, typename... _Args>
+    struct __is_nary_constructible_impl
+    : public __do_is_nary_constructible_impl
+    {
+      typedef decltype(__test<_Tp, _Args...>(0)) type;
+    };
+
+  template<typename _Tp, typename... _Args>
+    struct __is_nary_constructible
+    : public __is_nary_constructible_impl<_Tp, _Args...>::type
+    {
+      static_assert(sizeof...(_Args) > 1,
+                    "Only useful for > 1 arguments");
+    };
+
+  template<typename _Tp, typename... _Args>
+    struct __is_constructible_impl
+    : public __is_nary_constructible<_Tp, _Args...>
+    { };
+
+  template<typename _Tp, typename _Arg>
+    struct __is_constructible_impl<_Tp, _Arg>
+    : public __is_direct_constructible<_Tp, _Arg>
+    { };
+
+  template<typename _Tp>
+    struct __is_constructible_impl<_Tp>
+    : public is_default_constructible<_Tp>
+    { };
+
+
+  template<typename _Tp, typename... _Args>
+    struct is_constructible
+    : public __is_constructible_impl<_Tp, _Args...>::type
+    { };
+
+  template<typename _Tp, bool = __is_referenceable<_Tp>::value>
+    struct __is_copy_constructible_impl;
+
+  template<typename _Tp>
+    struct __is_copy_constructible_impl<_Tp, false>
+    : public false_type { };
+
+  template<typename _Tp>
+    struct __is_copy_constructible_impl<_Tp, true>
+    : public is_constructible<_Tp, const _Tp&>
+    { };
+
+
+  template<typename _Tp>
+    struct is_copy_constructible
+    : public __is_copy_constructible_impl<_Tp>
+    { };
+
+  template<typename _Tp, bool = __is_referenceable<_Tp>::value>
+    struct __is_move_constructible_impl;
+
+  template<typename _Tp>
+    struct __is_move_constructible_impl<_Tp, false>
+    : public false_type { };
+
+  template<typename _Tp>
+    struct __is_move_constructible_impl<_Tp, true>
+    : public is_constructible<_Tp, _Tp&&>
+    { };
+
+
+  template<typename _Tp>
+    struct is_move_constructible
+    : public __is_move_constructible_impl<_Tp>
+    { };
+
+  template<typename _Tp>
+    struct __is_nt_default_constructible_atom
+    : public integral_constant<bool, noexcept(_Tp())>
+    { };
+
+  template<typename _Tp, bool = is_array<_Tp>::value>
+    struct __is_nt_default_constructible_impl;
+
+  template<typename _Tp>
+    struct __is_nt_default_constructible_impl<_Tp, true>
+    : public __and_<__is_array_known_bounds<_Tp>,
+      __is_nt_default_constructible_atom<typename
+                      remove_all_extents<_Tp>::type>>
+    { };
+
+  template<typename _Tp>
+    struct __is_nt_default_constructible_impl<_Tp, false>
+    : public __is_nt_default_constructible_atom<_Tp>
+    { };
+
+
+  template<typename _Tp>
+    struct is_nothrow_default_constructible
+    : public __and_<is_default_constructible<_Tp>,
+                    __is_nt_default_constructible_impl<_Tp>>
+    { };
+
+  template<typename _Tp, typename... _Args>
+    struct __is_nt_constructible_impl
+    : public integral_constant<bool, noexcept(_Tp(declval<_Args>()...))>
+    { };
+
+  template<typename _Tp, typename _Arg>
+    struct __is_nt_constructible_impl<_Tp, _Arg>
+    : public integral_constant<bool,
+                               noexcept(static_cast<_Tp>(declval<_Arg>()))>
+    { };
+
+  template<typename _Tp>
+    struct __is_nt_constructible_impl<_Tp>
+    : public is_nothrow_default_constructible<_Tp>
+    { };
+
+
+  template<typename _Tp, typename... _Args>
+    struct is_nothrow_constructible
+    : public __and_<is_constructible<_Tp, _Args...>,
+      __is_nt_constructible_impl<_Tp, _Args...>>
+    { };
+
+  template<typename _Tp, bool = __is_referenceable<_Tp>::value>
+    struct __is_nothrow_copy_constructible_impl;
+
+  template<typename _Tp>
+    struct __is_nothrow_copy_constructible_impl<_Tp, false>
+    : public false_type { };
+
+  template<typename _Tp>
+    struct __is_nothrow_copy_constructible_impl<_Tp, true>
+    : public is_nothrow_constructible<_Tp, const _Tp&>
+    { };
+
+
+  template<typename _Tp>
+    struct is_nothrow_copy_constructible
+    : public __is_nothrow_copy_constructible_impl<_Tp>
+    { };
+
+  template<typename _Tp, bool = __is_referenceable<_Tp>::value>
+    struct __is_nothrow_move_constructible_impl;
+
+  template<typename _Tp>
+    struct __is_nothrow_move_constructible_impl<_Tp, false>
+    : public false_type { };
+
+  template<typename _Tp>
+    struct __is_nothrow_move_constructible_impl<_Tp, true>
+    : public is_nothrow_constructible<_Tp, _Tp&&>
+    { };
+
+
+  template<typename _Tp>
+    struct is_nothrow_move_constructible
+    : public __is_nothrow_move_constructible_impl<_Tp>
+    { };
+
+  template<typename _Tp, typename _Up>
+    class __is_assignable_helper
+    {
+      template<typename _Tp1, typename _Up1,
+        typename = decltype(declval<_Tp1>() = declval<_Up1>())>
+ static true_type
+ __test(int);
+
+      template<typename, typename>
+ static false_type
+ __test(...);
+
+    public:
+      typedef decltype(__test<_Tp, _Up>(0)) type;
+    };
+
+
+  template<typename _Tp, typename _Up>
+    struct is_assignable
+      : public __is_assignable_helper<_Tp, _Up>::type
+    { };
+
+  template<typename _Tp, bool = __is_referenceable<_Tp>::value>
+    struct __is_copy_assignable_impl;
+
+  template<typename _Tp>
+    struct __is_copy_assignable_impl<_Tp, false>
+    : public false_type { };
+
+  template<typename _Tp>
+    struct __is_copy_assignable_impl<_Tp, true>
+    : public is_assignable<_Tp&, const _Tp&>
+    { };
+
+
+  template<typename _Tp>
+    struct is_copy_assignable
+    : public __is_copy_assignable_impl<_Tp>
+    { };
+
+  template<typename _Tp, bool = __is_referenceable<_Tp>::value>
+    struct __is_move_assignable_impl;
+
+  template<typename _Tp>
+    struct __is_move_assignable_impl<_Tp, false>
+    : public false_type { };
+
+  template<typename _Tp>
+    struct __is_move_assignable_impl<_Tp, true>
+    : public is_assignable<_Tp&, _Tp&&>
+    { };
+
+
+  template<typename _Tp>
+    struct is_move_assignable
+    : public __is_move_assignable_impl<_Tp>
+    { };
+
+  template<typename _Tp, typename _Up>
+    struct __is_nt_assignable_impl
+    : public integral_constant<bool, noexcept(declval<_Tp>() = declval<_Up>())>
+    { };
+
+
+  template<typename _Tp, typename _Up>
+    struct is_nothrow_assignable
+    : public __and_<is_assignable<_Tp, _Up>,
+      __is_nt_assignable_impl<_Tp, _Up>>
+    { };
+
+  template<typename _Tp, bool = __is_referenceable<_Tp>::value>
+    struct __is_nt_copy_assignable_impl;
+
+  template<typename _Tp>
+    struct __is_nt_copy_assignable_impl<_Tp, false>
+    : public false_type { };
+
+  template<typename _Tp>
+    struct __is_nt_copy_assignable_impl<_Tp, true>
+    : public is_nothrow_assignable<_Tp&, const _Tp&>
+    { };
+
+
+  template<typename _Tp>
+    struct is_nothrow_copy_assignable
+    : public __is_nt_copy_assignable_impl<_Tp>
+    { };
+
+  template<typename _Tp, bool = __is_referenceable<_Tp>::value>
+    struct __is_nt_move_assignable_impl;
+
+  template<typename _Tp>
+    struct __is_nt_move_assignable_impl<_Tp, false>
+    : public false_type { };
+
+  template<typename _Tp>
+    struct __is_nt_move_assignable_impl<_Tp, true>
+    : public is_nothrow_assignable<_Tp&, _Tp&&>
+    { };
+
+
+  template<typename _Tp>
+    struct is_nothrow_move_assignable
+    : public __is_nt_move_assignable_impl<_Tp>
+    { };
+
+
+  template<typename _Tp, typename... _Args>
+    struct is_trivially_constructible
+    : public __and_<is_constructible<_Tp, _Args...>, integral_constant<bool,
+   __is_trivially_constructible(_Tp, _Args...)>>
+    { };
+
+
+  template<typename _Tp>
+    struct is_trivially_default_constructible
+    : public is_trivially_constructible<_Tp>::type
+    { };
+
+  struct __do_is_implicitly_default_constructible_impl
+  {
+    template <typename _Tp>
+    static void __helper(const _Tp&);
+
+    template <typename _Tp>
+    static true_type __test(const _Tp&,
+                            decltype(__helper<const _Tp&>({}))* = 0);
+
+    static false_type __test(...);
+  };
+
+  template<typename _Tp>
+    struct __is_implicitly_default_constructible_impl
+      : public __do_is_implicitly_default_constructible_impl
+  {
+    typedef decltype(__test(declval<_Tp>())) type;
+  };
+
+  template<typename _Tp>
+    struct __is_implicitly_default_constructible_safe
+      : public __is_implicitly_default_constructible_impl<_Tp>::type
+  { };
+
+  template <typename _Tp>
+    struct __is_implicitly_default_constructible
+      : public __and_<is_default_constructible<_Tp>,
+                      __is_implicitly_default_constructible_safe<_Tp>>
+  { };
+
+
+  template<typename _Tp>
+    struct is_trivially_copy_constructible
+    : public __and_<is_copy_constructible<_Tp>,
+      integral_constant<bool,
+   __is_trivially_constructible(_Tp, const _Tp&)>>
+    { };
+
+
+  template<typename _Tp>
+    struct is_trivially_move_constructible
+    : public __and_<is_move_constructible<_Tp>,
+      integral_constant<bool,
+   __is_trivially_constructible(_Tp, _Tp&&)>>
+    { };
+
+
+  template<typename _Tp, typename _Up>
+    struct is_trivially_assignable
+    : public __and_<is_assignable<_Tp, _Up>,
+      integral_constant<bool,
+   __is_trivially_assignable(_Tp, _Up)>>
+    { };
+
+
+  template<typename _Tp>
+    struct is_trivially_copy_assignable
+    : public __and_<is_copy_assignable<_Tp>,
+      integral_constant<bool,
+   __is_trivially_assignable(_Tp&, const _Tp&)>>
+    { };
+
+
+  template<typename _Tp>
+    struct is_trivially_move_assignable
+    : public __and_<is_move_assignable<_Tp>,
+      integral_constant<bool,
+   __is_trivially_assignable(_Tp&, _Tp&&)>>
+    { };
+
+
+  template<typename _Tp>
+    struct is_trivially_destructible
+    : public __and_<is_destructible<_Tp>, integral_constant<bool,
+         __has_trivial_destructor(_Tp)>>
+    { };
+
+
+  template<typename _Tp>
+    struct has_trivial_default_constructor
+    : public integral_constant<bool, __has_trivial_constructor(_Tp)>
+    { } ;
+
+
+  template<typename _Tp>
+    struct has_trivial_copy_constructor
+    : public integral_constant<bool, __has_trivial_copy(_Tp)>
+    { } ;
+
+
+  template<typename _Tp>
+    struct has_trivial_copy_assign
+    : public integral_constant<bool, __has_trivial_assign(_Tp)>
+    { } ;
+
+
+  template<typename _Tp>
+    struct has_virtual_destructor
+    : public integral_constant<bool, __has_virtual_destructor(_Tp)>
+    { };
+
+
+
+
+
+  template<typename _Tp>
+    struct alignment_of
+    : public integral_constant<std::size_t, __alignof__(_Tp)> { };
+
+
+  template<typename>
+    struct rank
+    : public integral_constant<std::size_t, 0> { };
+
+  template<typename _Tp, std::size_t _Size>
+    struct rank<_Tp[_Size]>
+    : public integral_constant<std::size_t, 1 + rank<_Tp>::value> { };
+
+  template<typename _Tp>
+    struct rank<_Tp[]>
+    : public integral_constant<std::size_t, 1 + rank<_Tp>::value> { };
+
+
+  template<typename, unsigned _Uint>
+    struct extent
+    : public integral_constant<std::size_t, 0> { };
+
+  template<typename _Tp, unsigned _Uint, std::size_t _Size>
+    struct extent<_Tp[_Size], _Uint>
+    : public integral_constant<std::size_t,
+          _Uint == 0 ? _Size : extent<_Tp,
+          _Uint - 1>::value>
+    { };
+
+  template<typename _Tp, unsigned _Uint>
+    struct extent<_Tp[], _Uint>
+    : public integral_constant<std::size_t,
+          _Uint == 0 ? 0 : extent<_Tp,
+             _Uint - 1>::value>
+    { };
+
+
+
+
+
+  template<typename, typename>
+    struct is_same
+    : public false_type { };
+
+  template<typename _Tp>
+    struct is_same<_Tp, _Tp>
+    : public true_type { };
+
+
+  template<typename _Base, typename _Derived>
+    struct is_base_of
+    : public integral_constant<bool, __is_base_of(_Base, _Derived)>
+    { };
+
+  template<typename _From, typename _To,
+           bool = __or_<is_void<_From>, is_function<_To>,
+                        is_array<_To>>::value>
+    struct __is_convertible_helper
+    { typedef typename is_void<_To>::type type; };
+
+  template<typename _From, typename _To>
+    class __is_convertible_helper<_From, _To, false>
+    {
+       template<typename _To1>
+ static void __test_aux(_To1);
+
+      template<typename _From1, typename _To1,
+        typename = decltype(__test_aux<_To1>(std::declval<_From1>()))>
+ static true_type
+ __test(int);
+
+      template<typename, typename>
+ static false_type
+ __test(...);
+
+    public:
+      typedef decltype(__test<_From, _To>(0)) type;
+    };
+
+
+
+  template<typename _From, typename _To>
+    struct is_convertible
+    : public __is_convertible_helper<_From, _To>::type
+    { };
+
+
+
+
+
+  template<typename _Tp>
+    struct remove_const
+    { typedef _Tp type; };
+
+  template<typename _Tp>
+    struct remove_const<_Tp const>
+    { typedef _Tp type; };
+
+
+  template<typename _Tp>
+    struct remove_volatile
+    { typedef _Tp type; };
+
+  template<typename _Tp>
+    struct remove_volatile<_Tp volatile>
+    { typedef _Tp type; };
+
+
+  template<typename _Tp>
+    struct remove_cv
+    {
+      typedef typename
+      remove_const<typename remove_volatile<_Tp>::type>::type type;
+    };
+
+
+  template<typename _Tp>
+    struct add_const
+    { typedef _Tp const type; };
+
+
+  template<typename _Tp>
+    struct add_volatile
+    { typedef _Tp volatile type; };
+
+
+  template<typename _Tp>
+    struct add_cv
+    {
+      typedef typename
+      add_const<typename add_volatile<_Tp>::type>::type type;
+    };
+
+
+
+
+
+
+  template<typename _Tp>
+    using remove_const_t = typename remove_const<_Tp>::type;
+
+
+  template<typename _Tp>
+    using remove_volatile_t = typename remove_volatile<_Tp>::type;
+
+
+  template<typename _Tp>
+    using remove_cv_t = typename remove_cv<_Tp>::type;
+
+
+  template<typename _Tp>
+    using add_const_t = typename add_const<_Tp>::type;
+
+
+  template<typename _Tp>
+    using add_volatile_t = typename add_volatile<_Tp>::type;
+
+
+  template<typename _Tp>
+    using add_cv_t = typename add_cv<_Tp>::type;
+
+
+
+
+
+  template<typename _Tp>
+    struct remove_reference
+    { typedef _Tp type; };
+
+  template<typename _Tp>
+    struct remove_reference<_Tp&>
+    { typedef _Tp type; };
+
+  template<typename _Tp>
+    struct remove_reference<_Tp&&>
+    { typedef _Tp type; };
+
+  template<typename _Tp, bool = __is_referenceable<_Tp>::value>
+    struct __add_lvalue_reference_helper
+    { typedef _Tp type; };
+
+  template<typename _Tp>
+    struct __add_lvalue_reference_helper<_Tp, true>
+    { typedef _Tp& type; };
+
+
+  template<typename _Tp>
+    struct add_lvalue_reference
+    : public __add_lvalue_reference_helper<_Tp>
+    { };
+
+  template<typename _Tp, bool = __is_referenceable<_Tp>::value>
+    struct __add_rvalue_reference_helper
+    { typedef _Tp type; };
+
+  template<typename _Tp>
+    struct __add_rvalue_reference_helper<_Tp, true>
+    { typedef _Tp&& type; };
+
+
+  template<typename _Tp>
+    struct add_rvalue_reference
+    : public __add_rvalue_reference_helper<_Tp>
+    { };
+
+
+
+  template<typename _Tp>
+    using remove_reference_t = typename remove_reference<_Tp>::type;
+
+
+  template<typename _Tp>
+    using add_lvalue_reference_t = typename add_lvalue_reference<_Tp>::type;
+
+
+  template<typename _Tp>
+    using add_rvalue_reference_t = typename add_rvalue_reference<_Tp>::type;
+
+
+
+
+
+  template<typename _Unqualified, bool _IsConst, bool _IsVol>
+    struct __cv_selector;
+
+  template<typename _Unqualified>
+    struct __cv_selector<_Unqualified, false, false>
+    { typedef _Unqualified __type; };
+
+  template<typename _Unqualified>
+    struct __cv_selector<_Unqualified, false, true>
+    { typedef volatile _Unqualified __type; };
+
+  template<typename _Unqualified>
+    struct __cv_selector<_Unqualified, true, false>
+    { typedef const _Unqualified __type; };
+
+  template<typename _Unqualified>
+    struct __cv_selector<_Unqualified, true, true>
+    { typedef const volatile _Unqualified __type; };
+
+  template<typename _Qualified, typename _Unqualified,
+    bool _IsConst = is_const<_Qualified>::value,
+    bool _IsVol = is_volatile<_Qualified>::value>
+    class __match_cv_qualifiers
+    {
+      typedef __cv_selector<_Unqualified, _IsConst, _IsVol> __match;
+
+    public:
+      typedef typename __match::__type __type;
+    };
+
+
+  template<typename _Tp>
+    struct __make_unsigned
+    { typedef _Tp __type; };
+
+  template<>
+    struct __make_unsigned<char>
+    { typedef unsigned char __type; };
+
+  template<>
+    struct __make_unsigned<signed char>
+    { typedef unsigned char __type; };
+
+  template<>
+    struct __make_unsigned<short>
+    { typedef unsigned short __type; };
+
+  template<>
+    struct __make_unsigned<int>
+    { typedef unsigned int __type; };
+
+  template<>
+    struct __make_unsigned<long>
+    { typedef unsigned long __type; };
+
+  template<>
+    struct __make_unsigned<long long>
+    { typedef unsigned long long __type; };
+# 1785 "/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++/type_traits" 3
+  template<typename _Tp,
+    bool _IsInt = is_integral<_Tp>::value,
+    bool _IsEnum = is_enum<_Tp>::value>
+    class __make_unsigned_selector;
+
+  template<typename _Tp>
+    class __make_unsigned_selector<_Tp, true, false>
+    {
+      typedef __make_unsigned<typename remove_cv<_Tp>::type> __unsignedt;
+      typedef typename __unsignedt::__type __unsigned_type;
+      typedef __match_cv_qualifiers<_Tp, __unsigned_type> __cv_unsigned;
+
+    public:
+      typedef typename __cv_unsigned::__type __type;
+    };
+
+  template<typename _Tp>
+    class __make_unsigned_selector<_Tp, false, true>
+    {
+
+      typedef unsigned char __smallest;
+      static const bool __b0 = sizeof(_Tp) <= sizeof(__smallest);
+      static const bool __b1 = sizeof(_Tp) <= sizeof(unsigned short);
+      static const bool __b2 = sizeof(_Tp) <= sizeof(unsigned int);
+      static const bool __b3 = sizeof(_Tp) <= sizeof(unsigned long);
+      typedef conditional<__b3, unsigned long, unsigned long long> __cond3;
+      typedef typename __cond3::type __cond3_type;
+      typedef conditional<__b2, unsigned int, __cond3_type> __cond2;
+      typedef typename __cond2::type __cond2_type;
+      typedef conditional<__b1, unsigned short, __cond2_type> __cond1;
+      typedef typename __cond1::type __cond1_type;
+
+      typedef typename conditional<__b0, __smallest, __cond1_type>::type
+ __unsigned_type;
+      typedef __match_cv_qualifiers<_Tp, __unsigned_type> __cv_unsigned;
+
+    public:
+      typedef typename __cv_unsigned::__type __type;
+    };
+
+
+
+
+
+  template<typename _Tp>
+    struct make_unsigned
+    { typedef typename __make_unsigned_selector<_Tp>::__type type; };
+
+
+  template<>
+    struct make_unsigned<bool>;
+
+
+
+  template<typename _Tp>
+    struct __make_signed
+    { typedef _Tp __type; };
+
+  template<>
+    struct __make_signed<char>
+    { typedef signed char __type; };
+
+  template<>
+    struct __make_signed<unsigned char>
+    { typedef signed char __type; };
+
+  template<>
+    struct __make_signed<unsigned short>
+    { typedef signed short __type; };
+
+  template<>
+    struct __make_signed<unsigned int>
+    { typedef signed int __type; };
+
+  template<>
+    struct __make_signed<unsigned long>
+    { typedef signed long __type; };
+
+  template<>
+    struct __make_signed<unsigned long long>
+    { typedef signed long long __type; };
+
+
+  template<>
+    struct __make_signed<wchar_t> : __make_signed<short unsigned int>
+    { };
+
+
+
+  template<>
+    struct __make_signed<char16_t> : __make_signed<uint_least16_t>
+    { };
+  template<>
+    struct __make_signed<char32_t> : __make_signed<uint_least32_t>
+    { };
+# 1904 "/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++/type_traits" 3
+  template<typename _Tp,
+    bool _IsInt = is_integral<_Tp>::value,
+    bool _IsEnum = is_enum<_Tp>::value>
+    class __make_signed_selector;
+
+  template<typename _Tp>
+    class __make_signed_selector<_Tp, true, false>
+    {
+      typedef __make_signed<typename remove_cv<_Tp>::type> __signedt;
+      typedef typename __signedt::__type __signed_type;
+      typedef __match_cv_qualifiers<_Tp, __signed_type> __cv_signed;
+
+    public:
+      typedef typename __cv_signed::__type __type;
+    };
+
+  template<typename _Tp>
+    class __make_signed_selector<_Tp, false, true>
+    {
+      typedef typename __make_unsigned_selector<_Tp>::__type __unsigned_type;
+
+    public:
+      typedef typename __make_signed_selector<__unsigned_type>::__type __type;
+    };
+
+
+
+
+
+  template<typename _Tp>
+    struct make_signed
+    { typedef typename __make_signed_selector<_Tp>::__type type; };
+
+
+  template<>
+    struct make_signed<bool>;
+
+
+
+  template<typename _Tp>
+    using make_signed_t = typename make_signed<_Tp>::type;
+
+
+  template<typename _Tp>
+    using make_unsigned_t = typename make_unsigned<_Tp>::type;
+
+
+
+
+
+  template<typename _Tp>
+    struct remove_extent
+    { typedef _Tp type; };
+
+  template<typename _Tp, std::size_t _Size>
+    struct remove_extent<_Tp[_Size]>
+    { typedef _Tp type; };
+
+  template<typename _Tp>
+    struct remove_extent<_Tp[]>
+    { typedef _Tp type; };
+
+
+  template<typename _Tp>
+    struct remove_all_extents
+    { typedef _Tp type; };
+
+  template<typename _Tp, std::size_t _Size>
+    struct remove_all_extents<_Tp[_Size]>
+    { typedef typename remove_all_extents<_Tp>::type type; };
+
+  template<typename _Tp>
+    struct remove_all_extents<_Tp[]>
+    { typedef typename remove_all_extents<_Tp>::type type; };
+
+
+
+  template<typename _Tp>
+    using remove_extent_t = typename remove_extent<_Tp>::type;
+
+
+  template<typename _Tp>
+    using remove_all_extents_t = typename remove_all_extents<_Tp>::type;
+
+
+
+
+  template<typename _Tp, typename>
+    struct __remove_pointer_helper
+    { typedef _Tp type; };
+
+  template<typename _Tp, typename _Up>
+    struct __remove_pointer_helper<_Tp, _Up*>
+    { typedef _Up type; };
+
+
+  template<typename _Tp>
+    struct remove_pointer
+    : public __remove_pointer_helper<_Tp, typename remove_cv<_Tp>::type>
+    { };
+
+
+  template<typename _Tp, bool = __or_<__is_referenceable<_Tp>,
+          is_void<_Tp>>::value>
+    struct __add_pointer_helper
+    { typedef _Tp type; };
+
+  template<typename _Tp>
+    struct __add_pointer_helper<_Tp, true>
+    { typedef typename remove_reference<_Tp>::type* type; };
+
+  template<typename _Tp>
+    struct add_pointer
+    : public __add_pointer_helper<_Tp>
+    { };
+
+
+
+  template<typename _Tp>
+    using remove_pointer_t = typename remove_pointer<_Tp>::type;
+
+
+  template<typename _Tp>
+    using add_pointer_t = typename add_pointer<_Tp>::type;
+
+
+  template<std::size_t _Len>
+    struct __aligned_storage_msa
+    {
+      union __type
+      {
+ unsigned char __data[_Len];
+ struct __attribute__((__aligned__)) { } __align;
+      };
+    };
+# 2050 "/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++/type_traits" 3
+  template<std::size_t _Len, std::size_t _Align =
+    __alignof__(typename __aligned_storage_msa<_Len>::__type)>
+    struct aligned_storage
+    {
+      union type
+      {
+ unsigned char __data[_Len];
+ struct __attribute__((__aligned__((_Align)))) { } __align;
+      };
+    };
+
+  template <typename... _Types>
+    struct __strictest_alignment
+    {
+      static const size_t _S_alignment = 0;
+      static const size_t _S_size = 0;
+    };
+
+  template <typename _Tp, typename... _Types>
+    struct __strictest_alignment<_Tp, _Types...>
+    {
+      static const size_t _S_alignment =
+        alignof(_Tp) > __strictest_alignment<_Types...>::_S_alignment
+ ? alignof(_Tp) : __strictest_alignment<_Types...>::_S_alignment;
+      static const size_t _S_size =
+        sizeof(_Tp) > __strictest_alignment<_Types...>::_S_size
+ ? sizeof(_Tp) : __strictest_alignment<_Types...>::_S_size;
+    };
+# 2089 "/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++/type_traits" 3
+  template <size_t _Len, typename... _Types>
+    struct aligned_union
+    {
+    private:
+      static_assert(sizeof...(_Types) != 0, "At least one type is required");
+
+      using __strictest = __strictest_alignment<_Types...>;
+      static const size_t _S_len = _Len > __strictest::_S_size
+ ? _Len : __strictest::_S_size;
+    public:
+
+      static const size_t alignment_value = __strictest::_S_alignment;
+
+      typedef typename aligned_storage<_S_len, alignment_value>::type type;
+    };
+
+  template <size_t _Len, typename... _Types>
+    const size_t aligned_union<_Len, _Types...>::alignment_value;
+
+
+
+  template<typename _Up,
+    bool _IsArray = is_array<_Up>::value,
+    bool _IsFunction = is_function<_Up>::value>
+    struct __decay_selector;
+
+
+  template<typename _Up>
+    struct __decay_selector<_Up, false, false>
+    { typedef typename remove_cv<_Up>::type __type; };
+
+  template<typename _Up>
+    struct __decay_selector<_Up, true, false>
+    { typedef typename remove_extent<_Up>::type* __type; };
+
+  template<typename _Up>
+    struct __decay_selector<_Up, false, true>
+    { typedef typename add_pointer<_Up>::type __type; };
+
+
+  template<typename _Tp>
+    class decay
+    {
+      typedef typename remove_reference<_Tp>::type __remove_type;
+
+    public:
+      typedef typename __decay_selector<__remove_type>::__type type;
+    };
+
+  template<typename _Tp>
+    class reference_wrapper;
+
+
+  template<typename _Tp>
+    struct __strip_reference_wrapper
+    {
+      typedef _Tp __type;
+    };
+
+  template<typename _Tp>
+    struct __strip_reference_wrapper<reference_wrapper<_Tp> >
+    {
+      typedef _Tp& __type;
+    };
+
+  template<typename _Tp>
+    struct __decay_and_strip
+    {
+      typedef typename __strip_reference_wrapper<
+ typename decay<_Tp>::type>::__type __type;
+    };
+
+
+
+
+  template<bool, typename _Tp = void>
+    struct enable_if
+    { };
+
+
+  template<typename _Tp>
+    struct enable_if<true, _Tp>
+    { typedef _Tp type; };
+
+  template<typename... _Cond>
+    using _Require = typename enable_if<__and_<_Cond...>::value>::type;
+
+
+
+  template<bool _Cond, typename _Iftrue, typename _Iffalse>
+    struct conditional
+    { typedef _Iftrue type; };
+
+
+  template<typename _Iftrue, typename _Iffalse>
+    struct conditional<false, _Iftrue, _Iffalse>
+    { typedef _Iffalse type; };
+
+
+  template<typename... _Tp>
+    struct common_type;
+
+
+
+  struct __do_common_type_impl
+  {
+    template<typename _Tp, typename _Up>
+      static __success_type<typename decay<decltype
+       (true ? std::declval<_Tp>()
+        : std::declval<_Up>())>::type> _S_test(int);
+
+    template<typename, typename>
+      static __failure_type _S_test(...);
+  };
+
+  template<typename _Tp, typename _Up>
+    struct __common_type_impl
+    : private __do_common_type_impl
+    {
+      typedef decltype(_S_test<_Tp, _Up>(0)) type;
+    };
+
+  struct __do_member_type_wrapper
+  {
+    template<typename _Tp>
+      static __success_type<typename _Tp::type> _S_test(int);
+
+    template<typename>
+      static __failure_type _S_test(...);
+  };
+
+  template<typename _Tp>
+    struct __member_type_wrapper
+    : private __do_member_type_wrapper
+    {
+      typedef decltype(_S_test<_Tp>(0)) type;
+    };
+
+  template<typename _CTp, typename... _Args>
+    struct __expanded_common_type_wrapper
+    {
+      typedef common_type<typename _CTp::type, _Args...> type;
+    };
+
+  template<typename... _Args>
+    struct __expanded_common_type_wrapper<__failure_type, _Args...>
+    { typedef __failure_type type; };
+
+  template<typename _Tp>
+    struct common_type<_Tp>
+    { typedef typename decay<_Tp>::type type; };
+
+  template<typename _Tp, typename _Up>
+    struct common_type<_Tp, _Up>
+    : public __common_type_impl<_Tp, _Up>::type
+    { };
+
+  template<typename _Tp, typename _Up, typename... _Vp>
+    struct common_type<_Tp, _Up, _Vp...>
+    : public __expanded_common_type_wrapper<typename __member_type_wrapper<
+               common_type<_Tp, _Up>>::type, _Vp...>::type
+    { };
+
+
+  template<typename _Tp>
+    struct underlying_type
+    {
+      typedef __underlying_type(_Tp) type;
+    };
+
+  template<typename _Tp>
+    struct __declval_protector
+    {
+      static const bool __stop = false;
+      static typename add_rvalue_reference<_Tp>::type __delegate();
+    };
+
+  template<typename _Tp>
+    inline typename add_rvalue_reference<_Tp>::type
+    declval() noexcept
+    {
+      static_assert(__declval_protector<_Tp>::__stop,
+      "declval() must not be used!");
+      return __declval_protector<_Tp>::__delegate();
+    }
+
+
+  template<typename _Signature>
+    class result_of;
+
+
+
+
+
+  struct __invoke_memfun_ref { };
+  struct __invoke_memfun_deref { };
+  struct __invoke_memobj_ref { };
+  struct __invoke_memobj_deref { };
+  struct __invoke_other { };
+
+
+  template<typename _Tp, typename _Tag>
+    struct __result_of_success : __success_type<_Tp>
+    { using __invoke_type = _Tag; };
+
+
+  struct __result_of_memfun_ref_impl
+  {
+    template<typename _Fp, typename _Tp1, typename... _Args>
+      static __result_of_success<decltype(
+      (std::declval<_Tp1>().*std::declval<_Fp>())(std::declval<_Args>()...)
+      ), __invoke_memfun_ref> _S_test(int);
+
+    template<typename...>
+      static __failure_type _S_test(...);
+  };
+
+  template<typename _MemPtr, typename _Arg, typename... _Args>
+    struct __result_of_memfun_ref
+    : private __result_of_memfun_ref_impl
+    {
+      typedef decltype(_S_test<_MemPtr, _Arg, _Args...>(0)) type;
+    };
+
+
+  struct __result_of_memfun_deref_impl
+  {
+    template<typename _Fp, typename _Tp1, typename... _Args>
+      static __result_of_success<decltype(
+      ((*std::declval<_Tp1>()).*std::declval<_Fp>())(std::declval<_Args>()...)
+      ), __invoke_memfun_deref> _S_test(int);
+
+    template<typename...>
+      static __failure_type _S_test(...);
+  };
+
+  template<typename _MemPtr, typename _Arg, typename... _Args>
+    struct __result_of_memfun_deref
+    : private __result_of_memfun_deref_impl
+    {
+      typedef decltype(_S_test<_MemPtr, _Arg, _Args...>(0)) type;
+    };
+
+
+  struct __result_of_memobj_ref_impl
+  {
+    template<typename _Fp, typename _Tp1>
+      static __result_of_success<decltype(
+      std::declval<_Tp1>().*std::declval<_Fp>()
+      ), __invoke_memobj_ref> _S_test(int);
+
+    template<typename, typename>
+      static __failure_type _S_test(...);
+  };
+
+  template<typename _MemPtr, typename _Arg>
+    struct __result_of_memobj_ref
+    : private __result_of_memobj_ref_impl
+    {
+      typedef decltype(_S_test<_MemPtr, _Arg>(0)) type;
+    };
+
+
+  struct __result_of_memobj_deref_impl
+  {
+    template<typename _Fp, typename _Tp1>
+      static __result_of_success<decltype(
+      (*std::declval<_Tp1>()).*std::declval<_Fp>()
+      ), __invoke_memobj_deref> _S_test(int);
+
+    template<typename, typename>
+      static __failure_type _S_test(...);
+  };
+
+  template<typename _MemPtr, typename _Arg>
+    struct __result_of_memobj_deref
+    : private __result_of_memobj_deref_impl
+    {
+      typedef decltype(_S_test<_MemPtr, _Arg>(0)) type;
+    };
+
+  template<typename _MemPtr, typename _Arg>
+    struct __result_of_memobj;
+
+  template<typename _Res, typename _Class, typename _Arg>
+    struct __result_of_memobj<_Res _Class::*, _Arg>
+    {
+      typedef typename remove_cv<typename remove_reference<
+        _Arg>::type>::type _Argval;
+      typedef _Res _Class::* _MemPtr;
+      typedef typename conditional<__or_<is_same<_Argval, _Class>,
+        is_base_of<_Class, _Argval>>::value,
+        __result_of_memobj_ref<_MemPtr, _Arg>,
+        __result_of_memobj_deref<_MemPtr, _Arg>
+      >::type::type type;
+    };
+
+  template<typename _MemPtr, typename _Arg, typename... _Args>
+    struct __result_of_memfun;
+
+  template<typename _Res, typename _Class, typename _Arg, typename... _Args>
+    struct __result_of_memfun<_Res _Class::*, _Arg, _Args...>
+    {
+      typedef typename remove_cv<typename remove_reference<
+        _Arg>::type>::type _Argval;
+      typedef _Res _Class::* _MemPtr;
+      typedef typename conditional<__or_<is_same<_Argval, _Class>,
+        is_base_of<_Class, _Argval>>::value,
+        __result_of_memfun_ref<_MemPtr, _Arg, _Args...>,
+        __result_of_memfun_deref<_MemPtr, _Arg, _Args...>
+      >::type::type type;
+    };
+
+
+
+
+
+  template<typename _Res, typename _Class, typename _Arg>
+    struct __result_of_memobj<_Res _Class::*, reference_wrapper<_Arg>>
+    : __result_of_memobj_ref<_Res _Class::*, _Arg&>
+    { };
+
+  template<typename _Res, typename _Class, typename _Arg>
+    struct __result_of_memobj<_Res _Class::*, reference_wrapper<_Arg>&>
+    : __result_of_memobj_ref<_Res _Class::*, _Arg&>
+    { };
+
+  template<typename _Res, typename _Class, typename _Arg>
+    struct __result_of_memobj<_Res _Class::*, const reference_wrapper<_Arg>&>
+    : __result_of_memobj_ref<_Res _Class::*, _Arg&>
+    { };
+
+  template<typename _Res, typename _Class, typename _Arg>
+    struct __result_of_memobj<_Res _Class::*, reference_wrapper<_Arg>&&>
+    : __result_of_memobj_ref<_Res _Class::*, _Arg&>
+    { };
+
+  template<typename _Res, typename _Class, typename _Arg>
+    struct __result_of_memobj<_Res _Class::*, const reference_wrapper<_Arg>&&>
+    : __result_of_memobj_ref<_Res _Class::*, _Arg&>
+    { };
+
+  template<typename _Res, typename _Class, typename _Arg, typename... _Args>
+    struct __result_of_memfun<_Res _Class::*, reference_wrapper<_Arg>, _Args...>
+    : __result_of_memfun_ref<_Res _Class::*, _Arg&, _Args...>
+    { };
+
+  template<typename _Res, typename _Class, typename _Arg, typename... _Args>
+    struct __result_of_memfun<_Res _Class::*, reference_wrapper<_Arg>&,
+         _Args...>
+    : __result_of_memfun_ref<_Res _Class::*, _Arg&, _Args...>
+    { };
+
+  template<typename _Res, typename _Class, typename _Arg, typename... _Args>
+    struct __result_of_memfun<_Res _Class::*, const reference_wrapper<_Arg>&,
+         _Args...>
+    : __result_of_memfun_ref<_Res _Class::*, _Arg&, _Args...>
+    { };
+
+  template<typename _Res, typename _Class, typename _Arg, typename... _Args>
+    struct __result_of_memfun<_Res _Class::*, reference_wrapper<_Arg>&&,
+         _Args...>
+    : __result_of_memfun_ref<_Res _Class::*, _Arg&, _Args...>
+    { };
+
+  template<typename _Res, typename _Class, typename _Arg, typename... _Args>
+    struct __result_of_memfun<_Res _Class::*, const reference_wrapper<_Arg>&&,
+         _Args...>
+    : __result_of_memfun_ref<_Res _Class::*, _Arg&, _Args...>
+    { };
+
+  template<bool, bool, typename _Functor, typename... _ArgTypes>
+    struct __result_of_impl
+    {
+      typedef __failure_type type;
+    };
+
+  template<typename _MemPtr, typename _Arg>
+    struct __result_of_impl<true, false, _MemPtr, _Arg>
+    : public __result_of_memobj<typename decay<_MemPtr>::type, _Arg>
+    { };
+
+  template<typename _MemPtr, typename _Arg, typename... _Args>
+    struct __result_of_impl<false, true, _MemPtr, _Arg, _Args...>
+    : public __result_of_memfun<typename decay<_MemPtr>::type, _Arg, _Args...>
+    { };
+
+
+  struct __result_of_other_impl
+  {
+    template<typename _Fn, typename... _Args>
+      static __result_of_success<decltype(
+      std::declval<_Fn>()(std::declval<_Args>()...)
+      ), __invoke_other> _S_test(int);
+
+    template<typename...>
+      static __failure_type _S_test(...);
+  };
+
+  template<typename _Functor, typename... _ArgTypes>
+    struct __result_of_impl<false, false, _Functor, _ArgTypes...>
+    : private __result_of_other_impl
+    {
+      typedef decltype(_S_test<_Functor, _ArgTypes...>(0)) type;
+    };
+
+  template<typename _Functor, typename... _ArgTypes>
+    struct result_of<_Functor(_ArgTypes...)>
+    : public __result_of_impl<
+        is_member_object_pointer<
+          typename remove_reference<_Functor>::type
+        >::value,
+        is_member_function_pointer<
+          typename remove_reference<_Functor>::type
+        >::value,
+     _Functor, _ArgTypes...
+      >::type
+    { };
+
+
+
+  template<size_t _Len, size_t _Align =
+     __alignof__(typename __aligned_storage_msa<_Len>::__type)>
+    using aligned_storage_t = typename aligned_storage<_Len, _Align>::type;
+
+  template <size_t _Len, typename... _Types>
+    using aligned_union_t = typename aligned_union<_Len, _Types...>::type;
+
+
+  template<typename _Tp>
+    using decay_t = typename decay<_Tp>::type;
+
+
+  template<bool _Cond, typename _Tp = void>
+    using enable_if_t = typename enable_if<_Cond, _Tp>::type;
+
+
+  template<bool _Cond, typename _Iftrue, typename _Iffalse>
+    using conditional_t = typename conditional<_Cond, _Iftrue, _Iffalse>::type;
+
+
+  template<typename... _Tp>
+    using common_type_t = typename common_type<_Tp...>::type;
+
+
+  template<typename _Tp>
+    using underlying_type_t = typename underlying_type<_Tp>::type;
+
+
+  template<typename _Tp>
+    using result_of_t = typename result_of<_Tp>::type;
+
+
+  template<typename...> using __void_t = void;
+
+
+
+
+  template<typename...> using void_t = void;
+
+
+
+  template<typename _Default, typename _AlwaysVoid,
+    template<typename...> class _Op, typename... _Args>
+    struct __detector
+    {
+      using value_t = false_type;
+      using type = _Default;
+    };
+
+
+  template<typename _Default, template<typename...> class _Op,
+     typename... _Args>
+    struct __detector<_Default, __void_t<_Op<_Args...>>, _Op, _Args...>
+    {
+      using value_t = true_type;
+      using type = _Op<_Args...>;
+    };
+
+
+  template<typename _Default, template<typename...> class _Op,
+    typename... _Args>
+    using __detected_or = __detector<_Default, void, _Op, _Args...>;
+
+
+  template<typename _Default, template<typename...> class _Op,
+    typename... _Args>
+    using __detected_or_t
+      = typename __detected_or<_Default, _Op, _Args...>::type;
+# 2595 "/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++/type_traits" 3
+  template <typename _Tp>
+    struct __is_swappable;
+
+  template <typename _Tp>
+    struct __is_nothrow_swappable;
+
+  template<typename _Tp>
+    inline
+    typename enable_if<__and_<is_move_constructible<_Tp>,
+         is_move_assignable<_Tp>>::value>::type
+    swap(_Tp&, _Tp&)
+    noexcept(__and_<is_nothrow_move_constructible<_Tp>,
+             is_nothrow_move_assignable<_Tp>>::value);
+
+  template<typename _Tp, size_t _Nm>
+    inline
+    typename enable_if<__is_swappable<_Tp>::value>::type
+    swap(_Tp (&__a)[_Nm], _Tp (&__b)[_Nm])
+    noexcept(__is_nothrow_swappable<_Tp>::value);
+
+  namespace __swappable_details {
+    using std::swap;
+
+    struct __do_is_swappable_impl
+    {
+      template<typename _Tp, typename
+               = decltype(swap(std::declval<_Tp&>(), std::declval<_Tp&>()))>
+        static true_type __test(int);
+
+      template<typename>
+        static false_type __test(...);
+    };
+
+    struct __do_is_nothrow_swappable_impl
+    {
+      template<typename _Tp>
+        static __bool_constant<
+          noexcept(swap(std::declval<_Tp&>(), std::declval<_Tp&>()))
+        > __test(int);
+
+      template<typename>
+        static false_type __test(...);
+    };
+
+  }
+
+  template<typename _Tp>
+    struct __is_swappable_impl
+    : public __swappable_details::__do_is_swappable_impl
+    {
+      typedef decltype(__test<_Tp>(0)) type;
+    };
+
+  template<typename _Tp>
+    struct __is_nothrow_swappable_impl
+    : public __swappable_details::__do_is_nothrow_swappable_impl
+    {
+      typedef decltype(__test<_Tp>(0)) type;
+    };
+
+  template<typename _Tp>
+    struct __is_swappable
+    : public __is_swappable_impl<_Tp>::type
+    { };
+
+  template<typename _Tp>
+    struct __is_nothrow_swappable
+    : public __is_nothrow_swappable_impl<_Tp>::type
+    { };
+
+
+}
+# 14 "include/conceptual/Serialize.h" 2
+# 1 "include/EnvInterface.h" 1
+# 26 "include/EnvInterface.h"
+
+# 26 "include/EnvInterface.h"
+namespace HostEnv{
+ enum{CUR_SEG = 0x10000u };
+# 267 "include/EnvInterface.h"
+};
+# 15 "include/conceptual/Serialize.h" 2
+
+
+template <size_t __N>
+class Byte2Type{
+public:
+};
+
+template <>
+class Byte2Type<1>{
+public:
+ using Type=u8_t;
+};
+
+template <>
+class Byte2Type<2>{
+public:
+ using Type=u16_t;
+};
+
+template <>
+class Byte2Type<4>{
+public:
+ using Type=u32_t;
+};
+# 58 "include/conceptual/Serialize.h"
+template <class __EnvTransfer>
+class SerializerPtr{
+public:
+ using This = SerializerPtr<__EnvTransfer>;
+ using __SerializerPtr = This;
+    public:
+  inline __attribute__((always_inline)) SerializerPtr(void *p);
+        inline __attribute__((always_inline)) void *getPtr()const;
+        inline __attribute__((always_inline)) __SerializerPtr & operator=(const __SerializerPtr &rhs);
+        inline __attribute__((always_inline)) __SerializerPtr & operator=(void *p);
+        inline __attribute__((always_inline)) operator bool()const;
+        inline __attribute__((always_inline)) operator void*()const;
+        inline __attribute__((always_inline)) operator void*();
+
+
+
+        inline __attribute__((always_inline)) __SerializerPtr operator+(ptrdiff_t pdiff)const;
+
+
+
+        inline __attribute__((always_inline)) __SerializerPtr operator-(ptrdiff_t pdiff)const;
+        inline __attribute__((always_inline)) __SerializerPtr& operator+=(ptrdiff_t pdiff);
+        inline __attribute__((always_inline)) __SerializerPtr& operator-=(ptrdiff_t pdiff);
+# 89 "include/conceptual/Serialize.h"
+        template <class __BasicType,size_t __N=__EnvTransfer::template sizeofHostType<__BasicType>(),
+          bool __SafeAssign=(sizeof(__BasicType)<=__N)>
+         inline __attribute__((always_inline)) void serializeBasicType(__BasicType data);
+
+        template <class __BasicType,size_t __N=__EnvTransfer::template sizeofHostType<__BasicType>(),
+          bool __SafeAssign=(sizeof(__BasicType)<=__N)>
+         inline __attribute__((always_inline)) void deserializeBasicType(__BasicType& data);
+
+
+        template <size_t __N=__EnvTransfer::template sizeofHostType<const void*>(),
+          bool __SafeAssign=(sizeof(const void*)<=__N)>
+         inline __attribute__((always_inline)) void serializeBasicType(const void* data);
+
+        template <size_t __N=__EnvTransfer::template sizeofHostType<void*>(),
+          bool __SafeAssign=(sizeof(void*)<=__N)>
+         inline __attribute__((always_inline)) void deserializeBasicType(void* & data);
+
+
+        template <size_t __N=__EnvTransfer::template sizeofHostType<const void*>(),
+          bool __SafeAssign=(sizeof(const void*)<=__N)>
+         inline __attribute__((always_inline)) void serializeBasicType(const void* data,ptrdiff_t diff);
+
+        template <size_t __N=__EnvTransfer::template sizeofHostType<void*>(),
+          bool __SafeAssign=(sizeof(void*)<=__N)>
+         inline __attribute__((always_inline)) void deserializeBasicType(void* & data,ptrdiff_t diff);
+
+
+        template <class __BasicType,size_t __N=__EnvTransfer::template sizeofHostType<__BasicType>(),
+   bool __SafeAssign=(sizeof(__BasicType)<=__N)>
+         inline __attribute__((always_inline)) void serializeBasicType(const __BasicType *data,size_t len);
+
+        template <class __BasicType,size_t __N=__EnvTransfer::template sizeofHostType<__BasicType>(),
+   bool __SafeAssign=(sizeof(__BasicType)<=__N)>
+         inline __attribute__((always_inline)) void deserializeBasicType(__BasicType *data,size_t len);
+private:
+
+
+
+        template <class __BasicType,size_t __N>
+        inline __attribute__((always_inline)) void __serializeByType(__BasicType data,Int2Type<true>);
+
+
+
+
+        template <class __BasicType,size_t __N>
+        inline __attribute__((always_inline)) void
+   __serializeByType(__BasicType data,Int2Type<false>) ;
+
+
+         template <class __BasicType,size_t __N>
+         inline __attribute__((always_inline)) void __deserializeByType(__BasicType& data,Int2Type<true>);
+
+
+         template <class __BasicType,size_t __N>
+         inline __attribute__((always_inline)) void
+     __deserializeByType(__BasicType& data,Int2Type<false>);
+
+private:
+
+
+
+
+
+
+        u8_t *ptr;
+};
+# 165 "include/conceptual/Serialize.h"
+class SerializationInterface{
+public:
+# 187 "include/conceptual/Serialize.h"
+};
+
+namespace{
+
+
+  template <class __S,class __EnvTransfer>
+  inline __attribute__((always_inline)) SerializerPtr<__EnvTransfer>&
+   __serializeHelper(SerializerPtr<__EnvTransfer>& p,const __S &s,Int2Type<true>)
+  {
+   p.serializeBasicType(s);
+   return p;
+  }
+
+  template <class __S,class __EnvTransfer>
+  inline __attribute__((always_inline)) SerializerPtr<__EnvTransfer>&
+   __serializeHelper(SerializerPtr<__EnvTransfer>& p,const __S &s,Int2Type<false>)
+  {
+   return s.serialize(p);
+  }
+
+  template <class __S,class __EnvTransfer>
+  inline __attribute__((always_inline)) SerializerPtr<__EnvTransfer>&
+   __deserializeHelper(SerializerPtr<__EnvTransfer>& p,__S &s,Int2Type<true>)
+  {
+   p.deserializeBasicType(s);
+   return p;
+  }
+
+  template <class __S,class __EnvTransfer>
+  inline __attribute__((always_inline)) SerializerPtr<__EnvTransfer>&
+   __deserializeHelper(SerializerPtr<__EnvTransfer>& p,__S &s,Int2Type<false>)
+  {
+   return s.deserialize(p);
+  }
+
+
+}
+# 232 "include/conceptual/Serialize.h"
+template <class __S,class __EnvTransfer>
+inline __attribute__((always_inline)) SerializerPtr<__EnvTransfer>& operator<<(SerializerPtr<__EnvTransfer>& p,const __S &s)
+{
+
+ return __serializeHelper<__S,__EnvTransfer>(p, s,Int2Type<std::is_pod<__S>::value>());
+}
+
+
+
+
+
+template <class __S,class __EnvTransfer>
+inline __attribute__((always_inline)) SerializerPtr<__EnvTransfer>& operator>>(SerializerPtr<__EnvTransfer>& p,__S &s)
+{
+ return __deserializeHelper<__S,__EnvTransfer>(p, s,Int2Type<std::is_pod<__S>::value>());
+}
+
+
+
+template <class __EnvTransfer,class T>
+inline __attribute__((always_inline)) SerializerPtr<__EnvTransfer>& operator<<(SerializerPtr<__EnvTransfer>& p,const HostEnv::Vector<T> &s)
+{
+ p << s.size();
+ for(auto & i : s)
+  p << i;
+ return p;
+}
+template <class __S,class __EnvTransfer,class T>
+inline __attribute__((always_inline)) SerializerPtr<__EnvTransfer>& operator>>(SerializerPtr<__EnvTransfer>& p,HostEnv::Vector<T> &s)
+{
+ decltype(s.size()) size=0;
+ p >> size;
+ s.resize(size);
+ for(decltype(size) i=0;i!=size;++i)
+  p >> s[i];
+ return p;
+}
+# 10 "include/List.h" 2
+
+
+
+
+
+class SimpleMemoryNode:public SerializationInterface{
+public:
+    inline __attribute__((always_inline)) SimpleMemoryNode(bool alloced=false);
+    inline __attribute__((always_inline)) bool isAlloced();
+    inline __attribute__((always_inline)) void setAlloced(bool alloced);
+
+    template <class __EnvTransfer>
+    inline __attribute__((always_inline)) SerializerPtr<__EnvTransfer>& serialize(SerializerPtr<__EnvTransfer> &ptr)const
+  { return ptr << alloced;}
+ template <class __EnvTransfer>
+ inline __attribute__((always_inline)) SerializerPtr<__EnvTransfer>& deserialize(SerializerPtr<__EnvTransfer> &ptr)
+  { return ptr >> alloced;}
+ template <class __EnvTransfer>
+ inline __attribute__((always_inline)) constexpr size_t getSerializitionSize()
+  {return __EnvTransfer::template sizeofHostType<decltype(alloced)>();}
+private:
+
+
+
+
+    bool alloced;
+};
+# 53 "include/List.h"
+template <class T>
+class SimpleMemoryManager{
+public:
+    __attribute__((deprecated)) SimpleMemoryManager()=default;
+
+public:
+# 68 "include/List.h"
+ struct Freeable:public T,public SimpleMemoryNode{
+
+ };
+ typedef struct Freeable FullNode;
+ typedef T DataPart;
+
+
+ typedef void (*ERROR_HANDLER)(SimpleMemoryManager *smm,int errcode);
+ enum{
+  ERR_NO_ERROR=0,
+  ERR_SPACE_IS_FULL,
+  ERR_NODE_NOT_INTERNAL,
+  ERR_GENERAL
+ };
+
+
+
+public:
+
+
+
+
+
+ __attribute__((deprecated)) SimpleMemoryManager(size_t start,size_t limit,bool doInit=true,size_t initSize=0,ERROR_HANDLER errhandler=(0));
+
+
+
+
+
+
+    T* getNew();
+    FullNode *getNewNode();
+    void withdraw(FullNode *t);
+    void withdraw(T *t);
+
+
+    inline __attribute__((always_inline)) bool isFull()const;
+    inline __attribute__((always_inline)) size_t getLen()const;
+    inline __attribute__((always_inline)) size_t getCurSize()const;
+    inline __attribute__((always_inline)) size_t getStart()const;
+    inline __attribute__((always_inline)) size_t getLimit()const;
+    inline __attribute__((always_inline)) static size_t getNodeSize();
+    inline __attribute__((always_inline)) ERROR_HANDLER getErrHandler();
+    inline __attribute__((always_inline)) void setErrHandler(ERROR_HANDLER errhandle);
+private:
+
+
+
+    inline __attribute__((always_inline)) bool checkIsInternal(FullNode *t);
+    size_t start;
+    size_t limit;
+
+    Freeable *data;
+    size_t curSize,len;
+
+    size_t lastIndex;
+    ERROR_HANDLER errhandle;
+};
+
+
+template<class T>
+class ListNode:public SerializationInterface
+{
+public:
+ using This = ListNode<T>;
+ using __ListNode = This;
+public:
+    ListNode(const T& data,__ListNode* next=(0),__ListNode* previous=(0));
+    ListNode(const __ListNode &)=default;
+    __ListNode & operator=(const __ListNode &)=default;
+    ~ListNode();
+
+    inline __attribute__((always_inline)) const T& getData()const;
+    inline __attribute__((always_inline)) T& getData();
+    inline __attribute__((always_inline)) void setData(const T& data);
+    inline __attribute__((always_inline)) __ListNode* getNext()const;
+    inline __attribute__((always_inline)) __ListNode* getPrevious()const;
+    inline __attribute__((always_inline)) void setNext(__ListNode* next);
+    inline __attribute__((always_inline)) void setPrevious(__ListNode* previous);
+    __ListNode* removeNext();
+    __ListNode* removePrevious();
+    void insertNext(__ListNode* next);
+    void insertPrevious(__ListNode* previous);
+    inline __attribute__((always_inline)) int hasNext()const;
+    inline __attribute__((always_inline)) int hasPrevious()const;
+
+
+
+    void adjustOffset(ptrdiff_t diff);
+    void initToNull();
+
+
+    __ListNode* getLast()const;
+    __ListNode* getFirst()const;
+    __attribute__((deprecated)) inline __attribute__((always_inline)) static void adjustOffset(char **p,ptrdiff_t off);
+
+
+
+
+
+
+
+    template <class __EnvTransfer>
+    inline __attribute__((always_inline)) SerializerPtr<__EnvTransfer>& serialize(SerializerPtr<__EnvTransfer> &ptr)const;
+ template <class __EnvTransfer>
+ inline __attribute__((always_inline)) SerializerPtr<__EnvTransfer>& deserialize(SerializerPtr<__EnvTransfer> &ptr);
+
+
+
+ template <class __EnvTransfer>
+ inline __attribute__((always_inline)) size_t getSerializitionSize();
+protected:
+    T data;
+    __ListNode *next;
+    __ListNode *previous;
+
+};
+# 205 "include/List.h"
+template<class T,template <class> class _Allocator>
+class LinkedList : public SerializationInterface
+{
+public:
+ using This = LinkedList<T,_Allocator>;
+ using __LinkedList = This;
+ using __ListNode = ListNode<T>;
+ using __Allocator = _Allocator<__ListNode>;
+public:
+
+
+ LinkedList()=delete;
+
+public:
+    LinkedList( __Allocator &smm);
+    LinkedList(const __LinkedList&)=default;
+    __LinkedList & operator=(const __LinkedList&)=default;
+    ~LinkedList();
+
+    inline __attribute__((always_inline)) __ListNode* getHead()const;
+    inline __attribute__((always_inline)) _Allocator<__ListNode > &getMemoryManager()const;
+
+
+    inline __attribute__((always_inline)) __ListNode* getLast()const;
+    __ListNode* append(const T &t);
+    __ListNode* append(__ListNode* p);
+    __ListNode* appendHead(__ListNode* p);
+    __ListNode* appendHead(const T &t);
+    __ListNode* remove();
+    __ListNode* removeHead();
+    void remove(__ListNode* p);
+    void insertNext(__ListNode* where,__ListNode* p);
+    void insertPrevious(__ListNode* where,__ListNode* p);
+    size_t getSize()const;
+    inline __attribute__((always_inline)) bool isEmpty()const;
+
+
+    void freeNode(__ListNode * node);
+    void free();
+    void freeNext(__ListNode *t);
+    void freePrevious(__ListNode *t);
+
+
+
+
+ template <class __EnvTransfer>
+  SerializerPtr<__EnvTransfer>& serialize(SerializerPtr<__EnvTransfer> &ptr)const
+  {
+   SerializerPtr<__EnvTransfer> ptrStart=ptr;
+   size_t n=0;
+   ptr >> n;
+   for(__ListNode *p=root->getNext();p!=last;p=p->getNext(),++n)
+      ptr << p->getData();
+   ptrStart << n;
+   return ptr;
+  }
+ template <class __EnvTransfer>
+  SerializerPtr<__EnvTransfer>& deserialize(SerializerPtr<__EnvTransfer> &ptr)
+  {
+   size_t n=0;
+   ptr >> n;
+   for(size_t i=0;i!=n;++i)
+   {
+    __ListNode *p=smm.getNew();
+    p->initToNull();
+    ptr >> p->getData();
+    this->append(p);
+   }
+   return ptr;
+  }
+
+
+
+
+
+ template <class __EnvTransfer>
+  size_t getSerializitionSize()
+ {
+  return __EnvTransfer::template sizeofHostType<decltype(root->getData())>() * getSize();
+ }
+protected:
+    _Allocator<__ListNode > &smm;
+
+
+
+
+    __ListNode* root;
+    __ListNode* last;
+
+
+};
+# 318 "include/List.h"
+template<class _Locateable,int _HowAllocated,
+  template <class> class _Allocator>
+class LocateableLinkedList:public LinkedList<_Locateable,_Allocator>
+{
+public:
+ using This = LocateableLinkedList<_Locateable,_HowAllocated,_Allocator>;
+ using Super = LinkedList<_Locateable,_Allocator>;
+ using __LocateableLinkedList = This;
+ using __LinkedList = Super;
+ using __ListNode = typename Super::__ListNode;
+ using __Allocator = _Allocator<__ListNode>;
+ using __SizeType = size_t;
+public:
+  LocateableLinkedList()=delete;
+public:
+
+
+
+    LocateableLinkedList( __Allocator &smm );
+    ~LocateableLinkedList();
+# 347 "include/List.h"
+    static __ListNode *findFirstStartLen(__ListNode* startNode,__SizeType start,__SizeType len);
+    static __ListNode *findFirstLen(__ListNode* startNode,__SizeType len);
+    static __ListNode *findFirstStart(__ListNode* startNode,__SizeType start);
+
+
+
+
+
+    static __ListNode *findFirstStartForInsert(__ListNode *startNode,__SizeType start);
+
+
+
+
+
+    __attribute__((deprecated)) static __ListNode *locateForDelete(__ListNode* startNode,__SizeType start,__SizeType len,bool allocable);
+    __attribute__((deprecated)) static __ListNode* locateForDeleteStart(__ListNode* startNode,__SizeType start,bool allocable);
+
+
+
+    static __ListNode* nextAllocable(__ListNode* startNode);
+protected:
+    static __ListNode* nextAllocable(__ListNode* startNode,Int2Type<Locator<_Locateable>::KEEP>);
+    static __ListNode* nextAllocable(__ListNode* startNode,Int2Type<Locator<_Locateable>::DISCARD>);
+};
+
+
+
+template <class T>
+class TreeNode:public ListNode<T>{
+public:
+ using This = TreeNode<T>;
+ using Super = ListNode<T>;
+ using __ListNode = Super;
+ using __TreeNode = This;
+public:
+ TreeNode()=default;
+ TreeNode(const __TreeNode&)=default;
+ __TreeNode & operator=(const __TreeNode&)=default;
+
+
+    TreeNode(const T& data,
+      __TreeNode* father=(0),
+   __TreeNode* son=(0),
+   __TreeNode* next=(0),
+   __TreeNode* previous=(0));
+    ~TreeNode();
+
+    inline __attribute__((always_inline)) __TreeNode* setSon(__TreeNode* son);
+    inline __attribute__((always_inline)) __TreeNode* setFather(__TreeNode* father);
+
+
+
+
+    inline __attribute__((always_inline)) __TreeNode* getSon()const;
+
+    inline __attribute__((always_inline)) __TreeNode* getNext()const;
+    inline __attribute__((always_inline)) __TreeNode* getPrevious()const;
+
+    inline __attribute__((always_inline)) __TreeNode* getDirectFather()const;
+      void addSon(__TreeNode* son);
+    inline __attribute__((always_inline)) bool hasSon()const;
+    inline __attribute__((always_inline)) bool hasFather()const;
+
+    void insertSon(__TreeNode* son);
+    void insertFather(__TreeNode* father);
+    __TreeNode* removeSon();
+ __TreeNode* removeFather();
+ void adjustOffset(ptrdiff_t diff);
+ void initToNull();
+
+
+    __TreeNode* getParent()const;
+
+    template <class __EnvTransfer>
+    inline __attribute__((always_inline)) SerializerPtr<__EnvTransfer>& serialize(SerializerPtr<__EnvTransfer> &ptr)const;
+ template <class __EnvTransfer>
+ inline __attribute__((always_inline)) SerializerPtr<__EnvTransfer>& deserialize(SerializerPtr<__EnvTransfer> &ptr);
+
+
+
+ template <class __EnvTransfer>
+ inline __attribute__((always_inline)) size_t getSerializitionSize();
+
+protected:
+
+    __TreeNode *son;
+    __TreeNode *father;
+
+};
+# 449 "include/List.h"
+template <class T,template <class> class _Allocator>
+class Tree{
+public:
+ using This = Tree<T,_Allocator>;
+ using __Tree = This;
+ using __TreeNode=TreeNode<T>;
+ using __Allocator = _Allocator<__TreeNode>;
+public:
+
+ Tree()=delete;
+public:
+    Tree(__Allocator &smm,__TreeNode* root=(0));
+    Tree(const __Tree & )=default;
+    __Tree &operator=(const __Tree & )=default;
+
+    ~Tree();
+
+    inline __attribute__((always_inline)) __TreeNode *getHead()const;
+    inline __attribute__((always_inline)) void setHead(__TreeNode *head);
+    inline __attribute__((always_inline)) void addRoot(__TreeNode* node);
+    inline __attribute__((always_inline)) bool isEmpty()const;
+    inline __attribute__((always_inline)) __Allocator* getSmm()const;
+    void free(__TreeNode *root);
+
+
+    void dumpInfo(Printer* p)const;
+
+protected:
+    __Allocator &smm;
+# 489 "include/List.h"
+    __TreeNode *root;
+
+};
+# 8 "include/Kernel.h" 2
+# 1 "include/Interrupts.h" 1
+
+
+
+# 1 "include/def.h" 1
+# 5 "include/Interrupts.h" 2
+
+extern int *intAddresses;
+extern int intLen;
+
+extern "C" {
+    void int0x0();
+    void int0x1();
+    void int0x2();
+    void int0x3();
+    void int0x4();
+    void int0x5();
+    void int0x6();
+    void int0x7();
+    void int0x8();
+    void int0x9();
+
+    void int0xa();
+    void int0xb();
+    void int0xc();
+    void int0xd();
+    void int0xe();
+    void int0xf();
+    void int0x10();
+    void int0x11();
+    void int0x12();
+    void int0x13();
+
+
+    void int0x14();
+    void int0x15();
+    void int0x16();
+    void int0x17();
+    void int0x18();
+    void int0x19();
+    void int0x1a();
+    void int0x1b();
+    void int0x1c();
+    void int0x1d();
+
+    void int0x1e();
+    void int0x1f();
+
+    void int0x24();
+    void int0x25();
+    void int0x27();
+    void intDefault();
+}
+extern int int0x20,int0x21,int0x30;
+
+class InterruptsManager{
+public:
+    typedef void (*GENERAL_FUNC)();
+public:
+    InterruptsManager();
+    ~InterruptsManager();
+
+    GENERAL_FUNC getIntAddr(unsigned int i);
+    void setIntAddr(unsigned int i);
+
+    static void callInt(unsigned int i);
+
+protected:
+    static GENERAL_FUNC intAddresses[];
+    static unsigned int intLen;
+
+    static GENERAL_FUNC defaultHandler;
+
+
+
+
+};
+# 9 "include/Kernel.h" 2
+
+# 1 "include/Descriptor.h" 1
+
+
+
+
+
+
+
+class Descriptor{
+public:
+    Descriptor();
+    ~Descriptor();
+protected:
+
+private:
+
+};
+
+
+
+
+
+#pragma pack(push,1)
+class SegmentDescriptor:public Descriptor{
+public:
+
+ enum{
+      TYPE_U_STACK = 0b0010,
+                  TYPE_U_EXPANEDDOWN=0b0110,
+                  TYPE_U_DATA = 0b0010,
+                  TYPE_U_CODE_NONCONFORMING = 0b1010,
+                  TYPE_U_CODE_CONFORMING = 0b1110,
+                  TYPE_S_UNUSED_1=0b0000,
+      TYPE_S_LDT =0b0010,
+                  TYPE_S_UNUSED_2=0b1000,
+                  TYPE_S_UNUSED_3=0b1010,
+                  TYPE_S_UNUSED_4=0b1101,
+                  TYPE_S_TSS_16_AVL=0b0001,
+                  TYPE_S_TSS_16_BUSY=0b0011,
+                  TYPE_S_TSS_32_AVL=0b1001,
+                  TYPE_S_TSS_32_BUSY=0b1011,
+                  TYPE_S_CALLGATE_16=0b0100,
+                  TYPE_S_CALLGATE_32=0b1100,
+                  TYPE_S_TASKGATE=0b0101,
+                  TYPE_S_INTGATE_16=0b0110,
+                  TYPE_S_TRAPGATE_16=0b0111,
+                  TYPE_S_INTGATE_32=0b1110,
+                  TYPE_S_TRAPGATE_32=0b1111,
+      DPL_0=0x0,
+                  DPL_1=0x1,
+                  DPL_2=0x2,
+                  DPL_3=0x3,
+      S_SYSTEM=0x0,
+      S_USER=0x1,
+      L_LONG_SEGMENT=0x1,
+      L_LEGACY_SEGMENT=0x0 ,
+      P_PRESENT=0x1,
+      P_NON_PRESENT=0x0,
+      G_4KB=0x1,
+      G_1B = 0x0,
+      G_4KB_SCALE=4*1024,
+      D_OPSIZE32=0x1,
+      D_OPSIZE16=0x0,
+      B_UPPER_BOUND32=0x1,
+      B_UPPER_BOUND16=0x0,
+      RESERVED=0,
+
+ };
+
+
+
+protected:
+    short limitLow_16:16;
+    int baseAddrLow_24:24;
+
+public:
+    char type:4;
+    char S:1;
+    char DPL:2;
+    char P:1;
+
+
+
+
+
+
+protected:
+    char limitHigh_4:4;
+public:
+    char AVL:1;
+    char L:1;
+    char D:1;
+    char G:1;
+
+
+
+
+protected:
+ char baseAddrHigh_8:8;
+
+public:
+    inline __attribute__((always_inline)) void setBaseAddr(int baseAddr);
+    inline __attribute__((always_inline)) int getBaseAddr()const;
+    inline __attribute__((always_inline)) int getLimit()const;
+    inline __attribute__((always_inline)) void setLimit(int limit);
+
+
+    SegmentDescriptor(char* baseaddr=0,int limit=0,char g=G_1B,char type=TYPE_U_DATA,
+      char dpl=DPL_0,char s=S_USER,char b=B_UPPER_BOUND32,char p=P_PRESENT);
+    ~SegmentDescriptor();
+
+
+
+
+    bool equals(SegmentDescriptor &sd2);
+    void init(char* baseaddr=0,int limit=0,char type=TYPE_U_DATA,char dpl=DPL_0,char s=1,char b=1,char p=1,char g=0,char l=0,char avl=0);
+
+    void writeToMemory(int seg,char* addr);
+    static void fromMemory(SegmentDescriptor *sd,int seg,char* addr);
+
+
+};
+#pragma pack(pop)
+
+
+
+#pragma pack(push,1)
+
+
+
+
+
+
+class SelectorDescriptor:public Descriptor{
+public:
+ enum{TYPE_INT=0x0600,
+  TYPE_TASK=0x0500,
+  TYPE_TRAP=0x0700,
+  SIZE_16=0,
+  SIZE_32=1
+ };
+public:
+
+    union{char I0[2];char __Offset_low[2]; char __reservedI0[2]; };
+    union{char I1[2]; char __SegmentSelectorInGDTorLDT[2]; char __TSSSelector[2]; char __Selector[2]; char __Sel[2]; };
+    union{char I2[2];};
+    union{char I3[2];char __reservedI3[2];char __Offset_high[2];};
+    SelectorDescriptor();
+    ~SelectorDescriptor();
+    void init(int sel,int offset,int type,int dpl=0,int p=1,int segSize=1);
+    void DPL(int dpl);
+    void P(int p);
+    void D(int d);
+    void Offset(int offset);
+    void Selector(int selector);
+    void Type(int index);
+
+    void writeToMemory(int seg,int off);
+    static void fromMemory(SelectorDescriptor &self,int seg,int off);
+
+
+
+
+
+
+ private:
+
+    char __P,__DPL,__D;
+
+
+};
+#pragma pack(pop)
+# 11 "include/Kernel.h" 2
+# 1 "include/AssociatedMemoryManager.h" 1
+# 20 "include/AssociatedMemoryManager.h"
+template <class T,size_t MaxArrNum=10>
+class AssociatedMemoryManager {
+public:
+ typedef SimpleMemoryNode NodeType;
+ typedef T TargetType;
+public:
+ AssociatedMemoryManager();
+ ~AssociatedMemoryManager();
+
+
+ TargetType* getNew();
+ void withraw(TargetType *t);
+
+ void setMan(size_t index,size_t nstart,size_t tstart,size_t len,bool doinit=true,int *usedList=(0),size_t usedLen=0);
+
+
+
+
+
+ inline __attribute__((always_inline)) size_t getArrNum();
+
+protected:
+
+
+
+ __attribute__((deprecated)) inline __attribute__((always_inline)) TargetType* getTarget(size_t index);
+ __attribute__((deprecated)) inline __attribute__((always_inline)) NodeType* getNode(size_t index);
+ __attribute__((deprecated)) inline __attribute__((always_inline)) size_t getTargetIndex(TargetType* t);
+ __attribute__((deprecated)) inline __attribute__((always_inline)) size_t getNodeIndex(NodeType* n);
+
+ AssociatedMemoryManager<T,1> manArrs[MaxArrNum];
+ size_t lastMan;
+};
+# 67 "include/AssociatedMemoryManager.h"
+template <class T>
+class AssociatedMemoryManager<T,1>:public SerializationInterface
+
+{
+public:
+ typedef SimpleMemoryNode NodeType;
+ typedef T TargetType;
+ typedef AssociatedMemoryManager<T,1> This;
+public:
+ AssociatedMemoryManager();
+# 86 "include/AssociatedMemoryManager.h"
+ AssociatedMemoryManager(size_t nstart,size_t tstart,size_t len,
+     bool nodeArrInit=true,int *usedList=(0),size_t usedLen=0);
+ ~AssociatedMemoryManager();
+
+
+
+    TargetType* getNew();
+
+
+
+ TargetType* getNew(int &index);
+    void withdraw(TargetType *t);
+
+
+
+
+
+
+    int allocContinuousFree(size_t n);
+
+    inline __attribute__((always_inline)) bool isFull()const;
+    inline __attribute__((always_inline)) bool isEmpty()const;
+    inline __attribute__((always_inline)) size_t getLen()const;
+    inline __attribute__((always_inline)) size_t getLeft()const;
+    inline __attribute__((always_inline)) size_t getCurSize()const;
+
+
+
+
+
+
+ inline __attribute__((always_inline)) TargetType* getTarget(size_t index);
+    inline __attribute__((always_inline)) size_t getTargetIndex(TargetType* t)const;
+ inline __attribute__((always_inline)) size_t getNodeIndex(NodeType* n)const;
+ inline __attribute__((always_inline)) constexpr static size_t getEachSize();
+ inline __attribute__((always_inline)) NodeType* getNodeAddress();
+ void allocNode(size_t index);
+ void withdrawNode(size_t index);
+
+ template <class __EnvTransfer>
+  SerializerPtr<__EnvTransfer>& serialize(SerializerPtr<__EnvTransfer> &ptr)const
+  {
+   return ptr << narr << tarr << len << lastIndex << curAllocedSize;
+  }
+ template <class __EnvTransfer>
+  SerializerPtr<__EnvTransfer>& deserialize(SerializerPtr<__EnvTransfer> &ptr)
+  {
+   return ptr >>narr >> tarr >> len >> lastIndex >> curAllocedSize;
+  }
+ template <class __EnvTransfer>
+  static constexpr size_t getSerializitionSize()
+ {
+  This *p=static_cast<This*>((0));
+
+  return __EnvTransfer::template sizeofHostType<decltype(p->nstart)>() +
+    __EnvTransfer::template sizeofHostType<decltype(p->tstart)>()+
+    __EnvTransfer::template sizeofHostType<decltype(p->len)>()+
+    __EnvTransfer::template sizeofHostType<decltype(p->lastIndex)>()+
+    __EnvTransfer::template sizeofHostType<decltype(p->curAllocedSize)>();
+
+ }
+
+
+private:
+ inline __attribute__((always_inline)) NodeType* getNode(size_t index);
+
+private:
+ union{
+  size_t nstart;
+  NodeType *narr;
+ };
+ union{
+  size_t tstart;
+  TargetType *tarr;
+ };
+
+ size_t len;
+
+
+ size_t lastIndex;
+
+
+ size_t curAllocedSize;
+# 184 "include/AssociatedMemoryManager.h"
+};
+# 12 "include/Kernel.h" 2
+# 30 "include/Kernel.h"
+template <class T>
+class KernelSmmWrapper{
+protected:
+ friend class Kernel;
+
+public:
+ inline __attribute__((always_inline)) KernelSmmWrapper();
+ inline __attribute__((always_inline)) ~KernelSmmWrapper();
+    inline __attribute__((always_inline)) T* getNew();
+    inline __attribute__((always_inline)) void withdraw(T *t);
+};
+
+
+# 1 "include/Process.h" 1
+
+
+
+
+# 1 "include/MemoryManager.h" 1
+# 12 "include/MemoryManager.h"
+inline __attribute__((always_inline)) void* operator new(size_t size) throw() {return (0);}
+inline __attribute__((always_inline)) void operator delete(void *p){}
+
+
+
+inline __attribute__((always_inline)) void* operator new(size_t, void* __p){ return __p; };
+inline __attribute__((always_inline)) void* operator new[](size_t, void* __p){ return __p; };
+
+
+inline __attribute__((always_inline)) void operator delete (void*, void*){};
+inline __attribute__((always_inline)) void operator delete[](void*, void*){};
+# 37 "include/MemoryManager.h"
+class LinearSourceDescriptor:public SerializationInterface
+{
+public:
+
+ using __SizeType = size_t;
+
+
+ using __LinearSourceDescriptor=LinearSourceDescriptor;
+
+public:
+ inline __attribute__((always_inline)) LinearSourceDescriptor()=default;
+public:
+    inline __attribute__((always_inline)) LinearSourceDescriptor(__SizeType start,__SizeType limit);
+
+    inline __attribute__((always_inline)) ~LinearSourceDescriptor();
+    inline __attribute__((always_inline)) __SizeType getStart() const ;
+    inline __attribute__((always_inline)) __SizeType getLimit() const ;
+    inline __attribute__((always_inline)) bool isAllocable() const;
+    inline __attribute__((always_inline)) void setStart(__SizeType start);
+    inline __attribute__((always_inline)) void setLimit(__SizeType limit);
+    inline __attribute__((always_inline)) bool contains(const LinearSourceDescriptor& b)const;
+    inline __attribute__((always_inline)) bool contains(__SizeType start,__SizeType limit)const;
+
+
+
+    inline __attribute__((always_inline)) bool operator==(const __LinearSourceDescriptor& b)const;
+    inline __attribute__((always_inline)) bool operator!=(const __LinearSourceDescriptor& b)const;
+
+    template <class __EnvTransfer>
+    inline __attribute__((always_inline)) SerializerPtr<__EnvTransfer>& serialize(SerializerPtr<__EnvTransfer> &ptr)const;
+ template <class __EnvTransfer>
+ inline __attribute__((always_inline)) SerializerPtr<__EnvTransfer>& deserialize(SerializerPtr<__EnvTransfer> &ptr);
+ template <class __EnvTransfer>
+ inline __attribute__((always_inline)) constexpr size_t getSerializitionSize();
+protected:
+
+
+
+    __SizeType start;
+
+
+
+    __SizeType limit;
+};
+
+
+class MemoryDescriptor:public LinearSourceDescriptor{
+public:
+ using This = MemoryDescriptor;
+ using Super = LinearSourceDescriptor;
+ using __LinearSourceDescriptor = Super;
+ using __SizeType = size_t;
+ using __MemoryDescriptor = This;
+
+    inline __attribute__((always_inline)) MemoryDescriptor(__SizeType start,__SizeType limit,bool allocable=true);
+
+    inline __attribute__((always_inline)) ~MemoryDescriptor();
+    inline __attribute__((always_inline)) bool isAllocable()const;
+    inline __attribute__((always_inline)) void setAllocable(bool allocable);
+
+
+    inline __attribute__((always_inline)) bool operator==(const __MemoryDescriptor& b)const;
+    inline __attribute__((always_inline)) bool operator!=(const __MemoryDescriptor& b)const;
+
+protected:
+    bool allocable;
+};
+# 119 "include/MemoryManager.h"
+template <class _LinearSourceDescriptor,template <class> class _NodeAllocator>
+class LinearSourceManager:
+  public
+  LocateableLinkedList<_LinearSourceDescriptor,Locator<_LinearSourceDescriptor>::DISCARD,_NodeAllocator>
+  {
+public:
+ using This = LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator>;
+ using __LinearSourceManager = This;
+ using Super = LocateableLinkedList<_LinearSourceDescriptor,
+   Locator<_LinearSourceDescriptor>::DISCARD,_NodeAllocator>;
+    using __ListNode = typename Super::__ListNode;
+    using NodeType = __ListNode;
+    using __Allocator = _NodeAllocator<__ListNode>;
+    using __LinkedList = LinkedList<_LinearSourceDescriptor,_NodeAllocator>;
+    using __SizeType = size_t;
+
+ LinearSourceManager()=delete;
+public:
+
+
+
+
+    LinearSourceManager(__Allocator &smm,__SizeType start,__SizeType size);
+    ~LinearSourceManager();
+
+    inline __attribute__((always_inline)) const _LinearSourceDescriptor & getSpace()const;
+
+
+
+
+
+
+
+    void* mnew(__SizeType start,__SizeType size);
+
+
+
+
+    void* mnew(__SizeType size);
+# 172 "include/MemoryManager.h"
+    void* extend(__SizeType start,__SizeType size,bool addOrReduce,__SizeType extsize,char *realBase=(0),bool moveData=false);
+    void mdelete(void* p,__SizeType size);
+
+
+
+
+    __attribute__((deprecated)) void mdelete(void *p);
+# 187 "include/MemoryManager.h"
+    bool mnewLinked(__SizeType size,
+      __LinkedList &list,__SizeType eachSectionExtraSize=0);
+
+
+
+
+
+
+
+    void mdeleteLinked(__LinkedList &list);
+
+
+
+
+
+ template <class __EnvTransfer>
+  SerializerPtr<__EnvTransfer>& serialize(SerializerPtr<__EnvTransfer> &ptr)const
+  {
+   ptr << space;
+   return Super::serialize(ptr);
+  }
+
+
+
+ template <class __EnvTransfer>
+  SerializerPtr<__EnvTransfer>& deserialize(SerializerPtr<__EnvTransfer> &ptr)
+  {
+   ptr >> space;
+   return Super::deserialize(ptr);
+  }
+
+
+
+
+
+ template <class __EnvTransfer>
+  size_t getSerializitionSize()
+ {
+  return __EnvTransfer::template sizeofHostType<decltype(space)>() + Super::getSerializitionSize();
+ }
+
+protected:
+    _LinearSourceDescriptor allocOutNode(__ListNode *avlNode,__SizeType start,__SizeType len);
+
+
+
+    __attribute__((deprecated)) void withdrawNode(__ListNode *exactNode);
+
+
+    bool checkRange(__SizeType start,__SizeType size);
+    bool checkRange(__SizeType start);
+    static bool checkPrevious(__ListNode *prev, __SizeType start);
+    static bool checkNext(__ListNode* nxt, __SizeType start,__SizeType len);
+
+protected:
+    _LinearSourceDescriptor space;
+};
+# 273 "include/MemoryManager.h"
+template <template <class> class _DescriptorAllocator>
+class MemoryManager:public Tree<MemoryDescriptor,_DescriptorAllocator>{
+public:
+ using This = MemoryManager<_DescriptorAllocator>;
+ using Super = Tree<MemoryDescriptor,_DescriptorAllocator>;
+
+ using __SizeType = size_t;
+ using __MemoryDescriptor=MemoryDescriptor;
+ using __MemoryManager = This;
+ using __TreeNode = typename Super::__TreeNode;
+ using NodeType = __TreeNode;
+
+ using SimpleAllocator = SimpleMemoryManager<NodeType>;
+ using __Allocator = _DescriptorAllocator<__TreeNode>;
+
+public:
+ MemoryManager()=default;
+    MemoryManager(__Allocator &smm);
+# 299 "include/MemoryManager.h"
+    MemoryManager(__Allocator &smm,__SizeType start,__SizeType len,bool fatherAllocable=true);
+
+
+
+
+
+
+    MemoryManager(__Allocator &smm,__SizeType start,__SizeType len,
+      __SizeType usedList[][2],__SizeType usedLen,bool fatherAllocable=true);
+
+    ~MemoryManager();
+
+
+    __MemoryManager allocFreeStart(__SizeType start,__SizeType len);
+    __MemoryManager allocFree(__SizeType len);
+
+    __TreeNode *copyOnAllocation(__TreeNode *head);
+
+
+    void* mnew(__SizeType start,__SizeType size);
+    void* mnew(__SizeType size);
+    void* mnewAlign(__SizeType size,__SizeType alignment);
+# 332 "include/MemoryManager.h"
+    void* extend(__SizeType start,__SizeType size,int extsize,char *realBase=(0),bool moveData=false);
+
+    void mdelete(void* p,__SizeType size);
+    void mdelete(void *p);
+
+    void withdrawToParent();
+
+
+    inline __attribute__((always_inline)) __SizeType getBase()const;
+    inline __attribute__((always_inline)) __SizeType getLimit()const;
+
+
+    static __TreeNode *findFirstStart(__TreeNode* loc,__SizeType start,__SizeType len);
+    static __TreeNode *findFirstLen(__TreeNode* loc,__SizeType len);
+
+
+
+    static __TreeNode*findFirstLenAlign(__TreeNode* loc, __SizeType len,__SizeType &extra,__SizeType alignment);
+    static __TreeNode *locateForInsertation(__TreeNode* loc,__TreeNode *son);
+    static __TreeNode *locateForDelete(__TreeNode * loc,__SizeType start,__SizeType len,bool allocable);
+    static __TreeNode * locateForDeleteStart(__TreeNode * loc,__SizeType start,bool allocable);
+
+
+
+
+
+    static int addToTree(__TreeNode *root,__TreeNode *son);
+    static __TreeNode *nextAllocable(__TreeNode *node);
+
+
+    int isnullptrManager();
+    void setnullptr();
+
+
+    void dumpInfo(Printer *p)const;
+
+protected:
+    __TreeNode * allocOutNode(__TreeNode *avlNode,__SizeType start,__SizeType len);
+    void withdrawNode(__TreeNode *exactNode);
+# 379 "include/MemoryManager.h"
+    u8_t findExtend(__SizeType start,__SizeType size,__SizeType extsize,__TreeNode * &rtnode)const;
+
+protected:
+
+
+private:
+
+};
+
+
+
+
+
+
+template <class T>
+class HighLevelSimpleMemoryManager{
+
+
+};
+# 6 "include/Process.h" 2
+
+# 1 "include/TSS.h" 1
+
+
+
+
+class Printer;
+
+#pragma pack(push,1)
+class TSS{
+public:
+        union{ char I0[4]; int PreviousTaskLink:16;int PTL:16; };
+        union{ char I1[4];int ESP0:32;};
+        union{ char I2[4];int SS0:16;};
+        union{ char I3[4];int ESP1:32;};
+        union{ char I4[4];int SS1:16;};
+        union{ char I5[4];int ESP2:32;};
+        union{ char I6[4];int SS2:16;};
+        union{ char I7[4];int CR3:32;int PDBR:32;};
+        union{ char I8[4];int EIP:32;};
+        union{ char I9[4];int EFLAGS:32;};
+        union{ char I10[4];int EAX:32;};
+        union{ char I11[4];int ECX:32;};
+        union{ char I12[4];int EDX:32;};
+        union{ char I13[4];int EBX:32;};
+        union{ char I14[4];int ESP:32;};
+        union{ char I15[4];int EBP:32;};
+        union{ char I16[4];int ESI:32;};
+        union{ char I17[4];int EDI:32;};
+        union{ char I18[4];int ES:16;};
+        union{ char I19[4];int CS:16;};
+        union{ char I20[4];int SS:16;};
+        union{ char I21[4];int DS:16;};
+        union{ char I22[4];int FS:16;};
+        union{ char I23[4];int GS:16;};
+        union{ char I24[4];int LDTSELECTOR:16;int LDTSEL:16;int LDT:16;};
+        union{ char I25[2];char TRAP:1;};
+        union{ char __I25[2];int IOBASE:16;};
+
+
+
+public:
+    TSS();
+    ~TSS();
+
+    void writeToMemory(int seg,int off);
+    __attribute__((deprecated)) void ensureReservedZero();
+    static void fromMemory(TSS &self,int seg,int off);
+
+    void dumpInfo(Printer *p);
+
+protected:
+
+private:
+
+};
+#pragma pack(pop)
+# 8 "include/Process.h" 2
+
+# 1 "include/VirtualMemory.h" 1
+# 10 "include/VirtualMemory.h"
+ class PTE;
+ typedef AssociatedMemoryManager<SegmentDescriptor,1> SegManager;
+ typedef AssociatedMemoryManager<PTE,1> PTEManager;
+
+
+
+#pragma pack(push,1)
+
+struct PageAttributes
+{
+ enum{
+
+  PWT_ALWAYS_UPDATE=1,
+  PWT_CACHE_UPDATE=0,
+  PCD_CACHE_ENABLE=0,
+  PCD_CACHE_DISABLE=1,
+  P_PRESENT=1,
+  P_NON_PRESENT=0,
+  RW_WRITE_ACCESS=1,
+  RW_READONLY=0,
+  US_ALL=1,
+  US_SYSTEM_ONLY=0,
+  A_ACCESSED=1,
+  A_NOT_ACCESSED=0,
+  D_WRITTEN_EVER=1,
+  D_NOT_WRITTEN=0,
+  G_GLOBAL=1,
+  G_LOCAL=0,
+  PAT_SUPPORTED=1,
+  PAT_UNSUPPORTED=0
+ };
+};
+struct CR3{
+ CR3(int base,int pwt ,
+   int pcd=PageAttributes::PCD_CACHE_DISABLE);
+ inline __attribute__((always_inline)) CR3(u32_t cr3);
+ int R0:3;
+ int PWT:1;
+ int PCD:1;
+ int R1:7;
+ int PDE_BASE:20;
+};
+
+struct PDE{
+ PDE(int base,char pwt ,char pcd=PageAttributes::PCD_CACHE_DISABLE,
+   char rw=PageAttributes::RW_WRITE_ACCESS,char us=PageAttributes::US_ALL,char present=PageAttributes::P_PRESENT,
+   char a=PageAttributes::A_NOT_ACCESSED);
+ inline __attribute__((always_inline)) PDE(u32_t pde);
+ int P:1;
+ int RW:1;
+ int US:1;
+ int PWT:1;
+ int PCD:1;
+ int A:1;
+ int R0:1;
+ int R1:1;
+ int R2:4;
+ int PTE_BASE:20;
+};
+struct PTE{
+ PTE(int base,char pwt ,char pcd=PageAttributes::PCD_CACHE_DISABLE,
+   char rw=PageAttributes::RW_WRITE_ACCESS,char us=PageAttributes::US_ALL,char global=PageAttributes::G_LOCAL,
+   char pat=PageAttributes::PAT_UNSUPPORTED,char dirty=PageAttributes::D_WRITTEN_EVER,
+   char present=PageAttributes::P_PRESENT,
+   char a=PageAttributes::A_NOT_ACCESSED);
+ inline __attribute__((always_inline)) PTE(u32_t pte);
+ int P:1;
+ int RW:1;
+ int US:1;
+ int PWT:1;
+ int PCD:1;
+ int A:1;
+ int D:1;
+ int PAT:1;
+ int G:1;
+ int R0:3;
+ int PAGE_BASE:20;
+
+};
+
+struct LinearAddress{
+ int PAGE_OFFSET:12;
+ int PTE_INDEX:10;
+ int PDE_INDEX:10;
+};
+
+#pragma pack(pop)
+
+
+class PDEManager:public AssociatedMemoryManager<PDE,1>{
+public:
+ typedef AssociatedMemoryManager<PDE,1> Father;
+public:
+ PDEManager();
+# 115 "include/VirtualMemory.h"
+ PDEManager(size_t nstart,size_t tstart,size_t ptemStart,size_t len,
+   bool doinit=true,
+   int *usedList=(0),size_t usedLen=0);
+ ~PDEManager();
+
+
+
+
+
+
+ int prepareVisitPhysical(u32_t phyaddr,size_t size,SegManager &segman);
+
+ inline __attribute__((always_inline)) PTEManager* getPTEManagerRef(int i);
+ inline __attribute__((always_inline)) void setPTEManagerRef(int i,PTEManager * pteman);
+
+
+
+
+
+
+ int allocPDE(size_t n_pte);
+# 144 "include/VirtualMemory.h"
+ void withdrawPDE(size_t i);
+protected:
+
+
+protected:
+ union{
+  size_t ptemstart;
+
+
+
+
+  PTEManager **ptemans;
+
+ };
+
+};
+
+class VirtualManager{
+public:
+
+
+
+
+ inline __attribute__((always_inline)) static int getL3(int targetPhyAddr);
+ inline __attribute__((always_inline)) static int getL2(int ptePhyAddr);
+ inline __attribute__((always_inline)) static int getL1(int pdePhyAddr);
+ inline __attribute__((always_inline)) static int getLinearAddress(int pdePhyAddr,int ptePhyAddr,int targetPhyAddr);
+ inline __attribute__((always_inline)) static void setVirtualAddress(int pdePhyAddr,int ptePhyAddr,int targetPhyAddr);
+
+ inline __attribute__((always_inline)) static u32_t getIndex(u32_t phyaddr,u32_t reg);
+ inline __attribute__((always_inline)) static u32_t getHighBase(u32_t phyaddr);
+ inline __attribute__((always_inline)) static CR3 getCr3();
+
+
+
+
+ inline __attribute__((always_inline)) static void writeCr3(const CR3& cr3);
+ inline __attribute__((always_inline)) static void enablePaging();
+public:
+
+protected:
+ PDEManager pdeman;
+
+};
+# 10 "include/Process.h" 2
+
+
+# 1 "include/Kernel.h" 1
+# 13 "include/Process.h" 2
+# 39 "include/Process.h"
+extern "C" {
+ void idle();
+ void process1();
+ void process2();
+}
+# 54 "include/Process.h"
+ class Process
+
+
+  :public ErrorSaver
+
+
+
+   {
+   public:
+   typedef Process This;
+
+
+
+ typedef AssociatedMemoryManager<SegmentDescriptor,1> SegManager;
+
+
+
+
+ enum{
+  RESERVED_PDE_START = 0,
+  RESERVED_PDE_NUM=10,
+  RESERVED_PTE_START = (RESERVED_PDE_NUM*(sizeof(PDEManager::NodeType) + sizeof(PDEManager::TargetType)) + 4)&0xfffffffc,
+
+
+
+  RESERVED_PTE_NUM=(512 - RESERVED_PTE_START)/(sizeof(PTEManager::NodeType)+sizeof(PTEManager::TargetType)),
+
+  RESERVED_PTE_MANAGER_START = 512,
+  RESERVED_PTE_MANAGER_NUM = RESERVED_PDE_NUM,
+
+
+
+  RESERVED_END = RESERVED_PTE_MANAGER_START + RESERVED_PTE_MANAGER_NUM * sizeof(PTEManager*),
+
+
+
+  ERROR_NO_ERROR=0,
+  ERROR_NO_ENOUGH_PROCESS_SPACE,
+  ERROR_GDT_IS_FULL,
+  ERROR_IDT_IS_FULL,
+  ERROR_GENERAL,
+  PID_IDLE=1,
+  PID_INVALID=0,
+  STAUTS_RUNNING,
+  STATUS_READY,
+  STATUS_STOPPED,
+
+
+  PDE_NUMS=10,
+  PTE0_NUMS=20
+ };
+
+
+
+
+public:
+ Process();
+ Process(const Process&)=delete;
+ Process &operator=(const Process&)=delete;
+# 136 "include/Process.h"
+ Process(
+   unsigned int pid,
+   TSS* ptss,int tssIndex,
+   size_t ldtNStart,size_t ldtTStart,size_t ldtNItems,int ldtIndex,
+   size_t absBase,size_t thisPrcBase ,size_t codeStart,size_t bodySize,
+   size_t codeLimit,size_t dataLimit,size_t stackLimit,
+   char dpl=SegmentDescriptor::DPL_3
+ );
+ ~Process();
+
+ inline __attribute__((always_inline)) unsigned int getPid()const;
+ inline __attribute__((always_inline)) void setStack0(size_t stack0);
+ inline __attribute__((always_inline)) void setStack3(size_t stack3);
+ inline __attribute__((always_inline)) void setSSSel0(int sel);
+ inline __attribute__((always_inline)) void setSSSel3(int sel);
+ inline __attribute__((always_inline)) void setCSSel(int sel);
+ inline __attribute__((always_inline)) void setCodeStart(size_t start);
+ inline __attribute__((always_inline)) size_t getCodeStart()const;
+ inline __attribute__((always_inline)) size_t getStart()const;
+ inline __attribute__((always_inline)) size_t getDataLimit()const;
+ inline __attribute__((always_inline)) size_t getStackLimit()const;
+ inline __attribute__((always_inline)) size_t getCodeLimit()const;
+ inline __attribute__((always_inline)) int getTSSSel()const;
+ inline __attribute__((always_inline)) int getLDTSsel()const;
+ inline __attribute__((always_inline)) int getSatus()const;
+ inline __attribute__((always_inline)) void setStatus(int status);
+ inline __attribute__((always_inline)) int getStatus()const;
+ inline __attribute__((always_inline)) size_t getProcessBase()const;
+ void dump(Printer * printer)const;
+
+
+protected:
+
+
+
+
+ unsigned int pid;
+ int status;
+
+
+
+ TSS *ptss;
+
+
+
+
+ int tssSel;
+
+
+
+
+ int ldtSel;
+
+ SegManager ldtm;
+
+
+
+
+ size_t absBase;
+
+
+
+ size_t processBase;
+
+
+
+
+ KernelSmmWrapper<TreeNode<MemoryDescriptor>> baseKsmm;
+
+
+
+
+ MemoryManager<KernelSmmWrapper> baseMM;
+
+
+
+
+
+
+ PDEManager pdeman;
+
+
+
+
+
+ int genLinearAddr;
+
+
+
+};
+# 44 "include/Kernel.h" 2
+
+class ProcessManager{
+public:
+ using This = ProcessManager;
+ using __TreeNode_Process = TreeNode<Process*>;
+ using __ListNode_Process = ListNode<__TreeNode_Process>;
+ using __ProcessQueueType = LinkedList<__TreeNode_Process,KernelSmmWrapper> ;
+ using __ProcessTreeType = Tree<Process*,KernelSmmWrapper> ;
+ enum{
+  LDT_ITEMS=10
+ };
+public:
+ ProcessManager();
+ ProcessManager(const ProcessManager&)=delete;
+ ProcessManager& operator=(const ProcessManager&)=delete;
+ ~ProcessManager();
+# 70 "include/Kernel.h"
+ Process *createProcess(size_t codeLimit,size_t dataLimit,size_t stackLimit,
+   char dpl=SegmentDescriptor::DPL_3);
+
+
+
+
+
+ inline __attribute__((always_inline)) __TreeNode_Process createProcessWrapper(Process* p);
+ void setFatherProcess(TreeNode<Process*> *p,TreeNode<Process*> *father);
+ inline __attribute__((always_inline)) TreeNode<Process*> * getFatherProcess(TreeNode<Process*> *p);
+ __TreeNode_Process getCurrentProcess()const;
+ void swithcNextProcess();
+
+
+
+ __TreeNode_Process addNewProcess(size_t codeLimit,size_t dataLimit,size_t stackLimit,
+   char dpl=SegmentDescriptor::DPL_3);
+
+
+
+ __attribute__((deprecated)) inline __attribute__((always_inline)) Process* getIdelProcess()const;
+
+
+
+
+ __attribute__((deprecated)) static bool pidComparator(unsigned int p1,unsigned int p2);
+
+protected:
+
+
+
+
+ unsigned int getNewPid();
+ void releasePid(unsigned int pid);
+# 118 "include/Kernel.h"
+ Process* createProcess(unsigned int pid,size_t prcBase,size_t prcStart,size_t codeLimit,size_t dataLimit,size_t stackLimit,
+   char dpl=SegmentDescriptor::DPL_3);
+ void createIdleProcess();
+ void invokeProcess(Process* p);
+ __TreeNode_Process getByPid(unsigned int pid);
+
+
+
+
+ KernelSmmWrapper<__ListNode_Process > lksmm;
+
+ KernelSmmWrapper<__TreeNode_Process > tksmm;
+ __ProcessQueueType prcsQueue;
+
+ __ProcessTreeType prcsTree;
+ Process *idleProcess;
+
+
+ __TreeNode_Process *curProcess;
+ unsigned int lastValidPID;
+
+
+
+ unsigned int maxPID;
+};
+# 158 "include/Kernel.h"
+class Kernel{
+public:
+ typedef Kernel This;
+ typedef TreeNode<MemoryDescriptor> MmNodeType;
+ typedef SimpleMemoryManager<MmNodeType> SmmType;
+ typedef SmmType::FullNode FullMMNodeType;
+ typedef MemoryManager<SimpleMemoryManager> MmType;
+ typedef AssociatedMemoryManager<SegmentDescriptor,1> SegManager;
+ using __TreeNode_Process =typename ProcessManager::__TreeNode_Process;
+
+
+
+
+ typedef u16_t InputBufferDataType;
+ enum{
+  LDT_ITEMS=10,
+  VIDEO_SEL=0x8,
+  KERNEL_CS=0x10,
+  KERNEL_DS=0x18,
+  KERNEL_SS=0x20
+ };
+ enum{
+  GPUI_MEM=0,
+  GPUI_PRINT=1
+ };
+ enum{
+  GPUI_MEM_NEW=0,
+  GPUI_MEM_DELETE=1
+ };
+ enum{
+  EOF=0xffffffff,
+ };
+protected:
+
+ static Kernel *theKernel;
+
+public:
+ static Printer *printer;
+ static void initTheKernel(Kernel *theKernel);
+ inline __attribute__((always_inline)) static Kernel* getTheKernel();
+ inline __attribute__((always_inline)) static int makeCR3(int pdePhyAddr,int controlWord_L12=0b11000);
+
+
+
+
+ inline __attribute__((always_inline)) static int makePDE(int ptePhyAddr,int controlWord_L12=0b11011);
+
+
+
+
+ inline __attribute__((always_inline)) static int makePTE(int targetPhyAddr,int controlWord_L12=0b100011011);
+
+protected:
+ ~Kernel();
+public:
+
+ Kernel();
+
+
+
+
+
+ Kernel(size_t smmStart,size_t smmLimit,
+   size_t kmmStart,size_t kmmSize,size_t usedList[][2],size_t usedLen,
+   size_t pmmStart,size_t pmmSize,
+   size_t pde0_start,size_t pde0_size,
+   size_t pte0_start,size_t pte_size,
+   size_t gdtnstart,size_t gdttstart,size_t gdtitems,int *gusedList,size_t gusedLen,
+   size_t idtnstart,size_t idttstart,size_t idtitems,int *iusedList,size_t iusedLen
+   );
+
+
+
+
+
+ inline __attribute__((always_inline)) void* mnewKernel(size_t mmStart,size_t mmSize);
+
+
+
+ inline __attribute__((always_inline)) void* mnewKernel(size_t mmSize);
+
+
+
+ inline __attribute__((always_inline)) void* mnewKernelAlign(size_t mmSize,size_t alignment=1);
+ inline __attribute__((always_inline)) void mdeleteKernel(void *p,size_t mmSize);
+ inline __attribute__((always_inline)) void mdeleteKernel(void* p);
+
+ inline __attribute__((always_inline)) void* mnewProcess(size_t mmStart,size_t mmSize);
+
+
+
+ inline __attribute__((always_inline)) void* mnewProcess(size_t mmSize);
+ inline __attribute__((always_inline)) void* mnewProcessAlign(size_t mmSize,size_t alignment=1);
+ inline __attribute__((always_inline)) void mdeleteProcess(void *p,size_t mmSize);
+ inline __attribute__((always_inline)) void mdeleteProcess(void *p);
+
+
+
+
+
+ inline __attribute__((always_inline)) void switchNextProcess();
+ inline __attribute__((always_inline)) __TreeNode_Process addNewProcess(size_t codeLimit,size_t dataLimit,size_t stackLimit,
+   char dpl=SegmentDescriptor::DPL_3);
+ void suspendProcess(__TreeNode_Process wp);
+ void resumeProcess(__TreeNode_Process wp);
+ void killProcess(__TreeNode_Process wp);
+
+
+
+
+
+ size_t getKernelMMBase()const;
+
+
+
+ size_t getProcessMMBase()const;
+
+
+
+
+
+
+
+ int newgdt(
+    char* baseaddr=0,
+    int limit=0,
+    char g=SegmentDescriptor::G_1B,
+    char type=SegmentDescriptor::TYPE_U_DATA,
+    char dpl=SegmentDescriptor::DPL_0,
+    char s=SegmentDescriptor::S_USER,char b=SegmentDescriptor::B_UPPER_BOUND32,char p=SegmentDescriptor::P_PRESENT);
+ inline __attribute__((always_inline)) void markGdtUsed(int index);
+ inline __attribute__((always_inline)) void markGdtUnused(int index);
+ inline __attribute__((always_inline)) void markIdtUsed(int index);
+ inline __attribute__((always_inline)) void markIdtUnused(int index);
+ inline __attribute__((always_inline)) SegManager& getGdtm();
+ inline __attribute__((always_inline)) SegManager& getIdtm();
+ inline __attribute__((always_inline)) int getCR3();
+ int newidt();
+ inline __attribute__((always_inline)) int allocPDE(size_t n_pte);
+
+
+
+ inline __attribute__((always_inline)) void withdrawPDE(size_t i);
+# 309 "include/Kernel.h"
+ inline __attribute__((always_inline)) int preparePhysicalMap(size_t physical,size_t size);
+
+
+ __attribute__((deprecated)) void destroyPhysicalMap();
+
+ inline __attribute__((always_inline)) void setInputBuffer(InputBufferDataType *p,size_t len);
+ inline __attribute__((always_inline)) Queue<InputBufferDataType>& getInputBuffer();
+
+
+
+
+ int getChar();
+
+
+
+
+ int getRawChar();
+
+ void dumpInfoInner()const;
+ void dumpInfo()const;
+protected:
+
+
+
+
+
+
+ SmmType smm;
+
+ MmType kernelMM;
+ MmType processMM;
+ InterruptsManager intm;
+ SegManager gdtm;
+ SegManager idtm;
+
+ ProcessManager processMan;
+
+ CR3 cr3;
+ PDEManager pdeman;
+
+
+ Queue<InputBufferDataType> inputBuffer;
+};
+# 2 "src/protected_main.cpp" 2
+
+
+
+# 1 "include/interrupts.h" 1
+# 6 "src/protected_main.cpp" 2
+
+# 1 "include/IOProgramer.h" 1
+# 15 "include/IOProgramer.h"
+class IO_8259A{
+public:
+# 32 "include/IOProgramer.h"
+    const static int PORTS[4];
+public:
+    IO_8259A();
+    ~IO_8259A();
+
+    void sendICW1(int chip=0,int electTriggerMode=0,int singleChip=0,int requireICW4=1);
+    void sendICW2(int chip=0,int base=0x20);
+    void sendICW3(int chip=0,int linkage=0x4);
+    void sendICW4(int chip=0,int specCompNest=0,int buf=0,int autoEndEOI=0,int useFor80x86=1);
+    void sendOCW1(int chip=0,int mask=0x0);
+    void sendOCW2(int chip=0,int eoi=0x20);
+
+
+protected:
+private:
+
+};
+
+
+
+
+
+
+
+class IO_8253{
+public:
+    const static int PORTS[4];
+    const static unsigned int MAXNUM;
+    const static unsigned int MAX_MICRO;
+public:
+    IO_8253();
+    ~IO_8253();
+
+
+
+
+
+    void setTimeMicro(int tunel,unsigned int microsecs);
+    void setTimeMill(int tunel,unsigned int millsecs);
+    void sendControlByte(int tunel=0,int writeOrder=0b11,int workingMode=0x3,int BCDMode=0);
+
+
+};
+
+
+
+
+
+
+
+class IO_CMOS{
+protected:
+ IO_CMOS();
+ ~IO_CMOS();
+public:
+
+
+};
+
+class Keyboard{
+public:
+    const static char* KEY_MAP_STD[];
+    const static int KEY_MAP_STD_LEN;
+
+
+
+
+    const static char KEY_MAP_SHIFT[];
+
+
+ enum{
+     ENTER_INDEX=28,
+     BACKSPACE_INDEX=14,
+     TAB_INDEX=15,
+     DEL_INDEX=83,
+     UP_INDEX=72,
+     DOWN_INDEX=80,
+     LEFT_INDEX=75,
+     RIGHT_INDEX=77,
+
+
+
+
+     LEFT_SHIFT_INDEX = 42,
+     LEFT_CTRL_INDEX = 29,
+     LEFT_ALT_INDEX = 56 ,
+     RIGHT_SHITF_INDEX = 54,
+
+ };
+ const static int
+     RIGHT_CTRL_INDEX,
+     RIGHT_ALT_INDEX;
+ enum{
+     CAP_INDEX=58,
+     NUM_INDEX=69,
+ };
+
+
+
+
+    enum{
+      CONTROL_LSHIFT = 1 << (0 + 8),
+      CONTROL_LCTRL = 1 << (1+8),
+      CONTROL_LALT = 1 << (2+8),
+      CONTROL_RSHIFT = 1 << (3+8),
+      CONTROL_RCTRL = 1 << (4+8),
+      CONTROL_RALT = 1 << (5+8),
+      CONTROL_CAP = 1 << (6+8),
+      CONTROL_NUM = 1 << (7+8),
+    };
+
+    enum{
+     PORT_DATA = 0x60,
+  PORT_CONTROL = 0x64,
+  PORT_PPI = 0x61,
+
+
+  NO_DATA_ERROR = 0x10000,
+    };
+# 169 "include/IOProgramer.h"
+public:
+    Keyboard();
+    ~Keyboard();
+
+
+
+
+    inline __attribute__((always_inline)) int isBusy();
+
+
+
+    inline __attribute__((always_inline)) int hasData();
+
+
+
+
+
+    inline __attribute__((always_inline)) int readScanCode();
+
+
+
+
+
+
+    inline __attribute__((always_inline)) void enable();
+    inline __attribute__((always_inline)) void disable();
+
+
+
+    void waitToWrite();
+
+    const char* getAsciiChar(unsigned char code);
+
+
+
+
+
+
+    static int getCodeTypeBit(u8_t code);
+
+
+
+
+
+
+    static int interpretCharData(u16_t data);
+
+
+protected:
+    int leds;
+
+
+};
+# 231 "include/IOProgramer.h"
+class IO_HDD{
+protected:
+public:
+ typedef IO_HDD This;
+
+ enum{
+  PORT_DATA=0x1f0,
+  PORT_ERROR_CODE=0x1f1,
+  PORT_SECNUM=0x1f2,
+  PORT_SECSTART_0=0x1f3,
+  PORT_SECSTART_1=0x1f4,
+  PORT_SECSTART_2=0x1f5,
+  PORT_SECSTART_3=0x1f6 ,
+  PORT_READ_COMMAND=0x1f7,PORT_WRITE_COMMAND=0x1f7,
+  PORT_STATUS = PORT_READ_COMMAND
+
+ };
+
+ IO_HDD(int hddNo,size_t secStart,unsigned char secNumber,int dstSeg,size_t dstOff);
+ IO_HDD();
+ ~IO_HDD();
+
+
+
+
+
+ void read();
+ __attribute__((deprecated)) void write();
+ inline __attribute__((always_inline)) static bool isBusy(char status);
+ inline __attribute__((always_inline)) static bool isReady(char status);
+ inline __attribute__((always_inline)) static bool isError(char status);
+ inline __attribute__((always_inline)) static char readStatus();
+ inline __attribute__((always_inline)) size_t getDstOff() const;
+ inline __attribute__((always_inline)) void setDstOff(size_t dstOff);
+ inline __attribute__((always_inline)) int getDstSeg() const;
+ inline __attribute__((always_inline)) void setDstSeg(int dstSeg);
+ inline __attribute__((always_inline)) int getHddNo() const;
+ inline __attribute__((always_inline)) void setHddNo(int hddNo);
+ inline __attribute__((always_inline)) bool isLbaMode() const;
+ inline __attribute__((always_inline)) unsigned char getSecNumber() const;
+ inline __attribute__((always_inline)) void setSecNumber(unsigned char secNumber);
+ inline __attribute__((always_inline)) size_t getSecStart() const;
+ inline __attribute__((always_inline)) void setSecStart(size_t secStart);
+
+protected:
+ inline __attribute__((always_inline)) void writeSecNum();
+ inline __attribute__((always_inline)) void writeSecStart();
+ inline __attribute__((always_inline)) void requestRead();
+ inline __attribute__((always_inline)) void requestWrite();
+ void readData();
+ inline __attribute__((always_inline)) void waitUntilReady();
+ void writeData();
+
+ int hddNo;
+ bool LBAMode;
+ size_t secStart;
+ unsigned char secNumber;
+ int dstSeg;
+ size_t dstOff;
+
+};
+
+class IO_Floppy{
+
+};
+# 8 "src/protected_main.cpp" 2
+# 1 "include/KernelMemoryConfig.h" 1
+# 31 "include/KernelMemoryConfig.h"
+namespace KernelMemoryConfig{
+ enum{
+  INIT_STACK_SZIE = 7680,
+  PDE_NUM = 10,
+  PTE_0_NUM = 1024,
+  PTE_1_NUM = 100,
+  GDT_LEN = 80,
+  IDT_LEN = 80,
+  MMNODE_NUM = 200,
+  INPUT_BUFFER_LEN = 512
+ };
+ extern char mmInitStack[];
+ extern char mmKernel[];
+ extern char mmPDE[] ;
+ extern char mmPTE_0[] ;
+ extern char mmPTE_1[] ;
+ extern char mmGDT[];
+ extern char mmIDT[];
+ extern char mmGDTAssocNode[];
+ extern char mmIDTAssocNode[];
+ extern char mmKernelMMNodes[];
+ extern char mmInputBuffer[];
+};
+# 9 "src/protected_main.cpp" 2
+# 1 "include/test.h" 1
+
+
+
+
+
+
+
+class Test{
+public:
+    Test();
+    ~Test();
+
+
+
+
+    void testIO_HDD();
+    void run();
+    void testVM();
+
+
+
+
+
+
+
+protected:
+
+    Printer dbg;
+
+    char buf[10];
+
+
+};
+# 10 "src/protected_main.cpp" 2
+# 1 "include/PMLoader.h" 1
+# 22 "include/PMLoader.h"
+class PMLoader{
+public:
+ enum{
+  SAFE_SEG = 0x50,
+  SECSIZE = 512,
+  PDE0_START = 0,
+  PDE0_SIZE = 1 * SECSIZE,
+  STACK_START = PDE0_START + PDE0_SIZE,
+    STACK_SIZE = 4 * SECSIZE,
+    IDT_START = STACK_START + STACK_SIZE,
+    IDT_SIZE = 1 * SECSIZE,
+    GDT_START = IDT_START + IDT_SIZE,
+    GDT_SIZE = 2 * SECSIZE,
+    PTE0_START = GDT_START + GDT_SIZE,
+    PTE0_SIZE = 6 * SECSIZE,
+# 66 "include/PMLoader.h"
+    TSS_MIN_SIZE = 104,
+    FREE_HEAP_SIZE = 18 * SECSIZE,
+    FREE_HEAP_START = PTE0_START + PTE0_SIZE,
+    CODE_START = FREE_HEAP_START + FREE_HEAP_SIZE,
+
+    CODE_LIMIT = 0xfffff,
+    DATA_LIMIT = 0x2fffff,
+    STACK_LIMIT = IDT_START - 1,
+    CODE_SIZE = CODE_LIMIT - CODE_START + 1,
+  JMPSEG = 0x10,
+  JMPOFF = CODE_START + 10*SECSIZE,
+
+
+
+
+
+  RESERVED_SECNUM = 32,
+  REAL_SECNUMS = 25,
+
+
+
+  PROTECTED_SECNUMS = 250,
+
+  PROCESS_SECNUMS = 35,
+  PROCESS_EACH_SECNUMS = 16,
+  TEMP_SEG = 0xa00,
+# 100 "include/PMLoader.h"
+  KERNEL_START=FREE_HEAP_START,
+  KERNEL_SIZE = (static_cast<size_t>(sizeof(Kernel))),
+
+
+
+
+
+  SMM_MEM_START = KERNEL_START + KERNEL_SIZE,
+
+  SMM_NODE_SIZE = (static_cast<size_t>(sizeof(Kernel::SmmType::FullNode))),
+  SMM_MAN_INIT_NODES = 100,
+  SMM_MEM_SIZE = SMM_NODE_SIZE * SMM_MAN_INIT_NODES,
+
+
+
+
+
+  GDT_NODE_START = SMM_MEM_START + SMM_MEM_SIZE,
+  GDT_NODE_ITEMS = GDT_SIZE / (static_cast<size_t>(sizeof(SegmentDescriptor))),
+  IDT_NODE_START = GDT_NODE_START + GDT_NODE_ITEMS*(static_cast<size_t>(sizeof(SegmentDescriptor))),
+  IDT_NODE_ITEMS = IDT_SIZE / (static_cast<size_t>(sizeof(SegmentDescriptor))),
+
+
+
+
+
+
+  GLOBAL_SHARE_START = CODE_LIMIT+1,
+  GLOBAL_SHARE_SIZE = 2*1024*2*SECSIZE,
+
+
+
+  KERNEL_MM_START = GLOBAL_SHARE_START,
+  KERNEL_MM_SIZE = GLOBAL_SHARE_SIZE,
+
+  END_OF_WHOLE_KERNEL = GLOBAL_SHARE_START + GLOBAL_SHARE_SIZE,
+
+
+
+
+
+
+  PROCESS_MM_START = END_OF_WHOLE_KERNEL,
+  PROCESS_MM_SIZE = 32*1024*1024 - PROCESS_MM_START,
+
+
+ };
+public:
+# 181 "include/PMLoader.h"
+};
+# 11 "src/protected_main.cpp" 2
+
+
+# 1 "include/macros/all.h" 1
+# 19 "include/macros/all.h"
+# 1 "include/Cache.h" 1
+# 18 "include/Cache.h"
+template <class K,class V>
+class Cache {
+public:
+ typedef Cache<K,V> This;
+ typedef K KeyType;
+ typedef V ValueType;
+ typedef bool (*COMPARATOR)(KeyType k1,KeyType k2);
+ typedef ValueType (*DEFAULT_GETTER)(KeyType k);
+public:
+ Cache(size_t capacity,DEFAULT_GETTER getter,COMPARATOR cmp=(0));
+ inline __attribute__((always_inline)) ~Cache();
+
+ ValueType get(KeyType k);
+ inline __attribute__((always_inline)) size_t getAccessTimes()const;
+ inline __attribute__((always_inline)) size_t getHitTimes()const;
+
+ inline __attribute__((always_inline)) void setCompartor(COMPARATOR cmp);
+ inline __attribute__((always_inline)) COMPARATOR getComparator()const;
+ inline __attribute__((always_inline)) void setGetter(DEFAULT_GETTER getter);
+ inline __attribute__((always_inline)) DEFAULT_GETTER getGetter()const;
+protected:
+
+ COMPARATOR cmp;
+ DEFAULT_GETTER getter;
+ size_t capacity;
+ KeyType *karr;
+ ValueType *varr;
+ size_t accessTimes,hitTimes;
+
+};
+# 20 "include/macros/all.h" 2
+
+
+# 1 "include/Filesystem.h" 1
+# 13 "include/Filesystem.h"
+class FileSystem{
+public:
+
+
+
+
+protected:
+
+
+
+};
+
+
+
+
+class Ext4FileSystem{
+public:
+
+
+protected:
+
+
+
+};
+
+
+
+
+class FATFileSystem{
+
+
+};
+# 53 "include/Filesystem.h"
+#pragma pack(push,1)
+class MBRPartitionEntry{
+public:
+ enum{
+  FLAG_ACTIVE=0x80u,
+  FLAG_NON_ACTIVE=0x0u
+ };
+ u8_t activeFlag;
+ u8_t chsStart[3];
+ u8_t chsEnd[3];
+ u8_t paritionType;
+ u32_t lbaStart;
+ u32_t sectorNum;
+};
+
+class MBRTable{
+public:
+ MBRTable()=default;
+ ~MBRTable();
+public:
+
+ MBRPartitionEntry table[4];
+
+ inline __attribute__((always_inline)) int findFirstActiveInline();
+
+
+};
+
+#pragma pack(pop)
+# 23 "include/macros/all.h" 2
+
+# 1 "include/macros/List_macros.h" 1
+# 22 "include/macros/List_macros.h"
+template<class T>
+typename ListNode<T>::__ListNode* ListNode<T>::getNext()const
+{
+    return next;
+}
+
+template<class T>
+typename ListNode<T>::__ListNode* ListNode<T>::getPrevious()const
+{
+    return previous;
+}
+template<class T>
+void ListNode<T>::setNext(__ListNode* next)
+{
+    this->next = next;
+}
+
+template<class T>
+void ListNode<T>::setPrevious(__ListNode* previous)
+{
+    this->previous = previous;
+}
+template<class T>
+int ListNode<T>::hasPrevious()const
+{
+    return (this->previous!=(0));
+}
+
+template<class T>
+int ListNode<T>::hasNext()const
+{
+    return (this->next!=(0));
+}
+
+template<class T>
+const T& ListNode<T>::getData()const
+{
+    return data;
+}
+template<class T>
+T& ListNode<T>::getData()
+{
+    return data;
+}
+template<class T>
+void ListNode<T>::setData(const T& data)
+{
+    this->data=data;
+}
+
+template<class T>
+template <class __EnvTransfer>
+SerializerPtr<__EnvTransfer>& ListNode<T>::serialize(SerializerPtr<__EnvTransfer> &ptr)const
+{
+ ptr << data
+   <<next
+   <<previous;
+ return ptr;
+}
+
+template<class T>
+template <class __EnvTransfer>
+SerializerPtr<__EnvTransfer>& ListNode<T>::deserialize(SerializerPtr<__EnvTransfer> &ptr)
+{
+ static_assert( __EnvTransfer::ptrPolicy()!=__EnvTransfer::POLICY_PTR_OBJECT,"ptr object policy not supported yet");
+ ptr >> data
+   >>next
+   >>previous;
+ next+=__EnvTransfer::ptrBase();
+ previous+=__EnvTransfer::ptrBase();
+ return ptr;
+}
+
+template<class T>
+template <class __EnvTransfer>
+size_t ListNode<T>::getSerializitionSize()
+{
+ static_assert( __EnvTransfer::ptrPolicy()!=__EnvTransfer::POLICY_PTR_OBJECT,"ptr object policy not supported yet");
+ return data.getSerializitionSize()+
+   __EnvTransfer::template sizeofHostType<decltype(this->next)>()+
+   __EnvTransfer::template sizeofHostType<decltype(this->previous)>();
+}
+# 112 "include/macros/List_macros.h"
+template <class T,template <class> class _Allocator>
+typename LinkedList<T,_Allocator>::__ListNode*
+LinkedList<T,_Allocator>::getHead()const
+{
+    return root->getNext();
+}
+template <class T,template <class> class _Allocator>
+typename LinkedList<T,_Allocator>::__ListNode*
+LinkedList<T,_Allocator>::getLast()const
+{
+    return last->getNext();
+}
+template <class T,template <class> class _Allocator>
+bool LinkedList<T,_Allocator>::isEmpty()const
+{
+ return this->getHead()==(0);
+}
+template <class T,template <class> class _Allocator>
+_Allocator<typename LinkedList<T,_Allocator>::__ListNode>
+&LinkedList<T,_Allocator>::getMemoryManager()const
+{
+    return smm;
+}
+
+
+
+
+
+SimpleMemoryNode::SimpleMemoryNode(bool alloced):
+alloced(alloced)
+{
+}
+
+bool SimpleMemoryNode::isAlloced()
+{
+ return alloced;
+}
+void SimpleMemoryNode::setAlloced(bool alloced)
+{
+ this->alloced=alloced;
+}
+
+
+
+template<class T>
+bool SimpleMemoryManager<T>::isFull()const
+{
+    return this->curSize==this->len;
+}
+template<class T>
+size_t SimpleMemoryManager<T>::getLen()const
+{
+    return this->len;
+}
+template<class T>
+size_t SimpleMemoryManager<T>::getCurSize()const
+{
+    return this->curSize;
+}
+template<class T>
+size_t SimpleMemoryManager<T>::getStart()const
+{
+    return this->start;
+}
+template<class T>
+size_t SimpleMemoryManager<T>::getLimit()const
+{
+    return this->limit;
+}
+
+template<class T>
+size_t SimpleMemoryManager<T>::getNodeSize()
+{
+ return sizeof(FullNode);
+}
+
+template<class T>
+typename SimpleMemoryManager<T>::ERROR_HANDLER SimpleMemoryManager<T>::getErrHandler()
+{
+ return this->errhandle;
+}
+template<class T>
+void SimpleMemoryManager<T>::setErrHandler(SimpleMemoryManager<T>::ERROR_HANDLER errhandle)
+{
+ this->errhandle= errhandle;
+}
+template<class T>
+bool SimpleMemoryManager<T>::checkIsInternal(FullNode *t)
+{
+ return this->start <= static_cast<size_t>(t) && static_cast<size_t>(t) -
+      static_cast<size_t>(this->start) <= this->limit ;
+}
+
+
+
+
+template<class T>
+typename TreeNode<T>::__TreeNode* TreeNode<T>::setSon(__TreeNode* son)
+  {
+
+
+
+   this->son=son;
+   return this;
+  }
+template<class T>
+typename TreeNode<T>::__TreeNode* TreeNode<T>::setFather(__TreeNode* father) {
+    this->father=father;
+    return this;
+}
+
+
+template<class T>
+typename TreeNode<T>::__TreeNode* TreeNode<T>::getSon() const{
+
+
+
+ return son;
+}
+
+
+
+template<class T>
+typename TreeNode<T>::__TreeNode* TreeNode<T>::getNext() const{
+ __TreeNode* next=static_cast<__TreeNode*>(this->__ListNode::getNext());
+ return next;
+}
+
+template<class T>
+typename TreeNode<T>::__TreeNode* TreeNode<T>::getPrevious() const{
+ __TreeNode* previous=static_cast<__TreeNode*>(this->__ListNode::getPrevious());
+ return previous;
+}
+
+
+template<class T>
+typename TreeNode<T>::__TreeNode* TreeNode<T>::getDirectFather()const {
+
+
+
+    return father;
+}
+
+template<class T>
+bool TreeNode<T>::hasSon()const
+{
+ return this->son!=(0);
+}
+template<class T>
+bool TreeNode<T>::hasFather()const
+{
+ return this->father!=(0);
+}
+template<class T>
+template <class __EnvTransfer>
+SerializerPtr<__EnvTransfer>& TreeNode<T>::serialize(SerializerPtr<__EnvTransfer> &ptr)const
+{
+
+
+ this->Super::template serialize<__EnvTransfer>(ptr)
+    <<son
+    <<father;
+ return ptr;
+}
+
+template<class T>
+template <class __EnvTransfer>
+SerializerPtr<__EnvTransfer>& TreeNode<T>::deserialize(SerializerPtr<__EnvTransfer> &ptr)
+{
+ static_assert( __EnvTransfer::ptrPolicy()!=__EnvTransfer::POLICY_PTR_OBJECT,"ptr object policy not supported yet");
+ this->Super::template deserialize<__EnvTransfer>(ptr)
+      >>son
+      >>father;
+ son+=__EnvTransfer::ptrBase();
+ father+=__EnvTransfer::ptrBase();
+ return ptr;
+}
+
+template<class T>
+template <class __EnvTransfer>
+size_t TreeNode<T>::getSerializitionSize()
+{
+ static_assert( __EnvTransfer::ptrPolicy()!=__EnvTransfer::POLICY_PTR_OBJECT,"ptr object policy not supported yet");
+ return this->Super::template getSerializitionSize<__EnvTransfer>()+
+   __EnvTransfer::template sizeofHostType<decltype(this->son)>()+
+   __EnvTransfer::template sizeofHostType<decltype(this->father)>();
+}
+# 308 "include/macros/List_macros.h"
+template<class T,template <class> class _Allocator>
+typename Tree<T,_Allocator>::__TreeNode* Tree<T,_Allocator>::getHead()const {
+
+
+
+ return root->getSon();
+}
+
+template<class T,template <class> class _Allocator>
+void Tree<T,_Allocator>::setHead(__TreeNode *head)
+ {
+
+
+
+
+
+
+  root->setSon(head);
+
+
+
+ }
+
+template<class T,template <class> class _Allocator>
+void Tree<T,_Allocator>::addRoot(__TreeNode* node)
+{
+ this->root->addSon(node);
+}
+template<class T,template <class> class _Allocator>
+bool Tree<T,_Allocator>::isEmpty()const
+{
+ return !(this->root->hasSon());
+}
+template<class T,template <class> class _Allocator>
+typename Tree<T,_Allocator>::__Allocator *Tree<T,_Allocator>::getSmm()const
+{
+ return this->smm;
+}
+# 25 "include/macros/all.h" 2
+# 1 "include/macros/Process_macros.h" 1
+# 18 "include/macros/Process_macros.h"
+int Process::getTSSSel()const
+{
+ return this->tssSel;
+}
+unsigned int Process::getPid()const
+{
+ return this->pid;
+}
+void Process::setStack0(size_t stack0)
+{
+ ptss->ESP0 = stack0;
+}
+
+void Process::setStack3(size_t stack3)
+{
+ ptss->ESP = stack3;
+}
+
+void Process::setSSSel0(int sel)
+{
+ ptss->SS0 = sel;
+}
+
+void Process::setSSSel3(int sel)
+{
+ ptss->SS = sel;
+}
+
+void Process::setCSSel(int sel)
+{
+ ptss->CS = sel;
+}
+
+void Process::setCodeStart(size_t start)
+{
+ ptss->EIP = start;
+}
+size_t Process::getCodeStart()const
+{
+ return this->ptss->EIP;
+}
+
+int Process::getLDTSsel()const
+{
+ return this->ldtSel;
+}
+int Process::getSatus() const
+{
+ return this->status;
+}
+
+void Process::setStatus(
+ int status)
+{
+ this->status=status;
+}
+int Process::getStatus()const
+{
+ return this->status;
+}
+size_t Process::getProcessBase()const
+{
+ return this->processBase;
+}
+# 26 "include/macros/all.h" 2
+# 1 "include/macros/AssociatedMemoryManager_macros.h" 1
+# 16 "include/macros/AssociatedMemoryManager_macros.h"
+template<class T,size_t MaxArrNum>
+size_t AssociatedMemoryManager<T,MaxArrNum>::getArrNum()
+{
+ return MaxArrNum;
+}
+
+
+template<class T>
+bool AssociatedMemoryManager<T,1>::isFull()const
+{
+    return this->curAllocedSize==this->len;
+}
+template<class T>
+bool AssociatedMemoryManager<T,1>::isEmpty()const
+{
+    return this->curAllocedSize==0;
+}
+template<class T>
+size_t AssociatedMemoryManager<T,1>::getLen()const
+{
+    return this->len;
+}
+template<class T>
+size_t AssociatedMemoryManager<T,1>::getLeft()const
+{
+ return this->len - this->curAllocedSize;
+}
+template<class T>
+size_t AssociatedMemoryManager<T,1>::getCurSize()const
+{
+    return this->curAllocedSize;
+}
+
+template<class T>
+typename AssociatedMemoryManager<T, 1>::TargetType* AssociatedMemoryManager<T, 1>::getTarget(size_t index)
+{
+ return (index<this->len)?this->tarr + index:(0);
+}
+# 77 "include/macros/AssociatedMemoryManager_macros.h"
+template<class T>
+typename AssociatedMemoryManager<T, 1>::NodeType* AssociatedMemoryManager<T, 1>::getNode(size_t index)
+{
+ return (index<this->len)?this->narr + index:(0);
+}
+
+
+
+
+template<class T>
+size_t AssociatedMemoryManager<T, 1>::getTargetIndex(TargetType* t)const
+{
+
+ ptrdiff_t diff=t - this->tarr;
+ return (t==(0) || diff<0||(static_cast<size_t>(diff) >= this->len) ?(this->len +1 ):static_cast<size_t>(diff));
+
+}
+template<class T>
+size_t AssociatedMemoryManager<T, 1>::getNodeIndex(NodeType* n)const
+{
+
+ ptrdiff_t diff=n - this->narr;
+ return (n==(0)||diff<0||static_cast<size_t>(diff) >= this->len) ?(this->len +1 ):static_cast<size_t>(diff);
+}
+template<class T>
+constexpr size_t AssociatedMemoryManager<T, 1>::getEachSize()
+{
+ return sizeof(TargetType)+sizeof(NodeType);
+}
+
+template<class T>
+typename AssociatedMemoryManager<T,1>::NodeType* AssociatedMemoryManager<T, 1>::getNodeAddress()
+{
+ return narr;
+}
+# 27 "include/macros/all.h" 2
+# 1 "include/macros/Kernel_macros.h" 1
+# 16 "include/macros/Kernel_macros.h"
+template <class T>
+KernelSmmWrapper<T>::KernelSmmWrapper()
+{}
+template <class T>
+KernelSmmWrapper<T>::~KernelSmmWrapper()
+{}
+template <class T>
+T* KernelSmmWrapper<T>::getNew()
+{
+ return (T*)Kernel::getTheKernel()->mnewKernel((static_cast<size_t>(sizeof(T))));
+}
+template <class T>
+void KernelSmmWrapper<T>::withdraw(T *t)
+{
+ Kernel::getTheKernel()->mdeleteKernel(t, (static_cast<size_t>(sizeof(T))));
+}
+
+TreeNode<Process*>* ProcessManager::createProcessWrapper(Process* p)
+{
+ return new (this->prcsTree.getSmm()->getNew()) TreeNode<Process*>(p);
+}
+TreeNode<Process*>* ProcessManager::getFatherProcess(TreeNode<Process*> *p)
+{
+ TreeNode<Process*> *pyield;
+ return p?
+   ((pyield=p->getParent())==this->prcsTree.getHead()?(0):pyield):
+   (0);
+}
+
+
+
+
+
+
+Kernel* Kernel::getTheKernel()
+{
+ return This::theKernel;
+}
+int Kernel::makeCR3(int pdePhyAddr,int controlWord_L12)
+{
+ return (pdePhyAddr & 0xfffff000)|
+   (controlWord_L12 & 0xfff);
+}
+int Kernel::makePDE(int ptePhyAddr,int controlWord_L12)
+{
+ return (ptePhyAddr & 0xfffff000)|
+   (controlWord_L12 & 0xfff);
+}
+int Kernel::makePTE(int targetPhyAddr,int controlWord_L12)
+{
+ return (targetPhyAddr & 0xfffff000)|
+   (controlWord_L12 & 0xfff);
+}
+void* Kernel::mnewKernel(size_t mmStart, size_t mmSize)
+{
+ return this->kernelMM.mnew(mmStart, mmSize);
+}
+
+void* Kernel::mnewKernel(size_t mmSize)
+{
+
+ return this->kernelMM.mnew(mmSize);
+}
+void* Kernel::mnewKernelAlign(size_t mmSize,size_t alignment)
+{
+ return this->kernelMM.mnewAlign(mmSize, alignment);
+}
+
+void Kernel::mdeleteKernel(void* p, size_t mmSize)
+{
+ this->kernelMM.mdelete(p, mmSize);
+}
+void Kernel::mdeleteKernel(void *p)
+{
+ this->kernelMM.mdelete(p);
+}
+void* Kernel::mnewProcess(size_t mmStart, size_t mmSize)
+{
+ return this->processMM.mnew(mmStart, mmSize);
+}
+
+void* Kernel::mnewProcess(size_t mmSize)
+{
+ return this->processMM.mnew(mmSize);
+}
+void* Kernel::mnewProcessAlign(size_t mmSize,size_t alignment)
+{
+ return this->processMM.mnewAlign(mmSize, alignment);
+}
+
+
+void Kernel::mdeleteProcess(void* p, size_t mmSize)
+{
+ this->processMM.mdelete(p,mmSize);
+}
+void Kernel::mdeleteProcess(void *p)
+{
+ this->processMM.mdelete(p);
+}
+void Kernel::switchNextProcess()
+{
+ this->processMan.swithcNextProcess();
+}
+TreeNode<Process*>* Kernel::addNewProcess(
+  size_t codeLimit, size_t dataLimit, size_t stackLimit, char dpl)
+{
+ return this->processMan.addNewProcess(codeLimit, dataLimit, stackLimit, dpl);
+}
+
+
+
+void Kernel::markGdtUsed(int index)
+{
+ this->gdtm.unfreeNode(index);
+}
+void Kernel::markGdtUnused(int index)
+{
+ this->gdtm.freeNode(index);
+}
+void Kernel::markIdtUsed(int index)
+{
+ this->idtm.unfreeNode(index);
+}
+
+void Kernel::markIdtUnused(int index)
+{
+ this->idtm.freeNode(index);
+}
+
+SegManager& Kernel::getGdtm()
+{
+ return this->gdtm;
+}
+SegManager& Kernel::getIdtm()
+{
+ return this->idtm;
+}
+int Kernel::getCR3()
+{
+ return *(int*)&cr3;
+}
+int Kernel::allocPDE(size_t n_pte)
+{
+ return pdeman.allocPDE(n_pte);
+}
+void Kernel::withdrawPDE(size_t i)
+{
+ if(i!=0)pdeman.withdrawPDE(i);
+}
+
+int Kernel::preparePhysicalMap(size_t physical,size_t size)
+{
+ return this->pdeman.prepareVisitPhysical(physical, size, this->gdtm);
+}
+void Kernel::setInputBuffer(InputBufferDataType *p,size_t len)
+{
+ new (&inputBuffer) Queue<InputBufferDataType>(p,len);
+}
+Queue<Kernel::InputBufferDataType>& Kernel::getInputBuffer()
+{
+ return inputBuffer;
+}
+# 28 "include/macros/all.h" 2
+# 1 "include/macros/libx2_macros.h" 1
+# 14 "include/macros/libx2_macros.h"
+void Util::reboot()
+{
+
+    __asm__ __volatile__(
+    "inb  $0x92,%%eax \n\t"
+    "andb $0xfe,%%eax \n\t"
+    "outb %%al,$0x92 \n\t"
+    "orb $0x1,%%eax \n\t"
+    "outb %%al,$0x92\n\t"
+    :
+    :
+    :"eax"
+    );
+}
+void Util::memcopyInlineable(int srcSeg,int srcOff,int dstSeg,int dstOff,int len)
+{
+
+    int s2; ({ __asm__ __volatile__( "mov %%es,%%ax \n\t" :"=a"(s2) : :); if(dstSeg==Util::SEG_CURRENT){ __asm__( "push %ds \n\t" "pop %es \n\t" ); }else{ __asm__ __volatile__( "movw %%ax,%%es \n\t"::"a"(dstSeg): ); }});
+    int s1; if(srcSeg!=Util::SEG_CURRENT){ __asm__ __volatile__( "mov %%ds,%%ebx\n\t" "movw %%ax,%%ds \n\t" :"=b"(s1) :"a"(srcSeg) : ); };
+
+    __asm__ __volatile__(
+    "cld \n\t"
+    "rep movsb \n\t"
+      :
+      :"S"(srcOff),"D"(dstOff),"c"(len)
+   :
+    );
+
+    ({ if(srcSeg!=Util::SEG_CURRENT){ __asm__ __volatile__( "mov %%ax,%%ds \n\t" : :"a"(s1) :); }});
+    ({__asm__ __volatile__("mov %%ax,%%es \n\t"::"a"(s2):);});
+
+
+
+}
+
+
+
+
+void Util::setStrSel(int sel)
+{
+ Util::strSel=sel;
+}
+int Util::getStrSel()
+{
+ return Util::strSel;
+}
+
+
+
+void Util::insertMark(int marker)
+{
+    __asm__(
+     "nop \n\t"
+    );
+}
+void Util::jmpDie()
+{
+    __asm__("jmp .\n\t");
+}
+void Util::jmp(int addr)
+{
+ __asm__ __volatile__(
+
+
+
+   "jmp %%eax \n\t"
+
+
+
+   :
+   :"a"(addr)
+   :
+ );
+}
+
+void Util::cli()
+{
+    __asm__("cli \n\t");
+}
+void Util::sti()
+{
+    __asm__("sti \n\t");
+}
+void Util::enterDs(int seg,int& temp)
+{
+    if(seg!=SEG_CURRENT)
+    {
+            __asm__ __volatile__(
+            "mov %%ds,%%bx \n\t"
+            "mov %%ax,%%ds \n\t"
+            :"=b"(temp)
+            :"a"(seg)
+            :);
+    }
+}
+void Util::leaveDs(int seg,int temp)
+{
+    if(seg!=SEG_CURRENT)
+    {
+        __asm__ __volatile__("mov %%ax,%%ds \n\t"::"a"(temp):);
+    }
+}
+ void Util::enterEs(int seg,int& temp)
+ {
+     __asm__ __volatile__("mov %%es,%%ax\n\t":"=a"(temp)::);
+    if(seg==SEG_CURRENT)
+    {
+        __asm__ __volatile__(
+            "mov %%ds,%%ax \n\t"
+            "mov %%ax,%%es \n\t"
+            :
+            :
+            :"eax"
+        );
+    }else{
+        __asm__ __volatile__(
+        "mov %%ax,%%es \n\t"
+        :
+        :"a"(seg)
+        :
+        );
+    }
+ }
+void Util::leaveEs(int temp)
+{
+    __asm__ __volatile__("mov %%ax,%%es \n\t"::"a"(temp):);
+}
+
+void Util::outb(short port,char data)
+{
+    __asm__(
+    "outb %%al,%%dx \n\t"
+    :
+    :"d"(port),"a"(data)
+    :
+    );
+}
+void Util::outw(short port,short data)
+{
+    __asm__(
+    "outw %%ax,%%dx \n\t"
+    :
+    :"d"(port),"a"(data)
+    :
+    );
+}
+char Util::inb(short port)
+{
+    char temp;
+    __asm__(
+    "inb %%dx,%%al \n\t"
+    :"=a"(temp)
+    :"d"(port)
+    :
+    );
+    return temp;
+}
+short Util::inw(short port)
+{
+    short temp;
+    __asm__(
+    "inw %%dx,%%ax \n\t"
+    :"=a"(temp)
+    :"d"(port)
+    :
+    );
+    return temp;
+}
+
+void Util::ljmp(int newcs,int neweip)
+{
+ __asm__ __volatile__(
+   "pushw %%cx \n\t"
+
+
+
+   "push %%ebx \n\t"
+
+   "ljmp *(%%esp) \n\t"
+   :
+   :"c"(newcs),"b"(neweip)
+   :"memory"
+ );
+}
+
+void Util::replaceCs(int newcs)
+{
+ __asm__ __volatile__(
+   "pushw  %%cx\n\t"
+
+   "push  	$1f \n\t"
+
+
+
+   "ljmp *(%%esp) \n\t"
+   "1:\n\t"
+   :
+   :"c"(newcs)
+   :"memory"
+ );
+}
+void Util::replaceSS_DS_ES(int newseg)
+{
+ __asm__ __volatile__(
+   "mov %%ax,%%ss \n\t"
+   "mov %%ax,%%ds \n\t"
+   "mov %%ax,%%es \n\t"
+   :
+   :"a"(newseg)
+   :
+ );
+}
+# 307 "include/macros/libx2_macros.h"
+int Printer::getX()
+{
+    return this->x;
+}
+
+int Printer::getY()
+{
+    return this->y;
+}
+
+
+ErrorSaver::ErrorSaver(int errno):errno(errno) {
+}
+
+int ErrorSaver::getErrno() const {
+ return this->errno;
+}
+
+void ErrorSaver::setErrno(int errno) {
+ this->errno=errno;
+}
+
+void Util::ltr(int sel)
+{
+    __asm__ __volatile__(
+    "ltr %0 \n\t"
+    :
+    :"m"(sel)
+    :
+    );
+}
+void Util::lldt(int sel)
+{
+    __asm__ __volatile__(
+    "lldt %0 \n\t"
+    :
+    :"m"(sel)
+    :
+    );
+}
+int Util::getCurrentDs()
+{
+ int temp;
+ __asm__ __volatile__(
+ "push %%ds \n\t"
+ "pop %%eax \n\t"
+ :"=a"(temp)
+ :
+ :
+ );
+ return temp;
+}
+void Util::setCurrentDs(int ds)
+{
+ __asm__ __volatile__(
+   "mov %%eax,%%ds \n\t"
+   :
+   :"a"(ds)
+    :
+    );
+}
+
+int Util::getCurrentSs()
+{
+ int temp;
+ __asm__ __volatile__(
+ "push %%ss \n\t"
+ "pop %%eax \n\t"
+ :"=a"(temp)
+ :
+ :
+ );
+ return temp;
+}
+void Util::setCurrentSs(int ss)
+{
+ __asm__ __volatile__(
+   "mov %%eax,%%ss \n\t"
+   :
+   :"a"(ss)
+    :
+    );
+}
+
+
+void Util::intReturn()
+{
+    __asm__(
+    "leave \n\t"
+    "iret \n\t"
+    );
+}
+# 415 "include/macros/libx2_macros.h"
+template <typename __SimpleType>
+__SimpleType Util::min(__SimpleType t1,__SimpleType t2)
+{
+ return (t1>t2?t2:t1);
+}
+template <typename __SimpleType>
+__SimpleType Util::max(__SimpleType t1,__SimpleType t2)
+{
+ return (t1>t2?t1:t2);
+}
+
+
+
+
+
+
+
+template <typename T>
+bool Queue<T>::isEmpty()
+{
+    return curLen==0;
+}
+template <typename T>
+bool Queue<T>::isFull()
+{
+    return curLen==len;
+}
+template <typename T>
+unsigned int Queue<T>::size()
+{
+    return curLen;
+}
+# 29 "include/macros/all.h" 2
+# 1 "include/macros/Descriptor_macros.h" 1
+# 13 "include/macros/Descriptor_macros.h"
+ void SegmentDescriptor::setBaseAddr(int baseAddr)
+ {
+  this->baseAddrLow_24 = baseAddr & 0xffffff;
+  this->baseAddrHigh_8 = ((baseAddr & 0xff000000)>>24);
+ }
+ int SegmentDescriptor::getBaseAddr()const
+ {
+  return (this->baseAddrLow_24 | (this->baseAddrHigh_8 << 24));
+ }
+ int SegmentDescriptor::getLimit()const
+ {
+  return (this->limitLow_16|(this->limitHigh_4 << 16));
+ }
+ void SegmentDescriptor::setLimit(int limit)
+ {
+  this->limitLow_16 = limit & 0xffff;
+  this->limitHigh_4 = ((limit & 0xf0000)>>16);
+ }
+# 30 "include/macros/all.h" 2
+# 1 "include/macros/Cache_macros.h" 1
+# 15 "include/macros/Cache_macros.h"
+template<class K, class V>
+Cache<K, V>::~Cache() {
+}
+template<class K, class V>
+size_t Cache<K, V>::getAccessTimes() const
+{
+ return this->accessTimes;
+}
+
+template<class K, class V>
+size_t Cache<K, V>::getHitTimes() const
+{
+ return this->hitTimes;
+}
+
+template <class K,class V>
+void Cache<K,V>::setCompartor(COMPARATOR cmp)
+{
+ this->cmp=cmp;
+}
+
+
+
+
+template <class K,class V>
+typename Cache<K,V>::COMPARATOR Cache<K,V>::getComparator()const
+{
+ return this->cmp;
+}
+
+template<class K, class V>
+void Cache<K, V>::setGetter(
+  DEFAULT_GETTER getter)
+{
+ this->getter=getter;
+}
+
+
+
+template<class K, class V>
+typename Cache<K,V>::DEFAULT_GETTER Cache<K, V>::getGetter() const
+{
+ return this->getter;
+}
+# 31 "include/macros/all.h" 2
+# 1 "include/macros/IOProgramer_macros.h" 1
+# 15 "include/macros/IOProgramer_macros.h"
+int Keyboard::isBusy()
+{
+    return Util::inb(Keyboard::PORT_CONTROL) & 0x2;
+}
+int Keyboard::hasData()
+{
+    return Util::inb(Keyboard::PORT_CONTROL) & 0x1;
+}
+int Keyboard::readScanCode()
+{
+    return Util::inb(Keyboard::PORT_DATA);
+}
+void Keyboard::enable()
+{
+    int a=Util::inb(Keyboard::PORT_PPI);
+    Util::outb(Keyboard::PORT_PPI,a & 0x7f);
+}
+void Keyboard::disable()
+{
+    int a=Util::inb(Keyboard::PORT_PPI);
+    Util::outb(Keyboard::PORT_PPI,a | 0x80);
+}
+
+
+
+
+
+
+bool IO_HDD::isBusy(char status)
+{
+ return (status & 0x80);
+}
+
+bool IO_HDD::isReady(char status)
+{
+ return (status & 0x8);
+}
+
+bool IO_HDD::isError(char status)
+{
+ return (status & 0x1);
+}
+
+char IO_HDD::readStatus()
+{
+ return Util::inb(This::PORT_STATUS);
+}
+
+void IO_HDD::writeSecNum()
+{
+ Util::outb(This::PORT_SECNUM,this->secNumber);
+}
+
+void IO_HDD::writeSecStart() {
+ Util::outb(This::PORT_SECSTART_0, (char)this->secStart);
+ Util::outb(This::PORT_SECSTART_1, (char)(this->secStart >> 8));
+ Util::outb(This::PORT_SECSTART_2, (char)(this->secStart >> 16));
+ Util::outb(This::PORT_SECSTART_3, ((char)(this->secStart >> 24) & (0xf) )|
+    (( this->LBAMode & 0x1) <<6)|
+    ((this->hddNo & 0x1) << 4) |
+    0xa0
+ );
+}
+void IO_HDD::requestRead()
+{
+ Util::outb(This::PORT_READ_COMMAND, 0x20);
+}
+void IO_HDD::requestWrite()
+{
+ Util::outb(This::PORT_WRITE_COMMAND, 0x30);
+}
+void IO_HDD::waitUntilReady()
+{
+ char status;
+ while(true)
+ {
+  status=This::readStatus();
+  if(!This::isBusy(status) && This::isReady(status))break;
+ }
+}
+size_t IO_HDD::getDstOff() const {
+ return dstOff;
+}
+
+void IO_HDD::setDstOff(size_t dstOff) {
+ this->dstOff = dstOff;
+}
+
+int IO_HDD::getDstSeg() const {
+ return dstSeg;
+}
+
+void IO_HDD::setDstSeg(int dstSeg) {
+ this->dstSeg = dstSeg;
+}
+
+int IO_HDD::getHddNo() const {
+ return hddNo;
+}
+
+void IO_HDD::setHddNo(int hddNo) {
+ this->hddNo = hddNo;
+}
+
+bool IO_HDD::isLbaMode() const {
+ return LBAMode;
+}
+
+unsigned char IO_HDD::getSecNumber() const {
+ return secNumber;
+}
+
+void IO_HDD::setSecNumber(unsigned char secNumber) {
+ this->secNumber = secNumber;
+}
+
+size_t IO_HDD::getSecStart() const {
+ return secStart;
+}
+
+void IO_HDD::setSecStart(size_t secStart) {
+ this->secStart = secStart;
+}
+# 32 "include/macros/all.h" 2
+# 1 "include/macros/Locator_macros.h" 1
+# 14 "include/macros/Locator_macros.h"
+template <class _Source,int _HowStart,int _HowLength,int _HowAllocable>
+const _Source* SourceLocator<_Source,_HowStart,_HowLength,_HowAllocable>::getComparator()const
+{
+ return p;
+}
+# 33 "include/macros/all.h" 2
+# 1 "include/macros/VirtualMemory_macros.h" 1
+# 15 "include/macros/VirtualMemory_macros.h"
+CR3::CR3(u32_t cr3)
+{
+ *(u32_t*)this=cr3;
+}
+
+PDE::PDE(u32_t pde)
+{
+ *(u32_t*)this=pde;
+}
+
+PTEManager* PDEManager::getPTEManagerRef(int i)
+{
+ return ptemans[i];
+}
+void PDEManager::setPTEManagerRef(int i,PTEManager * pteman)
+{
+ if(i>=0 && ((size_t)i) < len)
+ {
+  ptemans[i]=pteman;
+ }
+}
+
+PTE::PTE(u32_t pte)
+{
+ *(u32_t*)this=pte;
+}
+
+
+ int VirtualManager::getL3(int targetPhyAddr)
+ {
+  return targetPhyAddr & 0xfff;
+ }
+ int VirtualManager::getL2(int ptePhyAddr)
+ {
+  return (ptePhyAddr & 0xfff) >> 2;
+ }
+ int VirtualManager::getL1(int pdePhyAddr)
+ {
+  return (pdePhyAddr & 0xfff) >> 2;
+ }
+ int VirtualManager::getLinearAddress(int pdePhyAddr,int ptePhyAddr,int targetPhyAddr)
+ {
+  int l1 = getL1(pdePhyAddr) << 22;
+  int l2 = getL2(ptePhyAddr) << 12;
+  int l3 = getL3(targetPhyAddr);
+# 68 "include/macros/VirtualMemory_macros.h"
+  return l1 | l2 | l3;
+ }
+ void VirtualManager::setVirtualAddress(int pdePhyAddr,int ptePhyAddr,int targetPhyAddr)
+ {
+
+
+  *(int*)pdePhyAddr = Kernel::makePDE(ptePhyAddr);
+  *(int*)ptePhyAddr = Kernel::makePTE(targetPhyAddr);
+ }
+u32_t VirtualManager::getIndex(u32_t phyaddr, u32_t reg) {
+ return ((phyaddr - (reg & 0xfffff000))>>2);
+}
+
+u32_t VirtualManager::getHighBase(u32_t phyaddr) {
+ return (phyaddr & 0xfffff000);
+}
+
+CR3 VirtualManager::getCr3() {
+ int temp;
+ __asm__ __volatile__(
+  "mov %%cr3,%%eax \n\t"
+  :"=a"(temp)
+  :
+  :
+  );
+ return temp;
+}
+
+void VirtualManager::writeCr3(const CR3& cr3) {
+ __asm__ __volatile__(
+   "mov %%eax,%%cr3 \n\t"
+   :
+   :"a"(cr3)
+    :
+   );
+}
+
+
+void VirtualManager::enablePaging()
+{
+ __asm__(
+  "mov %cr0,%eax \n\t"
+  "or $0x80000000,%eax \n\t"
+  "mov %eax,%cr0 \n\t"
+ );
+}
+# 34 "include/macros/all.h" 2
+# 1 "include/macros/MemoryManager_macros.h" 1
+# 19 "include/macros/MemoryManager_macros.h"
+
+LinearSourceDescriptor::LinearSourceDescriptor(__SizeType start,__SizeType limit):
+ start(start),limit(limit)
+ {
+
+ }
+
+LinearSourceDescriptor::~LinearSourceDescriptor() {
+ }
+
+ typename LinearSourceDescriptor::__SizeType
+ LinearSourceDescriptor::getStart()const
+ {
+    return start;
+ }
+
+ typename LinearSourceDescriptor::__SizeType
+ LinearSourceDescriptor::getLimit()const
+ {
+    return limit;
+ }
+
+ void LinearSourceDescriptor::setStart(__SizeType start)
+ {
+    this->start=start;
+ }
+void LinearSourceDescriptor::setLimit(__SizeType limit)
+ {
+    this->limit=limit;
+ }
+
+bool LinearSourceDescriptor::contains(const LinearSourceDescriptor& b)const
+{
+ return contains(b.getStart(),b.getLimit());
+}
+
+bool LinearSourceDescriptor::contains(__SizeType start,__SizeType limit)const
+{
+
+
+
+ return (this->start<=start)&&( limit<=this->limit && (start - this->start)<=(this->limit - limit));
+}
+bool LinearSourceDescriptor::operator==(const __LinearSourceDescriptor& b)const
+{
+
+   return this->getStart()==b.getStart() && this->getLimit()==b.getLimit();
+}
+bool LinearSourceDescriptor::operator!=(const __LinearSourceDescriptor& b)const
+{
+    return ! this->operator==(b);
+}
+template <class __EnvTransfer>
+SerializerPtr<__EnvTransfer>& LinearSourceDescriptor::serialize(SerializerPtr<__EnvTransfer> &ptr)const
+{
+ return ptr << start << limit;
+}
+template <class __EnvTransfer>
+SerializerPtr<__EnvTransfer>& LinearSourceDescriptor::deserialize(SerializerPtr<__EnvTransfer> &ptr)
+{
+ return ptr >> start >> limit;
+}
+template <class __EnvTransfer>
+constexpr size_t LinearSourceDescriptor::getSerializitionSize()
+{
+ return __EnvTransfer::template sizeofHostType<decltype(this->start)>()+
+   __EnvTransfer::template sizeofHostType<decltype(this->limit)>();
+}
+bool LinearSourceDescriptor::isAllocable()const
+{
+    return true;
+}
+# 103 "include/macros/MemoryManager_macros.h"
+
+MemoryDescriptor::MemoryDescriptor(__SizeType start,__SizeType limit,bool allocable):
+Super(start,limit),allocable(allocable)
+{
+
+}
+
+
+
+
+
+ MemoryDescriptor::~MemoryDescriptor() {
+ }
+
+ void MemoryDescriptor::setAllocable(bool allocable)
+{
+    this->allocable=allocable;
+}
+
+
+bool MemoryDescriptor::isAllocable()const{
+    return allocable;
+}
+
+
+ bool MemoryDescriptor::operator==(const __MemoryDescriptor& b)const
+{
+    return this->__LinearSourceDescriptor::operator==(b) && this->allocable==b.allocable;
+
+}
+
+
+
+bool MemoryDescriptor::operator!=(const __MemoryDescriptor& b)const
+{
+    return ! this->operator==(b);
+}
+
+
+
+
+
+
+
+template <class _LinearSourceDescriptor,template <class> class _NodeAllocator>
+const _LinearSourceDescriptor & LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator>::getSpace()const
+{
+ return this->space;
+}
+
+
+
+
+
+
+template<template<class > class _DescriptorAllocator>
+typename MemoryManager<_DescriptorAllocator>::__SizeType MemoryManager<_DescriptorAllocator>::getBase() const {
+ return this->root->getData().getStart();
+}
+
+template<template<class > class _DescriptorAllocator>
+typename MemoryManager<_DescriptorAllocator>::__SizeType MemoryManager<_DescriptorAllocator>::getLimit() const {
+ return this->root->getData().getLimit();
+}
+# 35 "include/macros/all.h" 2
+# 1 "include/macros/Filesystem_macros.h" 1
+# 13 "include/macros/Filesystem_macros.h"
+int MBRTable::findFirstActiveInline()
+{
+ for(int i=0;i<4;i++)
+ {
+  if(table[i].activeFlag == MBRPartitionEntry::FLAG_ACTIVE)return i;
+ }
+ return -1;
+}
+# 36 "include/macros/all.h" 2
+# 14 "src/protected_main.cpp" 2
+
+
+__asm__(".code32 \n\t");
+
+
+__asm__(
+".text \n\t"
+
+  "// .global _extraVboxTest \n\t"
+  "// .global _protectedEntryHolder \n\t"
+"movw $0b11000,%ax \n\t"
+"movw %ax,%ds \n\t"
+"mov  %ax,%es \n\t"
+"mov %ax,%gs \n\t"
+"mov %ax,%fs \n\t"
+"mov $0b100000,%ax \n\t"
+"movw %ax,%ss \n\t"
+"mov  $CONFIG_INIT_STACK_SIZE - 1,%esp \n\t"
+"call _extraVboxTest\n\t"
+"call _protectedEntryHolder \n\t"
+"jmp 1f \n\t"
+"1:\n\t"
+);
+
+
+
+extern "C" {
+ void extraVboxTest();
+    void protectedEntryHolder();
+    void afterCPL3();
+    void forTss1();
+}
+
+ void extraVboxTest()
+{
+
+
+
+
+
+
+}
+
+void protectedEntryHolder()
+{
+
+
+
+
+
+
+
+ int secEach = 250;
+ int read = 14 ;
+ int left = 250 + 35 - read;
+ while(left > 0)
+ {
+  int thisRead = left>secEach?secEach:left;
+  IO_HDD iohd(0,
+    25 + read,
+    thisRead,
+    Util::getCurrentDs(),
+    24576 + read*512
+  );
+  left -= thisRead;
+  iohd.read();
+  __asm__( "nop \n\t" "nop \n\t" "nop \n\t" "nop \n\t" );;
+ }
+
+
+
+
+
+ int *PDE_USED_ON_ENABLING_CR3=(int*)( (int)KernelMemoryConfig::mmPDE & 0xfffff000 );
+
+
+
+
+ int *PTE_USED_ON_ENABLING_CR3=(int*)(1048576 * 3);
+
+ *PDE_USED_ON_ENABLING_CR3 = Kernel::makePDE((int)PTE_USED_ON_ENABLING_CR3);
+ for(int i=0;i<1024;++i)
+  PTE_USED_ON_ENABLING_CR3[i]=Kernel::makePTE(i*4*1024);
+
+
+ *(int*)KernelMemoryConfig::mmPDE = Kernel::makePDE((int)KernelMemoryConfig::mmPTE_0);
+
+
+ int *pte=(int*)KernelMemoryConfig::mmPTE_0;
+
+
+
+
+
+
+ for(size_t i=0;i<KernelMemoryConfig::PTE_0_NUM;i++)
+ {
+  pte[i] = Kernel::makePTE(i*4*1024);
+ }
+
+ VirtualManager::writeCr3(Kernel::makeCR3((int)KernelMemoryConfig::mmPDE));
+ VirtualManager::enablePaging();
+
+ int dsLineAddr = VirtualManager::getLinearAddress(
+   (int)KernelMemoryConfig::mmPDE,
+   (int)KernelMemoryConfig::mmPTE_0,
+   (int)0);
+
+ SegmentDescriptor* gdttable=(SegmentDescriptor*)KernelMemoryConfig::mmGDT;
+ gdttable[2].setBaseAddr(dsLineAddr);
+ gdttable[3].setBaseAddr(dsLineAddr);
+ gdttable[4].setBaseAddr(dsLineAddr);
+ gdttable[1].setBaseAddr(dsLineAddr+0xb8000);
+
+
+ gdttable[5].setBaseAddr(dsLineAddr + 1048576 + 3145728);
+
+
+ Util::setCurrentDs(Util::makeSel(3));
+ Util::setCurrentSs(Util::makeSel(4));
+ __asm__ __volatile__(
+   "pushw %%cx \n\t"
+   "push  $AFTER_JMP \n\t"
+   "ljmp *(%%esp) \n\t"
+   "AFTER_JMP:\n\t"
+   :
+   :"c"(Util::makeSel(2))
+   :
+  );
+# 160 "src/protected_main.cpp"
+    Util::clr();
+    Util::setStrSel(Util::getCurrentDs());
+
+
+    Printer stdp(0,0,Util::SCREEN_X,Util::SCREEN_Y,Util::MODE_COMMON);
+
+    Kernel::printer=&stdp;
+
+
+    stdp.putsz("Entered Protected Mode.\n");
+
+
+
+    stdp.putsz("Running Test.\n");
+    Test test;
+    test.run();
+
+    SelectorDescriptor reuse_sel;
+    reuse_sel.init(0x10,(int)intDefault,SelectorDescriptor::TYPE_INT,SegmentDescriptor::DPL_3);
+    for(int i=0;i!=intLen;i++)
+    {
+        reuse_sel.init(0x10,intAddresses[i],SelectorDescriptor::TYPE_INT,SegmentDescriptor::DPL_3);
+        reuse_sel.writeToMemory(Util::SEG_CURRENT,(size_t)KernelMemoryConfig::mmIDT+8*i);
+
+    }
+    reuse_sel.init(0x10,(int)&int0x20,SelectorDescriptor::TYPE_INT,SegmentDescriptor::DPL_3);
+    reuse_sel.writeToMemory(Util::SEG_CURRENT,(size_t)KernelMemoryConfig::mmIDT+8*0x20);
+    reuse_sel.init(0x10,(int)&int0x21,SelectorDescriptor::TYPE_INT,SegmentDescriptor::DPL_3);
+    reuse_sel.writeToMemory(Util::SEG_CURRENT,(size_t)KernelMemoryConfig::mmIDT+8*0x21);
+    reuse_sel.init(0x10,(int)&int0x30,SelectorDescriptor::TYPE_INT,SegmentDescriptor::DPL_3);
+    reuse_sel.writeToMemory(Util::SEG_CURRENT,(size_t)KernelMemoryConfig::mmIDT+8*0x30);
+
+
+
+    Kernel *pkernel=(Kernel*)KernelMemoryConfig::mmKernel;
+
+
+
+
+    Kernel::initTheKernel(pkernel);
+
+
+
+    Kernel::printer->putsz("by kernel printer\n");
+
+    int gused[]={0,1,2,3,4,5};
+    Util::insertMark(0xe181e181);
+    size_t mmUsedList[][2]={
+      {0,1048576},
+    };
+   stdp.putx("config_code_size=",1048576);
+   stdp.putx("config_mem_size=",3145728);
+    new (pkernel) Kernel(
+      (int)KernelMemoryConfig::mmKernelMMNodes,KernelMemoryConfig::MMNODE_NUM*(static_cast<size_t>(sizeof(Kernel::FullMMNodeType))),
+   1048576 , 3145728, mmUsedList,1,
+   1048576 + 3145728, 20971520,
+   (int)KernelMemoryConfig::mmPDE, KernelMemoryConfig::PDE_NUM,
+   (int)KernelMemoryConfig::mmPTE_0, KernelMemoryConfig::PTE_0_NUM,
+   (int)KernelMemoryConfig::mmGDTAssocNode,(int)KernelMemoryConfig::mmGDT,KernelMemoryConfig::GDT_LEN,gused,((static_cast<size_t>(sizeof(gused)))/(static_cast<size_t>(sizeof((gused)[0])))),
+   (int)KernelMemoryConfig::mmIDTAssocNode,(int)KernelMemoryConfig::mmIDT,KernelMemoryConfig::IDT_LEN,(0),0
+    );
+    pkernel->setInputBuffer((Kernel::InputBufferDataType*)KernelMemoryConfig::mmInputBuffer, KernelMemoryConfig::INPUT_BUFFER_LEN);
+    stdp.putsz("after kernel done\n");
+
+
+
+
+
+
+    Kernel::printer->clr();
+    int viIndex=pkernel->preparePhysicalMap(4*1024*1024, 4*1024);
+    pkernel->printer->puti("viIndex=", viIndex);
+
+    Util::setl(Util::makeSel(viIndex, 0, 0), 0, 0xaa55);
+# 286 "src/protected_main.cpp"
+    TreeNode<Process*>* wp=pkernel->addNewProcess(24*512 - 1, 24*512 - 1,4*512 - 1, 3);
+    pkernel->printer->putx("new process is ", (int)wp);
+
+    Process *proc1=wp->getData();
+
+
+
+
+
+      PTE *newpte0=(PTE*)pkernel->mnewKernelAlign(3*(static_cast<size_t>(sizeof(PTE))),4);
+      stdp.putx("newpte 0 address=",(int)newpte0);
+      ((int*)(KernelMemoryConfig::mmPDE))[2] = Kernel::makePDE((int)newpte0);
+      newpte0[0] = Kernel::makePTE(1048576 + 3145728);
+      newpte0[1] = Kernel::makePTE(1048576 + 3145728 +4*1024);
+      newpte0[2] = Kernel::makePTE(1048576 + 3145728 +8*1024);
+      int lineAddr = VirtualManager::getLinearAddress((int) KernelMemoryConfig::mmPDE + 2*(static_cast<size_t>(sizeof(int))), (int)newpte0, 1048576 + 3145728);
+      stdp.putx("lineAddr=",lineAddr);
+      int limit = 24*512-1;
+
+      int gdtAllocIndex =
+        pkernel->newgdt(
+          (char*)lineAddr,
+          limit/SegmentDescriptor::G_4KB_SCALE,
+          SegmentDescriptor::G_4KB,
+          SegmentDescriptor::TYPE_U_DATA,
+          0);
+
+      pkernel->printer->puti("gdtAllocIndex=",gdtAllocIndex);
+
+
+
+
+
+
+
+     short sel=Util::makeSel(gdtAllocIndex, 0, 0);
+
+    pkernel->printer->putsz("before memcopy\n");
+    int processCodeImgAddress = 250*PMLoader::SECSIZE + 24576;
+    Util::insertMark(0xDEDEDE);
+    Util::memcopy(Util::getCurrentDs(),processCodeImgAddress,
+      sel,
+   proc1->getProcessBase()+proc1->getCodeStart(),
+   16*512);
+    pkernel->printer->putsz("process1 copied\n");
+# 379 "src/protected_main.cpp"
+    IO_8259A p1;
+    p1.sendICW1(0,0,0,1);
+    p1.sendICW1(1,0,0,1);
+    p1.sendICW2(0,0x20);
+    p1.sendICW2(1,0x28);
+    p1.sendICW3(0,0x4);
+    p1.sendICW3(1,0x2);
+    p1.sendICW4(0,0,0,0,1);
+    p1.sendICW4(1,0,0,0,1);
+
+    p1.sendOCW1(0, 0xfd);
+
+
+
+    p1.sendOCW1(1,0xff);
+# 426 "src/protected_main.cpp"
+    Kernel::printer->putsz("before sti\n");
+    Kernel::printer->clr();
+
+    Util::sti();
+
+
+
+    while(true)
+    {
+     u32_t readChar=(u32_t)pkernel->getChar();
+     if(readChar!=Kernel::EOF)
+     {
+      pkernel->printer->putc(readChar);
+     }
+    }
+    Util::jmpDie();
+
+}
+
+void afterCPL3()
+{
+    __asm__(
+    "pushw $0x3b \n\t"
+    "popw %ds \n\t"
+    );
+    __asm__ __volatile__( "int $" "0x24" "\n\t" : :"c"(Util::SEG_CURRENT) , "b"("int 0x24 by CPL3.\n") ,"d"(Util::MODE_COMMON) : );
+    SimpleCharRotator scr(0,40);
+    scr.run();
+}
+void forTss1()
+{
+    SimpleCharRotator scr(0,50,Util::MODE_COMMON|Util::MODE_FL_ON|Util::MODE_BG_BLUE);
+    scr.run();
+}

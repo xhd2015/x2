@@ -3,8 +3,8 @@
 #define DEF_h__
 
 //====数据宏
-#if !defined(NULL)
-#define NULL (0)
+#if !defined(nullptr)
+#define nullptr (0)
 #endif
 
 //====为了解决环形依赖问题而设置的常数区域
@@ -25,6 +25,8 @@ typedef unsigned char  u8_t;
 #define PREFERED_ALIGNMENT 8
 #endif
 
+//== macro configs, for any purepose
+#include <macros/configurations.h>
 #include <config.h>
 
 #if defined(CODE32)||defined(CODE16) || defined(CODE32USER)   //in standard host enviornment,do not use these definitions.
@@ -61,7 +63,7 @@ typedef unsigned char  u8_t;
 
 //=====替换sizeof
 // IDE-ISSUE eclipse does not recoginize sizeof as type of size_t
-#define x2sizeof(x) ((size_t)sizeof(x))
+#define x2sizeof(x) (static_cast<size_t>(sizeof(x)))
 
 //===========数学宏
 #define arrsizeof(arr) (x2sizeof(arr)/x2sizeof((arr)[0]))

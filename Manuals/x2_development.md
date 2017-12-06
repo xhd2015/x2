@@ -76,6 +76,7 @@ typename __DEF_X2fsUtil::FileTree* __DEF_X2fsUtil::getFileTree()
 25.测试能较早地发现问题，能够驱动设计更快迭代
 26.代码风格：启用-Wall -Werror -Werror=old-style-cast,-Werror=effctc++
 使用nullptr代替所有的NULL常量
+26.永远不要在局部作用域中使用include.除非你知道你是对的。
 # 建议
 本节给出开发程序的各个方面的建议，包括考虑程序员自身的因素。
 

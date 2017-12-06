@@ -235,7 +235,7 @@ void PMLoader::mainProcess() //仅16位
 
 
     //2.初始化GDT表  需要知道具体的GDT，IDE表的绝对位置
-    SegmentDescriptor nullSeg,
+    SegmentDescriptor nullptrSeg,
                         loaderSegCode(0,CONFIG_KERNEL_CODE_SIZE - 1,SegmentDescriptor::G_1B,SegmentDescriptor::TYPE_U_CODE_NONCONFORMING,0),
                         loaderSegData(0,(CONFIG_KERNEL_CODE_SIZE + CONFIG_KERNEL_FREE_MEM_SIZE-1)/SegmentDescriptor::G_4KB_SCALE,SegmentDescriptor::G_4KB,SegmentDescriptor::TYPE_U_DATA,0),
                         loaderSegStack(0,CONFIG_INIT_STACK_SIZE - 1,SegmentDescriptor::G_1B,SegmentDescriptor::TYPE_U_STACK,0),
@@ -247,19 +247,19 @@ void PMLoader::mainProcess() //仅16位
 								(CONFIG_PROCESS_MEM_SIZE-1)/SegmentDescriptor::G_4KB_SCALE,
 								SegmentDescriptor::G_4KB,
 								SegmentDescriptor::TYPE_U_DATA,0);
-    nullSeg={0};//not really all zeros.
+    nullptrSeg={0};//not really all zeros.
 
     int gdtAddr = CONFIG_INIT_STACK_SIZE%8==0?CONFIG_INIT_STACK_SIZE:(CONFIG_INIT_STACK_SIZE/8*8 + 8);//对其到8字节
     int idtAddr = gdtAddr + 8*CONFIG_GDT_ITEM_NUM;
  
-//    nullSeg.writeToMemory(0,(char*)PMLoader::GDT_START);
+//    nullptrSeg.writeToMemory(0,(char*)PMLoader::GDT_START);
 //    videoSeg.writeToMemory(0,(char*)PMLoader::GDT_START+1*8);
 //    loaderSegCode.writeToMemory(0,(char*)PMLoader::GDT_START+2*8);
 //    loaderSegData.writeToMemory(0,(char*)PMLoader::GDT_START+3*8);
 //    loaderSegStack.writeToMemory(0,(char*)PMLoader::GDT_START+4*8);//B set 4GB
 //    processSeg.writeToMemory(0,(char*)PMLoader::GDT_START + 5*8); // index=5
 
-        nullSeg.writeToMemory(0,(char*)gdtAddr);
+        nullptrSeg.writeToMemory(0,(char*)gdtAddr);
         videoSeg.writeToMemory(0,(char*)gdtAddr+1*8);
         loaderSegCode.writeToMemory(0,(char*)gdtAddr+2*8);
         loaderSegData.writeToMemory(0,(char*)gdtAddr+3*8);

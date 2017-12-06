@@ -9,6 +9,7 @@
 #define INCLUDE_64_CMDUTIL_H_
 
 #include <File.h>
+#include <EnvInterface64Impl.h>
 
 #if defined(CODE64)
 #include <string>
@@ -18,14 +19,14 @@ struct ParamRwfile{
 		READ,WRITE
 	};
 	int mode=READ;
-	std::string hddfile;
+	std::string hddfile{};
 	size_t x2offset=0;
 	size_t fsoffset=0;
 	size_t length=0;
-	std::string fsfile;
-	std::string x2file;
-	std::string cdpath;
-	u32_t lbalow;
+	std::string fsfile{};
+	std::string x2file{};
+	std::string cdpath{};
+	u32_t lbalow{0};
 	u8_t  basicSize=sizeof(size_t);
 };
 /**
@@ -33,18 +34,18 @@ struct ParamRwfile{
  */
 struct ParamMkfs{
 	u8_t  basicSize=sizeof(size_t);
-	u32_t lbaLow;
+	u32_t lbaLow{};
 	u32_t lbaHigh=0;
-	std::string imgFile;
-	size_t wholeSecNum;
+	std::string imgFile{};
+	size_t wholeSecNum{};
 	bool wholeSecNumSet=false;
 	bool lbaLowSet=false;
 
 	size_t secSpaces[4]={
-			X2fsUtil<EnvInterface64Impl,FsEnv64>::FileNameSectionLen/CONST_SECSIZE,
-			X2fsUtil<EnvInterface64Impl,FsEnv64>::DirSectionLen/CONST_SECSIZE,
-			X2fsUtil<EnvInterface64Impl,FsEnv64>::FreeSpaceSectionLen/CONST_SECSIZE,
-			X2fsUtil<EnvInterface64Impl,FsEnv64>::LinkedInfoSectionLen/CONST_SECSIZE,
+			X2fsMetaInfo::FileNameSectionLen/CONST_SECSIZE,
+			X2fsMetaInfo::DirSectionLen/CONST_SECSIZE,
+			X2fsMetaInfo::FreeSpaceSectionLen/CONST_SECSIZE,
+			X2fsMetaInfo::LinkedInfoSectionLen/CONST_SECSIZE,
 	};
 	size_t optional[1]={0};
 
@@ -54,9 +55,9 @@ struct ParamMain{
 public:
 	u8_t  basicSize=sizeof(size_t);
 	const std::string spiltor=";";
-	std::string imgFile;
-	std::string cmds;
-	std::string cdpath;
+	std::string imgFile{};
+	std::string cmds{};
+	std::string cdpath{};
 	u32_t lbalow=0;
 
 };

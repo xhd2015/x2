@@ -11,26 +11,14 @@
 *  能够将任何环境提供的malloc函数转换成simple new
 *
 */
-template<class T,class __EnvInterface>
+template<class T>
 class MallocToSimple
 {
 public:
-	typedef
-#if defined(IDE_MODE)
-			EnvInterface
-#else
-			__EnvInterface
-#endif
-		_EnvInterface;
-public:
-	MallocToSimple(_EnvInterface &env);
-	~MallocToSimple();
+	MallocToSimple()=default;
+	~MallocToSimple()=default;
 	T *getNew();
 	void withdraw(T *t);
-
-protected:
-	_EnvInterface &env;
-
 };
 
 
