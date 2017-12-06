@@ -29,11 +29,7 @@ public:
 int main(int argc,char *argv[])
 {
 	Foo f;
-	Bar *b=new Bar;
-	Widget *w=new Widget(f);
-
-	delete b;
-	delete w;
+	f.~Foo();//可以多次调用
 	cout << "END."<<endl;
 	return 0;
 }

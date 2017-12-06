@@ -1,7 +1,7 @@
 # 1 "src/conceptual/all.cpp"
 # 1 "/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system//"
 # 1 "<built-in>"
-# 1 "<command-line>"
+# 1 "<命令行>"
 # 1 "src/conceptual/all.cpp"
 
 # 1 "include/conceptual/all.h" 1
@@ -63493,7 +63493,7 @@ namespace HostEnv{
 
 
   ::printf(fmt,arg0,arg1,arg2);
-
+  flushOutputs();
   return 0;
 
  }
@@ -65414,7 +65414,7 @@ public:
 
 
  FileOperation(u8_t driver,u32_t lbaAddress);
- ~FileOperation()=default;
+ ~FileOperation();
 
 
 
@@ -67128,8 +67128,22 @@ int MBRTable::findFirstActiveInline()
 # 28 "include/conceptual/all.h" 2
 # 3 "src/conceptual/all.cpp" 2
 # 17 "src/conceptual/all.cpp"
-# 1 "src/conceptual/../64/CMDUtil_main.cpp" 1
-# 12 "src/conceptual/../64/CMDUtil_main.cpp"
+# 1 "src/conceptual/../64/CMDUtil_mkfs.x2fs.cpp" 1
+# 9 "src/conceptual/../64/CMDUtil_mkfs.x2fs.cpp"
+# 1 "/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++/cstdlib" 1 3
+# 39 "/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++/cstdlib" 3
+       
+# 40 "/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++/cstdlib" 3
+# 10 "src/conceptual/../64/CMDUtil_mkfs.x2fs.cpp" 2
+# 1 "/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++/cstdio" 1 3
+# 39 "/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++/cstdio" 3
+       
+# 40 "/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++/cstdio" 3
+# 11 "src/conceptual/../64/CMDUtil_mkfs.x2fs.cpp" 2
+
+
+
+
 # 1 "include/common/Getopt.h" 1
 # 20 "include/common/Getopt.h"
 struct CommandOption{
@@ -67281,41 +67295,38 @@ public:
 
 
 };
-# 13 "src/conceptual/../64/CMDUtil_main.cpp" 2
-
-
-
+# 16 "src/conceptual/../64/CMDUtil_mkfs.x2fs.cpp" 2
 
 
 
 using namespace std;
-
-
 
 CommandOptions opts{
    {"-s","--basic-size",true,"文件系统的基本尺寸,默认为系统的sizeof(size_t)"},
    {"","--16",false,"等价于-s 2"},
    {"","--32",false,"等价于-s 4"},
    {"","--64",false,"等价于-s 8"},
-   {"-l","--lbalow",true,"镜像文件的lba低32位地址"},
-   {"-e","--cmd",true,"以;分隔,执行一系列命令,然后退出"},
-   {"-c","--cd",true,"在进行操作之前，x2文件系统先切换到目录下"},
+   {"-l","--lbalow",true,"lba低32位地址,必须指定"},
+   {"-g","--lbahigh",true,"lba高32位地址，默认为0"},
+   {"-n","--secnum",true,"扇区总数,必须指定"},
+   {"-m","--namesecs",true,"name区总数,0或者默认则为"},
+   {"-d","--dirsecs",true,"dir区总数，0或者默认则为"},
+   {"-f","--freesecs",true,"free区总数,0或者默认则为"},
+   {"-k","--linksecs",true,"link区总数,0或者默认则为"},
+   {"-2","--secdsecs",true,"二级加载器预留扇区数目,默认为0"},
    {"-h","--help",false,"显示此帮助信息"},
    {"-v","--version",false,"打印版本号"},
  };
-string helpMsg = opts.makeHelpMessage("指定镜像文件为x2文件系统,然后打开",
-  "CMDUtil_main [选项]  x2文件系统文件", "");
+string helpMsg = opts.makeHelpMessage("格式化分区为x2文件系统",
+  "CMDUtil_mkfs.x2fs [选项]  镜像文件", "");
 
-class MyPorcessor:public CommandProcessor<ParamMain>
+class MyPorcessor:public CommandProcessor<ParamMkfs>
 {
 public:
- MyPorcessor()=default;
- virtual int onProcessArgOpt(ParamMain &pack,__OptPosIterator itopt,__VS_cit itarg) override{
-  if(itopt->equals("-e")){
-   pack.cmds+=pack.spiltor+ *(itarg+1);
-  }else if(itopt->equals("-c")){
-   pack.cdpath = *(itarg+1);
-  }else if(itopt->equals("-s")){
+ MyPorcessor(){}
+ virtual int onProcessArgOpt(ParamMkfs &pack,__OptPosIterator itopt,__VS_cit itarg) override{
+  if(itopt->equals("-s"))
+  {
    pack.basicSize = atoi((itarg+1)->c_str());
   }else if(itopt->equals("--16")){
    pack.basicSize=2;
@@ -67324,20 +67335,38 @@ public:
   }else if(itopt->equals("--64")){
    pack.basicSize=8;
   }else if(itopt->equals("-l")){
-   pack.lbalow = atoi( (itarg+1)->c_str());
+   pack.lbaLow=atoi((itarg+1)->c_str());
+   pack.lbaLowSet=true;
+  }else if(itopt->equals("-g")){
+   pack.lbaHigh=atoi((itarg+1)->c_str());
+  }else if(itopt->equals("-n")){
+   pack.wholeSecNum=atoi((itarg+1)->c_str());
+   pack.wholeSecNumSet=true;
+  }else if(itopt->equals("-m")){
+   pack.secSpaces[X2fsMetaInfo::INDEX_NAME]=atoi((itarg+1)->c_str());
+  }else if(itopt->equals("-d")){
+   pack.secSpaces[X2fsMetaInfo::INDEX_DIR]=atoi((itarg+1)->c_str());
+  }else if(itopt->equals("-f")){
+   pack.secSpaces[X2fsMetaInfo::INDEX_FREE]=atoi((itarg+1)->c_str());
+  }else if(itopt->equals("-k")){
+   pack.secSpaces[X2fsMetaInfo::INDEX_LINK]=atoi((itarg+1)->c_str());
+  }else if(itopt->equals("-2")){
+   pack.optional[X2fsMetaInfo::INDEX_OPTIONAL_SECD]=atoi((itarg+1)->c_str());
   }
+
   return ERROR_NO_ERROR;
  }
 
- virtual int onProcessArgTarget(ParamMain &pack,__VS_cit itarg)override
+ virtual int onProcessArgTarget(ParamMkfs &pack,__VS_cit itarg)override
  {
   pack.imgFile = *itarg;
   return ERROR_NO_ERROR;
  }
 
- virtual int onProcessPost(ParamMain &pack)override
+ virtual int onProcessPost(ParamMkfs &pack)override
  {
-  if(pack.imgFile.empty())
+  if(pack.imgFile.empty() || !pack.wholeSecNumSet
+    || !pack.lbaLowSet)
   {
    return ERROR_ARG_NOT_ENOUGH;
   }else{
@@ -67346,12 +67375,12 @@ public:
  }
 
 
- virtual int onProcessHelp(ParamMain &pack)override
+ virtual int onProcessHelp(ParamMkfs &pack)override
  {
   cout << helpMsg << endl;
   return ERROR_NORMAL_EXIT;
  }
- virtual int onProcessVersion(ParamMain &pack)override
+ virtual int onProcessVersion(ParamMkfs &pack)override
  {
   cout << "Version 1.0"<<endl;
   return ERROR_NORMAL_EXIT;
@@ -67360,80 +67389,95 @@ public:
 
 
 template <class __FsEnv>
-void process(ParamMain &p,int& status);
+void process(const ParamMkfs & param);
 
-bool prompt(const string &p)
-{
- cout << p;
- return true;
-}
-# 110 "src/conceptual/../64/CMDUtil_main.cpp"
+
+
+
 int main(int argc,char *argv[])
 {
- vector<string> args(argv+1,argv+argc);
-
- for(int i=0;i<argc;++i)
-   cout << argv[i]<< " ";
-  cout << endl;
-
+  vector<string> args(argv+1,argv+argc);
+ ParamMkfs param;
  MyPorcessor prep;
- ParamMain p;
- int status=prep.processOptions(opts, args.cbegin(),args.cend(), p);
+ int status=prep.processOptions(opts, args.begin(),args.end(), param);
+
  if(status==MyPorcessor::RETURN_CONTINUE)
  {
-  if(p.basicSize==2)
+  if(param.basicSize==2)
   {
-   process<EnvTransfer<16>>(p,status);
-  }else if(p.basicSize==4){
-   process<EnvTransfer<32>>(p,status);
-  }else if(p.basicSize==8){
-   process<EnvTransfer<64>>( p,status);
+   process<EnvTransfer<32>>(param);
+   status = MyPorcessor::RETURN_DONE;
+  }else if(param.basicSize==4){
+   process<EnvTransfer<32>>(param);
+   status = MyPorcessor::RETURN_DONE;
+  }else if(param.basicSize==8){
+   process<EnvTransfer<64>>( param);
+   status = MyPorcessor::RETURN_DONE;
   }else{
-   cerr << "Unsupported basic size type:"<<p.basicSize<<endl;
+   cerr << "Unsupported basic size type:"<<param.basicSize<<endl;
    status = MyPorcessor::RETURN_ERROR;
   }
  }
 
  return (status!=MyPorcessor::RETURN_ERROR?
-# 136 "src/conceptual/../64/CMDUtil_main.cpp" 3 4
-                                          0
-# 136 "src/conceptual/../64/CMDUtil_main.cpp"
-                                                      :
-# 136 "src/conceptual/../64/CMDUtil_main.cpp" 3 4
-                                                       1
-# 136 "src/conceptual/../64/CMDUtil_main.cpp"
-                                                                   );
+# 139 "src/conceptual/../64/CMDUtil_mkfs.x2fs.cpp" 3 4
+                                          0 
+# 139 "src/conceptual/../64/CMDUtil_mkfs.x2fs.cpp"
+                                                       : 
+# 139 "src/conceptual/../64/CMDUtil_mkfs.x2fs.cpp" 3 4
+                                                         1
+# 139 "src/conceptual/../64/CMDUtil_mkfs.x2fs.cpp"
+                                                                     );
+
 }
 
 template <class __FsEnv>
-void process(ParamMain &p,int& status)
+void process(const ParamMkfs & param)
 {
- u8_t driver=HostEnv::addFile(p.imgFile,p.lbalow);
- FileOperation<__FsEnv> op(driver,p.lbalow);
+ using __X2fsUtil = X2fsUtil<__FsEnv>;
+ using __X2fsMetaInfo = typename __X2fsUtil::__X2fsMetaInfo;
+ __X2fsMetaInfo metainfo;
+ metainfo.lbaStartLow = param.lbaLow;
+ metainfo.lbaStartHigh = param.lbaHigh;
+ metainfo.wholeSecnums =param.wholeSecNum;
+ for(size_t i=0;i<metainfo.PARTS_REQUIRED;++i)
+  metainfo.secnums[i]=param.secSpaces[i];
+ for(size_t i=0;i<metainfo.PARTS_OPTIONAL;++i)
+  metainfo.optional[i]=param.optional[i];
 
 
 
+ std::cout << "information about metainfo"<<std::endl;
+ metainfo.dumpInfo();
+ std::cout << std::endl;
 
+ u8_t driver=HostEnv::addFile(param.imgFile,param.lbaLow);
+ if(!__X2fsMetaInfo::checkMetainfo(metainfo))
+  printf("cannot validate metainfo\n");
+ else
+  __X2fsUtil::mkfs(driver, metainfo);
 
- if(p.cdpath.size()>0)
-  op.cd(p.cdpath);
-
- if(p.cmds.size()>0)
+ printf("re-reading the information to validate....");
+ u8_t *buf = static_cast<u8_t*>(HostEnv::malloc(metainfo.metaSec * 512));
+ __X2fsMetaInfo readMetainfo;
+ HostEnv::readSectors(
+    HostEnv::CUR_SEG, buf,driver , param.lbaLow + __X2fsMetaInfo::SECNUM_RESERVED_CONST,
+    __X2fsMetaInfo::SECNUM_META_CONST, 0);
+ SerializerPtr<__FsEnv> ptrMetaNew{buf};
+ ptrMetaNew >> readMetainfo;
+ if(!__X2fsMetaInfo::checkMetainfo(readMetainfo))
  {
-  std::vector<string> cmds=HostEnv::cmdSplit(p.cmds);
-  for(const std::string &cmd:cmds)
-  {
-   if(!op.eval(cmd))break;
-  }
-  status=MyPorcessor::RETURN_DONE;
+  printf("validating failed!\n");
  }else{
-  string cmd;
-  while(
-    prompt(op.curDir()) &&
-    prompt(">") &&
-    getline(std::cin,cmd))
-   if(!op.eval(cmd))break;
+  printf("validating succeed!\n");
  }
+ HostEnv::flushOutputs();
+
+
+ HostEnv::free(buf);
+
+ printf("end.\n");
+ HostEnv::flushOutputs();
 }
 # 18 "src/conceptual/all.cpp" 2
 
@@ -68562,15 +68606,7 @@ X2fsUtil<__FsEnv>::~X2fsUtil()
 
 
   this->flush();
-  this->freemm.~LinearSourceManager();
-  this->mmnodesmm.~MallocToSimple();
-  this->filenamemm.~MemoryManager();
-  this->dirsmm.~AssociatedMemoryManager();
-
-  this->linkmm.~LinearSourceManager();
-
-
-
+# 292 "src/conceptual/../File.cpp"
 }
 
 
@@ -68758,7 +68794,7 @@ void X2fsUtil<__FsEnv>::saveDirSection() {
  FileNode *fileNodes=reinterpret_cast<FileNode*>(buffersDir + sizeof(FileNode));
  SimpleMemoryNode *smmnodes = reinterpret_cast<SimpleMemoryNode*>(buffersDir + sizeof(FileNode)*(nodesNum+1));
 
- SerializerPtr<__MyEnv> ptr{buffersDir};
+ SerializerPtr<__MyEnv> ptr{buffersRAW[INDEX_DIR]};
  ptr << nodesNum
       << dirsmm;
  for(size_t i=0;i!=nodesNum;++i)
@@ -69960,6 +69996,13 @@ FileOperation<__FsEnv>::FileOperation(u8_t driver,u32_t lbaAddress):
 {
  curPath.push_back("");
  curNode =util.getFileTree()->getHead();
+}
+template <class __FsEnv>
+FileOperation<__FsEnv>::~FileOperation()
+{
+ this->curNode=(0);
+ this->lastNode=(0);
+ this->curPath.clear();
 }
 template <class __FsEnv>
 void FileOperation<__FsEnv>::help()
@@ -72229,9 +72272,9 @@ namespace std
 
 }
 # 1082 "/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++/fstream" 2 3
-# 410 "src/conceptual/../File_FileOperation.cpp" 2
+# 417 "src/conceptual/../File_FileOperation.cpp" 2
 
-# 410 "src/conceptual/../File_FileOperation.cpp"
+# 417 "src/conceptual/../File_FileOperation.cpp"
 template <class __FsEnv>
 typename FileOperation<__FsEnv>::__SizeType FileOperation<__FsEnv>::readSysFileToX2File(const __String &sysFile,__SizeType sysStart,
        const __String &x2File,__SizeType x2Start,

@@ -1,5 +1,4 @@
 # 1 "src/KernelMemoryConfig.cpp"
-# 1 "/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system//"
 # 1 "<built-in>"
 # 1 "<command-line>"
 # 1 "./include/macros/configurations.h" 1
@@ -3539,7 +3538,7 @@ public:
     inline __attribute__((always_inline)) void setHead(__TreeNode *head);
     inline __attribute__((always_inline)) void addRoot(__TreeNode* node);
     inline __attribute__((always_inline)) bool isEmpty()const;
-    inline __attribute__((always_inline)) __Allocator* getSmm()const;
+    inline __attribute__((always_inline)) __Allocator& getSmm()const;
     void free(__TreeNode *root);
 
 

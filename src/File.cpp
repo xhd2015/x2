@@ -280,12 +280,12 @@ __DEF_X2fsUtil::~X2fsUtil()
 //	{
 //		printf("destruct \n");
 		this->flush();  //自行调用flush
-		this->freemm.~LinearSourceManager();
-		this->mmnodesmm.~MallocToSimple();
-		this->filenamemm.~MemoryManager();
-		this->dirsmm.~AssociatedMemoryManager();
-
-		this->linkmm.~LinearSourceManager();
+//		this->freemm.~LinearSourceManager();
+//		this->mmnodesmm.~MallocToSimple();
+//		this->filenamemm.~MemoryManager();
+//		this->dirsmm.~AssociatedMemoryManager();
+//
+//		this->linkmm.~LinearSourceManager();
 //		fclose(fpimg);
 //		fpimg=nullptr;
 //	}
@@ -566,7 +566,7 @@ void __DEF_X2fsUtil::saveDirSection() {
 	FileNode *fileNodes=reinterpret_cast<FileNode*>(buffersDir + sizeof(FileNode));
 	SimpleMemoryNode *smmnodes = reinterpret_cast<SimpleMemoryNode*>(buffersDir + sizeof(FileNode)*(nodesNum+1));
 
-	SerializerPtr<__MyEnv> ptr{buffersDir};
+	SerializerPtr<__MyEnv> ptr{buffersRAW[INDEX_DIR]};
 	ptr					<< nodesNum
 						<< dirsmm;
 	for(size_t i=0;i!=nodesNum;++i)

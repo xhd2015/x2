@@ -32,6 +32,13 @@ __DEF_FileOperation::FileOperation(u8_t driver,u32_t lbaAddress):
 	curNode =util.getFileTree()->getHead();//当前目录为根目录
 }
 __DEF_Template_FileOperation
+__DEF_FileOperation::~FileOperation()
+{
+	this->curNode=nullptr;
+	this->lastNode=nullptr;
+	this->curPath.clear();
+}
+__DEF_Template_FileOperation
 void __DEF_FileOperation::help()
 {
 	HostEnv::printf_simple(R"+*( 

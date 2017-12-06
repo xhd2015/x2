@@ -177,7 +177,7 @@ namespace HostEnv{
 	//	vfprintf(stdout,fmt,ap);
 	//	va_end(ap);
 		::printf(fmt,arg0,arg1,arg2);
-
+		flushOutputs();
 		return 0;
 
 	}

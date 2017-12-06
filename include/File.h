@@ -784,7 +784,7 @@ public:
 	 * @param lbaAddress  分区的位置
 	 */
 	FileOperation(u8_t driver,u32_t lbaAddress);
-	~FileOperation()=default;
+	~FileOperation();
 
 	/**
 	 * 显示help内容
