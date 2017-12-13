@@ -113,6 +113,7 @@ public:
 
 //== EnvTransfer
 namespace{ // 文件局部的namespace，替代c语言的static
+namespace Local{ // 真正的文件局部命名空间
 template <size_t __TargetBit,class __T>
 struct __EnvTransfer
 {
@@ -171,12 +172,13 @@ template <>
 		};
 #endif
 }
+}
 //== 环境转化器：将某一字面量类型（即书写出来的样子）映射到不同的平台上，计算出它的实际大小
 //比如 void*在64位机器上是8字节，在32位机器上是4字节。
 /**
  * 注意：
  */
-template <size_t __TargetBit>
+template <size_t __TargetBit = HOST_BIT>
 struct EnvTransfer{
 
 //	using PtrBaseGetterType = std::function<ptrdiff_t()>;
@@ -184,20 +186,20 @@ struct EnvTransfer{
 	/**
 	 * 序列化指针时采用的两种不同方案：POLICY_PTR_VALUE表示存储指针相对于一个基地址的偏移值,  POLICY_PTR_OBJECT表示序列化指向的对象
 	 */
-	enum PtrPolicy{POLICY_PTR_VALUE,POLICY_PTR_OBJECT};
+	enum PtrPolicy{POLICY_PTR_VALUE,POLICY_PTR_OBJECT,POLICY_PTR_NOT_ALLOWED};
 	template <class __T> struct SizeofHostType{ //把类当做处理模板的函数
-		enum{Size=__EnvTransfer<__TargetBit,__T>::Size };
+		enum{Size=Local::__EnvTransfer<__TargetBit,__T>::Size };
 	};
 	template <class __T>
 	constexpr static size_t sizeofHostType()
 	{
-		return __EnvTransfer<__TargetBit,__T>::Size;
+		return Local::__EnvTransfer<__TargetBit,__T>::Size;
 	}//把重写放到外部，这里来处理
 
 	/**
 	 * 继承的类可以重写这个静态函数来动态配置自己的policy
 	 */
-	constexpr static PtrPolicy ptrPolicy(){return POLICY_PTR_VALUE;} //默认情况下存储指针值
+	constexpr static PtrPolicy ptrPolicy(){return POLICY_PTR_NOT_ALLOWED;} //默认情况下存储指针值
 	AS_MACRO static ptrdiff_t ptrBase(){  //!!!!DEPRECATED注意这里返回的是一个获取函数而不是值
 //		return [](){return static_cast<ptrdiff_t>(nullptr);};//默认情况下指针的基地址是0
 		return static_cast<ptrdiff_t>(nullptr);

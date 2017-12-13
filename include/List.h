@@ -3,10 +3,11 @@
 #define List_h__
 
 #include <def.h>
-#include <loki/Int2Type.h>
+#include <conceptual/loki/Int2Type.h>
 #include <Locator.h>
 #include <libx2.h>
 #include <conceptual/Serialize.h>
+#include <conceptual/ExtFunctional.h>
 
 //可以当做基本类型来处理
 /**
@@ -132,10 +133,32 @@ public:
 	using This = ListNode<T>;
 	using __ListNode = This;
 public:
+	/**
+	 * @brief 初始化一个空的TreeNode
+	 * 空的TreeNode是允许存在的，因此节点的目的其一是存储数据信息，其二是存储链接信息。可以允许只存储链接信息，比如作为链表的头部。
+	 */
+	ListNode();
     ListNode(const T& data,__ListNode* next=nullptr,__ListNode* previous=nullptr);
     ListNode(const __ListNode &)=default;
     __ListNode & operator=(const __ListNode &)=default;
     ~ListNode();
+
+    // UNTESTED
+    /**
+     * @brief 将ListNode<Apple*>&转换成ListNode<Fruit*>&
+     * 前置条件： T,__PTDerived必须是指针类型且具有继承关系
+     */
+    template <class __PTDerived>
+    operator ListNode<__PTDerived>&()
+	{
+    	return basePointerCast<ListNode,__PTDerived,T>(*this);
+	}
+    template <class __PTDerived>
+    operator const ListNode<__PTDerived>&()const
+	{
+    	return basePointerCast<ListNode,__PTDerived,T>(*this); // 将ListNode<Apple*>&转换成ListNode<Fruit*>&
+	}
+
 
     AS_MACRO const T& getData()const;
     AS_MACRO T& getData();
@@ -194,7 +217,9 @@ protected:
 *      void _Allocator<T>::withdraw(T*);
 *       T*  _Allocator<T>::getNew(size_t size);
 *
-*
+*  类的不变式：
+*   初始化时：
+*  	初始化后：
 *
 */
 /**
@@ -212,32 +237,63 @@ public:
 	using __Allocator = _Allocator<__ListNode>;
 public:
 	//初始化必须指定引用smm,否则后面的工作不能正常进行
-	// TODO 总结一条关于使用引用的合适时机
+	// TODO 总结一条关于使用引用的合适时机， 引用显然是为了共享，
+	// 引用具有以下性质：共享性  初始化后不可变性（除非使用"重构"， 即replacement new)
 	LinkedList()=delete;
 
 public:
-    LinkedList(  __Allocator &smm);
+	LinkedList(const std::shared_ptr<__Allocator>& smm);
+	LinkedList(std::shared_ptr<__Allocator>&& smm);
+    LinkedList( __Allocator *smm);// willbe DEPRECATED
+private:
+    void initRooLast();
+public:
     LinkedList(const __LinkedList&)=default;
     __LinkedList & operator=(const __LinkedList&)=default;
     ~LinkedList();
     
     AS_MACRO __ListNode* getHead()const;//done
-    AS_MACRO _Allocator<__ListNode > &getMemoryManager()const;//done
+    DEPRECATED AS_MACRO _Allocator<__ListNode > &getMemoryManager()const;//done
 
 
     AS_MACRO __ListNode*    getLast()const;//done
     __ListNode*    append(const T &t);//done
+    template <class ... Args>
+    __ListNode*	    append(Args &&...args);
     __ListNode*    append(__ListNode* p);//done
     __ListNode*    appendHead(__ListNode* p);//done
     __ListNode*    appendHead(const T &t);//done
-    __ListNode*    remove();//done
+    template <class ... Args>
+    __ListNode*	    appendHead(Args &&...args);
+    // UNTESTED 含义不明
+     __ListNode*    remove();//done
+    /**
+     * 移除头部，但是保留头部之后的链接
+     */
     __ListNode*    removeHead();//done
+    /**
+     * 移除头部后面所有的链表，清空root和last
+     */
+    __ListNode*	   removeAllAfterHead();
     void            remove(__ListNode* p);//done
     void			insertNext(__ListNode* where,__ListNode* p);//done
+    template <class ... Args>
+    AS_MACRO void			insertNext(__ListNode *where,Args &&...args);
     void			insertPrevious(__ListNode* where,__ListNode* p);//done
+    template <class ... Args>
+    AS_MACRO void			insertPrevious(__ListNode *where,Args &&...args);
     size_t 			getSize()const;//done
     AS_MACRO 		bool			isEmpty()const;
 
+
+    /**
+     * @brief 返回一个空的node或者nullptr
+     */
+    template <class ... Args>
+    AS_MACRO __ListNode*		newOneNode(Args &&...args)noexcept;
+    template <class ... Args>
+    AS_MACRO __ListNode*		newOneNodeThrows(Args &&...args);
+   AS_MACRO void				freeOneNode(__ListNode *node);
 
     void freeNode(__ListNode * node);//done
     void free();//free this list,(equals to destruct) that means free all,then set root&last as nullptr.   done
@@ -282,16 +338,15 @@ public:
 	{
 		return __EnvTransfer::template sizeofHostType<decltype(root->getData())>() * getSize();
 	}
-protected:
-    _Allocator<__ListNode > &smm; //共享空间分配代理器
+private:
+    std::shared_ptr<__Allocator> smm; //共享空间分配代理器
 
+    // TODO 使用更简洁的设计：将last放到root的previous域
     /**
     *Designing them as pointer is the best choice I've ever made.
     */
     __ListNode* root; //root存在的意义不是
     __ListNode* last; //next指向最后一个
-    
-    
 };
 /**
 *It provides extra functions for location
@@ -330,10 +385,7 @@ public:
 public:
 	 LocateableLinkedList()=delete;//done
 public:
-	/**
-	 * @param smm   一个能否分配器ListNode<_Locateable>类型的分配器
-	 */
-    LocateableLinkedList( __Allocator &smm );//done
+	using Super::LinkedList; // 构造方法使用父类的
     ~LocateableLinkedList();//done
     /**
     * What should they return?The location,or a near location that can be later used to insert a node?
@@ -379,7 +431,7 @@ public:
 	using __ListNode = Super;
 	using __TreeNode = This;
 public:
-	TreeNode()=default;
+	TreeNode();
 	TreeNode(const __TreeNode&)=default;
 	__TreeNode & operator=(const __TreeNode&)=default;
 
@@ -390,6 +442,20 @@ public:
 			__TreeNode* next=nullptr,
 			__TreeNode* previous=nullptr);
     ~TreeNode();
+    /**
+     * @brief 将TreeNode<Apple*>&转换成TreeNode<Fruit*>&
+     */
+    template <class __PTDerived>
+    operator TreeNode<__PTDerived>&()
+	{
+    	return basePointerCast<TreeNode,__PTDerived,T>(*this);
+	}
+    template <class __PTDerived>
+    operator const TreeNode<__PTDerived>&()const
+	{
+    	return basePointerCast<TreeNode,__PTDerived,T>(*this);
+	}
+
 
     AS_MACRO __TreeNode* setSon(__TreeNode* son);//done
     AS_MACRO __TreeNode* setFather(__TreeNode* father);//done
@@ -407,12 +473,28 @@ public:
     AS_MACRO bool		hasSon()const;
     AS_MACRO bool 		hasFather()const;
 
+    /**
+     * NOTE 注意，这些方法要求给定的参数son/father只能是单个节点，不能含有任何其他附属节点
+     * 前置条件：son->{next,previous,son,father} 全部为空
+     */
     void		insertSon(__TreeNode* son);
     void		insertFather(__TreeNode* father);
-    __TreeNode*	removeSon();
-	__TreeNode*	removeFather();
+    void		removeSon();
+	void		removeFather();
 	void 			adjustOffset(ptrdiff_t diff);
 	void			initToNull();
+
+	/**
+	 * @brief 与节点按父子关系链接起来
+	 * 前置条件： this->son=nullptr, node=nullptr else node->father=nullptr.
+	 * 在恢复序列化节点时特别有用
+	 */
+	void		concateSon(__TreeNode *node);
+	/**
+	 * @brief 与节点按前后关系链接起来
+	 * 前置条件：this->next=nullptr, node=nullptr else node->previous=nullptr.
+	 */
+	void		concateNext(__TreeNode *node);
 
 
     __TreeNode* getParent()const;//往previous一直遍历，直到是根，然后返回根的father,done
@@ -445,12 +527,21 @@ protected:
  *
  *	不变式：
  *		该类一旦初始化：root不为nullptr, smm有引用存在。 如果构造时违反，就抛出异常
+ *		只能通过setHead, append,appendHead来初始化头部
+ *	含状态的不变式：
+ *		初始态：root不为nullptr
+ *		被移动的状态：root为nullptr
+ *		析构态：
+ *
+ *
+ *	一般而言，希望该结构能够做出更强的限制条件：不暴露任何节点。
+ *	满足更强的不变式：不能够直接依赖root直接创建一棵新的树。因为序列化能够完成得更好。
  *
  *	@param T			节点存储的数据类型
  *	@param _Allocator  分配TreeNode的分配器类型
  */
 template <class T,template <class> class _Allocator>
-class Tree{
+class Tree : public SerializationInterface{
 public:
 	using This = Tree<T,_Allocator>;
 	using __Tree = This;
@@ -460,24 +551,170 @@ public:
 //	Tree()=default;
 	Tree()=delete;
 public:
-    Tree(__Allocator &smm,__TreeNode* root=nullptr);//If give root=nullptr,then assign root by smm,else by root.
-    Tree(const __Tree & )=default;
-    __Tree &operator=(const __Tree & )=default;
+	// 并非异常安全
+	/**
+	 * @brief 初始化树并分配root节点
+	 * @param smm
+	 * @param root  在有些情况下，root节点可以代表一棵已经分配好的树
+	 */
+//	template <template <class> class __SharedPtr>
+//    explicit Tree(__SharedPtr<__Allocator>&& smm);//If give root=nullptr,then assign root by smm,else by root.
+    explicit Tree(const std::shared_ptr<__Allocator>& smm);
+    explicit Tree(std::shared_ptr<__Allocator> && smm);
+
+	// TODO 允许下面的两条
+    Tree(const __Tree & )=delete;
+    __Tree &operator=(const __Tree & )=delete;
+
+    // 移动构造，赋值
+    Tree(__Tree && tree);
+    __Tree operator=(__Tree && tree);
+    /**
+     * @brief 构造一棵使用相同的节点管理器的Tree
+     */
+    __Tree makeSmmSharedTree();
 
     ~Tree();
     
     AS_MACRO __TreeNode *getHead()const;//done
     AS_MACRO void 		setHead(__TreeNode *head);  //返回其自身,done
+    template <typename ...Args>
+    AS_MACRO void		setHead(Args&& ... args);
     AS_MACRO void		addRoot(__TreeNode* node);
     AS_MACRO bool		isEmpty()const;
-    AS_MACRO	__Allocator&	getSmm()const;
-    void         free(__TreeNode *root);//将root自身和所有子节点都释放掉，== withdraw all nodes recursively  done
 
+    template <typename ...Args>
+    AS_MACRO This& insertNext(Args&& ... args);
+    template <typename ...Args>
+    AS_MACRO This& insertPrevious(Args&& ... args);
+    template <typename ...Args>
+    AS_MACRO This& insertSon(Args&& ... args);
+    template <typename ...Args>
+    AS_MACRO This& insertFather( Args&& ... args);
+
+    // walker
+//	tree.startWalk();
+//	tree.gotoNext();
+//	tree.gotoPrevious();
+//	tree.atNull();
+//	tree.gotoFather();
+//	tree.atHead();
+//	tree.gotoSon();
+//	tree.endWalk()
+    This& startWalk()
+    {
+    	if(curNode!=nullptr)
+    		HostEnv::systemAbort("in tree startWalk,there is unfinished walking", -2);
+    	curNode = root->getSon();
+    	return *this;
+    }
+    This& gotoNext() noexcept
+	{
+    	if(curNode->getNext())curNode=curNode->getNext();
+    	return *this;
+	}
+    This& gotoPrevious()
+    {
+    	if(curNode->hasPrevious())curNode=curNode->getPrevious();
+    	return *this;
+    }
+    This& gotoFather()
+    {
+    	if(curNode->hasFather() && curNode->getDirectFather()!=root)
+    		curNode=curNode->getDirectFather();
+    	return *this;
+    }
+    This& gotoSon()
+    {
+    	if(curNode->hasSon())
+    		curNode = curNode->getSon();
+    	return *this;
+    }
+    This& endWalk()
+    {
+    	curNode=nullptr;
+    	return *this;
+    }
+
+    /**
+     * 因为资源管理器现在集中到基类身上，且为private成员
+     * 所以由基类对派生类进行资源管理
+     */
+    AS_MACRO void		freeOneNode(__TreeNode *node);
+    /**
+     * @brief 创建TreeNode，初始化为空
+     * @returns 一个TreeNode或者nullptr
+     */
+    template <class ...Args>
+    __TreeNode *		 newOneNode(Args&&...args) noexcept;
+    /**
+     * @brief 创建一个TreeNode，如果为空抛出异常
+     * @returns 非空TreeNode，并且已经初始化完毕
+     */
+    template <class ...Args>
+    __TreeNode* 		newOneNodeThrows(Args&&...args);
+
+    /**
+     * @brief 将节点及其链接的子节点，相邻节点回收到管理器
+     * @param node 递归调用freeAll(node->getSon()),freeAll(node->getNext()),然后释放node
+     */
+    void         freeAll(__TreeNode *node);//将root自身和所有子节点都释放掉，== withdraw all nodes recursively  done
+
+    /**
+     * 计算树中节点的个数
+     */
+    size_t		getSize()const;
+
+
+
+    /**
+     * 序列化方案概述： Tree的节点结构有自己的特殊性：
+     * 			对节点node，如果son节点和next节点已经序列化完毕，则只需要记录son节点的个数，next节点的个数，然后将node节点数据序列化
+     * 			则，node节点也序列化完毕。
+     * 			可见具有递归的性质。
+     * 	序列化每个节点占用的空间布局如下：[T data] [size_t n_son] [size_t n_next]
+     * 	n_son/n_next:以son/next为头结点的树的序列化数目
+     * 	此方案甚至比直接存储指针要节省两个域的空间。
+     *
+     */
+private:
+//    template <class __SerializerPtr>
+//    static __SerializerPtr* ptrNewest;//为了防止递归压栈导致的空间开销，将与局部无关的指针提到该处。
+    /**
+     * 用状态机的观点看待下面的算法：1.正在序列化node  2.正在序列化node的son节点  3.正在序列化node的next节点
+     */
+    template <class __EnvTransfer>
+    		size_t __serializeHelper(SerializerPtr<__EnvTransfer> &ptr,__TreeNode *node)const;
+    template <class __EnvTransfer>
+       		__TreeNode *	__deserializeHelper(SerializerPtr<__EnvTransfer> &ptr,size_t n);
+public:
+
+	template <class __EnvTransfer>
+		SerializerPtr<__EnvTransfer>& serialize(SerializerPtr<__EnvTransfer> &ptr)const;
+	template <class __EnvTransfer>
+		SerializerPtr<__EnvTransfer>& deserialize(SerializerPtr<__EnvTransfer> &ptr);
+	template <class __EnvTransfer>
+		 size_t getSerializitionSize();
 #if defined(CODE32)
     void		dumpInfo(Printer* p)const;
+#elif defined(CODE64)
+    void		dumpInfo(
+    		std::function<void(const T& t)>   consumer,
+			std::function<void()>   beforeSon,
+			std::function<void()>   afterSon,
+			std::function<void()>   beforeNext,
+			std::function<void()>   afterNext,
+			__TreeNode *node)const;
+    void 		dumpInfo(std::function<void(const T& t)>   consumer,
+    		std::function<void()>   beforeSon,
+    		std::function<void()>   afterSon,
+    		std::function<void()>   beforeNext,
+    		std::function<void()>   afterNext
+    )const;
 #endif
-protected:
-    __Allocator &smm;
+
+private:
+    std::shared_ptr<__Allocator> smm;
     // 0
     // 1 
     // 2
@@ -491,6 +728,11 @@ protected:
     //father 是最左边的节点的father
     __TreeNode *root;//有唯一的son，此节点不用于存储。root->son = head，此节点为头节点。
     
+    /**
+     * @brief Tree Walker Status
+     */
+    __TreeNode	*curNode;
+
 };
 
 /*These can be used in SimpleMemoryManager*/

@@ -8,9 +8,6 @@
 #include <Descriptor.h>
 #include <libx2.h>
 
-#include <macros/libx2_macros.h>
-#include <macros/Descriptor_macros.h>
-
 //指针类型
 //#define __MXp(type,pointer,andNum,shiftNum,direction) ((*((type*)this->pointer) & (andNum) ) direction (shiftNum))
 ////直接量
@@ -63,6 +60,25 @@ SegmentDescriptor::SegmentDescriptor(char* baseaddr,int limit,char g,char type,c
 	this->setBaseAddr(reinterpret_cast<size_t>(baseaddr));
 	this->setLimit(limit);
 }
+void SegmentDescriptor::setBaseAddr(int baseAddr)
+{
+	 this->baseAddrLow_24 = baseAddr & 0xffffff;
+	 this->baseAddrHigh_8 = ((baseAddr & 0xff000000)>>24);
+}
+int	 SegmentDescriptor::getBaseAddr()const
+{
+	 return (this->baseAddrLow_24 | (this->baseAddrHigh_8 << 24));
+}
+int		 SegmentDescriptor::getLimit()const
+{
+	 return (this->limitLow_16|(this->limitHigh_4 << 16));
+}
+void	 SegmentDescriptor::setLimit(int limit)
+{
+	 this->limitLow_16 = limit & 0xffff;
+	 this->limitHigh_4 = ((limit & 0xf0000)>>16);
+}
+
 bool SegmentDescriptor::equals(SegmentDescriptor &sd2)
 {
 		return (*reinterpret_cast<int*>(this) == *reinterpret_cast<int*>(&sd2)) &&

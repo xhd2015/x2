@@ -1,7 +1,8 @@
 # 1 "src/KernelMemoryConfig.cpp"
+# 1 "/cygdrive/c/Users/13774/Desktop/old_desktop/bochs/devel/x2-system//"
 # 1 "<built-in>"
 # 1 "<command-line>"
-# 1 "./include/macros/configurations.h" 1
+# 1 "./include/conceptual/configurations.h" 1
 # 1 "<command-line>" 2
 # 1 "src/KernelMemoryConfig.cpp"
 
@@ -20,7 +21,7 @@
 
 # 1 "include/def.h" 1
 # 29 "include/def.h"
-# 1 "include/macros/configurations.h" 1
+# 1 "include/conceptual/configurations.h" 1
 # 30 "include/def.h" 2
 # 1 "include/config.h" 1
 # 31 "include/def.h" 2
@@ -366,7 +367,7 @@ protected:
 
 
 
-# 1 "include/loki/Int2Type.h" 1
+# 1 "include/conceptual/loki/Int2Type.h" 1
 
 
 
@@ -2957,9 +2958,10 @@ namespace std
 # 26 "include/EnvInterface.h"
 namespace HostEnv{
  enum{CUR_SEG = 0x10000u };
-# 267 "include/EnvInterface.h"
+# 269 "include/EnvInterface.h"
 };
 # 15 "include/conceptual/Serialize.h" 2
+
 
 
 template <size_t __N>
@@ -2980,13 +2982,14 @@ template <>
 struct Byte2Type<4>{
  using Type=u32_t;
 };
-# 57 "include/conceptual/Serialize.h"
+# 58 "include/conceptual/Serialize.h"
 template <class __EnvTransfer>
 class SerializerPtr{
 public:
  using This = SerializerPtr<__EnvTransfer>;
  using __SerializerPtr = This;
     public:
+  SerializerPtr()=default;
   inline __attribute__((always_inline)) SerializerPtr(void *p);
         inline __attribute__((always_inline)) void *getPtr()const;
         inline __attribute__((always_inline)) __SerializerPtr & operator=(const __SerializerPtr &rhs);
@@ -3007,91 +3010,103 @@ public:
 
 
 
-        enum{ TYPE_POINTER_SAFE,TYPE_BASIC_SAFE,TYPE_POINTER_TRUNCATE,TYPE_BASIC_TRUNCATE};
+        enum Policy{ TYPE_POINTER_SAFE,TYPE_BASIC_SAFE,TYPE_POINTER_TRUNCATE,TYPE_BASIC_TRUNCATE};
 
 
 
 
 
 
-        template <class __BasicType,size_t __N=__EnvTransfer::template sizeofHostType<__BasicType>(),
-          int __AssignType=( sizeof(__BasicType)<=__N ?
-               ((std::is_pointer<__BasicType>())?TYPE_POINTER_SAFE:TYPE_BASIC_SAFE):
-         ((std::is_pointer<__BasicType>())?TYPE_POINTER_TRUNCATE:TYPE_BASIC_TRUNCATE))
-         >
+        template <class __BasicType>
          inline __attribute__((always_inline)) void serializeBasicType(__BasicType data);
 
-        template <class __BasicType,size_t __N=__EnvTransfer::template sizeofHostType<__BasicType>(),
-          int __AssignType=( sizeof(__BasicType)>=__N ?
-      ((std::is_pointer<__BasicType>())?TYPE_POINTER_SAFE:TYPE_BASIC_SAFE):
-      ((std::is_pointer<__BasicType>())?TYPE_POINTER_TRUNCATE:TYPE_BASIC_TRUNCATE))>
+        template <class __BasicType>
          inline __attribute__((always_inline)) void deserializeBasicType(__BasicType& data);
 
 
-        template <size_t __N=__EnvTransfer::template sizeofHostType<const void*>(),
-          int __AssignType=(sizeof(const void*)<=__N)>
-         inline __attribute__((always_inline)) void serializeBasicType( void* data,ptrdiff_t diff);
 
-        template <size_t __N=__EnvTransfer::template sizeofHostType<void*>(),
-          int __AssignType=(sizeof(void*)<=__N)>
-         inline __attribute__((always_inline)) void deserializeBasicType(void* & data,ptrdiff_t diff);
+         inline __attribute__((always_inline)) __attribute__((deprecated)) void serializeBasicType( void* data,ptrdiff_t diff);
+
+         inline __attribute__((always_inline)) __attribute__((deprecated)) void deserializeBasicType(void* & data,ptrdiff_t diff);
 
 
-        template <class __BasicType,size_t __N=__EnvTransfer::template sizeofHostType<__BasicType>(),
-   int __AssignType=( sizeof(__BasicType)<=__N ?
-     ((std::is_pointer<__BasicType>())?TYPE_POINTER_SAFE:TYPE_BASIC_SAFE):
-     ((std::is_pointer<__BasicType>())?TYPE_POINTER_TRUNCATE:TYPE_BASIC_TRUNCATE))>
+        template <class __BasicType>
          inline __attribute__((always_inline)) void serializeBasicType(const __BasicType *data,size_t len);
 
-        template <class __BasicType,size_t __N=__EnvTransfer::template sizeofHostType<__BasicType>(),
-   int __AssignType=( sizeof(__BasicType) >= __N ?
-     ((std::is_pointer<__BasicType>())?TYPE_POINTER_SAFE:TYPE_BASIC_SAFE):
-     ((std::is_pointer<__BasicType>())?TYPE_POINTER_TRUNCATE:TYPE_BASIC_TRUNCATE))>
+        template <class __BasicType>
          inline __attribute__((always_inline)) void deserializeBasicType(__BasicType *data,size_t len);
 private:
 
 
 
-        template <class __BasicType,size_t __N>
+
+
+        template <class __BasicType,int __N>
         inline __attribute__((always_inline)) void __serializeByType(__BasicType data,Int2Type<TYPE_BASIC_SAFE>);
 
 
 
 
-        template <class __BasicType,size_t __N>
+        template <class __BasicType,int __N>
         inline __attribute__((always_inline)) void
    __serializeByType(__BasicType data,Int2Type<TYPE_BASIC_TRUNCATE>) ;
 
 
 
 
-   template <class __BasicType,size_t __N>
+   template <class __BasicType,int __N>
    inline __attribute__((always_inline)) void __serializeByType(__BasicType data,Int2Type<TYPE_POINTER_SAFE>);
 
 
 
 
-   template <class __BasicType,size_t __N>
+   template <class __BasicType,int __N>
    inline __attribute__((always_inline)) void
    __serializeByType(__BasicType data,Int2Type<TYPE_POINTER_TRUNCATE>) ;
 
 
 
-         template <class __BasicType,size_t __N>
+         template <class __BasicType,int __N>
          inline __attribute__((always_inline)) void __deserializeByType(__BasicType& data,Int2Type<TYPE_BASIC_SAFE>);
 
 
-         template <class __BasicType,size_t __N>
+         template <class __BasicType,int __N>
          inline __attribute__((always_inline)) void
      __deserializeByType(__BasicType& data,Int2Type<TYPE_BASIC_TRUNCATE>);
 
-              template <class __BasicType,size_t __N>
+              template <class __BasicType,int __N>
               inline __attribute__((always_inline)) void __deserializeByType(__BasicType& data,Int2Type<TYPE_POINTER_SAFE>);
 
 
-              template <class __BasicType,size_t __N>
+              template <class __BasicType,int __N>
               inline __attribute__((always_inline)) void
           __deserializeByType(__BasicType& data,Int2Type<TYPE_POINTER_TRUNCATE>);
+
+
+              template <class __BasicType>
+             static constexpr size_t hostTypeSize(){
+                 return __EnvTransfer::template sizeofHostType<__BasicType>();
+              }
+
+
+
+            template <class __BasicType>
+           static constexpr Policy bscTpSrlzPolicy()
+            {
+              return (sizeof(__BasicType)<= hostTypeSize<__BasicType>() ?
+                  ((std::is_pointer<__BasicType>())?TYPE_POINTER_SAFE:TYPE_BASIC_SAFE):
+                  ((std::is_pointer<__BasicType>())?TYPE_POINTER_TRUNCATE:TYPE_BASIC_TRUNCATE));
+            }
+
+
+
+            template <class __BasicType>
+          static constexpr Policy bscTpDesrlzPolicy()
+            {
+             return (sizeof(__BasicType) >= hostTypeSize<__BasicType>() ?
+                  ((std::is_pointer<__BasicType>())?TYPE_POINTER_SAFE:TYPE_BASIC_SAFE):
+                  ((std::is_pointer<__BasicType>())?TYPE_POINTER_TRUNCATE:TYPE_BASIC_TRUNCATE));
+            }
 
 private:
 
@@ -3100,12 +3115,12 @@ private:
 
 
 
-        u8_t *ptr;
+        u8_t *ptr {(0) };
 };
-# 188 "include/conceptual/Serialize.h"
+# 202 "include/conceptual/Serialize.h"
 class SerializationInterface{
 public:
-# 210 "include/conceptual/Serialize.h"
+# 224 "include/conceptual/Serialize.h"
 };
 
 namespace{
@@ -3141,9 +3156,35 @@ namespace{
    return s.deserialize(p);
   }
 
+  template <class __S,class __EnvTransfer>
+  inline __attribute__((always_inline)) size_t
+   __getSizeHelper(const __S &s,Int2Type<true>)
+  {
+   return __EnvTransfer::template sizeofHostType<__S>();
+  }
+
+  template <class __S,class __EnvTransfer>
+  inline __attribute__((always_inline)) size_t
+   __getSizeHelper(const __S &s,Int2Type<false>)
+  {
+   return s.template getSerializitionSize<__EnvTransfer>();
+  }
+
+  template <class __S,class __EnvTransfer>
+  inline __attribute__((always_inline)) size_t
+   __getSizeHelper(Int2Type<true>)
+  {
+   return __EnvTransfer::template sizeofHostType<__S>();
+  }
+
+  template <class __S,class __EnvTransfer>
+  inline __attribute__((always_inline)) size_t __getSizeHelper(Int2Type<false>)
+  {
+   return __S::template getSerializitionSize<__EnvTransfer>();
+  }
 
 }
-# 255 "include/conceptual/Serialize.h"
+# 295 "include/conceptual/Serialize.h"
 template <class __S,class __EnvTransfer>
 inline __attribute__((always_inline)) SerializerPtr<__EnvTransfer>& operator<<(SerializerPtr<__EnvTransfer>& p,const __S &s)
 {
@@ -3159,6 +3200,22 @@ template <class __S,class __EnvTransfer>
 inline __attribute__((always_inline)) SerializerPtr<__EnvTransfer>& operator>>(SerializerPtr<__EnvTransfer>& p,__S &s)
 {
  return __deserializeHelper<__S,__EnvTransfer>(p, s,Int2Type<std::is_pod<__S>::value>());
+}
+
+
+
+template <class __S,class __EnvTransfer>
+inline __attribute__((always_inline)) size_t getSerializitionSize(const __S &s)
+{
+ return __getSizeHelper<__S,__EnvTransfer>(s,Int2Type<std::is_pod<__S>::value>());
+}
+
+
+
+template <class __S,class __EnvTransfer>
+inline __attribute__((always_inline)) size_t getSerializitionSize()
+{
+ return __getSizeHelper<__S,__EnvTransfer>(Int2Type<std::is_pod<__S>::value>());
 }
 # 10 "include/List.h" 2
 
@@ -3263,6 +3320,11 @@ public:
  using This = ListNode<T>;
  using __ListNode = This;
 public:
+
+
+
+
+ ListNode();
     ListNode(const T& data,__ListNode* next=(0),__ListNode* previous=(0));
     ListNode(const __ListNode &)=default;
     __ListNode & operator=(const __ListNode &)=default;
@@ -3313,7 +3375,7 @@ protected:
     __ListNode *previous;
 
 };
-# 205 "include/List.h"
+# 212 "include/List.h"
 template<class T,template <class> class _Allocator>
 class LinkedList : public SerializationInterface
 {
@@ -3325,6 +3387,7 @@ public:
 public:
 
 
+
  LinkedList()=delete;
 
 public:
@@ -3334,7 +3397,7 @@ public:
     ~LinkedList();
 
     inline __attribute__((always_inline)) __ListNode* getHead()const;
-    inline __attribute__((always_inline)) _Allocator<__ListNode > &getMemoryManager()const;
+    __attribute__((deprecated)) inline __attribute__((always_inline)) _Allocator<__ListNode > &getMemoryManager()const;
 
 
     inline __attribute__((always_inline)) __ListNode* getLast()const;
@@ -3342,14 +3405,25 @@ public:
     __ListNode* append(__ListNode* p);
     __ListNode* appendHead(__ListNode* p);
     __ListNode* appendHead(const T &t);
-    __ListNode* remove();
+
+     __ListNode* remove();
+
+
+
     __ListNode* removeHead();
+
+
+
+    __ListNode* removeAllAfterHead();
     void remove(__ListNode* p);
     void insertNext(__ListNode* where,__ListNode* p);
     void insertPrevious(__ListNode* where,__ListNode* p);
     size_t getSize()const;
     inline __attribute__((always_inline)) bool isEmpty()const;
 
+
+    inline __attribute__((always_inline)) __ListNode* newOneNode();
+    inline __attribute__((always_inline)) void freeOneNode(__ListNode *node);
 
     void freeNode(__ListNode * node);
     void free();
@@ -3394,8 +3468,9 @@ public:
  {
   return __EnvTransfer::template sizeofHostType<decltype(root->getData())>() * getSize();
  }
-protected:
+private:
     _Allocator<__ListNode > &smm;
+
 
 
 
@@ -3405,7 +3480,7 @@ protected:
 
 
 };
-# 318 "include/List.h"
+# 338 "include/List.h"
 template<class _Locateable,int _HowAllocated,
   template <class> class _Allocator>
 class LocateableLinkedList:public LinkedList<_Locateable,_Allocator>
@@ -3426,7 +3501,7 @@ public:
 
     LocateableLinkedList( __Allocator &smm );
     ~LocateableLinkedList();
-# 347 "include/List.h"
+# 367 "include/List.h"
     static __ListNode *findFirstStartLen(__ListNode* startNode,__SizeType start,__SizeType len);
     static __ListNode *findFirstLen(__ListNode* startNode,__SizeType len);
     static __ListNode *findFirstStart(__ListNode* startNode,__SizeType start);
@@ -3462,7 +3537,7 @@ public:
  using __ListNode = Super;
  using __TreeNode = This;
 public:
- TreeNode()=default;
+ TreeNode();
  TreeNode(const __TreeNode&)=default;
  __TreeNode & operator=(const __TreeNode&)=default;
 
@@ -3490,12 +3565,28 @@ public:
     inline __attribute__((always_inline)) bool hasSon()const;
     inline __attribute__((always_inline)) bool hasFather()const;
 
+
+
+
+
     void insertSon(__TreeNode* son);
     void insertFather(__TreeNode* father);
-    __TreeNode* removeSon();
- __TreeNode* removeFather();
+    void removeSon();
+ void removeFather();
  void adjustOffset(ptrdiff_t diff);
  void initToNull();
+
+
+
+
+
+
+ void concateSon(__TreeNode *node);
+
+
+
+
+ void concateNext(__TreeNode *node);
 
 
     __TreeNode* getParent()const;
@@ -3516,9 +3607,9 @@ protected:
     __TreeNode *father;
 
 };
-# 452 "include/List.h"
+# 490 "include/List.h"
 template <class T,template <class> class _Allocator>
-class Tree{
+class Tree : public SerializationInterface{
 public:
  using This = Tree<T,_Allocator>;
  using __Tree = This;
@@ -3528,9 +3619,15 @@ public:
 
  Tree()=delete;
 public:
-    Tree(__Allocator &smm,__TreeNode* root=(0));
-    Tree(const __Tree & )=default;
-    __Tree &operator=(const __Tree & )=default;
+
+
+
+
+
+
+    Tree(__Allocator &smm,__TreeNode * rootNode=(0));
+    Tree(const __Tree & )=delete;
+    __Tree &operator=(const __Tree & )=delete;
 
     ~Tree();
 
@@ -3538,15 +3635,51 @@ public:
     inline __attribute__((always_inline)) void setHead(__TreeNode *head);
     inline __attribute__((always_inline)) void addRoot(__TreeNode* node);
     inline __attribute__((always_inline)) bool isEmpty()const;
-    inline __attribute__((always_inline)) __Allocator& getSmm()const;
-    void free(__TreeNode *root);
 
+    __attribute__((deprecated)) inline __attribute__((always_inline)) __Allocator& getSmm()const;
+
+
+
+
+
+    inline __attribute__((always_inline)) void freeOneNode(__TreeNode *node);
+    inline __attribute__((always_inline)) __TreeNode * newOneNode();
+
+
+
+
+
+    void freeAll(__TreeNode *node);
+
+
+
+
+    size_t getSize()const;
+# 550 "include/List.h"
+private:
+    template <class __EnvTransfer>
+    static SerializerPtr<__EnvTransfer>* ptrNewest;
+
+
+
+    template <class __EnvTransfer>
+      size_t __serializeHelper(__TreeNode *node)const;
+    template <class __EnvTransfer>
+         __TreeNode * __deserializeHelper(size_t n);
+public:
+
+ template <class __EnvTransfer>
+  SerializerPtr<__EnvTransfer>& serialize(SerializerPtr<__EnvTransfer> &ptr)const;
+ template <class __EnvTransfer>
+  SerializerPtr<__EnvTransfer>& deserialize(SerializerPtr<__EnvTransfer> &ptr);
+ template <class __EnvTransfer>
+   size_t getSerializitionSize();
 
     void dumpInfo(Printer* p)const;
-
+# 586 "include/List.h"
 protected:
     __Allocator &smm;
-# 492 "include/List.h"
+# 599 "include/List.h"
     __TreeNode *root;
 
 };
@@ -3731,15 +3864,14 @@ protected:
  char baseAddrHigh_8:8;
 
 public:
+    SegmentDescriptor(char* baseaddr=0,int limit=0,char g=G_1B,char type=TYPE_U_DATA,
+      char dpl=DPL_0,char s=S_USER,char b=B_UPPER_BOUND32,char p=P_PRESENT);
+    ~SegmentDescriptor();
+
     inline __attribute__((always_inline)) void setBaseAddr(int baseAddr);
     inline __attribute__((always_inline)) int getBaseAddr()const;
     inline __attribute__((always_inline)) int getLimit()const;
     inline __attribute__((always_inline)) void setLimit(int limit);
-
-
-    SegmentDescriptor(char* baseaddr=0,int limit=0,char g=G_1B,char type=TYPE_U_DATA,
-      char dpl=DPL_0,char s=S_USER,char b=B_UPPER_BOUND32,char p=P_PRESENT);
-    ~SegmentDescriptor();
 
 
 
@@ -4033,6 +4165,11 @@ public:
  using __SizeType = size_t;
  using __MemoryDescriptor = This;
 
+public:
+
+
+
+ MemoryDescriptor()=default;
     inline __attribute__((always_inline)) MemoryDescriptor(__SizeType start,__SizeType limit,bool allocable=true);
 
     inline __attribute__((always_inline)) ~MemoryDescriptor();
@@ -4044,9 +4181,9 @@ public:
     inline __attribute__((always_inline)) bool operator!=(const __MemoryDescriptor& b)const;
 
 protected:
-    bool allocable;
+    bool allocable {false};
 };
-# 119 "include/MemoryManager.h"
+# 124 "include/MemoryManager.h"
 template <class _LinearSourceDescriptor,template <class> class _NodeAllocator>
 class LinearSourceManager:
   public
@@ -4087,7 +4224,7 @@ public:
 
 
     void* mnew(__SizeType size);
-# 173 "include/MemoryManager.h"
+# 178 "include/MemoryManager.h"
     void* extend(__SizeType start,__SizeType size,bool addOrReduce,__SizeType extsize,char *realBase=(0),bool moveData=false);
     void mdelete(void* p,__SizeType size);
 
@@ -4095,7 +4232,7 @@ public:
 
 
     __attribute__((deprecated)) void mdelete(void *p);
-# 188 "include/MemoryManager.h"
+# 193 "include/MemoryManager.h"
     bool mnewLinked(__SizeType size,
       __LinkedList &list,__SizeType eachSectionExtraSize=0);
 
@@ -4153,7 +4290,7 @@ protected:
 protected:
     _LinearSourceDescriptor space;
 };
-# 274 "include/MemoryManager.h"
+# 279 "include/MemoryManager.h"
 template <template <class> class _DescriptorAllocator>
 class MemoryManager:public Tree<MemoryDescriptor,_DescriptorAllocator>{
 public:
@@ -4170,9 +4307,9 @@ public:
  using __Allocator = _DescriptorAllocator<__TreeNode>;
 
 public:
- MemoryManager()=default;
+ MemoryManager()=delete;
     MemoryManager(__Allocator &smm);
-# 300 "include/MemoryManager.h"
+# 305 "include/MemoryManager.h"
     MemoryManager(__Allocator &smm,__SizeType start,__SizeType len,bool fatherAllocable=true);
 
 
@@ -4182,6 +4319,9 @@ public:
 
     MemoryManager(__Allocator &smm,__SizeType start,__SizeType len,
       __SizeType usedList[][2],__SizeType usedLen,bool fatherAllocable=true);
+
+
+
 
     ~MemoryManager();
 
@@ -4195,7 +4335,7 @@ public:
     void* mnew(__SizeType start,__SizeType size);
     void* mnew(__SizeType size);
     void* mnewAlign(__SizeType size,__SizeType alignment);
-# 333 "include/MemoryManager.h"
+# 341 "include/MemoryManager.h"
     void* extend(__SizeType start,__SizeType size,int extsize,char *realBase=(0),bool moveData=false);
 
     void mdelete(void* p,__SizeType size);
@@ -4234,15 +4374,13 @@ public:
 
 protected:
     __TreeNode * allocOutNode(__TreeNode *avlNode,__SizeType start,__SizeType len);
+
+
+
+
     void withdrawNode(__TreeNode *exactNode);
-# 380 "include/MemoryManager.h"
+# 392 "include/MemoryManager.h"
     u8_t findExtend(__SizeType start,__SizeType size,__SizeType extsize,__TreeNode * &rtnode)const;
-
-protected:
-
-
-private:
-
 };
 
 

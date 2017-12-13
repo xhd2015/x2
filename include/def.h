@@ -23,10 +23,11 @@ typedef unsigned int u32_t;
 typedef unsigned short u16_t;
 typedef unsigned char  u8_t;
 #define PREFERED_ALIGNMENT 8
+enum { HOST_BIT = 64 };
 #endif
 
 //== macro configs, for any purepose
-#include <macros/configurations.h>
+#include <conceptual/configurations.h>
 #include <config.h>
 
 #if defined(CODE32)||defined(CODE16) || defined(CODE32USER)   //in standard host enviornment,do not use these definitions.
@@ -39,8 +40,10 @@ typedef unsigned short u16_t;
 typedef unsigned char  u8_t;
 #if defined(CODE16)
 #define PREFERED_ALIGNMENT 2
+enum { HOST_BIT = 32 };
 #else
 #define PREFERED_ALIGNMENT 4
+enum { HOST_BIT = 16 };
 #endif
 #endif
 

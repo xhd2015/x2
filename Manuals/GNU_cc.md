@@ -26,6 +26,17 @@ template class Foo<Bar>;  对Foo<Bar>这个实例化模板生成代码，也就�
 
 对于编译64位目标机器上的程序，不要单独使用ld。
 
+# inline 和 attribute always_inline
+'always_inline'
+     Generally, functions are not inlined unless optimization is
+     specified.  For functions declared inline, this attribute inlines
+     the function independent of any restrictions that otherwise apply
+     to inlining.  Failure to inline such a function is diagnosed as an
+     error.  Note that if such a function is called indirectly the
+     compiler may or may not inline it depending on optimization level
+     and a failure to inline an indirect call may or may not be
+     diagnosed.
+注意：如果inline失败（比如有取地址的行为），则根据优化级别的不同，编译器可能发出也可能不发出错误。
 
 # 16位和32位的区别
 对同一条指令 mov $34,%eax   由于这是一条32位指令，16位代码会生成额外的前缀；32位不会
@@ -268,7 +279,7 @@ One of the standard libraries bypassed by -nostdlib and -nodefaultlibs is libgcc
 
 
 
-# 附录：pragma指令
+# 附录：pragma指令 
 '#pragma GCC target ("STRING"...)'
   指定目标架构，同__attribute__((target("STRING"))).目前实现的由x86,PowerPC和Nios II.
 '#pragma GCC optimize ("STRING"...)' 指定优化选项，参见属性
@@ -497,11 +508,14 @@ stdcall 对于固定参数，自动平衡堆栈；对于可变参数，不平衡
 -M  不生成预处理结果文件，而是生成适合make使用的规则。 -M本身包含-E。
 -MM 同-M，但是不包含系统文件
 -MF 指定-M系列的输出文件。如果未指定，为标准输出
--MP  为每个头文件生成必要的phony目标，比如
+比如， g++ -MM -MF Makefile File.cpp
+则生成的依赖为：
+File.o: File.cpp include/XXX.h ...
+-MP  为每个头文件生成必要的空目标，比如
 ```make
           test.o: test.c test.h
 
-          test.h:
+          test.h: #为头文件生成空目标
 ```
 '-MT TARGET' 改变规则中的target部分的名称
 -MD  =>-M -MF FILE，但是不启用-E，因此-E需要自己开启

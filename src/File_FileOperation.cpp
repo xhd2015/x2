@@ -9,6 +9,7 @@
 
 #include <def.h>
 #include <File.h>
+#include <EnvInterface.h>
 
 #if defined(CODE64)
 #include <EnvInterface64Impl.h>
@@ -206,7 +207,7 @@ void __DEF_FileOperation::mkdir(const __String& dir)
 {
 
 	util.seterrno(__X2fsUtil::ERROR_NOERR);
-	util.create(curNode, FileDescriptor::TYPE_DIR, dir.c_str(), 0,0);
+	util.create(curNode, FileType::TYPE_DIR, dir.c_str(), 0,0);
 	if(util.geterrno() == __X2fsUtil::ERROR_FILE_ALREDY_EXIST)
 	{
 		HostEnv::printf_simple("file/directory");
@@ -219,7 +220,7 @@ __DEF_Template_FileOperation
 void __DEF_FileOperation::touch(const __String & fname,__SizeType secNum,__FsTimeType ctime)
 {
 	util.seterrno(__X2fsUtil::ERROR_NOERR);
-	util.create(curNode, FileDescriptor::TYPE_FILE, fname.c_str(), secNum,ctime);
+	util.create(curNode, FileType::TYPE_FILE, fname.c_str(), secNum,ctime);
 	if(util.geterrno()!=__X2fsUtil::ERROR_NOERR)
 	{
 		HostEnv::printf_simple("error code is %d\n",util.geterrno());
@@ -338,7 +339,7 @@ bool __DEF_FileOperation::eval(const __String &cmd)
 {
 		//parse all args
 		//将其用正则表达式分解成数组格式
-		vector<string> args=HostEnv::spaceSplit(cmd);
+		HostEnv::Vector<HostEnv::String> args=HostEnv::spaceSplit(cmd);
 		if(args.size()==0)return true;
 		if(args[0].compare("help")==0)
 		{
@@ -412,6 +413,13 @@ bool __DEF_FileOperation::eval(const __String &cmd)
 		return true;
 
 }
+__DEF_Template_FileOperation
+void __DEF_FileOperation::flush()
+{
+	util.flush();
+}
+
+
 #if defined(CODE64)
 #include <fstream>
 __DEF_Template_FileOperation

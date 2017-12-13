@@ -41,12 +41,12 @@ struct ParamMkfs{
 	bool wholeSecNumSet=false;
 	bool lbaLowSet=false;
 
-	size_t secSpaces[4]={
-			X2fsMetaInfo::FileNameSectionLen/CONST_SECSIZE,
-			X2fsMetaInfo::DirSectionLen/CONST_SECSIZE,
-			X2fsMetaInfo::FreeSpaceSectionLen/CONST_SECSIZE,
-			X2fsMetaInfo::LinkedInfoSectionLen/CONST_SECSIZE,
-	};
+//	size_t secSpaces[4]={
+//			X2fsMetaInfo::FileNameSectionLen/CONST_SECSIZE,
+//			X2fsMetaInfo::DirSectionLen/CONST_SECSIZE,
+//			X2fsMetaInfo::FreeSpaceSectionLen/CONST_SECSIZE,
+//			X2fsMetaInfo::LinkedInfoSectionLen/CONST_SECSIZE,
+//	};
 	size_t optional[1]={0};
 
 };

@@ -48,14 +48,26 @@ namespace HostEnv{
 	using ::memcpy;
 	using ::atoi;
 
+	using ::operator new;
+
 	using String =std::string;
 	template <class T>
 		 using Allocator =typename std::template allocator<T>;
 	template <class T>
 		using Vector = typename std::template vector<T,Allocator<T>>;
 
+	using std::cout;
+	using std::cin;
+	using std::endl;
+	using std::flush;
 
- // NOTE 检查下面的=0在没有virtual的情况下能否用，IDE没有报错
+	void *checkOnNullThrows(void *ptr);
+	/**
+	 * 如果不成功，抛出异常
+	 * 用于需要确保对象被正确初始化，保证不变式被建立
+	 */
+	void *mallocThrows(size_t size);
+
 	// 不能使用
 	int writeSectors(u32_t srcSeg,const u8_t* srcOff,u8_t driver,u32_t LBAlow,u32_t num,u32_t LBAhigh);
 	int readSectors(u32_t dstSeg,u8_t* dstOff,u8_t driver,u32_t LBAlow,u32_t num,u32_t LBAhigh);
@@ -91,6 +103,9 @@ namespace HostEnv{
 	 */
 	void flushOutputs();
 
+	/**
+	 * atoi对String类型的包装
+	 */
 	int atoi(const String &s)
 	{
 		return ::atoi(s.c_str());
@@ -251,8 +266,17 @@ namespace HostEnv{
 				return std::move(regexSplit(std::regex(";+"), s));
 			}
 
+		void *checkOnNullThrows(void *ptr)
+		{
+			if(!ptr)
+				HostEnv::systemAbort("nullpointer?", -2);
+			return ptr;
+		}
 
-
+		void *mallocThrows(size_t size)
+		{
+			return checkOnNullThrows(malloc(size));
+		}
 #elif defined(CODE32)
 
 #elif defined(CODE32USER)
@@ -265,6 +289,8 @@ namespace HostEnv{
 
 
 };
+
+using HostEnv::operator new; // HostEnv重新定义new
 
 
 

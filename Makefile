@@ -94,7 +94,7 @@ CXXSTD := c++17
 # CCFLAGS is for all, CCFLAGSXX for CODEXX
 # deprecated,unused vars, will be later checked, th
 CCFLAGS_CHECK_LEVEL_LOW = -Wdeprecated -Wdeprecated-declarations  -Wunused-variable
-CCFLAGS :=  -fno-exceptions -nostdlib -I $(INCLUDE) -imacros $(INCLUDE)/macros/configurations.h \
+CCFLAGS :=  -fno-exceptions -nostdlib -I $(INCLUDE) -imacros $(INCLUDECONCEPTUAL)/configurations.h \
 		-std=$(CXXSTD) -Winline -Wall \
 		-Wno-deprecated -Wcomment -Wno-deprecated-declarations -Wno-unused-variable \
 		-Werror -fmax-errors=10 \
@@ -107,7 +107,7 @@ DEPRECATED_CCFLAGS = -fpack-struct=1
 
 DDFLAGS := conv=notrunc bs=1c
 
-CCFLAGS64 := -m64 -I./include -std=$(CXXSTD)
+CCFLAGS64 := -m64 
 CCMACROS64 := -D CODE64
 
 LDFLAGS :=    --print-gc-sections --no-gc-sections
@@ -118,7 +118,8 @@ UNUSED_CCFLAGS := -fkeep-inline-functions -fpermissive
 # imageMacros := DRIVER SECSTART SECNUM CODESEG CODEOFF
 # imageSyms := JMPSEG JMPOFF
 #==================================================================================
-.PHONY : dump16 dump default nothing help debug exportversion backup push all update-host-tools console
+.PHONY : dump16 dump default nothing help debug exportversion backup push all update-host-tools console \
+	force
 .ONESHELL:
 .SECONDEXPANSION:
 default:
@@ -272,23 +273,7 @@ $(GEN)/main.bimg:$(TOOLSDIR)/main.bimg.clean $(GEN16)/MBRmain.bimg $(GEN32)/main
 	&&\
 	dd if=$(GEN32USER)/UserProcess.bimg of=$@ bs=512c conv=notrunc seek=$$(( $(CONFIG_PROTECTED_SECNUMS) + $(CONFIG_REAL_SECNUMS) )) count=$(CONFIG_USER_PROCESS_SECNUMS)
 
-$(GEN64)/CMDUtil%.exe:$(GEN64)/lib64.a  $(SRC64)/CMDUtil%.cpp $(SRC)/File.cpp $(SRC)/EnvInterface64Impl.cpp \
-			$(SRC64)/MallocToSimple.cpp $(SRCCOMMON)/Getopt.cpp
-	filename=$$(basename $@|grep -P '.*CMDUtil.*\.exe' -o)
-	if [ -z $$filename ];then
-		echo 'filename is invalid'
-		exit 1
-	fi
-	basefilename=$${filename/%.exe/}
-	basefilename=$${basefilename/#CMDUtil/}
-	$(CXX) -Werror -Wall -DCODE64 -std=$(CXXSTD) -I$(INCLUDE) \
-	-Wformat \
-	 -o $@ \
-	-L$(GEN64) -Wl,'-(' -l64 $(SRC64)/CMDUtil$${basefilename}.cpp \
-			$(SRC)/File.cpp $(SRC)/EnvInterface64Impl.cpp $(SRCCOMMON)/Getopt.cpp \
-			$(SRC64)/MallocToSimple.cpp		\
-	-Wl,'-)' -static
-$(GEN64)/conceptual_%.exe:$(SRC64)/CMDUtil_%.cpp $(INCLUDECONCEPTUAL)/all.h $(SRCCONCEPTUAL)/all.cpp
+$(GEN64)/conceptual_%.exe:$(SRC64)/CMDUtil_%.cpp force
 	filename=$$(basename $@|grep -P '.*conceptual_.*\.exe' -o)
 	if [ -z $$filename ];then
 		echo 'filename is invalid'
@@ -299,23 +284,9 @@ $(GEN64)/conceptual_%.exe:$(SRC64)/CMDUtil_%.cpp $(INCLUDECONCEPTUAL)/all.h $(SR
 	$(CXX) -Werror -Wall -DCODE64 -DCMDUTIL=$${basefilename}.cpp -std=$(CXXSTD) -I$(INCLUDE) \
 	-Wformat \
 	 -o $@ \
+	 $(CCFLAGS64) \
 	-L$(GEN64) -Wl,'-(' $(SRCCONCEPTUAL)/all.cpp \
 	-Wl,'-)' -static
-#$(GEN64)/CMDUtil.o:$(SRC64)/CMDUtil.cpp
-#	$(CXX) -Werror -fmax-errors=2 -Wall -DCODE64 -std=$(CXXSTD) -I$(INCLUDE) \
-#	-Wno-error=unused-variable -Wno-error=int-to-pointer-cast -Wno-error=deprecated-declarations \
-#	-Wno-error=unused-but-set-variable \
-#	 -c -o $@ $^
-#$(GEN64)/File.o:$(SRC)/File.cpp
-#	$(CXX) -Werror -fmax-errors=2 -Wall -DCODE64 -std=$(CXXSTD) -I$(INCLUDE) \
-#	-Wno-error=unused-variable -Wno-error=int-to-pointer-cast -Wno-error=deprecated-declarations \
-#	-Wno-error=unused-but-set-variable \
-#	 -c -o $@ $^
-#$(GEN64)/EnvInterface64Impl.o:$(SRC)/EnvInterface64Impl.cpp
-#	$(CXX)  -Werror -fmax-errors=2 -Wall -DCODE64 -std=$(CXXSTD) -I$(INCLUDE) \
-#	-Wno-error=unused-variable -Wno-error=int-to-pointer-cast -Wno-error=deprecated-declarations \
-#	-Wno-error=unused-but-set-variable \
-#	 -c -o $@ $^
 
 	
 
@@ -329,6 +300,13 @@ $(GEN32USER)/%.o:$(GEN32USER)/%.s
 $(GEN64)/%.o:$(SRC)/%.cpp
 	$(CXX) -c $< -o $@ $(CCFLAGS64) $(CCMACROS64)
 
+# 实际效果甚差，不推荐
+#$(INCLUDECONCEPTUAL)/precompiled_most.h.gch:force #$(INCLUDECONCEPTUAL)/precompiled_most.h
+#	$(CXX) $(INCLUDECONCEPTUAL)/precompiled_most.h -o $@ $(CCFLAGS64) $(CCMACROS64)
+
+#$(GEN64)/precompiled_most.o:$(SRCCONCEPTUAL)/precompiled_most.cpp #$(SRCCONCEPTUAL)/all.cpp
+#	$(CXX) -c $< -o $@ $(CCFLAGS64) $(CCMACROS64) -DCMDUTIL=test_serialize.cpp
+
 # .cpp --> .s
 $(GEN16)/%.s:$(SRC)/%.cpp
 	$(CXX) -S $< -o $@ $(CCFLAGS) $(CCFLAGS16) $(CCMACROS) $(CCMACROS16)
@@ -340,7 +318,7 @@ $(GEN32USER)/%.s:$(SRC)/%.cpp
 #	$(CXX) $(CCFLAGS64) $(CCMACROS64) -S $< -o $@
 
 #.h --> .cpp
-$(SRC)/%.cpp:$(finclude) $(INCLUDE)/macros/configurations.h
+$(SRC)/%.cpp:$(finclude) $(INCLUDECONCEPTUAL)/configurations.h
 	@#nothing
 # me --> .cpp .h  由我本人亲自操刀
 .cpp .h:
@@ -350,7 +328,7 @@ $(SRC)/%.cpp:$(finclude) $(INCLUDE)/macros/configurations.h
 #生成-imacros使用的宏定义文件
 CCMACROS_DEFINES_EVAL := $(foreach macro,$(CONFIG_ARGS),\t\\\#define $(macro)\t\t\t\t\t\t\t$$($(macro))\n)
 $(eval CCMACROS_DEFINES := $(CCMACROS_DEFINES_EVAL))
-$(INCLUDE)/macros/configurations.h:Config.makefile
+$(INCLUDECONCEPTUAL)/configurations.h:Config.makefile
 	@
 	echo Generating $@
 	(
@@ -403,7 +381,7 @@ $(GEN32)/Config.prefixsize.makefile:$(GEN32)/KernelMemoryConfig.o
 
 #Keep the directory structure
 clean:clean16 clean32 clean64
-	-rm -rf $(GEN)/main.bimg.lock $(INCLUDE)/config.h
+	-rm -rf $(GEN)/main.bimg.lock $(INCLUDE)/config.h #$(INCLUDECONCEPTUAL)/precompiled_most.h.pch
 	#clean all
 clean16:
 	-rm -rf $(GEN16)/*

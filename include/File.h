@@ -4,7 +4,7 @@
 #define File_h__
 
 
-#include <loki/Int2Type.h>
+#include <conceptual/loki/Int2Type.h>
 #include <64/MallocToSimple.h>
 #include <def.h>
 #include <MemoryManager.h>
@@ -18,89 +18,231 @@
 //using std::initializer_list;
 
 
-//==class FileDescriptor
-
-/**
-* 支持序列化
-*/
-class FileDescriptor:public SerializationInterface
-{
-public:
-	enum{ TYPE_FILE=0,TYPE_DIR=1,TYPE_EAP=2};
-
+//==class FileDescriptorBase
 	/**
-	 * 仅仅是size_t的别名
+	 * 可默认初始化
+	 * 实现：序列化接口
 	 */
-	using size_t = HostEnv::size_t;
-	using __TimeType = size_t;
+	template <class __FsEnv = EnvTransfer<HOST_BIT>>
+	class BaseDescriptor:public SerializationInterface{
+	public:
+		using This = BaseDescriptor<__FsEnv>;
+		using __BaseDescriptor = This;
+		using Super = void ; //kidding? no, I do not have a super,but an interface
+	public:
+		/**
+		 * 用于记录动态类型的域
+		 */
+		using ClassSerializeType = u8_t;
+		enum FileType{ TYPE_FILE=0,TYPE_DIR=1,TYPE_EAP=2};
+
+		/**
+		 * 仅仅是size_t的别名
+		 */
+		using size_t = HostEnv::size_t;
+		using __TimeType = size_t;
+	protected:// 不允许构造一个不完整的Descriptor
+		AS_MACRO BaseDescriptor()=default;
+		AS_MACRO BaseDescriptor(const HostEnv::String& name,__TimeType createdTime,__TimeType lastModefiedTime):
+						name(name),createdTime(createdTime),lastModefiedTime(lastModefiedTime) {}
+		AS_MACRO BaseDescriptor(HostEnv::String&& name,__TimeType createdTime,__TimeType lastModefiedTime):
+								name(std::move(name)),createdTime(createdTime),lastModefiedTime(lastModefiedTime) {}
+		BaseDescriptor(const __BaseDescriptor &bd)=default;
+		__BaseDescriptor &operator=(const __BaseDescriptor &bd)=default;
+		BaseDescriptor(BaseDescriptor &&)=default;
+		__BaseDescriptor &operator=(__BaseDescriptor &&)=default;
+	public:
+
+		virtual ~BaseDescriptor()=default;
+
+
+		virtual FileType getType()const = 0;
+
+		AS_MACRO const HostEnv::String& getName()const { return  name;}
+		AS_MACRO void				setName(const HostEnv::String& name) { this->name=name;}
+		AS_MACRO void				setName(HostEnv::String && name){this->name = std::move(name);}
+		AS_MACRO __TimeType getCreatedTime() const{return createdTime;}
+		AS_MACRO void setCreatedTime(__TimeType createdTime) { this->createdTime = createdTime;}
+		AS_MACRO __TimeType getLastModefiedTime() const{return lastModefiedTime;}
+		AS_MACRO void setLastModefiedTime(__TimeType lastModefiedTime){this->lastModefiedTime = lastModefiedTime;}
 public:
+		//FsEnv只与序列化这一部分有关
+		/**
+		 * 序列化方案：此处仅仅是序列化的子过程调用dynamic_cast进行转换
+		 *
+		 */
+		virtual SerializerPtr<__FsEnv>& serialize(SerializerPtr<__FsEnv> &ptr)const
+			{
+				return ptr << name << createdTime << lastModefiedTime;
+			}
+		virtual SerializerPtr<__FsEnv>& deserialize(SerializerPtr<__FsEnv> &ptr)
+			{
+				return ptr >> name >> createdTime >> lastModefiedTime;
+			}
+		virtual size_t getSerializitionSize()const
+		{
+			return ::getSerializitionSize<__FsEnv>(name) +
+					::getSerializitionSize<__FsEnv,decltype(createdTime)>()+
+					::getSerializitionSize<__FsEnv,decltype(lastModefiedTime)>();
+		}
+		/**
+		 * 全局operator<<会根据此方法的返回进行选择
+		 */
+		static constexpr GlobalCallPolicy callPolicy(){
+			return CALL_GLOBAL_HELPER;
+		}
+	private:
+		HostEnv::String name{};//name 其实必须初始化
+
+		/**
+		 * 创建时间
+		 */
+		__TimeType createdTime=0;
+
+		/**
+		 * 最后修改时间
+		 */
+		__TimeType lastModefiedTime=0;
+	};
+
+
+template <class __FsEnv>
+class DirDescriptor:public BaseDescriptor<__FsEnv>{ //无需改写任何东西
+private:
+	using This = DirDescriptor;
+	using Super = BaseDescriptor<__FsEnv>;
+public:
+	using FileType = typename Super::FileType;
+
+	using Super::BaseDescriptor;//继承构造函数
+	virtual ~DirDescriptor()=default;
+	virtual FileType getType()const
+	{
+		return FileType::TYPE_DIR;
+	}
+};
+template <class __FsEnv>
+class FileDescriptor:public BaseDescriptor<__FsEnv>{
+private:
+	using This = FileDescriptor;
+	using Super = BaseDescriptor<__FsEnv>;
+public:
+	using FileType = typename Super::FileType;
 	AS_MACRO FileDescriptor()=default;
-	AS_MACRO FileDescriptor(u8_t type,size_t sectionList,
-			size_t fileLen,size_t nameStart,__TimeType createdTime,__TimeType lastModefiedTime);
+	virtual ~FileDescriptor()=default;
+	using Super::BaseDescriptor;
 
-	AS_MACRO u8_t getType()const;
-	AS_MACRO void setType(u8_t type);
+	virtual FileType getType()const
+	{
+		return FileType::TYPE_FILE;
+	}
+	AS_MACRO size_t getFileLen() const { return fileLen;}
+	AS_MACRO void setFileLen(size_t fileLen) { this->fileLen = fileLen;}
+	void addSpace(const LinearSourceDescriptor &lsd)
+	{
+		this->spaces.push_back(lsd);
+	}
+	void popSpace()
+	{
+		this->spaces.pop_back();
+	}
 
-	AS_MACRO size_t getNameOffset()const;
-	AS_MACRO void	setNameOffset(size_t off);
-	AS_MACRO __TimeType getCreatedTime() const;
-	AS_MACRO void setCreatedTime(__TimeType createdTime);
-	AS_MACRO size_t getFileLen() const;
-	AS_MACRO void setFileLen(size_t fileLen);
-	AS_MACRO DEPRECATED size_t getFileStart() const;//file will always starts from the beginning
-	AS_MACRO DEPRECATED void setFileStart(size_t fileStart);
-	AS_MACRO __TimeType getLastModefiedTime() const;
-	AS_MACRO void setLastModefiedTime(__TimeType lastModefiedTime);
-	AS_MACRO DEPRECATED size_t getSectionSpan() const;
-	AS_MACRO DEPRECATED void setSectionSpan(size_t sectionSpan);
-	AS_MACRO DEPRECATED size_t getSectionStart() const;
-	AS_MACRO DEPRECATED void setSectionStart(size_t sectionStart);
+	const LinearSourceDescriptor & getSpace(size_t i)const
+	{
+		return this->spaces[i];
+	}
+	size_t getSpaceListSize()const
+	{
+		return this->spaces.size();
+	}
+	const HostEnv::Vector<LinearSourceDescriptor> & getSpaces()const
+	{
+		return spaces;
+	}
 
+	virtual SerializerPtr<__FsEnv>& serialize(SerializerPtr<__FsEnv> &ptr)const
+	{
+		return this->Super::serialize(ptr) << fileLen << spaces;
+	}
 
-	AS_MACRO size_t getSectionListIndex() const ;
-	AS_MACRO void setSectionListIndex(size_t	sectionListIndex);
+	virtual SerializerPtr<__FsEnv>& deserialize(SerializerPtr<__FsEnv> &ptr)
+	{
+		return this->Super::deserialize(ptr) >>  fileLen >> spaces;
+	}
 
+	virtual size_t getSerializitionSize()const
+	{
+		return this->Super::getSerializitionSize() +
+				::getSerializitionSize<__FsEnv,decltype(fileLen)>() +
+				::getSerializitionSize<__FsEnv>(spaces);
+	}
 
-	template <class __EnvTransfer>
-		SerializerPtr<__EnvTransfer>& serialize(SerializerPtr<__EnvTransfer> &ptr)const;
-	template <class __EnvTransfer>
-		SerializerPtr<__EnvTransfer>& deserialize(SerializerPtr<__EnvTransfer> &ptr);
-	template <class __EnvTransfer>
-		constexpr size_t getSerializitionSize();
 private:
 	/**
-	 * 类型，文件，文件夹，或者扩展区域（废弃）
+	 * 文件长度，字节为单位
 	 */
-	u8_t type=TYPE_FILE;
-
+	size_t fileLen = 0;
 	/**
-	 * 文件占据的分区链表的下标
+	 * 占据的空间分区信息，可以不连续
 	 */
-	size_t /* DEPRECATED sectionStart,sectionSpan,*//*DEPRECATED fileStart */sectionListIndex=0;
-	/**
-	 * 文件长度
-	 */
-	size_t fileLen=0;
-
-	/**
-	 * 文件名在 name分区中的开始下标
-	 */
-	size_t nameStart=0;
-
-	/**
-	 * 创建时间
-	 */
-	__TimeType createdTime=0;
-
-	/**
-	 * 最后修改时间
-	 */
-	__TimeType lastModefiedTime=0;
-
+	HostEnv::Vector<LinearSourceDescriptor> spaces {};
 };
 
 
 
+template <class __FsEnv,class ... Args>
+BaseDescriptor<__FsEnv> *createFileDescriptor(typename BaseDescriptor<__FsEnv>::FileType type,Args&&...args)
+{
+	if(type==BaseDescriptor<__FsEnv>::TYPE_FILE)
+		return new FileDescriptor<__FsEnv>(std::forward<Args>(args)...);
+	else
+		return new DirDescriptor<__FsEnv>(std::forward<Args>(args)...);
+}
+
+/**
+ * 使用全局静态函数，这种情况下，原来的operator<<,operator>>需要进行一定程度的改写，指针版本。
+ * 只有指针情况下需要使用policy
+ * 如果有此静态方法，应当优先调用
+ */
+template <class __EnvTransfer>
+SerializerPtr<__EnvTransfer>& serialize(SerializerPtr<__EnvTransfer> &ptr,
+			const BaseDescriptor<__EnvTransfer> * pfile)
+{
+	ptr << static_cast<typename BaseDescriptor<__EnvTransfer>::ClassSerializeType>(pfile->getType()); //先写 type类型，然后调用其自身的序列化函数
+	return pfile->serialize(ptr);
+}
+/**
+ * 前置条件： pfile==nullptr，否则，pfile原来的对象被重置
+ * @return pfile指向已经反序列化的对象
+ * 如果类型未知,或者分配空间失败，抛出异常
+ */
+template <class __EnvTransfer>
+SerializerPtr<__EnvTransfer>&  deserialize(SerializerPtr<__EnvTransfer> &ptr,
+		BaseDescriptor<__EnvTransfer> * &pfile)
+{
+	typename BaseDescriptor<__EnvTransfer>::ClassSerializeType type;
+	ptr >> type; //读取type
+	if(type == BaseDescriptor<__EnvTransfer>::TYPE_FILE) //file
+	{
+		pfile = new FileDescriptor<__EnvTransfer>();
+
+//				static_cast<>(HostEnv::mallocThrows(sizeof(FileDescriptor<__EnvTransfer>)));
+		//注意：只能使用static,reinterpret可能导致指针没有正常转换。
+		// 并未初始化，vtable表不正确
+	}else if(type == BaseDescriptor<__EnvTransfer>::TYPE_DIR){
+		pfile = new DirDescriptor<__EnvTransfer>();
+//		pfile = static_cast<DirDescriptor<__EnvTransfer>*>(HostEnv::mallocThrows(sizeof(DirDescriptor<__EnvTransfer>))); //
+	}else{ //未知类型，抛出异常
+		HostEnv::systemAbort("deserialize unknow type", -2);
+	}
+	return pfile->deserialize(ptr);
+}
+template <class __EnvTransfer>
+size_t getSerializitionSize(const BaseDescriptor<__EnvTransfer> *pfile)
+{
+	return __EnvTransfer::template sizeofHostType<BaseDescriptor<__EnvTransfer>::ClassSerializeType>() +
+			pfile->getSerializitionSize();
+}
 //==class X2fsMetaInfo
 /**
  * 从一个扇区初始化
@@ -113,104 +255,107 @@ class X2fsMetaInfo:public SerializationInterface
 {
 public:
 
-	enum __ENUMS{
-		SECNUM_RESERVED_CONST=2,
-		SECNUM_META_CONST=1,
-		SECNUM_SECD = 20,
+	enum {
+		SECNUM_RESERVED_CONST=25,
+		SECNUM_META_CONST=40, // 200个节点的规模，每个节点100b，大约是40个扇区
 		VALID_FLAG=0xaa55,
 
-
-		INDEX_NAME=0,
-		INDEX_DIR=1,
-		INDEX_FREE=2,
-		INDEX_LINK=3,//当你修改该区时，必须修改PARTS_REQUIRED
-
-		PARTS_REQUIRED=4,
-		PARTS_OPTIONAL=1,
-
 		BASIC_SIZE_TYPE =  sizeof(size_t),
-
-
-		INDEX_OPTIONAL_SECD=0
 	};
 	enum{SecSize=512,KiB=2*SecSize,MiB=1024*KiB,GiB=1024*MiB};
-	enum{
-		 ReservedSection=0,ReservedSectionLen=2*SecSize,
-		 FileNameSection=2*SecSize,FileNameSectionLen=5*SecSize,
-		 DirSection=FileNameSection+FileNameSectionLen,DirSectionLen=15*SecSize,
-		 FreeSpaceSection=DirSection+DirSectionLen,FreeSpaceSectionLen=5*SecSize,
-		 /*NEW @ 2017-03-12 16:19:43*/LinkedInfoSection=FreeSpaceSection + FreeSpaceSectionLen, LinkedInfoSectionLen=5*SecSize,
-		 	 	 	 	 	 	 	 FileAllocSection=LinkedInfoSection+LinkedInfoSectionLen
-		// DEPRECATED,use sizeof(SECTION_TRAIL) SectoinPointerSize = sizeof(size_t),SectionLengthSize = sizeof(size_t)/*the end of the section has the two trailing numbers*/
-		//DEPRECATED SectionTrailSize = sizeof(LinearSourceDescriptor)
-
-	};
-
 	X2fsMetaInfo()=default;
 
-
-
-public:
-	/**
-	 *  记录文件系统的size_t的基本长度
-	 *  注意：该域必须放在开始，以便一个位置系统读取之后能够根据第一个字节判断出该文件系统的尺寸基本类型
-	 *  取值：1,2,4,...
-	 */
-	u8_t	basicSizeType = BASIC_SIZE_TYPE;
-
-	// mutable因为可能通过反序列化设置
-	size_t reservedSec=SECNUM_RESERVED_CONST;//2
-	size_t metaSec=SECNUM_META_CONST;
-
-	//长度必须放在上面，以便进行序列化
-	u8_t len=PARTS_REQUIRED;//上面数组的长度
-	/**
-	 * 	name dir free file link secd
-	 *
-	 * 	=0表示该分区不分配。通常用于一些可选分区
-	 */
-	size_t secnums[PARTS_REQUIRED];
-
-	u8_t optionalLen=PARTS_OPTIONAL;
-	size_t optional[PARTS_OPTIONAL];
-
-
-	/**
-	 * 记录该分区的lba起始地址
-	 * 与mbr中的信息重复
-	 */
-	u32_t lbaStartLow=0;
-	u32_t lbaStartHigh=0;
-
-	/**
-	 * 记录该分区的总的扇区数
-	 * 与mbr中的信息重复
-	 */
-	size_t wholeSecnums=0;
-
-	u16_t	validFlag=VALID_FLAG;
+    X2fsMetaInfo(u32_t lbaBaseLow, u32_t lbaBaseHigh,size_t wholeSecnums,u8_t basicSizeType = BASIC_SIZE_TYPE,
+                 size_t reservedSec = SECNUM_RESERVED_CONST,
+                 size_t metaSec = SECNUM_META_CONST,
+                  u16_t validFlag = VALID_FLAG) :
+            basicSizeType(basicSizeType), reservedSec(reservedSec),
+                                                         metaSec(metaSec), lbaBaseLow(lbaBaseLow),
+                                                         lbaBaseHigh(lbaBaseHigh), wholeSecnums(wholeSecnums),
+                                                         validFlag(validFlag) {}
 
 public:
 	/**
-	 *  校验metainfo是否符合结构
+	 *  校验metainfo是否有效
 	 */
-	static bool checkMetainfo(const X2fsMetaInfo& info);
+	static bool checkMetainfo(const X2fsMetaInfo& info)=delete;
 
+	bool isValid()const
+	{
+		return validFlag == VALID_FLAG;
+	}
 	//序列化接口
 	template <class __EnvTransfer>
 		SerializerPtr<__EnvTransfer>& serialize(SerializerPtr<__EnvTransfer> &ptr)const;
 	template <class __EnvTransfer>
 		SerializerPtr<__EnvTransfer>& deserialize(SerializerPtr<__EnvTransfer> &ptr);
 	template <class __EnvTransfer>
-		size_t getSerializitionSize();
+		static constexpr size_t getSerializitionSize();
 	void dumpInfo();
-//	size_t getDataAllocation
+
+    // auto generated setters & getters
+    u8_t getBasicSizeType() const;
+
+    void setBasicSizeType(u8_t basicSizeType);
+
+    size_t getReservedSec() const;
+
+    void setReservedSec(size_t reservedSec);
+
+    size_t getMetaSec() const;
+
+    void setMetaSec(size_t metaSec);
+
+    size_t getFreeSpaceStart()const
+    {
+    	return getMetaSec() + getReservedSec();
+    }
+    size_t getFreeSpaceLength()const
+    {
+    	return getWholeSecnums() - getFreeSpaceStart();
+    }
+
+    u32_t getLbaBaseLow() const;
+
+    void setLbaBaseLow(u32_t lbaBaseLow);
+
+    u32_t getLbaBaseHigh() const;
+
+    void setLbaBaseHigh(u32_t lbaBaseHigh);
+
+    size_t getWholeSecnums() const;
+
+    void setWholeSecnums(size_t wholeSecnums);
+
+private:
+	/**
+	 *  记录文件系统的size_t的基本长度
+	 *  注意：该域必须放在开始，以便一个位置系统读取之后能够根据第一个字节判断出该文件系统的尺寸基本类型
+	 *  取值：1,2,4,...
+	 */
+	u8_t	basicSizeType { BASIC_SIZE_TYPE };
+
+	// mutable因为可能通过反序列化设置
+	size_t reservedSec { SECNUM_RESERVED_CONST };//2
+	size_t metaSec { SECNUM_META_CONST };
+
+	u32_t	lbaBaseLow { 0 };
+	u32_t	lbaBaseHigh	{ 0 };
+	/**
+	 * 记录该分区的总的扇区数
+	 * 与mbr中的信息重复
+	 */
+	size_t wholeSecnums { 0 };
+
+	u16_t	validFlag { VALID_FLAG };
 };
 
 
 
 //************X2fsMetaInfo 定义结束
 
+
+//===class X2fsUtil
 /**
  *  about offset: relative to the beginning of that partition
  *		zero(0~3,an integer size) address in   filename should not be used,pointing to them means no name.Only root directory can do that
@@ -225,30 +370,29 @@ public:
  *
  *	性能分析：因为解析路径名需要从根遍历树，很耗费时间。
  *
+ *	不变式：
+ *
+ *
  *	@param __FsEnv 参见EnvTransfer
  *
  */
 template <class __FsEnv>
-class X2fsUtil{
+class X2fsUtil : public SerializationInterface{
 public:
 	using __SizeType = HostEnv::size_t;
 	// DEPRECATED  对齐因为序列化技术提出，已经过时
 //	enum{ __FsAlignment =  __FsEnv::Alignment};
 	using __X2fsMetaInfo = X2fsMetaInfo;
 	using __SerializerPtr = SerializerPtr<__FsEnv>;
+	using __BaseDescriptor = BaseDescriptor<__FsEnv>;
+	using __FileDescriptor = FileDescriptor<__FsEnv>;
+	using __DirDescriptor = DirDescriptor<__FsEnv>;
 
 public:
 	enum{
-		// 顺序一致
-		INDEX_NAME=__X2fsMetaInfo::INDEX_NAME,
-		INDEX_DIR=__X2fsMetaInfo::INDEX_DIR,
-		INDEX_FREE=__X2fsMetaInfo::INDEX_FREE,
-		INDEX_LINK=__X2fsMetaInfo::INDEX_LINK,
-		INDEX_OPTIONAL_SECD=__X2fsMetaInfo::INDEX_OPTIONAL_SECD,
-	};
-	enum{
 		ERROR_FILENAMESPACE,
-		ERROR_DIRTREESPACE,
+		ERROR_NEW_NULL,
+		ERROR_UNSUPORTED,
 		ERROR_FREESPACE,
 		ERROR_LINKINFO_SPACE_NOT_ENOUGH,
 		//
@@ -268,7 +412,7 @@ public:
 		PATH_TYPE_UNKNOWN
 
 	};
-
+	using FileType = typename __BaseDescriptor::FileType;
 
 	using This = X2fsUtil<__FsEnv>;
 	using __X2fsUtil = This;
@@ -276,49 +420,57 @@ public:
 	using __TreeNode_MemoryDescriptor = TreeNode<MemoryDescriptor>;
 	using __LinearSourceDescriptor = LinearSourceDescriptor;
 	using __ListNode_LinearSourceDescriptor = ListNode<__LinearSourceDescriptor>;
-	using __FileDescriptor = FileDescriptor;
-	using __TimeType = typename __FileDescriptor::__TimeType;
-	using __TreeNode_FileDescriptor = TreeNode<__FileDescriptor>;
-	/**
-	 * 依赖这些类型作为分配器
-	 */
-	using TMSmm = MallocToSimple<__TreeNode_MemoryDescriptor>;
+	using __TimeType =typename __BaseDescriptor::__TimeType;
+	using __TreeNode_BaseDescriptor = TreeNode<__BaseDescriptor*>;
+
 	using LLSmm = MallocToSimple<__ListNode_LinearSourceDescriptor>;
+	using FileNode = __TreeNode_BaseDescriptor;
 
-	template <class T>
-			using __SimpleAssociated = AssociatedMemoryManager<T,1>;
-	// DEPRECATED 启用SimpleMemoryManager
-//	using FileNodeMM = SimpleMemoryManager<__FsTreeNode_FileDescriptor>;
-	using FileNodeMM = __SimpleAssociated<__TreeNode_FileDescriptor>;
-	using FileNameMM = MemoryManager<MallocToSimple>;
-	using FileNode = typename FileNodeMM::TargetType;
-
-	using FileTree = Tree<__FileDescriptor,__SimpleAssociated>;
+	// 可以有allocator，但是这种情形基本上不多见，一般使用new即可。
+	using FileTree = Tree<__BaseDescriptor*,MallocToSimple>; //多态必须使用指针
+	using FileTreeSMM = typename FileTree::__Allocator;
 	using FreeSpaceMM = LinearSourceManager<__LinearSourceDescriptor,
 			MallocToSimple>;
-	using LinkedInfoMM = LinearSourceManager<__LinearSourceDescriptor,
-			MallocToSimple>;
-
-	enum{
-		FileNodeSize=sizeof(FileNode) + sizeof(SimpleMemoryNode)
-	};
+private:
 public:
-	X2fsUtil()=default;
 	X2fsUtil(const __X2fsUtil &)=delete;
 	__X2fsUtil& operator=(const __X2fsUtil &)=delete;
 	/**
-	 * 两种初始化情况：
-	 * 	1.需要从驱动器上读取数据，分配缓冲区，然后初始化
-	 * 	2.已经准备完备所有缓冲区，数据已经读入，初始化
-	 *
-	 * 	metainfo 初始化完毕就可以开始读取了
+	 * @brief 从已有的文件系统初始化
+	 * 先读取第一个扇区的506~508字节=保留区长度,508~509字节=元信息区长度，然后读取序列化的x2fsutil结构
 	 */
-	X2fsUtil(u8_t driver,u32_t lbaBase);
-	X2fsUtil(u8_t driver,const __X2fsMetaInfo &metainfo,u8_t *buffers[]);
-private:
-	void initWithBuffersAlloced();
+	X2fsUtil(u8_t driver,u32_t lbaBase,u32_t lbaHigh);
+	/**
+	 * @brief 依据metainfo(格式化分区暗示者)创建一个新的X2fsUtil
+	 */
+	X2fsUtil(u8_t driver,const __X2fsMetaInfo &metainfo);
 public:
 	~X2fsUtil();
+
+	/**
+	 * 保留区大小的存储位置
+	 */
+	static constexpr int getReservedNumOff()
+	{
+		return 506;
+	}
+	/**
+	 * 元信息区大小的存储位置
+	 */
+	static constexpr int getMetaNumOff()
+	{
+		return getReservedNumOff() + sizeof(u16_t);
+	}
+	static void readHeaderBufferInfo(void *buffer,u16_t &reservedNum,u16_t &metaNum)
+	{
+		reservedNum = *reinterpret_cast<u16_t*>(buffer + This::getReservedNumOff()) ;
+		metaNum = *reinterpret_cast<u16_t*>(buffer + This::getMetaNumOff());
+	}
+	static void writeHeaderBufferInfo(void *buffer,u16_t reservedNum,u16_t metaNum)
+	{
+		*reinterpret_cast<u16_t*>(buffer + This::getReservedNumOff()) = reservedNum;
+		*reinterpret_cast<u16_t*>(buffer + This::getMetaNumOff()) =metaNum;
+	}
 	/**
 	 * 在root根目录下创建一个文件
 	 * @name   文件名
@@ -367,7 +519,7 @@ public:
 	void listOnNode(const FileNode *p,int maxdeepth=1)const;
 
 	bool hasFilename(FileNode * fnode,const char *name)const;
-	bool create(FileNode *p,u8_t type,const char *name,__SizeType secSpan=2,__TimeType ctime=0);
+	bool create(FileNode *p,FileType type,const char *name,__SizeType secSpan=2,__TimeType ctime=0);
 	bool createFile(FileNode *p,const char *name,__SizeType secNum);
 	bool mkdir(FileNode * fatherDir,const char *dirname);
 	void freeNode(FileNode * node);//free all,not just a single.This is generally used in dir & file
@@ -408,7 +560,8 @@ public:
 	 * @param	foff	写到文件的偏移位置
 	 */
 //	INCOMPLETE
-	DEPRECATED __SizeType writeToFile(const char *buf,__SizeType objsize, __SizeType nobj,FileNode *fnode,__SizeType foff=0);
+	DEPRECATED __SizeType
+	writeToFile(const char *buf,__SizeType objsize, __SizeType nobj,FileNode *fnode,__SizeType foff=0)=delete;
 
 	// UNTESTED
 	/**
@@ -423,7 +576,7 @@ public:
 	 * 		  最后一个查找的ilink; 如果此ilink 长度(limit)为0，则表明空间不足以定位到该处；此时ilink就是最后一个起始分区
 	 * 		   其他，则一定保证retOff小于该区的limit，也就是说refOff一定在该区的范围内。
 	 */
-	__SizeType locateILink(__SizeType startILink,__SizeType secPos,__SizeType & retOff);
+	__SizeType locateILink(__FileDescriptor *fd,__SizeType startILink,__SizeType secPos,__SizeType & retOff);
 
 	/**
 	 * 按扇区写数据到ilink所指示的区间中，从secPos开始写，写secLen个
@@ -431,7 +584,7 @@ public:
 	 * @return  如果ilink无效，或者所写的数据范围超过该ilink，则不执行写操作，并且返回0；
 	 * 			写成功则返回实际写入的分区长度(secLen=0时返回实际长度)
 	 */
-	__SizeType		writeToILink(__SizeType ilink,const char *src,__SizeType secPos,__SizeType secLen);
+	__SizeType		writeToILink(__SizeType ilink,const char *src,__SizeType secPos,__SizeType secLen)=delete;
 
 	/**
 	 * 扩展文件实际占用的扇区数目
@@ -441,7 +594,7 @@ public:
 	 *
 	 * @return 如果extraSec = 0则无影响； 如果不能增加，则返回false，源文件节点状态不变；否则，可能改变ilink的位置
 	 */
-	bool			extendFileSecNum(FileNode * fileNode,__SizeType extraSec,bool addFileLength=false);
+	bool			extendFileSecNum(__FileDescriptor* fd,__SizeType extraSec,bool addFileLength=false);
 
 	/**
 	 * 返回最后一个ILink的位置，即(0,0)处
@@ -454,9 +607,9 @@ public:
 	 * 实现相对于文件的随机位置扇区的读写
 	 * @param updateFileLen 当文件长度不足时，是否更新文件的长度
 	 */
-	__SizeType _writeToFile(const char *buf, __SizeType nsec,FileNode *fnode,__SizeType secPos=0,
+	__SizeType _writeToFile(const char *buf, __SizeType nsec,__FileDescriptor *fd,__SizeType secPos=0,
 			bool updateFileLen=true);
-	__SizeType _readFromFile(char *buf,__SizeType nsec,FileNode *fnode,__SizeType secPos=0);
+	__SizeType _readFromFile(char *buf,__SizeType nsec,__FileDescriptor *fd,__SizeType secPos=0);
 	/** UNTESTED
 	 * 对文件进行按字节随机写
 	 * 前置条件：buf是扇区的整数倍, byteStart%CONST_SIZE是相对于buf的开始
@@ -468,12 +621,12 @@ public:
 	 *
 	 * @return 实际写入的字节数目
 	 */
-	__SizeType _randomWriteFile(char *buf, __SizeType nbyte,FileNode *fnode,__SizeType byteStart=0);
+	__SizeType _randomWriteFile(char *buf, __SizeType nbyte,__FileDescriptor *fd,__SizeType byteStart=0);
 	/** UNTESTED
 	 * 条件同上
 	 * 此函数的实现不需要补齐，返回值的buf+(byteStart%CONST_SECSIZE)为有效数据
 	 */
-	__SizeType _randomReadFile(char *buf, __SizeType nbyte,FileNode *fnode,__SizeType byteStart=0);
+	__SizeType _randomReadFile(char *buf, __SizeType nbyte,__FileDescriptor *fd,__SizeType byteStart=0);
 
 
 	/** INCOMPLETE
@@ -484,7 +637,7 @@ public:
 	 *
 	 * @return 成功返回true，其他错误返回false
 	 */
-	bool truncateFile(FileNode *fnode,__SizeType newlen);
+	bool truncateFile(__FileDescriptor *fd,__SizeType newlen);
 
 	// EFF 使用自动管理的数组效果更佳
 	/**
@@ -540,7 +693,6 @@ public:
 
 	/**
 	 * 根据metainfo和磁盘信息，建立一个有效的空分区
-	 * @param env				主机环境
 	 * @param driver			主机上的磁盘
 	 * @param metainfo			目标区域的metainfo
 	 */
@@ -570,175 +722,49 @@ public:
 			__SizeType *endDiff=nullptr,
 			__SizeType unit=CONST_SECSIZE);
 
-
-
-protected:
-		DEPRECATED void initBuffers();
-
-		/**
-		 * 这真是一个bug， 因为指针偏移在64位系统下不能仅仅使用int存放，所以导致出错。
-		 * 调试了半天。。。
-		 */
-		// old version ---> void adjustDirbufOffset(int off);//positive or negative
-		DEPRECATED void adjustDirbufOffset(ptrdiff_t off);
-
-
-		/**
-		 * 文件名的存储方式不是以'\0'为分隔的链表形式，而是[N]...的 存储形式
-		 * 比如存储 foo,则内存布局如下：[4][f][o][o],首个字节表示字符串长度
-		 * 因此，文件名最长不能超过128
-		 */
-		void retriveFileNameSection();
-		/**
-		 * This is not necessary for filename section,cause all changes had been made as direct and immediate
-		 * 这个函数是没有必要的，但是仅仅为了兼容性才使用
-		 * 所有的改变都是基于该缓冲区的，因此不必刷新缓冲区
-		 */
-		DEPRECATED void saveFileNameSection();
-
-		void retriveFreeSpaceSection();
-		void saveFreeSpaceSection();
-
-
-//		UNTESTED
-		void retriveLinkedInfoSection();
-		/**
-		 * 同name section，所有的修改都是基于该缓冲区的
-		 */
-		DEPRECATED void saveLinkedInfoSection();/*The modifies are at-place*/
-
-		/**
-		 * 从dir内存缓冲区恢复处正常的链接信息
-		 */
-		void retriveDirSection();
-
-		/**
-		 *  这里需要对dir区指针进行偏移调整，调整基于dir区的开始
-		 */
-		void saveDirSection();
+public:
+			SerializerPtr<__FsEnv>& serialize(SerializerPtr<__FsEnv> &ptr)const
+			{
+				return ptr << metainfo << freemm << fileTree;
+			}
+			SerializerPtr<__FsEnv>& deserialize(SerializerPtr<__FsEnv> &ptr)
+			{
+				return ptr >> metainfo >> freemm >> fileTree;
+			}
+			size_t getSerializitionSize()
+			{
+				return metainfo.getSerializitionSize<__FsEnv>()+
+						freemm.getSerializitionSize<__FsEnv>()+
+						fileTree.template getSerializitionSize<__FsEnv>();
+			}
 
 private:
 	/**
-	 *  DEPRECATED  现在统一使用命名空间HostEnv
-	 * 要求操作系统实现提供的功能集
-	 */
-//	__EnvInterface &env;
-	/**
 	 * 驱动器号，在有的操作系统上，可能将驱动器号映射成文件
 	 */
-	u8_t	driver{};
+	u8_t	driver{}; // 不参与序列化
 
 	/**
 	 * 元信息区域
 	 */
-	u8_t * metainfoRAW{};
 	__X2fsMetaInfo metainfo{};
-
-	/**
-	 *  buffers[INDEX_NAME]  文件名区域。直接操纵
-	 *	buffers[INDEX_FREE]  该区的开始位置存放两个节点，节点0描述了总体的信息(数据区开始，长度），节点1是(0,0)
-	 * 						其中数据区开始是相对于该文件分区的起点，如果文件有10个用于元信息的区域，则开始就是10，以扇区为单位
-	 * 						所有的数据以(0,0)结尾
-	 * 	buffers[INDEX_LINK]  间接操纵，布局：
-	 * 	buffers[INDEX_DIR]   间接操纵，布局：dirsmm  FileNode*N  SMMNode*N,  需要序列化
-	 */
-	u8_t *buffersRAW[__X2fsMetaInfo::PARTS_REQUIRED];
-	/**
-	 * 存放buffers[INDEX_DIR]的反序列化对象，用于内存直接操作。
-	 */
-	u8_t *buffersDir{};
-
-	/** DEPRECATED
-	 * 将link分区看成是一个LineaerSourceDescriptor数组
-	 * 每一个元素描述了文件的分配情况，文件占据多个不连续的扇区，这些扇区由下面链表描述
-	 */
-
-	/**
-	 * 描述文件的占用的扇区信息，文件中的保存起始下标
-	 * 文件占用的扇区不连续，可能如下： (2,3)-->(7,2)-->(0,0) 表示文件占用2扇区开始的3个扇区，7扇区开始的2个扇区
-	 * 该数组实际上是freespace分区的别名，也就是说linkarr的首地址指向了内存中freespace分区的开始
-	 *
-	 *  UPDATE:使用Vector自动内存管理
-	 *
-	 */
-	HostEnv::Vector<__LinearSourceDescriptor> linkarr{};
-
-
-
-	// TODO 检查下面的设计是否符合松耦合结构设计
-	// 依赖图
-	/*
-	 * this
-	 * filenamemm-->mmnodesmm(节点分配器,该节点可以任意)
-	 *				fileTree-->dirsmm-->buffers[INDEX_DIR]
-	 *		linkmm,freemm-->listnodesmm(同一种类型的节点分配器）
-	 *
-	 *
-	 *
-	 *	注：x2文件系统中，除了dir分区存放的是完整的链接信息
-	 *	其他分区存放的是原始信息，根据这些原始信息可以构造一个链表
-	 */
-
-
-	TMSmm mmnodesmm{};
-	/**
-	 * 管理文件名的MemoryManager
-	 *
-	 * 可以根据文件名区重建，不需要序列化
-	 */
-	FileNameMM filenamemm;
-
-	/**
-	 * 为linkmm，分配管理节点
-	 */
-	LLSmm listnodesmm{};
-
-
-	/**
-	 * 管理节点区域的SMM，管理类型为TreeNode<FileDescriptor>
-	 * 用于分配树节点
-	 * 此管理器管理的区域是buffers[INDEX_DIR]
-	 */
-	FileNodeMM dirsmm{};
-
-	/**
-	 * 一棵树，其全部分配的节点在dirsmm中
-	 */
-	FileTree fileTree{};
 
 	/**
 	 * 一个数值区间管理器，初始数值区间是  [数据区开始，数据区开始+数据区长度)
 	 * 对于这种管理器，我们只应当将其认为是标记一系列的数值
 	 * 当我们从中分配了一段字区间后，相应的认为磁盘上这些区间已经分配了。
-	 * 对文件的分配使得这段被分配的区间被加入到该文件linkarr的数组中
-	 *
-	 * 管理freespace空闲空间的信息，链表实现
-	 * 当分配空间后，该段空间就从链表中取消
-	 *
-	 * 可以被决定安全地反序列化，只要设置了smm即可
 	 */
-	FreeSpaceMM freemm{};
-
+	FreeSpaceMM freemm ;
 
 	/**
-	 * 一个数值管理器，标记linkarr中可用的下标
-	 * 该管理器管理一个数组linkarr，管理范围是[0,0+linarrLen)
-	 * 使用listnodesmm作为节点分配器，在retriveLinkeInfoSection()方法中初始化
-	 *
+	 * 一棵树，其全部分配的节点在dirsmm中
 	 */
-	LinkedInfoMM linkmm{};
-
+	FileTree fileTree;
 
 	/**
 	 * 存放错误信息
 	 */
 	mutable int processErrno{};/*can be used in both const & non-const method*/
-
-//	/** DEPRECATED 不再加载可选分区
-//	 * 二级加载器是否载入
-//	 */
-//	bool secdLoaded;
-
 };
 
 
@@ -760,6 +786,7 @@ public:
 	using FileNode = typename __X2fsUtil::FileNode;
 	using __FileDescriptor = typename __X2fsUtil::__FileDescriptor;
 	using __FsTimeType = typename __FileDescriptor::__TimeType;
+	using FileType = typename __FileDescriptor::FileType;
 
 	//===============接口约束
 
@@ -878,6 +905,8 @@ public:
 	 */
 	bool eval(const __String &cmd);
 
+	void flush();
+
 #if defined(CODE64)
 	/** UNTESTED
 	 *  与系统文件进行交互
@@ -943,7 +972,7 @@ public:
     ManagedObject & operator=(const __ManagedObject &)=default;
 	~ManagedObject();
 	void setBufferIfNone(T buffer);
-	T	 getOnlyBuffer()const;
+	AS_MACRO T	 getOnlyBuffer()const;
 	T    getOnlyBuffer(__SizeType size);
 	/**
 	 * 返回一个常量引用
@@ -962,102 +991,6 @@ private:
 
 
 //=============Function Macros
-//=====class : FileDescriptor
-#define __DEF_Template_FileDescriptor
-#define __DEF_FileDescriptor FileDescriptor
-
-__DEF_Template_FileDescriptor
-__DEF_FileDescriptor::FileDescriptor(u8_t type,size_t sectionList,size_t fileLen,size_t nameStart,
-		__TimeType createdTime,__TimeType lastModefiedTime):
-type(type),sectionListIndex(sectionList),fileLen(fileLen),
-nameStart(nameStart),createdTime(createdTime),lastModefiedTime(lastModefiedTime)
-{
-}
-
-__DEF_Template_FileDescriptor
-typename __DEF_FileDescriptor::__TimeType __DEF_FileDescriptor::getCreatedTime() const
-{
-	return createdTime;
-}
-
-__DEF_Template_FileDescriptor
-void __DEF_FileDescriptor::setCreatedTime(__TimeType createdTime) {
-	this->createdTime = createdTime;
-}
-
-__DEF_Template_FileDescriptor
-typename __DEF_FileDescriptor::size_t __DEF_FileDescriptor::getFileLen() const {
-	return fileLen;
-}
-
-__DEF_Template_FileDescriptor
-void __DEF_FileDescriptor::setFileLen(size_t fileLen) {
-	this->fileLen = fileLen;
-}
-
-__DEF_Template_FileDescriptor
-typename __DEF_FileDescriptor::__TimeType __DEF_FileDescriptor::getLastModefiedTime() const {
-	return lastModefiedTime;
-}
-__DEF_Template_FileDescriptor
-void __DEF_FileDescriptor::setLastModefiedTime(__TimeType lastModefiedTime) {
-	this->lastModefiedTime = lastModefiedTime;
-}
-__DEF_Template_FileDescriptor
-typename __DEF_FileDescriptor::size_t __DEF_FileDescriptor::getSectionListIndex() const
-{
-	return this->sectionListIndex;
-}
-
-__DEF_Template_FileDescriptor
-void __DEF_FileDescriptor::setSectionListIndex(size_t	sectionListIndex)
-{
-	this->sectionListIndex = sectionListIndex;
-}
-
-__DEF_Template_FileDescriptor
-template <class __EnvTransfer>
-constexpr size_t __DEF_FileDescriptor::getSerializitionSize()
-{
-	// DEPRECATED Old code: call through funcion-like class .
-//	using u8size=typename __EnvTransfer::template SizeofHostType<u8_t>;
-//	using SizeTypeSize = typename __EnvTransfer::template SizeofHostType<size_t>;
-//	using TimetypeSize = typename __EnvTransfer::template SizeofHostType<__TimeType>;
-//	return u8size::Size + SizeTypeSize::Size*3 + TimetypeSize::Size*2;
-
-
-	return __EnvTransfer::template sizeofHostType<decltype(this->type)>()+
-			__EnvTransfer::template sizeofHostType<decltype(this->sectionListIndex)>()+
-			__EnvTransfer::template sizeofHostType<decltype(this->fileLen)>()+
-			__EnvTransfer::template sizeofHostType<decltype(this->nameStart)>()+
-			__EnvTransfer::template sizeofHostType<decltype(this->createdTime)>()+
-			__EnvTransfer::template sizeofHostType<decltype(this->lastModefiedTime)>();
-}
-
-__DEF_Template_FileDescriptor
-u8_t __DEF_FileDescriptor::getType() const {
-	return type;
-}
-__DEF_Template_FileDescriptor
-void __DEF_FileDescriptor::setType(u8_t type) {
-	this->type = type;
-}
-
-__DEF_Template_FileDescriptor
-typename __DEF_FileDescriptor::size_t __DEF_FileDescriptor::getNameOffset()const
-{
-	return this->nameStart;
-}
-__DEF_Template_FileDescriptor
-void __DEF_FileDescriptor::setNameOffset(size_t off)
-{
-	this->nameStart=off;
-}
-#undef __DEF_Template_FileDescriptor
-#undef __DEF_FileDescriptor
-
-
-
 //=========class X2fsUtil
 #define __DEF_X2fsUtil_Template template <class __FsEnv>
 #define __DEF_X2fsUtil X2fsUtil<__FsEnv>
@@ -1090,12 +1023,12 @@ typename __DEF_X2fsUtil::FileNode *__DEF_X2fsUtil::getRootBase()
 __DEF_X2fsUtil_Template
 bool __DEF_X2fsUtil::isDirectory(const FileNode *p)
 {
-	return p && p->getData().getType()==__FileDescriptor::TYPE_DIR;
+	return p && p->getData()->getType()==__FileDescriptor::TYPE_DIR;
 }
 __DEF_X2fsUtil_Template
 bool __DEF_X2fsUtil::isFile(const FileNode *p)
 {
-	return p && p->getData().getType()==__FileDescriptor::TYPE_FILE;
+	return p && p->getData()->getType()==__FileDescriptor::TYPE_FILE;
 }
 __DEF_X2fsUtil_Template
 typename __DEF_X2fsUtil::FileTree* __DEF_X2fsUtil::getFileTree()

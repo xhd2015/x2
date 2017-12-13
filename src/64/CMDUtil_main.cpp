@@ -142,6 +142,15 @@ void process(ParamMain &p,int& status)
 	u8_t driver=HostEnv::addFile(p.imgFile,p.lbalow);
 	FileOperation<__FsEnv> op(driver,p.lbalow);
 
+	op.mkdir("boot");
+	op.cd("boot");
+	op.touch("x2.kernel.img", 25, 0);
+	op.flush();
+
+	FileOperation<__FsEnv> op2(driver,p.lbalow);
+	op2.ls();
+	return;
+
 //	op.ls();
 //	op.touch("file", 4,0);
 //	op.ls();

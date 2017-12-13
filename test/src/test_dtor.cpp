@@ -14,22 +14,44 @@ public:
 		cout << "~Foo"<<endl;
 	}
 };
-
-class Bar{
-public:
-	Foo f;
+class Foo2{
+protected:
+	~Foo2(){
+		cout << "~Foo2"<<endl;
+	}
 };
-
 class Widget{
 public:
-	Widget(Foo & f):f(f){}
-	Foo &f;
+	~Widget(){
+		cout << "~Widget" << endl;
+	}
 };
+class Widget2{
+public:
+	~Widget2(){
+		cout <<"~Widget2"<<endl;
+	}
+};
+
+class Bar : public Foo,public Foo2{
+public:
+	~Bar(){
+		cout << "~Bar" << endl;
+	}
+	Widget w;
+	Widget2 w2;
+};
+
+//class Widget{
+//public:
+//	Widget(Foo & f):f(f){}
+//	Foo &f;
+//};
 
 int main(int argc,char *argv[])
 {
-	Foo f;
-	f.~Foo();//可以多次调用
+	Bar b;
+//	b.~Bar();
 	cout << "END."<<endl;
 	return 0;
 }

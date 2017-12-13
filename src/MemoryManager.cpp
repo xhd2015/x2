@@ -10,7 +10,7 @@ __asm__(".code32 \n\t");
 #include <libx2.h>
 #include <def.h>
 
-#include <macros/all.h>
+
 
 #if defined(CODE32)||defined(CODE16)
 #include <test.h>
@@ -42,38 +42,20 @@ __asm__(".code32 \n\t");
 __DEF_Template_MemoryManager
 __DEF_MemoryManager::
 MemoryManager(__Allocator &smm)
-:
-Super(smm) //调用父类的构造函数
+:Super(smm) //调用父类的构造函数
 {
 
 }
 __DEF_Template_MemoryManager
 __DEF_MemoryManager::MemoryManager(
 		__Allocator &smm,__SizeType start,__SizeType len,bool fatherAllocable)
-:MemoryManager(smm)
-//:dbg1("MemoryManager 1\n")
+:Super(smm)
 {
-#if defined(CODE64)
-	//printf("set Head\n");
-#endif
-	// root->son = new_node, 也就是head， 但是head不指向root，也就是说指针时单向的
-	//Kernel::printer->move(-40);
-
-
-	__TreeNode *head=smm.getNew();
-
+	__TreeNode *head=this->newOneNode();
+	if(!head)
+		HostEnv::systemAbort("init MemoryManager,head returned nullptr", -2);
 	new (head) __TreeNode(__MemoryDescriptor(start,len,fatherAllocable));
-
 	this->setHead(head);
-
-	//===分配内存
-
-
-#if defined(CODE64)
-    //printf("in constructor : ");
-    //getchar();
-    //printf("%x ~ %x\n",this->getHead()->getData().getStart(),this->getHead()->getData().getLimit());
-#endif
 }
 __DEF_Template_MemoryManager
 __DEF_MemoryManager::
@@ -87,15 +69,8 @@ MemoryManager(__Allocator &smm,__SizeType start,__SizeType len,
 __DEF_Template_MemoryManager
 __DEF_MemoryManager::~MemoryManager()
 {
-//    //这里不进行真正的撤销，只是把管理器所使用的节点撤销
-    if(this->getHead())
-    {
-        this->getHead()->setFather(nullptr);
-    }
+	// 没有任何事情要做，所有的节点会被父类撤销
 
-     // TODO 完善该类和Tree的内存管理
-    // NOTE 可能内存泄露
-//    this->smm.withdraw(this->root);
 }
 
 __DEF_Template_MemoryManager
@@ -163,7 +138,7 @@ __DEF_MemoryManager::allocOutNode(__TreeNode *avlNode,__SizeType start,__SizeTyp
         if(len1>0)//前面有剩余,需要插入新的点
         {
             avlNode->getData().setLimit(len1);
-            newnode = this->smm.getNew();
+            newnode = this->newOneNode();
             newnode->initToNull();
              new (newnode) __TreeNode(__MemoryDescriptor(start,len,false));//新建一个node，不可用于分配
                                             //将这个节点加入以这个点为根的树中
@@ -180,7 +155,7 @@ __DEF_MemoryManager::allocOutNode(__TreeNode *avlNode,__SizeType start,__SizeTyp
         if(len2>0)//后面有剩余
         {
 //        	Util::printf("before smm new\n");
-        	__TreeNode *newnodeEnd=this->smm.getNew();
+        	__TreeNode *newnodeEnd=this->newOneNode();
         	newnodeEnd->initToNull();
 
 //        	Util::printf("after smm new \n");
@@ -205,30 +180,27 @@ __DEF_MemoryManager::allocOutNode(__TreeNode *avlNode,__SizeType start,__SizeTyp
 __DEF_Template_MemoryManager
 void __DEF_MemoryManager::withdrawNode(__TreeNode *exactNode)
 {
+	if(!exactNode)return;
     //先释放其所有子节点
-    __TreeNode *p=exactNode->getSon();
-    while(p)
-    {
-        this->free(p);
-        p=reinterpret_cast<__TreeNode*>(p->getNext());
-    }
+    this->freeAll(exactNode->getSon());
 //    Util::printf("in mm,withdrawNode \n");
     exactNode->setSon(nullptr);//free完毕
 
-    //开始合并
-    __TreeNode *prev=reinterpret_cast<__TreeNode*>(exactNode->getPrevious());
-    if(prev && prev->getData().isAllocable() && exactNode->getData().getStart() - prev->getData().getStart() == prev->getData().getLimit() )
+    //开始合并左右节点
+    __TreeNode *prev=exactNode->getPrevious();
+    if(prev && prev->getData().isAllocable() &&
+    		exactNode->getData().getStart() - prev->getData().getStart() == prev->getData().getLimit() )
     {
     //	Util::printStr("combine..");
         prev->getData().setLimit(prev->getData().getLimit() + exactNode->getData().getLimit() );
         prev->removeNext();//移除冗余节点
-        this->smm.withdraw(exactNode);
+        this->withdrawNode(exactNode);
     }else{
         prev=exactNode;
-        prev->getData().setAllocable(1);
+        prev->getData().setAllocable(true);
     }//OK,the previous node cheking is done
 
-    __TreeNode *nxt=reinterpret_cast<__TreeNode*>(prev->getNext());
+    __TreeNode *nxt=prev->getNext();
     if(nxt && nxt->getData().isAllocable() && nxt->getData().getStart() - prev->getData().getStart() == prev->getData().getLimit() )
     {
         prev->getData().setLimit(prev->getData().getLimit() + nxt->getData().getLimit() );
@@ -247,7 +219,7 @@ void __DEF_MemoryManager::withdrawNode(__TreeNode *exactNode)
 
         // }
         prev->removeNext();
-        this->smm.withdraw(nxt);
+        this->freeOneNode(nxt);
     }else{//do nothing
 
     }
@@ -713,7 +685,7 @@ __DEF_MemoryManager::copyOnAllocation(__TreeNode *head)
         //Util::printStr("copyOnAllocation -- ");
         //**********
 
-        __TreeNode *newnode=this->smm.getNew();
+        __TreeNode *newnode=this->newOneNode();
         newnode->initToNull();
         new (newnode) __TreeNode(__MemoryDescriptor(data.getStart(),data.getLimit(),!data.isAllocable()));
 
@@ -749,21 +721,20 @@ __DEF_MemoryManager::nextAllocable(
 #define __DEF_LinearSourceManager LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator>
 
 __DEF_Template_LinearSourceManager
-__DEF_LinearSourceManager::LinearSourceManager(__Allocator &smm):
-Super(smm),space(0,0)
-{}
-
-__DEF_Template_LinearSourceManager
-__DEF_LinearSourceManager::LinearSourceManager(__Allocator &smm,
-    __SizeType start,__SizeType size):
-Super(smm),
-space(start,size)
+__DEF_LinearSourceManager::LinearSourceManager(const std::shared_ptr<__Allocator> &smm,__SizeType start,__SizeType size):
+Super(smm),space(start,size)
 {
-	auto node=smm.getNew();
-	node->initToNull();
-	this->appendHead( new(node) __ListNode(space));
-
+    this->appendHead(start,size);
 }
+__DEF_Template_LinearSourceManager
+__DEF_LinearSourceManager::LinearSourceManager(std::shared_ptr<__Allocator> &&smm,__SizeType start,__SizeType size):
+        Super(std::move(smm)),space(start,size)
+{
+    this->appendHead(start,size);
+}
+
+
+
 
 __DEF_Template_LinearSourceManager
 __DEF_LinearSourceManager::~LinearSourceManager()
@@ -876,9 +847,9 @@ void __DEF_LinearSourceManager::mdelete(void* p,__SizeType size)
         }else{
             if(diff>0)
             {
-                found->insertPrevious(new (this->smm.getNew()) __ListNode(_LinearSourceDescriptor(reinterpret_cast<__SizeType>(p),size)) );
+                found->insertPrevious(new (this->newOneNode()) __ListNode(_LinearSourceDescriptor(reinterpret_cast<__SizeType>(p),size)) );
             }else{
-                found->insertNext(new (this->smm.getNew()) __ListNode(_LinearSourceDescriptor(reinterpret_cast<__SizeType>(p),size)) );
+                found->insertNext(new (this->newOneNode()) __ListNode(_LinearSourceDescriptor(reinterpret_cast<__SizeType>(p),size)) );
             }
         }
     }else{//empty list
@@ -888,7 +859,7 @@ void __DEF_LinearSourceManager::mdelete(void* p,__SizeType size)
 }
 __DEF_Template_LinearSourceManager
  bool __DEF_LinearSourceManager::mnewLinked(__SizeType size,
-		 __LinkedList&list,__SizeType eachSectionExtraSize)
+		 __LinkedList &  list,__SizeType eachSectionExtraSize)
 {
 //	printf("in mnewlinked,size is %d,this space is %d,%d\n",size,this->space.getStart(),this->space.getLimit());
 	NodeType * p=this->getHead(),*lastAvl=nullptr;
@@ -925,7 +896,7 @@ __DEF_Template_LinearSourceManager
 //		printf("avl has left,left is %d\n",leftSize);
 		__SizeType orilimit=lastAvl->getData().getLimit();
 		lastAvl->getData().setLimit(  extraNeeded );
-		NodeType * newnode=new (this->smm.getNew()) NodeType(_LinearSourceDescriptor(
+		NodeType * newnode=new (this->newOneNode()) NodeType(_LinearSourceDescriptor(
 				lastAvl->getData().getStart() + lastAvl->getData().getLimit(),
 				orilimit - extraNeeded
 		));
@@ -933,12 +904,19 @@ __DEF_Template_LinearSourceManager
 //		printf("avl = %d,%d  avl.next = %d,%d\n",lastAvl->getData().getStart(),lastAvl->getData().getLimit(),
 //				lastAvl->getNext()->getData().getStart(),lastAvl->getNext()->getData().getLimit());
 	}
-	list.appendHead(this->getHead());
+
 //	printf("list.head is %d,%d\n",list.getHead()->getData().getStart(),list.getHead()->getData().getLimit());
-	this->root->setNext(nullptr);
-	this->last->setNext(nullptr);
-	this->appendHead(lastAvl->getNext());
+
+	// TODO  测试removeHead替换注释掉的两句是否正确
+//	this->root->setNext(nullptr);
+//	this->last->setNext(nullptr);
+	__ListNode* head=this->removeAllAfterHead();
+	list.appendHead(head);
+
+	__ListNode *avlNext = lastAvl->getNext();
 	lastAvl->setNext(nullptr);
+	avlNext->setPrevious(nullptr); //取消互相指向
+	this->appendHead(avlNext);
 
 //	printf("list.head is %d,%d\n",list.getHead()->getData().getStart(),list.getHead()->getData().getLimit());
 	return true;
@@ -1016,7 +994,7 @@ _LinearSourceDescriptor __DEF_LinearSourceManager::allocOutNode(__ListNode *avlN
             avlNode->getData().setLimit(len1);
         }else{//前后都有剩余
             avlNode->getData().setLimit(len1);
-            this->insertNext(avlNode, new (this->smm.getNew()) __ListNode(_LinearSourceDescriptor(start+len,len2)) );
+            this->insertNext(avlNode, new (this->newOneNode()) __ListNode(_LinearSourceDescriptor(start+len,len2)) );
 
         }
     }
@@ -1026,3 +1004,158 @@ _LinearSourceDescriptor __DEF_LinearSourceManager::allocOutNode(__ListNode *avlN
 #undef __DEF_Template_LinearSourceManager
 #undef __DEF_LinearSourceDescriptor
 
+
+//==class LinearSourceDescriptor
+#define __DEF_Template_LinearSourceDescriptor
+#define __DEF_LinearSourceDescriptor LinearSourceDescriptor
+
+__DEF_Template_LinearSourceDescriptor
+__DEF_LinearSourceDescriptor::LinearSourceDescriptor(__SizeType start,__SizeType limit):
+ start(start),limit(limit)
+ {
+
+ }
+
+__DEF_LinearSourceDescriptor::~LinearSourceDescriptor() {
+ }
+
+ typename __DEF_LinearSourceDescriptor::__SizeType
+ __DEF_LinearSourceDescriptor::getStart()const
+ {
+    return start;
+ }
+
+ typename  __DEF_LinearSourceDescriptor::__SizeType
+ __DEF_LinearSourceDescriptor::getLimit()const
+ {
+    return limit;
+ }
+
+ void  __DEF_LinearSourceDescriptor::setStart(__SizeType start)
+ {
+    this->start=start;
+ }
+void  __DEF_LinearSourceDescriptor::setLimit(__SizeType limit)
+ {
+    this->limit=limit;
+ }
+
+bool  __DEF_LinearSourceDescriptor::contains(const LinearSourceDescriptor& b)const
+{
+	return contains(b.getStart(),b.getLimit());
+}
+
+bool  __DEF_LinearSourceDescriptor::contains(__SizeType start,__SizeType limit)const
+{
+#if defined(CODE64)
+//	printf("this->start-start>=limit-this->limit   : (%d >= %d = %d)\n",this->start-start,limit-this->limit,(int)(this->start-start)>=(int)(limit-this->limit));
+#endif
+	return (this->start<=start)&&( limit<=this->limit  && (start - this->start)<=(this->limit - limit));
+}
+bool  __DEF_LinearSourceDescriptor::operator==(const __LinearSourceDescriptor& b)const
+{
+
+   return this->getStart()==b.getStart() && this->getLimit()==b.getLimit();
+}
+bool  __DEF_LinearSourceDescriptor::operator!=(const __LinearSourceDescriptor& b)const
+{
+    return ! this->operator==(b);
+}
+template <class __EnvTransfer>
+SerializerPtr<__EnvTransfer>& __DEF_LinearSourceDescriptor::serialize(SerializerPtr<__EnvTransfer> &ptr)const
+{
+	return ptr << start << limit;
+}
+template <class __EnvTransfer>
+SerializerPtr<__EnvTransfer>& __DEF_LinearSourceDescriptor::deserialize(SerializerPtr<__EnvTransfer> &ptr)
+{
+	return ptr >> start >> limit;
+}
+template <class __EnvTransfer>
+constexpr size_t __DEF_LinearSourceDescriptor::getSerializitionSize()
+{
+	return __EnvTransfer::template sizeofHostType<decltype(reinterpret_cast<This*>(nullptr)->start)>()+
+			__EnvTransfer::template sizeofHostType<decltype(reinterpret_cast<This*>(nullptr)->limit)>();
+}
+bool  __DEF_LinearSourceDescriptor::isAllocable()const
+{
+    return true;
+}
+
+#undef __DEF_Template_LinearSourceDescriptor
+#undef __DEF_LinearSourceDescriptor
+
+
+
+
+ //==========class: MemoryDescriptor
+// TODO 检查下面的声明有什么错误
+#define __DEF_Template_MemoryDescriptor
+#define __DEF_MemoryDescriptor MemoryDescriptor
+
+__DEF_Template_MemoryDescriptor
+__DEF_MemoryDescriptor::MemoryDescriptor(__SizeType start,__SizeType limit,bool allocable):
+Super(start,limit),allocable(allocable)
+{
+
+}
+
+
+
+
+__DEF_Template_MemoryDescriptor
+ __DEF_MemoryDescriptor::~MemoryDescriptor() {
+ }
+__DEF_Template_MemoryDescriptor
+ void __DEF_MemoryDescriptor::setAllocable(bool allocable)
+{
+    this->allocable=allocable;
+}
+
+__DEF_Template_MemoryDescriptor
+bool __DEF_MemoryDescriptor::isAllocable()const{
+    return allocable;
+}
+
+__DEF_Template_MemoryDescriptor
+ bool __DEF_MemoryDescriptor::operator==(const __MemoryDescriptor& b)const
+{
+    return this->__LinearSourceDescriptor::operator==(b) && this->allocable==b.allocable;
+
+}
+
+
+__DEF_Template_MemoryDescriptor
+bool __DEF_MemoryDescriptor::operator!=(const __MemoryDescriptor& b)const
+{
+    return ! this->operator==(b);
+}
+
+#undef __DEF_Template_MemoryDescriptor
+#undef __DEF_MemoryDescriptor
+
+//==============class LinearSourceManager
+#define __DEF_Template_LinearSourceManager template <class _LinearSourceDescriptor,template <class> class _NodeAllocator>
+#define __DEF_LinearSourceManager LinearSourceManager<_LinearSourceDescriptor,_NodeAllocator>
+__DEF_Template_LinearSourceManager
+const _LinearSourceDescriptor & __DEF_LinearSourceManager::getSpace()const
+{
+	return this->space;
+}
+#undef __DEF_Template_LinearSourceManager
+#undef __DEF_LinearSourceManager
+
+//============class MemoryManager<_DescriptorAllocator>
+#define __DEF_Template_MemoryManager template<template<class > class _DescriptorAllocator>
+#define __DEF_MemeoryManager MemoryManager<_DescriptorAllocator>
+__DEF_Template_MemoryManager
+typename __DEF_MemeoryManager::__SizeType __DEF_MemeoryManager::getBase() const {
+	return this->root->getData().getStart();
+}
+
+__DEF_Template_MemoryManager
+typename __DEF_MemeoryManager::__SizeType __DEF_MemeoryManager::getLimit() const {
+	return this->root->getData().getLimit();
+}
+#undef __DEF_Template_MemoryManager
+#undef __DEF_MemeoryManager

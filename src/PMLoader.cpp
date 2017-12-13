@@ -6,7 +6,6 @@
 #include <IOProgramer.h> //for IO_HDD
 #include <def.h>
 
-#include <macros/all.h>
 
 #ifdef CODE16
 __asm__(".code16gcc \n\t");

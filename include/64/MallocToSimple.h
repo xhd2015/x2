@@ -18,6 +18,8 @@ public:
 	MallocToSimple()=default;
 	~MallocToSimple()=default;
 	T *getNew();
+	template <class ... Args>
+	T *constructNew(Args && ... args);
 	void withdraw(T *t);
 };
 

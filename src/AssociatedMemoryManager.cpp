@@ -9,8 +9,6 @@
 #include <MemoryManager.h>
 #include <def.h>
 
-#include <macros/all.h>
-
 #if defined(CODE32)
 __asm__(".code32 \n\t");
 #endif
@@ -73,6 +71,11 @@ void			AssociatedMemoryManager<T,MaxArrNum>::setMan(size_t index,size_t nstart,s
 		new (&this->manArrs[index]) AssociatedMemoryManager<T,1>(nstart,tstart,len,doinit,usedList,usedLen);
 	}
 }
+template<class T,size_t MaxArrNum>
+size_t	AssociatedMemoryManager<T,MaxArrNum>::getArrNum()
+{
+	return MaxArrNum;
+}
 
 
 //============class  AssociatedMemoryManager<T,1>
@@ -117,7 +120,7 @@ typename AssociatedMemoryManager<T,1>::TargetType *AssociatedMemoryManager<T,1>:
     TargetType *rt=nullptr;
     if(!this->isFull())
     {
-        for(size_t i=0;i!=this->len;i++)
+        for(size_t i=0;i!=this->len;++i)
         {
             if(!this->narr[this->lastIndex].isAlloced())
             {
@@ -126,8 +129,8 @@ typename AssociatedMemoryManager<T,1>::TargetType *AssociatedMemoryManager<T,1>:
                 this->curAllocedSize++;
                 this->lastIndex = (this->lastIndex + 1 ) % this->len;
                 break;
-            }
-            this->lastIndex = (this->lastIndex + 1 ) % this->len;
+            }else// increment lastIndex
+            	this->lastIndex = (this->lastIndex + 1 ) % this->len;
         }
     }
     return rt;
@@ -187,6 +190,96 @@ int AssociatedMemoryManager<T, 1>::allocContinuousFree(size_t n)
 
 	return -1;
 }
+template<class T>
+bool AssociatedMemoryManager<T,1>::isFull()const
+{
+    return this->curAllocedSize==this->len;
+}
+template<class T>
+bool AssociatedMemoryManager<T,1>::isEmpty()const
+{
+    return this->curAllocedSize==0;
+}
+template<class T>
+size_t AssociatedMemoryManager<T,1>::getLen()const
+{
+    return this->len;
+}
+template<class T>
+size_t AssociatedMemoryManager<T,1>::getLeft()const
+{
+	return this->len - this->curAllocedSize;
+}
+template<class T>
+size_t AssociatedMemoryManager<T,1>::getCurSize()const
+{
+    return this->curAllocedSize;
+}
+
+template<class T>
+typename AssociatedMemoryManager<T, 1>::TargetType* AssociatedMemoryManager<T, 1>::getTarget(size_t index)
+{
+	return (index<this->len)?this->tarr + index:nullptr;
+}
+
+//template<class T>
+//void AssociatedMemoryManager<T, 1>::freeNode(size_t index)
+//{
+//	NodeType *p;
+//	if( (p=this->getNode(index))!=nullptr && !p->isFree())
+//	{
+//		p->free();
+//		this->curAllocedSize--;
+//	}
+//}
+//template<class T>
+//void AssociatedMemoryManager<T, 1>::unfreeNode(size_t index)
+//{
+//	NodeType *p;
+//	if( (p=this->getNode(index))!=nullptr && p->isFree())
+//	{
+//		p->unfree();
+//		this->curAllocedSize++;
+//	}
+//}
+
+
+template<class T>
+typename AssociatedMemoryManager<T, 1>::NodeType* AssociatedMemoryManager<T, 1>::getNode(size_t index)
+{
+	return (index<this->len)?this->narr + index:nullptr;
+}
+/**
+ * return len+1 meaning invalid
+ * nullptr,<,>
+ */
+template<class T>
+size_t AssociatedMemoryManager<T, 1>::getTargetIndex(TargetType* t)const
+{
+//	ptrdiff_t diff=((char*)t - (char*)this->tarr)/sizeof(*t);
+	ptrdiff_t diff=t - this->tarr;
+	return (t==nullptr || diff<0||(static_cast<size_t>(diff) >= this->len) ?(this->len +1 ):static_cast<size_t>(diff));
+
+}
+template<class T>
+size_t		AssociatedMemoryManager<T, 1>::getNodeIndex(NodeType* n)const
+{
+//	ptrdiff_t diff=((char*)n - (char*)this->narr)/sizeof(*n);
+	ptrdiff_t diff=n - this->narr;
+	return (n==nullptr||diff<0||static_cast<size_t>(diff) >= this->len) ?(this->len +1 ):static_cast<size_t>(diff);
+}
+template<class T>
+constexpr size_t		AssociatedMemoryManager<T, 1>::getEachSize()
+{
+	return sizeof(TargetType)+sizeof(NodeType);
+}
+
+template<class T>
+typename AssociatedMemoryManager<T,1>::NodeType*		AssociatedMemoryManager<T, 1>::getNodeAddress()
+{
+	return narr;
+}
+
 
 template<class T>
 void AssociatedMemoryManager<T, 1>::allocNode(size_t index)

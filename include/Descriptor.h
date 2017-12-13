@@ -98,15 +98,14 @@ protected:
 	char	baseAddrHigh_8:8;
 
 public:
+    SegmentDescriptor(char* baseaddr=0,int limit=0,char g=G_1B,char type=TYPE_U_DATA,
+    		char dpl=DPL_0,char s=S_USER,char b=B_UPPER_BOUND32,char p=P_PRESENT);
+    ~SegmentDescriptor();
+
     AS_MACRO void setBaseAddr(int baseAddr);
     AS_MACRO int	getBaseAddr()const;
     AS_MACRO int		getLimit()const;
     AS_MACRO void	setLimit(int limit);
-
-
-    SegmentDescriptor(char* baseaddr=0,int limit=0,char g=G_1B,char type=TYPE_U_DATA,
-    		char dpl=DPL_0,char s=S_USER,char b=B_UPPER_BOUND32,char p=P_PRESENT);
-    ~SegmentDescriptor();
 
     /**
     *相同返回1，不同返回0

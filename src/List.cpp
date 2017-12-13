@@ -1,8 +1,11 @@
 
 #include <List.h>
 #include <MemoryManager.h>
+#include <conceptual/ExtFunctional.h>
+#include <utility>
+#include <conceptual/ResourceProtocal.h>
 
-#include <macros/all.h>
+
 #if defined(CODE32)
 	__asm__(".code32 \n\t");
 #endif
@@ -161,6 +164,13 @@ void SimpleMemoryManager<T>::withdraw(T *t)
 #define __DEF_ListNode ListNode<T>
 
 __DEF_Template_ListNode
+__DEF_ListNode::ListNode():
+data(),
+next(nullptr),
+previous(nullptr)
+{
+}
+__DEF_Template_ListNode
 __DEF_ListNode::ListNode(const T& data,__ListNode* next,__ListNode* previous):
 data(data),
 next(next),
@@ -177,14 +187,18 @@ __DEF_Template_ListNode
 typename __DEF_ListNode::__ListNode* __DEF_ListNode::removeNext()
 {
     __ListNode* rt=this->getNext();
-    if(this->hasNext())
-    {
-        this->setNext(rt->getNext());
-        if(rt->hasNext())
-        {
-            rt->getNext()->setPrevious(this);
-        }
-    }
+    if(!rt)return nullptr;
+
+	this->setNext(rt->getNext());
+	if(rt->hasNext())
+	{
+		rt->getNext()->setPrevious(this);
+	}
+
+	// 清除rt的链接信息，保留其数据
+	rt->setPrevious(nullptr);
+	rt->setNext(nullptr);
+
     return rt;
 }
 
@@ -192,14 +206,17 @@ __DEF_Template_ListNode
 typename __DEF_ListNode::__ListNode* __DEF_ListNode::removePrevious()
 {
     __ListNode* rt=this->getPrevious();
-    if(this->hasPrevious())
-    {
-        this->setPrevious(rt->getPrevious());
-        if(rt->hasPrevious())
-        {
-            rt->getPrevious()->setNext(this);
-        }
-    }
+    if(!rt) return nullptr;
+
+	this->setPrevious(rt->getPrevious());
+	if(rt->hasPrevious())
+	{
+		rt->getPrevious()->setNext(this);
+	}
+
+	rt->setPrevious(nullptr);
+	rt->setNext(nullptr);
+
     return rt;
 }
 
@@ -209,8 +226,7 @@ void    __DEF_ListNode::insertNext(__ListNode* next)
 {
     if(next)
     {
-        __ListNode* temp1;
-        temp1 = this->getNext();
+        __ListNode* temp1=this->getNext();
         if(temp1)
         {
             temp1->setPrevious(next);
@@ -283,26 +299,24 @@ typename __DEF_ListNode::__ListNode*    __DEF_ListNode::getFirst()const
 #define __DEF_LinkedList LinkedList<T,_Allocator>
 
 __DEF_Template_LinkedList
-__DEF_LinkedList::LinkedList(__Allocator &smm):
-smm(smm),root(nullptr),last(nullptr)
+__DEF_LinkedList::LinkedList(const std::shared_ptr<__Allocator>& smm):
+smm(),root(newOneNodeThrows()),last(newOneNodeThrows())
 {
-//	Kernel::printer->putsz("in LinkedList init\n");
-//	Kernel::printer->putx("sizeof(ListNode<T>)=",x2sizeof(ListNode<T>));
-//	Kernel::getTheKernel()->dumpInfo();
-    char temp[sizeof(T)];
-    __ListNode *node1=smm.getNew();
-//    Kernel::printer->putx("node1=",(int)node1);
-//	Kernel::getTheKernel()->dumpInfo();
+    this->smm = smm; //必须使用赋值来设置
+}
 
-    __ListNode *node2=smm.getNew();
-//    Kernel::printer->putx("node2=",(int)node2);
-//	Kernel::getTheKernel()->dumpInfo();
 
-//	Util::insertMark(0x270270);
-    this->root = new (node1) __ListNode(*reinterpret_cast<T*>(temp),nullptr,nullptr);
-    this->last = new (node2) __ListNode(*reinterpret_cast<T*>(temp),nullptr,nullptr);
-//	Kernel::printer->putsz("in LinkedList init return\n");
-//	Util::jmpDie();
+
+__DEF_Template_LinkedList
+__DEF_LinkedList::LinkedList(std::shared_ptr<__Allocator>&& smm):
+smm(std::move(smm)),root(newOneNodeThrows()),last(newOneNodeThrows())
+{
+
+}
+__DEF_Template_LinkedList
+__DEF_LinkedList::LinkedList(__Allocator *smm):
+smm(smm),root(newOneNodeThrows()),last(newOneNodeThrows())
+{
 }
 
 __DEF_Template_LinkedList
@@ -316,8 +330,8 @@ void __DEF_LinkedList::free()
 	if(root)
 		this->freeNext(root->getNext());
 
-	this->smm.withdraw(this->root);
-    this->smm.withdraw(this->last);
+	this->smm->withdraw(this->root);
+    this->smm->withdraw(this->last);
 
     this->root=nullptr;
     this->last=nullptr;
@@ -331,7 +345,7 @@ void __DEF_LinkedList::freeNext(__ListNode *t)
     __ListNode *prev=t->getPrevious();
     while(p)
     {
-        smm.withdraw(p);
+        smm->withdraw(p);
         p=p->getNext();
     }
     if(prev)
@@ -397,12 +411,17 @@ typename __DEF_LinkedList::__ListNode*  __DEF_LinkedList::
 
     return p;
 }
-
+__DEF_Template_LinkedList
+template <class ... Args>
+typename __DEF_LinkedList::__ListNode*	    __DEF_LinkedList::append(Args &&...args)
+{
+	this->append(getNew(*smm,std::forward<Args>(args)...));
+}
 __DEF_Template_LinkedList
 typename __DEF_LinkedList::__ListNode*  __DEF_LinkedList::
 		appendHead(const T& t)
 {
-    return appendHead(new (smm.getNew()) __ListNode(t));
+    return appendHead(new (smm->getNew()) __ListNode(t));
 }
 
 __DEF_Template_LinkedList
@@ -435,7 +454,12 @@ typename __DEF_LinkedList::__ListNode*    __DEF_LinkedList::
    return plast;
    
 }
-
+__DEF_Template_LinkedList
+template <class ... Args>
+typename __DEF_LinkedList::__ListNode*	    __DEF_LinkedList::appendHead(Args &&...args)
+{
+	this->appendHead(getNew(*smm,std::forward<Args>(args)...));
+}
 
 __DEF_Template_LinkedList
 void    __DEF_LinkedList::remove(__ListNode* p)
@@ -470,6 +494,12 @@ void	 __DEF_LinkedList::insertNext(__ListNode* where,__ListNode* p)
 	}
 }
 __DEF_Template_LinkedList
+template <class ... Args>
+void			__DEF_LinkedList::insertNext(__ListNode *where,Args &&...args)
+{
+	this->insertNext(where,newOneNodeThrows(std::forward<Args>(args)...));
+}
+__DEF_Template_LinkedList
 void	 __DEF_LinkedList::insertPrevious(__ListNode* where,__ListNode* p)
 {
 	if(where==nullptr||where==this->root||p==nullptr)return;
@@ -480,6 +510,12 @@ void	 __DEF_LinkedList::insertPrevious(__ListNode* where,__ListNode* p)
 		where->insertPrevious(p);
 	}
 
+}
+__DEF_Template_LinkedList
+template <class ... Args>
+void			__DEF_LinkedList::insertPrevious(__ListNode *where,Args &&...args)
+{
+	this->insertPrevious(where,newOneNodeThrows(std::forward<Args>(args)...));
 }
 __DEF_Template_LinkedList
 size_t   __DEF_LinkedList::getSize()const
@@ -494,16 +530,46 @@ size_t   __DEF_LinkedList::getSize()const
 	return size;
 }
 __DEF_Template_LinkedList
+template <class ... Args>
+typename __DEF_LinkedList::__ListNode*
+__DEF_LinkedList::newOneNode(Args &&...args)noexcept
+{
+	return getNew(*this->smm,std::forward<Args>(args)...);
+}
+__DEF_Template_LinkedList
+template <class ... Args>
+typename __DEF_LinkedList::__ListNode*
+__DEF_LinkedList::newOneNodeThrows(Args &&...args)
+{
+	return getNewThrows(*this->smm,std::forward<Args>(args)...);
+}
+__DEF_Template_LinkedList
+void __DEF_LinkedList::freeOneNode(__ListNode *node)
+{
+	smm->withdraw(node);
+}
+__DEF_Template_LinkedList
 typename __DEF_LinkedList::__ListNode*    __DEF_LinkedList::
 		removeHead()
 {
     __ListNode* p=root->removeNext();
+    if(!p)return nullptr;//empty
     if(p==getLast())
     {
         last->setNext(nullptr);
     }
     return p;
    
+}
+__DEF_Template_LinkedList
+typename __DEF_LinkedList::__ListNode*
+	__DEF_LinkedList::removeAllAfterHead()
+{
+	__ListNode *p=root->getNext();
+	if(!p) return nullptr;
+	p->setPrevious(nullptr);
+	root->setNext(nullptr);
+	last->setNext(nullptr);
 }
 #undef __DEF_Template_LinkedList
 #undef __DEF_LinkedList
@@ -515,12 +581,6 @@ typename __DEF_LinkedList::__ListNode*    __DEF_LinkedList::
 #define __DEF_Template_LocateableLinkedList template<class _Locateable,int _HowAllocated,template <class> class _Allocator>
 #define __DEF_LocateableLinkedList LocateableLinkedList<_Locateable,_HowAllocated,_Allocator>
 
-__DEF_Template_LocateableLinkedList
-__DEF_LocateableLinkedList::LocateableLinkedList(__Allocator &smm ):
-Super(smm)
-{
-
-}
 __DEF_Template_LocateableLinkedList
 __DEF_LocateableLinkedList::~LocateableLinkedList()
 {
@@ -696,8 +756,17 @@ typename __DEF_LocateableLinkedList::__ListNode* __DEF_LocateableLinkedList::
 #define __DEF_TreeNode TreeNode<T>
 
 __DEF_Template_TreeNode
+__DEF_TreeNode::TreeNode():
+Super(),
+son(nullptr),
+father(nullptr)
+{
+
+}
+
+__DEF_Template_TreeNode
 __DEF_TreeNode::TreeNode(const T& data,__TreeNode* father,__TreeNode* son,__TreeNode* next,__TreeNode* previous):
-__ListNode(data,next,previous),
+Super(data,next,previous),
 son(son),
 father(father)
 {
@@ -776,7 +845,7 @@ void __DEF_TreeNode::insertFather(__TreeNode* father) {
 }
 
 __DEF_Template_TreeNode
-typename __DEF_TreeNode::__TreeNode* __DEF_TreeNode::removeSon() {
+void __DEF_TreeNode::removeSon() {
 	if(this->getSon())
 	{
 		__TreeNode *son=this->getSon()->getSon();
@@ -786,8 +855,6 @@ typename __DEF_TreeNode::__TreeNode* __DEF_TreeNode::removeSon() {
 		this->getSon()->setSon(nullptr);
 
 	}
-	// TODO 改变返回参数，什么都不返回
-	return nullptr;
 }
 __DEF_Template_TreeNode
 void 			__DEF_TreeNode::adjustOffset(ptrdiff_t diff)
@@ -804,9 +871,23 @@ void 			__DEF_TreeNode::initToNull()
 	__ListNode::initToNull();
 	father=son=nullptr;
 }
+__DEF_Template_TreeNode
+void 			__DEF_TreeNode::concateSon(__TreeNode *node)
+{
+	if(this->hasSon() || node==nullptr || node->hasFather())return;//前置条件不满足
+	this->setSon(node);
+	node->setFather(this);
+}
+__DEF_Template_TreeNode
+void 			__DEF_TreeNode::concateNext(__TreeNode *node)
+{
+	if(this->hasNext() || node==nullptr || node->hasFather())return;//前置条件不满足
+	this->setNext(node);
+	node->setPrevious(this);
+}
 
 __DEF_Template_TreeNode
-typename __DEF_TreeNode::__TreeNode* __DEF_TreeNode::removeFather() {
+void __DEF_TreeNode::removeFather() {
 	if(this->getDirectFather())
 	{
 		__TreeNode *father=this->getDirectFather()->getDirectFather();
@@ -815,8 +896,6 @@ typename __DEF_TreeNode::__TreeNode* __DEF_TreeNode::removeFather() {
 		this->getDirectFather()->setFather(nullptr);
 		this->getDirectFather()->setSon(nullptr);
 	}
-	//TODO 返回void
-	return nullptr;
 }
 
 __DEF_Template_TreeNode
@@ -828,6 +907,9 @@ typename __DEF_TreeNode::__TreeNode* __DEF_TreeNode::getParent()const {//往prev
 	}
 	return p->getDirectFather();
 }
+
+
+
 
 #undef __DEF_Template_TreeNode
 #undef __DEF_TreeNode
@@ -841,48 +923,51 @@ typename __DEF_TreeNode::__TreeNode* __DEF_TreeNode::getParent()const {//往prev
 
 #define __DEF_Template_Tree template<class T,template <class> class _Allocator>
 #define __DEF_Tree Tree<T,_Allocator>
+
+//__DEF_Template_Tree
+//template <template <class> class __SharedPtr>
+//__DEF_Tree::Tree(__SharedPtr<__Allocator>&& smm):
+//smm(std::forward<__SharedPtr<__Allocator>>(smm)),root(newOneNodeThrows()) // root通过smm->getNew(),也必须被恰当地回收。
+//{
+//}
 __DEF_Template_Tree
-__DEF_Tree::Tree(__Allocator& smm,__TreeNode* root):
-smm(smm),root(root)
+__DEF_Tree::Tree(const std::shared_ptr<__Allocator> &smm):
+smm(smm),
+root(newOneNodeThrows()), // root通过smm->getNew(),也必须被恰当地回收。
+curNode(nullptr)
 {
-#if defined(CODE32)
-	Kernel::printer->putsz("in Tree init.");
-	Kernel::printer->putsz("in Tree init2");
-	Kernel::printer->putsz("in Tree init3");
-	Kernel::printer->putsz("\n");
-	Kernel::printer->putsz("in Tree init4");
-	Util::insertMark(0x785785); // 0013417
-#endif
+}
+__DEF_Template_Tree
+__DEF_Tree::Tree(std::shared_ptr<__Allocator>&& smm):
+smm(std::move(smm)),
+root(newOneNodeThrows()), // root通过smm->getNew(),也必须被恰当地回收。
+curNode(nullptr)
+{
+}
 
-	// TODO 恢复下面的代码
-	__TreeNode *node=nullptr;
-	if(root==nullptr && (node=smm.getNew())!=nullptr)
-	{
-		node->initToNull();
-		this->root=node;
-	}
-
-//	Kernel::getTheKernel()->dumpInfo();
-//	__TreeNode *node=reinterpret_cast<__TreeNode*>(Kernel::getTheKernel())->mnewKernel(x2sizeof(__TreeNode));
-
-#if defined(CODE32)
-	Kernel::printer->putsz("in Tree init return\n");
-#endif
-	//char saver[sizeof(T)];
-	//new (this->root) __TreeNode(*(T*)saver);//root must be very carefully initiated,but if you don't do that,it is fine.Do be very
-	//careful about the actual type at a position.Because that's really important.
-	//this->root->setSon(0);
-#if defined(CODE64)
-//	printf("arg root is : %x,this->root : %x\n",root,this->root);
-//	printf("ask you when TreeNode<FileDescriptor>,press y to stop\n");
-//	while(getchar()!='\n');
-//	int ask=getchar();
-//	if(ask=='y')
-//	{
-//		TreeNode<FileDescriptor> * head=(TreeNode<FileDescriptor>*)this->getHead();
-//		printf("call getFathter , %x \n",head->getDirectFather());
-//	}
-#endif
+__DEF_Template_Tree
+__DEF_Tree::Tree(__Tree && tree):
+smm(std::move(tree.smm)),
+root(tree.root),
+curNode(nullptr)
+{
+	// NOTE 下面的语句必须，而且必须配合析构函数进行使用：移动过后，就好像该类已经被析构了一样，但是它所指的资源并没有相应关闭
+	tree.root=nullptr;
+	tree.curNode=nullptr;
+}
+__DEF_Template_Tree
+typename __DEF_Tree::__Tree __DEF_Tree::operator=(__Tree && tree)
+{
+	this->smm = std::move(tree.smm);
+	this->root = tree.root;
+	this->curNode = nullptr;
+	tree.root=nullptr;
+	tree.curNode=nullptr;
+}
+__DEF_Template_Tree
+typename __DEF_Tree::__Tree __DEF_Tree::makeSmmSharedTree()
+{
+  return std::move(__Tree{this->smm});
 }
 
 #if defined(CODE32)
@@ -900,26 +985,516 @@ void __DEF_Tree::dumpInfo(Printer* p)const
 
 __DEF_Template_Tree
 __DEF_Tree::~Tree() {
-	 // 所有节点应当被撤销
-//	free(this->root);
-
+	// DONE 证明正确性
+	// 考虑可重入性
+	// 是的，现在析构函数的语义应当是： 销毁所有未被关闭，以及未被移动的资源。 考虑移动构造函数的影响。
+	if(this->root) // root仅可能通过移动进行改变。
+		freeAll(this->root);
 }
 
 __DEF_Template_Tree
-void         __DEF_Tree::free(__TreeNode *root)
+void         __DEF_Tree::freeAll(__TreeNode *node)
 {
-  if(root)
+  if(node)
   {
-     __TreeNode* p=root->getSon();//先把所有子节点free
-    while(p)
-    {
-    	__TreeNode* next=p->getNext();
-        this->free(p);
-        p = next;
-    }//OK,all the sons are free
-    smm.withdraw(root);
+	  this->freeAll(node->getSon());
+	  this->freeAll(node->getNext());
+	  smm->withdraw(node);
   }
 }
+__DEF_Template_Tree
+size_t		__DEF_Tree::getSize()const
+{
+	size_t size=0;
+	dumpInfo([&size](const T& t){++size;},
+			doNothing<void>, doNothing<void>, doNothing<void>, doNothing<void>);
+	return size;
+}
+
+//__DEF_Template_Tree
+//template <class __SerializerPtr>
+//__SerializerPtr* __DEF_Tree::ptrNewest=nullptr;
+
+__DEF_Template_Tree
+template <class __EnvTransfer>
+		size_t __DEF_Tree::__serializeHelper(SerializerPtr<__EnvTransfer> &ptr,__TreeNode *node)const
+		{
+			if(node)
+			{
+				size_t n_son;
+				size_t n_next; // 不赋初值，减少初始化开销，因为只要进入node!=nullptr的区域，它们一定会被赋值；而不进入则没必要赋值
+				ptr << node->getData();
+				SerializerPtr<__EnvTransfer> ptrLast = ptr;//指向写n_last的地方
+				ptr << size_t(0) << size_t(0); //跳到下一个节点的起始处
+
+				// BUG 下面的两句，如果用在一起，不能保证谁先发生，即可能先序列化son，也可能先序列化next。
+				//   观察到的实际结果是先序列化next,然后是son。显然需要分开来做。
+				ptrLast <<(n_son = __serializeHelper<__EnvTransfer>(ptr,node->getSon()));
+				ptrLast	<<(n_next = __serializeHelper<__EnvTransfer>(ptr,node->getNext()));
+//				HostEnv::printf_simple("data=%d,n_son=%d, n_next=%d\n",node->getData(),n_son,n_next);
+				return (n_son + n_next + 1);
+			}else
+				return (0);
+		}
+__DEF_Template_Tree
+template <class __EnvTransfer>
+typename __DEF_Tree::__TreeNode *	__DEF_Tree::
+		__deserializeHelper(SerializerPtr<__EnvTransfer> &ptr,size_t n)
+		{
+			if(n==0)return (nullptr);
+			__TreeNode *node = this->newOneNode();
+			size_t n_son;
+			size_t n_next;
+
+			ptr	>> node->getData()
+			    >> n_son
+			    >> n_next;
+//			HostEnv::printf_simple("data=%d,n_son=%d, n_next=%d\n",node->getData(),n_son,n_next);
+
+			node->concateSon(__deserializeHelper<__EnvTransfer>(ptr,n_son));
+			node->concateNext(__deserializeHelper<__EnvTransfer>(ptr,n_next));
+//			HostEnv::printf_simple("data=%d,n_son=%d, n_next=%d\n",node->getData(),n_son,n_next);
+			return node;
+		}
+__DEF_Template_Tree
+template <class __EnvTransfer>
+	SerializerPtr<__EnvTransfer>& __DEF_Tree::serialize(SerializerPtr<__EnvTransfer> &ptr)const
+	{
+		SerializerPtr<__EnvTransfer> headPtr = ptr;
+		ptr << size_t(0); //先移动到下一个开始处
+		size_t sum = __serializeHelper<__EnvTransfer>(ptr,this->getHead());
+		headPtr << sum; // 回写
+//		HostEnv::printf_simple("write sum =%d\n",sum);
+		return ptr;
+	}
+__DEF_Template_Tree
+template <class __EnvTransfer>
+	SerializerPtr<__EnvTransfer>& __DEF_Tree::deserialize(SerializerPtr<__EnvTransfer> &ptr)
+	{
+		size_t sum;
+		ptr >> sum;
+		this->setHead(__deserializeHelper<__EnvTransfer>(ptr,sum));
+//		HostEnv::printf_simple("read sum =%d\n",sum);
+		return ptr;
+	}
+__DEF_Template_Tree
+template <class __EnvTransfer>
+	 size_t __DEF_Tree::getSerializitionSize() // 每一个不一定都是定长的
+{
+	return  __EnvTransfer::template sizeofHostType<size_t>()+
+			getSize() *(
+			::getSerializitionSize<T,__EnvTransfer>()+__EnvTransfer::template sizeofHostType<size_t>()*2) ;
+}
+
+#if defined(CODE64)
+__DEF_Template_Tree
+void 		__DEF_Tree::dumpInfo(
+		std::function<void(const T& t)>   consumer,
+		std::function<void()>   beforeSon,
+		std::function<void()>   afterSon,
+		std::function<void()>   beforeNext,
+		std::function<void()>   afterNext,
+		__TreeNode *node)const
+{
+	if(node)
+	{
+		consumer(node->getData());
+		beforeSon();
+		dumpInfo(consumer, beforeSon, afterSon, beforeNext, afterNext, node->getSon());
+		afterSon();
+		beforeNext();
+		dumpInfo(consumer, beforeSon, afterSon, beforeNext, afterNext, node->getNext());
+		afterNext();
+	}
+}
+__DEF_Template_Tree
+void 		__DEF_Tree::dumpInfo(std::function<void(const T& t)>   consumer,		std::function<void()>   beforeSon,
+		std::function<void()>   afterSon,
+		std::function<void()>   beforeNext,
+		std::function<void()>   afterNext)const
+{
+	dumpInfo(consumer, beforeSon, afterSon, beforeNext, afterNext,this->getHead());
+}
+#endif
+
+__DEF_Template_Tree
+typename __DEF_Tree::__TreeNode* __DEF_Tree::getHead()const {
+#ifdef CODE64
+//	std::cout << "tree getHead()"<<std::endl;
+#endif
+	return root->getSon();
+}
+
+__DEF_Template_Tree
+void  __DEF_Tree::setHead(__TreeNode *head)
+ {
+#if defined(CODE64)
+	//printf("root : %x  , head : %x\n",root,head);
+	//head->setFather(root);
+	//head->setSon(root);
+	//printf("head data : %x \n",head->getDirectFather());
+#endif
+ 	root->setSon(head);
+#if defined(CODE64)
+ 	//printf("root->setSon : %x\n",root->getSon());
+#endif
+ }
+__DEF_Template_Tree
+template <typename ...Args>
+void		__DEF_Tree::setHead(Args&& ... args)
+{
+	this->setHead(getNewThrows(*smm, std::forward<Args>(args)...));
+}
+
+__DEF_Template_Tree
+void		__DEF_Tree::addRoot(__TreeNode* node)
+{
+	this->root->addSon(node);
+}
+__DEF_Template_Tree
+bool		__DEF_Tree::isEmpty()const
+{
+	return !(this->root->hasSon());
+}
+
+__DEF_Template_Tree
+template <typename ...Args>
+typename __DEF_Tree::__Tree& __DEF_Tree::insertNext(Args&& ... args)
+{
+	curNode->insertNext(newOneNodeThrows(std::forward<Args>(args)...));
+	return *this;
+}
+
+__DEF_Template_Tree
+template <typename ...Args>
+typename __DEF_Tree::__Tree& __DEF_Tree::insertPrevious(Args&& ... args)
+{
+	curNode->insertPrevious(newOneNodeThrows(std::forward<Args>(args)...));
+	return *this;
+}
+
+__DEF_Template_Tree
+template <typename ...Args>
+typename __DEF_Tree::__Tree& __DEF_Tree::insertSon( Args&& ... args)
+{
+	curNode->insertSon(newOneNodeThrows(std::forward<Args>(args)...));
+	return *this;
+}
+
+__DEF_Template_Tree
+template <typename ...Args>
+typename __DEF_Tree::__Tree& __DEF_Tree::insertFather(Args&& ... args)
+{
+	curNode->insertFather(newOneNodeThrows(std::forward<Args>(args)...));
+	return *this;
+}
+
+__DEF_Template_Tree
+void		__DEF_Tree::freeOneNode(__TreeNode *node)
+{
+	// 即使node为nullptr仍然可以安全调用
+	smm->withdraw(node);
+}
+__DEF_Template_Tree
+template <class ...Args>
+typename __DEF_Tree::__TreeNode*__DEF_Tree::newOneNode(Args&&...args) noexcept
+{
+	// 即使node为nullptr仍然可以安全调用
+	return getNew(*this->smm,std::forward<Args>(args)...);
+}
+__DEF_Template_Tree
+template <class ...Args>
+typename __DEF_Tree::__TreeNode*__DEF_Tree::newOneNodeThrows(Args&&...args)
+{
+	return getNewThrows(*this->smm,std::forward<Args>(args)...);
+}
+//__DEF_Template_Tree
+//typename __DEF_Tree::__Allocator &__DEF_Tree::getSmm()const
+//{
+//	return this->smm;
+//}
 
 #undef __DEF_Template_Tree
 #undef __DEF_Tree
+
+
+
+
+
+//=========class : ListNode
+#define __DEF_Template_ListNode template<class T>
+#define __DEF_ListNode ListNode<T>
+
+__DEF_Template_ListNode
+typename __DEF_ListNode::__ListNode* __DEF_ListNode::getNext()const
+{
+    return next;
+}
+
+__DEF_Template_ListNode
+typename __DEF_ListNode::__ListNode* __DEF_ListNode::getPrevious()const
+{
+    return previous;
+}
+__DEF_Template_ListNode
+void __DEF_ListNode::setNext(__ListNode* next)
+{
+    this->next = next;
+}
+
+__DEF_Template_ListNode
+void  __DEF_ListNode::setPrevious(__ListNode* previous)
+{
+    this->previous = previous;
+}
+__DEF_Template_ListNode
+int  __DEF_ListNode::hasPrevious()const
+{
+    return (this->previous!=nullptr);
+}
+
+__DEF_Template_ListNode
+int  __DEF_ListNode::hasNext()const
+{
+    return (this->next!=nullptr);
+}
+
+__DEF_Template_ListNode
+const T& __DEF_ListNode::getData()const
+{
+    return data;
+}
+__DEF_Template_ListNode
+T& __DEF_ListNode::getData()
+{
+    return data;
+}
+__DEF_Template_ListNode
+void __DEF_ListNode::setData(const T& data)
+{
+    this->data=data;
+}
+
+__DEF_Template_ListNode
+template <class __EnvTransfer>
+SerializerPtr<__EnvTransfer>& __DEF_ListNode::serialize(SerializerPtr<__EnvTransfer> &ptr)const
+{
+	return ptr 	<< data
+				<< next
+				<< previous;
+}
+
+__DEF_Template_ListNode
+template <class __EnvTransfer>
+SerializerPtr<__EnvTransfer>& __DEF_ListNode::deserialize(SerializerPtr<__EnvTransfer> &ptr)
+{
+	static_assert( __EnvTransfer::ptrPolicy()!=__EnvTransfer::POLICY_PTR_OBJECT,"ptr object policy not supported yet");
+	ptr >> data
+			>>next
+			>>previous;
+	return ptr;
+}
+
+__DEF_Template_ListNode
+template <class __EnvTransfer>
+size_t __DEF_ListNode::getSerializitionSize()
+{
+	static_assert( __EnvTransfer::ptrPolicy()!=__EnvTransfer::POLICY_PTR_OBJECT,"ptr object policy not supported yet");
+	return data.getSerializitionSize<__EnvTransfer>()+
+			__EnvTransfer::template sizeofHostType<decltype(this->next)>()+
+			__EnvTransfer::template sizeofHostType<decltype(this->previous)>();
+}
+#undef __DEF_Template_ListNode
+#undef __DEF_ListNode
+
+
+
+//=============class:LinkedList
+#define __DEF_Template_LinkedList template <class T,template <class> class _Allocator>
+#define __DEF_LinkedList LinkedList<T,_Allocator>
+__DEF_Template_LinkedList
+typename __DEF_LinkedList::__ListNode*
+__DEF_LinkedList::getHead()const
+{
+    return root->getNext();
+}
+__DEF_Template_LinkedList
+typename __DEF_LinkedList::__ListNode*
+__DEF_LinkedList::getLast()const
+{
+    return last->getNext();
+}
+__DEF_Template_LinkedList
+bool			__DEF_LinkedList::isEmpty()const
+{
+	return this->getHead()==nullptr;
+}
+
+#undef __DEF_Template_LinkedList
+#undef __DEF_LinkedList
+
+
+//=====class: SimpleMemoryNode
+SimpleMemoryNode::SimpleMemoryNode(bool alloced):
+alloced(alloced)
+{
+}
+
+bool SimpleMemoryNode::isAlloced()
+{
+	return alloced;
+}
+void SimpleMemoryNode::setAlloced(bool alloced)
+{
+	this->alloced=alloced;
+}
+
+
+//=====class:SimpleMemoryManager
+template<class T>
+bool SimpleMemoryManager<T>::isFull()const
+{
+    return this->curSize==this->len;
+}
+template<class T>
+size_t SimpleMemoryManager<T>::getLen()const
+{
+    return this->len;
+}
+template<class T>
+size_t SimpleMemoryManager<T>::getCurSize()const
+{
+    return this->curSize;
+}
+template<class T>
+size_t SimpleMemoryManager<T>::getStart()const
+{
+    return this->start;
+}
+template<class T>
+size_t SimpleMemoryManager<T>::getLimit()const
+{
+    return this->limit;
+}    ///////////
+
+template<class T>
+size_t  SimpleMemoryManager<T>::getNodeSize()
+{
+	return sizeof(FullNode);
+}
+
+template<class T>
+typename SimpleMemoryManager<T>::ERROR_HANDLER SimpleMemoryManager<T>::getErrHandler()
+{
+	return this->errhandle;
+}
+template<class T>
+void			SimpleMemoryManager<T>::setErrHandler(SimpleMemoryManager<T>::ERROR_HANDLER errhandle)
+{
+	this->errhandle= errhandle;
+}
+template<class T>
+bool			SimpleMemoryManager<T>::checkIsInternal(FullNode *t)
+{
+	return this->start <= static_cast<size_t>(t) && static_cast<size_t>(t) -
+						static_cast<size_t>(this->start) <= this->limit ;
+}
+//===========class TreeNode
+#define __DEF_Template_TreeNode template<class T>
+#define __DEF_TreeNode TreeNode<T>
+
+__DEF_Template_TreeNode
+typename __DEF_TreeNode::__TreeNode* __DEF_TreeNode::setSon(__TreeNode* son)
+  {
+#if defined(CODE64)
+	//printf("setSon is : %x \n",son);
+#endif
+  	this->son=son;
+  	return this;
+  }
+__DEF_Template_TreeNode
+typename __DEF_TreeNode::__TreeNode* __DEF_TreeNode::setFather(__TreeNode* father) {
+    this->father=father;
+    return this;
+}
+
+//#if ! defined(CODE64)
+__DEF_Template_TreeNode
+typename __DEF_TreeNode::__TreeNode* __DEF_TreeNode::getSon() const{
+//#if defined(CODE64)
+//	printf("gettSon \n");
+//#endif
+	return son;
+}
+//#endif
+
+
+__DEF_Template_TreeNode
+typename __DEF_TreeNode::__TreeNode* __DEF_TreeNode::getNext() const{
+	__TreeNode* next=static_cast<__TreeNode*>(this->__ListNode::getNext());//这种情况下的强制转换一定是正确的，因为TreeNode中只存储TreeNode，而不会存储ListNode
+	return next;
+}
+
+__DEF_Template_TreeNode
+typename __DEF_TreeNode::__TreeNode* __DEF_TreeNode::getPrevious() const{
+	__TreeNode* previous=static_cast<__TreeNode*>(this->__ListNode::getPrevious());
+	return previous;
+}
+
+
+__DEF_Template_TreeNode
+typename __DEF_TreeNode::__TreeNode* __DEF_TreeNode::getDirectFather()const {//direct father
+#if defined(CODE64)
+//	printf("call direct,this is %x,father is %x\n",this,this->father);
+#endif
+    return father;
+}
+
+__DEF_Template_TreeNode
+bool		 __DEF_TreeNode::hasSon()const
+{
+	return this->son!=nullptr;
+}
+__DEF_Template_TreeNode
+bool 		 __DEF_TreeNode::hasFather()const
+{
+	return this->father!=nullptr;
+}
+__DEF_Template_TreeNode
+template <class __EnvTransfer>
+SerializerPtr<__EnvTransfer>& __DEF_TreeNode::serialize(SerializerPtr<__EnvTransfer> &ptr)const
+{
+	// TODO 修改下面的指针序列化
+	// 调用父类的serialize,然后自己的
+	this->Super::template serialize<__EnvTransfer>(ptr)
+				<<son
+				<<father;
+	return ptr;
+}
+
+__DEF_Template_TreeNode
+template <class __EnvTransfer>
+SerializerPtr<__EnvTransfer>& __DEF_TreeNode::deserialize(SerializerPtr<__EnvTransfer> &ptr)
+{
+	this->Super::template deserialize<__EnvTransfer>(ptr)
+						>>son
+						>>father;
+	return ptr;
+}
+
+__DEF_Template_TreeNode
+template <class __EnvTransfer>
+size_t __DEF_TreeNode::getSerializitionSize()
+{
+	static_assert( __EnvTransfer::ptrPolicy()!=__EnvTransfer::POLICY_PTR_OBJECT,"ptr object policy not supported yet");
+	return this->Super::template getSerializitionSize<__EnvTransfer>()+
+			__EnvTransfer::template sizeofHostType<decltype(this->son)>()+
+			__EnvTransfer::template sizeofHostType<decltype(this->father)>();
+}
+
+#undef __DEF_Template_TreeNode
+#undef __DEF_TreeNode
+
+
+
+//======class Tree

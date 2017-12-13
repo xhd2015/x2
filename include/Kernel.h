@@ -6,7 +6,7 @@
 #include <libx2.h>
 #include <List.h>	//SimpleMemoryManager
 #include <Interrupts.h>
-#include <loki/Int2Type.h>
+#include <conceptual/loki/Int2Type.h>
 #include <Descriptor.h>
 #include <AssociatedMemoryManager.h>
 

@@ -361,12 +361,20 @@
 				<useDefaultCommand>false</useDefaultCommand>
 				<runAllBuilders>true</runAllBuilders>
 			</target>
-			<target name="include/macros/configurations.h" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+			<target name="include/conceptual/configurations.h" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
 				<buildArguments>-j4</buildArguments>
-				<buildTarget>include/macros/configurations.h</buildTarget>
+				<buildTarget>include/conceptual/configurations.h</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
+				<runAllBuilders>true</runAllBuilders>
+			</target>
+			<target name="gen/64/precompiled_most.o" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>make</buildCommand>
+				<buildArguments>-j4 DEBUG=true</buildArguments>
+				<buildTarget>gen/64/precompiled_most.o</buildTarget>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>false</useDefaultCommand>
 				<runAllBuilders>true</runAllBuilders>
 			</target>
 		</buildTargets>

@@ -26,8 +26,9 @@
 using u64_t = unsigned long long;
 using u32_t = unsigned int;
 using u16_t = unsigned short;
-#define AS_MACRO __attribute__((always_inline)) inline
+//#define AS_MACRO __attribute__((always_inline)) inline
 
-
+#define DEOUT()	cout << __func__ << endl
+#define DEFUN(name) name(){DEOUT();}
 
 #endif /* TEST_ALL_PRECOMPILED_H_ */

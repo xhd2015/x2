@@ -24,7 +24,7 @@
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.archiver.cygwin.base.646555247" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.cygwin.base"/>
 							<tool command="g++ -Werror -Wall -fno-exceptions" errorParsers="org.eclipse.cdt.core.GCCErrorParser" id="cdt.managedbuild.tool.gnu.cpp.compiler.cygwin.exe.debug.2065765450" name="Cygwin C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.cygwin.exe.debug">
-								<option id="gnu.cpp.compiler.cygwin.exe.debug.option.optimization.level.408731964" name="Optimization Level" superClass="gnu.cpp.compiler.cygwin.exe.debug.option.optimization.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.optimization.level.none" valueType="enumerated"/>
+								<option id="gnu.cpp.compiler.cygwin.exe.debug.option.optimization.level.408731964" name="Optimization Level" superClass="gnu.cpp.compiler.cygwin.exe.debug.option.optimization.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.optimization.level.most" valueType="enumerated"/>
 								<option id="gnu.cpp.compiler.cygwin.exe.debug.option.debugging.level.220264942" name="Debug Level" superClass="gnu.cpp.compiler.cygwin.exe.debug.option.debugging.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.debugging.level.max" valueType="enumerated"/>
 								<option id="gnu.cpp.compiler.option.other.other.1830593690" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" useByScannerDiscovery="false" value="-c -fmessage-length=0" valueType="string"/>
 								<option id="gnu.cpp.compiler.option.dialect.std.1997034481" name="Language standard" superClass="gnu.cpp.compiler.option.dialect.std" useByScannerDiscovery="true" value="gnu.cpp.compiler.dialect.default" valueType="enumerated"/>
@@ -34,6 +34,10 @@
 								<option id="gnu.cpp.compiler.option.preprocessor.preprocess.1070523732" name="Preprocess only (-E)" superClass="gnu.cpp.compiler.option.preprocessor.preprocess" useByScannerDiscovery="false" value="false" valueType="boolean"/>
 								<option id="gnu.cpp.compiler.option.preprocessor.def.1384188433" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="IDE_MODE"/>
+									<listOptionValue builtIn="false" value="CODE64"/>
+								</option>
+								<option id="gnu.cpp.compiler.option.include.paths.111567938" superClass="gnu.cpp.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/x2/include}&quot;"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.cygwin.1561165164" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input.cygwin"/>
 							</tool>
@@ -54,7 +58,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="test_static_lambda.cpp|test_new_no_stdlib.cpp|test_atomic.cpp|test_nothing.cpp|test_type_sizeof_alignof.cpp|test_serialize.cpp|test_inc.cpp|test_multiple_file_instantiate.cpp|test_max_alignment.cpp|test_template_static.cpp|test_typeid.cpp|temp_reconstruct.cpp|test_class_partial.cpp|test_alignment.cpp|test_if.cpp|test_getopt.cpp|testGCC_macros.cpp|test_using_global_function.cpp|test_my_allocator.cpp|testLiteral.cpp|printKeymap.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
+						<entry excluding="test_templated_pointer_cast.cpp|test_empty_struct_derived_size.cpp|test_return_rvalue_ref.cpp|test_forward_rvalue.cpp|test_union_init_shared_ptr_dtor.cpp|test_replacement_ass_ref.cpp|test_dtor.cpp|test_static_lambda.cpp|test_new_no_stdlib.cpp|test_atomic.cpp|test_nothing.cpp|test_type_sizeof_alignof.cpp|test_serialize.cpp|test_inc.cpp|test_multiple_file_instantiate.cpp|test_max_alignment.cpp|test_template_static.cpp|test_typeid.cpp|temp_reconstruct.cpp|test_class_partial.cpp|test_alignment.cpp|test_if.cpp|test_getopt.cpp|testGCC_macros.cpp|test_using_global_function.cpp|test_my_allocator.cpp|testLiteral.cpp|printKeymap.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -102,7 +106,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="test_static_lambda.cpp|test_new_no_stdlib.cpp|test_atomic.cpp|test_nothing.cpp|test_type_sizeof_alignof.cpp|test_serialize.cpp|test_inc.cpp|test_multiple_file_instantiate.cpp|test_max_alignment.cpp|test_template_static.cpp|test_typeid.cpp|temp_reconstruct.cpp|test_class_partial.cpp|test_alignment.cpp|test_if.cpp|test_getopt.cpp|testGCC_macros.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
+						<entry excluding="test_templated_pointer_cast.cpp|test_empty_struct_derived_size.cpp|test_return_rvalue_ref.cpp|test_forward_rvalue.cpp|test_union_init_shared_ptr_dtor.cpp|test_replacement_ass_ref.cpp|test_dtor.cpp|test_static_lambda.cpp|test_new_no_stdlib.cpp|test_atomic.cpp|test_nothing.cpp|test_type_sizeof_alignof.cpp|test_serialize.cpp|test_inc.cpp|test_multiple_file_instantiate.cpp|test_max_alignment.cpp|test_template_static.cpp|test_typeid.cpp|temp_reconstruct.cpp|test_class_partial.cpp|test_alignment.cpp|test_if.cpp|test_getopt.cpp|testGCC_macros.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>

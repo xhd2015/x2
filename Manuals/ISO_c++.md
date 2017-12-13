@@ -79,7 +79,176 @@ using identifier attr(optional) = type-id ;
 
 # virtual语法和=0
 =0必须与virtual联用。
+# 取析构函数地址：taking address of destructor 'Bar::~Bar'
+类似的错误还有：
+taking address of constructor 'Bar::Bar'
+取成员函数地址是可行的，但是析构函数和构造函数不行。
+成员函数通常调用时使用的语法是：bar->*fun()..
+bar在调用时已经构造完成，不存在让其再被构造一次的做法。
 
+C++ standard says :
+$12.1/10: “The address of a constructor shall not be taken.”.
+
+而且，手动调用析构函数的唯一时机，应当是使用placement new的时候。这个时候对对象进行重构可以使用。
+
+为了在shared_ptr中传入栈上的指针并且使用其析构函数，下面的函数应当为我们所用：
+```
+# 析构函数
+```c++
+
+class Foo{
+public:
+    ~Foo()
+    {
+        cout << "~Foo"<<endl;
+    }
+};
+class Foo2{
+protected:
+    ~Foo2(){
+        cout << "~Foo2"<<endl;
+    }
+};
+class Widget{
+public:
+    ~Widget(){
+        cout << "~Widget" << endl;
+    }
+};
+class Widget2{
+public:
+    ~Widget2(){
+        cout <<"~Widget2"<<endl;
+    }
+};
+
+class Bar : public Foo,public Foo2{
+public:
+    ~Bar(){
+        cout << "~Bar" << endl;
+    }
+    Widget w;
+    Widget2 w2;
+};
+int main(int argc,char *argv[])
+{
+    Bar b;
+    b.~Bar();
+}
+```
+顺序：
+```c++
+~Bar
+~Widget2
+~Widget
+~Foo2
+~Foo
+```
+继承：如果一个类含有private的析构函数，则这个类不能用作基类
+成员：如果一个类含有private,protected的析构函数，则不能用作成员
+顺序：多重继承中，析构顺序是1.子类的析构函数体，2.子类非引用、非基本类型成员按倒序析构 3.继承的基类按声明倒序析构
+
+# 联合中的初始化
+```c++
+#define DEFUN(name) name(){cout << #name << endl;}
+class Bar{
+public:
+    DEFUN(Bar);
+    DEFUN(~Bar);
+};
+class Widget{
+public:
+    DEFUN(Widget);
+    DEFUN(~Widget);
+};
+class Foo{
+public:
+    DEFUN(Foo);
+    DEFUN(~Foo);
+    union{ // 即使注释掉b，编译器仍然不能自动生成，提示为ill-formed
+        Bar b;
+        Widget w;
+    };
+};
+```
+对Foo进行初始化:
+```c++
+Foo f;
+```
+则因为联合的初始化是编译器不能决定的，如果没有定义Foo(),~Foo(),编译器由于不能生成正确的函数，所以默认不生成。
+这种情况下，必须自己定义初始化函数和析构函数。
+注意：如果union是一个单纯的简单结构，也就是说union不含任何class对象，则编译器可以处理。但是只要含有一个类对象，编译器都拒绝自动生成。
+# shared_ptr和unique_ptr
+shared_ptr默认使用delete p;来删除所管理的对象。但是也能传递额外的参数让其在资源引用为0时进行删除。
+
+std::default_delete<_Tp>
+std::default_delete<_Tp[]> 可以用来生成默认的删除函数
+
+但是没有std::default_destruct<_Tp>
+
+# 右值引用
+```c++
+
+class Foo{
+public:
+    Foo& operator=(const Foo &)  {
+        cout << "operator="<<endl;
+        return *this;}
+    Foo()=default;
+    Foo(const Foo &)
+{
+        cout << "copying" << endl;
+}
+    Foo(Foo &&){
+        cout << "moving"<<endl;
+    }
+};
+
+Foo foo_copy_move(Foo &&f)
+{
+    Foo f3=std::move(f);
+    cout << "foo_copy_move"<<endl;
+    cout << &f << endl;
+    return f;
+}
+Foo&& foo_nothing(Foo &&f)
+{
+    cout << "foo_nothing" <<endl;
+    cout << &f << endl;
+    Foo localF=f;
+    return std::move(f=localF);//只有operator=发生，而构造函数没有发生，因为函数签名和f的类型匹配。但是在使用过程中f不具有主动成为移动的性质。
+}
+
+
+int main(int argc,char *argv[])
+{
+    foo_copy_move(foo_copy_move(Foo()));
+    foo_nothing(foo_nothing(Foo()));
+    cout << "END."<<endl;
+    return 0;
+}
+```
+结果：
+```c++
+moving
+foo_copy_move
+0xffffcb0d
+copying
+moving
+foo_copy_move
+0xffffcb0e
+copying
+foo_nothing
+0xffffcb0f
+copying
+operator=
+foo_nothing
+0xffffcb0f
+copying
+operator=
+END.
+```
+上面的例子我们可以看出，对象地址没有改变，因此我们使用的一直都是同一个临时对象。
 
 # 关于字面量
 c++11中有两条关于字面量的语法，从stroustrup的网站上可以找到：

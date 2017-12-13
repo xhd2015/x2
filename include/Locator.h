@@ -2,7 +2,7 @@
 #ifndef Locator_h__
 #define Locator_h__
 
-#include <loki/Int2Type.h>
+#include <conceptual/loki/Int2Type.h>
 #include <def.h>
 
 template <class T>

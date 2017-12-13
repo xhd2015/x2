@@ -88,6 +88,11 @@ public:
 	using __SizeType = size_t;
 	using __MemoryDescriptor = This;
 
+public:
+	/**
+	 * 因为特殊的缘由，可以使用默认的MemoryDescriptor
+	 */
+	MemoryDescriptor()=default;
     AS_MACRO MemoryDescriptor(__SizeType start,__SizeType limit,bool allocable=true);//done
 
     AS_MACRO ~MemoryDescriptor();//done
@@ -99,7 +104,7 @@ public:
     AS_MACRO bool operator!=(const __MemoryDescriptor& b)const;//done
     //const static MemoryDescriptor nullptr_DESCRIPTOR;
 protected:
-    bool allocable;
+    bool allocable {false};
 };
 
 
@@ -134,12 +139,12 @@ public:
 
 	LinearSourceManager()=delete;
 public:
-
 	/**
 	 * @param start应当不等于0，否则可能返回错误值
 	 */
-    LinearSourceManager(__Allocator &smm,__SizeType start,__SizeType size);//done
-    LinearSourceManager(__Allocator &smm);//done
+    LinearSourceManager(const std::shared_ptr<__Allocator> &smm,__SizeType start,__SizeType size);//done
+    LinearSourceManager(std::shared_ptr<__Allocator> &&smm,__SizeType start,__SizeType size);//done
+
     ~LinearSourceManager();//done
     
     AS_MACRO const _LinearSourceDescriptor & getSpace()const;
@@ -287,7 +292,7 @@ public:
 	using __Allocator = _DescriptorAllocator<__TreeNode>;
 
 public:
-	MemoryManager()=default;
+	MemoryManager()=delete;
     MemoryManager(__Allocator &smm);//done
     /**
      * 初始化一个带有待管理区间的内存管理器，区间范围是[start,start+len)
@@ -307,6 +312,9 @@ public:
     MemoryManager(__Allocator &smm,__SizeType start,__SizeType len,
     		__SizeType usedList[][2],__SizeType usedLen,bool fatherAllocable=true);
 
+    /**
+     * NOTE 一旦调用此函数，意味着所有分配出去的子管理器也被撤销。
+     */
     ~MemoryManager(); 
     
     //注意：不能在父类管理器中
@@ -368,6 +376,10 @@ public:
 #endif
 protected:
     __TreeNode  * allocOutNode(__TreeNode  *avlNode,__SizeType start,__SizeType len);//done
+    /**
+     * @brief 回收某个已经分配节点
+     * @param exactNode
+     */
     void withdrawNode(__TreeNode  *exactNode);//done
     /**
      * Note: extsize is __SizeType,it cannot be less than 0.if it is 0,then returned false.
@@ -378,12 +390,6 @@ protected:
      * 	@return 根据查找的情况返回值0,1,2
      */
     u8_t findExtend(__SizeType start,__SizeType size,__SizeType extsize,__TreeNode  * &rtnode)const;
-    
-protected:
-    //SimpleMemoryManager<__TreeNode  > *smm;  //the base class already has one
-
-private:
-
 };
 
 //================High Level Memory Allocation====================

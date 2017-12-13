@@ -1,0 +1,95 @@
+help: File.cpp ../include/def.h ../include/macros/configurations.h \
+ ../include/config.h ../include/List.h ../include/loki/Int2Type.h \
+ ../include/Locator.h ../include/libx2.h \
+ ../include/conceptual/Serialize.h ../include/EnvInterface.h \
+ ../include/EnvInterface64Impl.h ../include/64/MallocToSimple.h \
+ ../include/File.h ../include/MemoryManager.h ../include/macros/all.h \
+ ../include/Kernel.h ../include/Interrupts.h ../include/def.h \
+ ../include/Descriptor.h ../include/AssociatedMemoryManager.h \
+ ../include/IOProgramer.h ../include/Process.h ../include/TSS.h \
+ ../include/VirtualMemory.h ../include/Cache.h ../include/Filesystem.h \
+ ../include/macros/List_macros.h ../include/macros/Process_macros.h \
+ ../include/macros/AssociatedMemoryManager_macros.h \
+ ../include/macros/Kernel_macros.h ../include/macros/libx2_macros.h \
+ ../include/macros/Descriptor_macros.h ../include/macros/Cache_macros.h \
+ ../include/macros/IOProgramer_macros.h \
+ ../include/macros/Locator_macros.h \
+ ../include/macros/VirtualMemory_macros.h \
+ ../include/macros/MemoryManager_macros.h \
+ ../include/macros/Filesystem_macros.h File_FileOperation.cpp
+
+../include/def.h:
+
+../include/macros/configurations.h:
+
+../include/config.h:
+
+../include/List.h:
+
+../include/loki/Int2Type.h:
+
+../include/Locator.h:
+
+../include/libx2.h:
+
+../include/conceptual/Serialize.h:
+
+../include/EnvInterface.h:
+
+../include/EnvInterface64Impl.h:
+
+../include/64/MallocToSimple.h:
+
+../include/File.h:
+
+../include/MemoryManager.h:
+
+../include/macros/all.h:
+
+../include/Kernel.h:
+
+../include/Interrupts.h:
+
+../include/def.h:
+
+../include/Descriptor.h:
+
+../include/AssociatedMemoryManager.h:
+
+../include/IOProgramer.h:
+
+../include/Process.h:
+
+../include/TSS.h:
+
+../include/VirtualMemory.h:
+
+../include/Cache.h:
+
+../include/Filesystem.h:
+
+../include/macros/List_macros.h:
+
+../include/macros/Process_macros.h:
+
+../include/macros/AssociatedMemoryManager_macros.h:
+
+../include/macros/Kernel_macros.h:
+
+../include/macros/libx2_macros.h:
+
+../include/macros/Descriptor_macros.h:
+
+../include/macros/Cache_macros.h:
+
+../include/macros/IOProgramer_macros.h:
+
+../include/macros/Locator_macros.h:
+
+../include/macros/VirtualMemory_macros.h:
+
+../include/macros/MemoryManager_macros.h:
+
+../include/macros/Filesystem_macros.h:
+
+File_FileOperation.cpp:

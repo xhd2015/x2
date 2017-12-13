@@ -11,7 +11,6 @@
 
 #endif
 
-#include <macros/all.h>
 
 template <class _Source,int _HowStart,int _HowLength,int _HowAllocable>
 SourceLocator<_Source,_HowStart,_HowLength,_HowAllocable>::SourceLocator(const _Source& t):
@@ -137,3 +136,12 @@ bool SourceLocator<_Source,_HowStart,_HowLength,_HowAllocable>::tellLocation(con
 	return this->tellLocation(t,Int2Type<Locator<_Source>::IGNORE>());
 	
 }
+
+
+template <class _Source,int _HowStart,int _HowLength,int _HowAllocable>
+const _Source* SourceLocator<_Source,_HowStart,_HowLength,_HowAllocable>::getComparator()const
+{
+	return p;
+}
+
+
