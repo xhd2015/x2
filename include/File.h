@@ -10,6 +10,7 @@
 #include <MemoryManager.h>
 #include <List.h>
 #include <EnvInterface.h>
+#include <cassert>
 //#if defined(CODE64)
 //#include <EnvInterface64Impl.h>  //impl for dumpInfo
 //#endif
@@ -19,12 +20,12 @@
 
 
 //==class FileDescriptorBase
-	/**
-	 * 可默认初始化
-	 * 实现：序列化接口
-	 */
-	template <class __FsEnv = EnvTransfer<HOST_BIT>>
-	class BaseDescriptor:public SerializationInterface{
+/**
+ * 可默认初始化
+ * 实现：序列化接口
+ */
+template <class __FsEnv = EnvTransfer<HOST_BIT>>
+class BaseDescriptor:public SerializationInterface{
 	public:
 		using This = BaseDescriptor<__FsEnv>;
 		using __BaseDescriptor = This;
@@ -36,11 +37,8 @@
 		using ClassSerializeType = u8_t;
 		enum FileType{ TYPE_FILE=0,TYPE_DIR=1,TYPE_EAP=2};
 
-		/**
-		 * 仅仅是size_t的别名
-		 */
-		using size_t = HostEnv::size_t;
 		using __TimeType = size_t;
+		using __SizeType = HostEnv::size_t;
 	protected:// 不允许构造一个不完整的Descriptor
 		AS_MACRO BaseDescriptor()=default;
 		AS_MACRO BaseDescriptor(const HostEnv::String& name,__TimeType createdTime,__TimeType lastModefiedTime):
@@ -51,6 +49,11 @@
 		__BaseDescriptor &operator=(const __BaseDescriptor &bd)=default;
 		BaseDescriptor(BaseDescriptor &&)=default;
 		__BaseDescriptor &operator=(__BaseDescriptor &&)=default;
+
+		explicit BaseDescriptor(SerializerPtr<__FsEnv> & ptr)
+		{
+			this->This::deserialize(ptr);//在构造函数中，只有this只有基类类型
+		}
 	public:
 
 		virtual ~BaseDescriptor()=default;
@@ -113,8 +116,19 @@ private:
 	using Super = BaseDescriptor<__FsEnv>;
 public:
 	using FileType = typename Super::FileType;
+	using __TimeType = typename Super::__TimeType;
+	using __SizeType = typename Super::__SizeType;
 
-	using Super::BaseDescriptor;//继承构造函数
+	AS_MACRO DirDescriptor(const HostEnv::String& name,__TimeType createdTime,__TimeType lastModefiedTime):
+						Super(name,createdTime,lastModefiedTime) {}
+	AS_MACRO DirDescriptor(HostEnv::String&& name,__TimeType createdTime,__TimeType lastModefiedTime):
+		Super(std::move(name),createdTime,lastModefiedTime){}
+	AS_MACRO DirDescriptor()=default;
+	explicit DirDescriptor(SerializerPtr<__FsEnv> & ptr)
+	{
+		this->This::deserialize(ptr);//在构造函数中，只有this只有基类类型
+	}
+
 	virtual ~DirDescriptor()=default;
 	virtual FileType getType()const
 	{
@@ -128,9 +142,15 @@ private:
 	using Super = BaseDescriptor<__FsEnv>;
 public:
 	using FileType = typename Super::FileType;
+	using __TimeType = typename Super::__TimeType;
+	using __SizeType = typename Super::__SizeType;
 	AS_MACRO FileDescriptor()=default;
 	virtual ~FileDescriptor()=default;
-	using Super::BaseDescriptor;
+	FileDescriptor(const HostEnv::String& name,__TimeType createdTime,__TimeType lastModefiedTime,__SizeType fileLen):Super(name,createdTime,lastModefiedTime),fileLen(fileLen){}
+	explicit FileDescriptor(SerializerPtr<__FsEnv> & ptr)
+	{
+		this->This::deserialize(ptr);
+	}
 
 	virtual FileType getType()const
 	{
@@ -189,15 +209,6 @@ private:
 };
 
 
-
-template <class __FsEnv,class ... Args>
-BaseDescriptor<__FsEnv> *createFileDescriptor(typename BaseDescriptor<__FsEnv>::FileType type,Args&&...args)
-{
-	if(type==BaseDescriptor<__FsEnv>::TYPE_FILE)
-		return new FileDescriptor<__FsEnv>(std::forward<Args>(args)...);
-	else
-		return new DirDescriptor<__FsEnv>(std::forward<Args>(args)...);
-}
 
 /**
  * 使用全局静态函数，这种情况下，原来的operator<<,operator>>需要进行一定程度的改写，指针版本。
@@ -265,7 +276,9 @@ public:
 	enum{SecSize=512,KiB=2*SecSize,MiB=1024*KiB,GiB=1024*MiB};
 	X2fsMetaInfo()=default;
 
-    X2fsMetaInfo(u32_t lbaBaseLow, u32_t lbaBaseHigh,size_t wholeSecnums,u8_t basicSizeType = BASIC_SIZE_TYPE,
+    X2fsMetaInfo(u32_t lbaBaseLow, u32_t lbaBaseHigh,
+    				size_t wholeSecnums = 10 + SECNUM_META_CONST +  SECNUM_META_CONST,
+    				u8_t basicSizeType = BASIC_SIZE_TYPE,
                  size_t reservedSec = SECNUM_RESERVED_CONST,
                  size_t metaSec = SECNUM_META_CONST,
                   u16_t validFlag = VALID_FLAG) :
@@ -310,8 +323,12 @@ public:
     {
     	return getMetaSec() + getReservedSec();
     }
+    /**
+     * 必须足够长
+     */
     size_t getFreeSpaceLength()const
     {
+//    	std::assert( (this->getWholeSecnums() > this->getFreeSpaceStart()) );
     	return getWholeSecnums() - getFreeSpaceStart();
     }
 
@@ -444,6 +461,11 @@ public:
 	 * @brief 依据metainfo(格式化分区暗示者)创建一个新的X2fsUtil
 	 */
 	X2fsUtil(u8_t driver,const __X2fsMetaInfo &metainfo);
+
+	/**
+	 * 提供一些参数，然后从序列化指针读取保存的部分
+	 */
+	X2fsUtil(u8_t driver,SerializerPtr<__FsEnv>& ptr);
 public:
 	~X2fsUtil();
 
@@ -484,7 +506,7 @@ public:
 //	bool hasFilename(FileNode * node,const std::string& name)const;
 
 
-	DEPRECATED bool mkdir(const char* name);
+//	DEPRECATED bool mkdir(const char* name);
 	bool createFile(int argc,const char* argv[],int secSpan);
 	bool createDir(int argc,const char* argv[]);
 	bool deleteFile(int argc,const char * argv[]);
@@ -1028,7 +1050,7 @@ bool __DEF_X2fsUtil::isDirectory(const FileNode *p)
 __DEF_X2fsUtil_Template
 bool __DEF_X2fsUtil::isFile(const FileNode *p)
 {
-	return p && p->getData()->getType()==__FileDescriptor::TYPE_FILE;
+	return p && p->getData()->getType()==FileType::TYPE_FILE;
 }
 __DEF_X2fsUtil_Template
 typename __DEF_X2fsUtil::FileTree* __DEF_X2fsUtil::getFileTree()

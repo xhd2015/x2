@@ -4,16 +4,16 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
-../src/test_nouse_template.cpp 
+../src/test_functor_push_stack.cpp 
 
 O_SRCS += \
 ../src/test_new_no_stdlib.o 
 
 OBJS += \
-./src/test_nouse_template.o 
+./src/test_functor_push_stack.o 
 
 CPP_DEPS += \
-./src/test_nouse_template.d 
+./src/test_functor_push_stack.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes

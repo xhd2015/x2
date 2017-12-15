@@ -171,6 +171,14 @@ previous(nullptr)
 {
 }
 __DEF_Template_ListNode
+template <typename ... Args>
+__DEF_ListNode::ListNode(__ListNode *next,__ListNode* previous,Args&&...args):
+data(std::forward<Args>(args)...),
+next(next),
+previous(previous)
+{
+}
+__DEF_Template_ListNode
 __DEF_ListNode::ListNode(const T& data,__ListNode* next,__ListNode* previous):
 data(data),
 next(next),
@@ -413,16 +421,17 @@ typename __DEF_LinkedList::__ListNode*  __DEF_LinkedList::
 }
 __DEF_Template_LinkedList
 template <class ... Args>
-typename __DEF_LinkedList::__ListNode*	    __DEF_LinkedList::append(Args &&...args)
+typename __DEF_LinkedList::This&	    __DEF_LinkedList::append(Args &&...args)
 {
-	this->append(getNew(*smm,std::forward<Args>(args)...));
+	this->append(newOneNodeOnlyData(std::forward<Args>(args)...));
+	return *this;
 }
-__DEF_Template_LinkedList
-typename __DEF_LinkedList::__ListNode*  __DEF_LinkedList::
-		appendHead(const T& t)
-{
-    return appendHead(new (smm->getNew()) __ListNode(t));
-}
+//__DEF_Template_LinkedList
+//typename __DEF_LinkedList::__ListNode*  __DEF_LinkedList::
+//		appendHead(const T& t)
+//{
+//    return appendHead(new (smm->getNew()) __ListNode(t));
+//}
 
 __DEF_Template_LinkedList
 typename __DEF_LinkedList::__ListNode*  __DEF_LinkedList::
@@ -455,10 +464,11 @@ typename __DEF_LinkedList::__ListNode*    __DEF_LinkedList::
    
 }
 __DEF_Template_LinkedList
-template <class ... Args>
-typename __DEF_LinkedList::__ListNode*	    __DEF_LinkedList::appendHead(Args &&...args)
+template <class ... TArgs>
+typename __DEF_LinkedList::This&   __DEF_LinkedList::appendHead(TArgs &&...args)
 {
-	this->appendHead(getNew(*smm,std::forward<Args>(args)...));
+	this->appendHead(newOneNodeOnlyData(std::forward<TArgs>(args)...));//用于构造ListNode
+	return *this;
 }
 
 __DEF_Template_LinkedList
@@ -535,6 +545,17 @@ typename __DEF_LinkedList::__ListNode*
 __DEF_LinkedList::newOneNode(Args &&...args)noexcept
 {
 	return getNew(*this->smm,std::forward<Args>(args)...);
+		//语义错误，应当只构造某一部分
+}
+__DEF_Template_LinkedList
+template <class ... Args>
+typename __DEF_LinkedList::__ListNode*
+__DEF_LinkedList::newOneNodeOnlyData(Args &&...args)noexcept
+{
+	return getNew(*this->smm,
+			static_cast<__ListNode*>(nullptr),
+			static_cast<__ListNode*>(nullptr),
+			std::forward<Args>(args)...);
 }
 __DEF_Template_LinkedList
 template <class ... Args>
@@ -543,6 +564,14 @@ __DEF_LinkedList::newOneNodeThrows(Args &&...args)
 {
 	return getNewThrows(*this->smm,std::forward<Args>(args)...);
 }
+__DEF_Template_LinkedList
+template <class ... Args>
+typename __DEF_LinkedList::__ListNode*
+__DEF_LinkedList::newOneNodeOnlyDataThrows(Args &&...args)
+{
+	return getNewThrows(*this->smm,nullptr,nullptr,std::forward<Args>(args)...);
+}
+
 __DEF_Template_LinkedList
 void __DEF_LinkedList::freeOneNode(__ListNode *node)
 {
@@ -760,6 +789,19 @@ __DEF_TreeNode::TreeNode():
 Super(),
 son(nullptr),
 father(nullptr)
+{
+
+}
+
+__DEF_Template_TreeNode
+template <typename ... Args>
+__DEF_TreeNode::TreeNode(__TreeNode* father,
+		__TreeNode* son,
+		__TreeNode* next,
+		__TreeNode* previous,Args &&...args):
+Super(next,previous,std::forward<Args>(args)...),
+son(son),
+father(father)
 {
 
 }
@@ -1143,7 +1185,7 @@ __DEF_Template_Tree
 template <typename ...Args>
 void		__DEF_Tree::setHead(Args&& ... args)
 {
-	this->setHead(getNewThrows(*smm, std::forward<Args>(args)...));
+	this->setHead(newOneNode( std::forward<Args>(args)...));
 }
 
 __DEF_Template_Tree
@@ -1204,9 +1246,31 @@ typename __DEF_Tree::__TreeNode*__DEF_Tree::newOneNode(Args&&...args) noexcept
 }
 __DEF_Template_Tree
 template <class ...Args>
+typename __DEF_Tree::__TreeNode*__DEF_Tree::newOneNodeOnlyData(Args&&...args)noexcept
+{
+	return getNewThrows(*this->smm,
+			static_cast<__TreeNode*>(nullptr),
+			static_cast<__TreeNode*>(nullptr),
+			static_cast<__TreeNode*>(nullptr),
+			static_cast<__TreeNode*>(nullptr),
+			std::forward<Args>(args)...);
+}
+__DEF_Template_Tree
+template <class ...Args>
 typename __DEF_Tree::__TreeNode*__DEF_Tree::newOneNodeThrows(Args&&...args)
 {
 	return getNewThrows(*this->smm,std::forward<Args>(args)...);
+}
+__DEF_Template_Tree
+template <class ...Args>
+typename __DEF_Tree::__TreeNode*__DEF_Tree::newOneNodeOnlyDataThrows(Args&&...args)
+{
+	return getNewThrows(*this->smm,
+			static_cast<__TreeNode*>(nullptr),
+			static_cast<__TreeNode*>(nullptr),
+			static_cast<__TreeNode*>(nullptr),
+			static_cast<__TreeNode*>(nullptr),
+			std::forward<Args>(args)...);
 }
 //__DEF_Template_Tree
 //typename __DEF_Tree::__Allocator &__DEF_Tree::getSmm()const
@@ -1329,7 +1393,12 @@ bool			__DEF_LinkedList::isEmpty()const
 {
 	return this->getHead()==nullptr;
 }
-
+__DEF_Template_LinkedList
+void __DEF_LinkedList::setIfNoLast(__ListNode * p)
+{
+	if(!this->last->hasNext())
+		this->last->setNext(p);
+}
 #undef __DEF_Template_LinkedList
 #undef __DEF_LinkedList
 

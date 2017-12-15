@@ -142,8 +142,8 @@ public:
 	/**
 	 * @param start应当不等于0，否则可能返回错误值
 	 */
-    LinearSourceManager(const std::shared_ptr<__Allocator> &smm,__SizeType start,__SizeType size);//done
-    LinearSourceManager(std::shared_ptr<__Allocator> &&smm,__SizeType start,__SizeType size);//done
+    LinearSourceManager(const std::shared_ptr<__Allocator> &smm,__SizeType start=0,__SizeType size = 0);//done
+    LinearSourceManager(std::shared_ptr<__Allocator> &&smm,__SizeType start=0,__SizeType size = 0);//done
 
     ~LinearSourceManager();//done
     

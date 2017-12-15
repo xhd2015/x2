@@ -20,25 +20,37 @@ AS_MACRO void destruct(T *p)
 	p->~T();
 }
 /**
- * 例子： deleteArray<char*>, char*本身是一个Array
- * @param __Tp 表示希望以何种方式删除
+ * 例子： deleteArray<char, char (*)[]>, 为什么不采用更简单的方式？比如 deleteArray(__Tp (*p)[]), 因为C++不支持参数指向未知元素个数的数组指针
+ * @param __Up 数组元素类型
+ * @param __Tp 原始的指针类型
+ *
+ * @param p  数组的首地址
+ * 配合makeSharedArray使用。
  */
-template <class __Tp>
-void deleteArray(__Tp  p)
+template <class __Up,class __Tp>
+void deleteArray(__Tp p)
 {
-	delete [] reinterpret_cast<__Tp*>(p);
+	delete [] reinterpret_cast<__Up*>(p);
 }
 template <class __Tp>
 void deleteSingle(__Tp *p)
 {
 	delete p;
 }
+/**
+ * @param __Tp  真实类型
+ */
+template <class __Tp>
+void deleteSingle(void *p)
+{
+	delete reinterpret_cast<__Tp>(p);
+}
 
 template <class __Tp>
 std::shared_ptr<__Tp[]> makeSharedArray(size_t size)
 {
 	return (std::move(
-			std::shared_ptr<__Tp[]>{ reinterpret_cast<__Tp(*)[]>(new __Tp[size]),deleteArray<__Tp(*)[]>}
+			std::shared_ptr<__Tp[]>{ reinterpret_cast<__Tp(*)[]>(new __Tp[size]),deleteArray<__Tp,__Tp(*)[]>}
 			));
 }
 
@@ -154,13 +166,15 @@ class Node{
 // holds the pointer to them
 class ResourceWatcher{
 public:
-	using DeleterFunc = std::function<void(void*)>;
+//	using DeleterFunc = std::function<void(void*)>;
+	using DeleterFunc = void (*)(void *);
+
 public:
 	ResourceWatcher():
 		data{},statusGood(true)
 	{}
 	template <class __T>
-	__T* add(__T *obj,DeleterFunc deleter = std::default_delete<__T>())
+	__T* add(__T *obj,DeleterFunc deleter = deleteSingle<__T*>)
 	{
 		data.push_back(std::make_pair(obj, deleter));
 		return obj;
@@ -168,17 +182,16 @@ public:
 
 	// never good again
 	/**
-	 * fail on expr==true
+	 * 前置条件：statusGood=true
+	 * fails on expr!=true
 	 */
 	bool fail(bool expr)
 	{
-		if(statusGood!=expr && statusGood)
-			statusGood=false;
-		return statusGood;
+		return !(statusGood=expr);
 	}
 	bool fail()
 	{
-		return (statusGood=false);
+		return !(statusGood=false);// yes,it fails
 	}
 	bool succeed()=delete;
 	bool succeed(bool expr)=delete;

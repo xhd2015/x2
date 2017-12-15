@@ -133,12 +133,14 @@ public:
 	using This = ListNode<T>;
 	using __ListNode = This;
 public:
+	ListNode();
 	/**
 	 * @brief 初始化一个空的TreeNode
 	 * 空的TreeNode是允许存在的，因此节点的目的其一是存储数据信息，其二是存储链接信息。可以允许只存储链接信息，比如作为链表的头部。
 	 */
-	ListNode();
     ListNode(const T& data,__ListNode* next=nullptr,__ListNode* previous=nullptr);
+    template <typename ... Args> // construct T from Args
+    ListNode(__ListNode *next,__ListNode *previous,Args&&...args);
     ListNode(const __ListNode &)=default;
     __ListNode & operator=(const __ListNode &)=default;
     ~ListNode();
@@ -259,12 +261,23 @@ public:
     AS_MACRO __ListNode*    getLast()const;//done
     __ListNode*    append(const T &t);//done
     template <class ... Args>
-    __ListNode*	    append(Args &&...args);
+    This&	    append(Args &&...args);
+
+    // TODO 修改返回值为This&
+    /**
+     * 同样可以在没有setHead的情况下调用
+     */
     __ListNode*    append(__ListNode* p);//done
+    /**
+     * 在头部插入，可以在没有setHead的情况下调用
+     */
     __ListNode*    appendHead(__ListNode* p);//done
-    __ListNode*    appendHead(const T &t);//done
-    template <class ... Args>
-    __ListNode*	    appendHead(Args &&...args);
+    __ListNode*    appendHead(const T &t)=delete;//done
+    /**
+     * @param TArgs  仅仅用于构造T的参数，其他指针默认为nullptr
+     */
+    template <class ... TArgs>
+    This&	    appendHead(TArgs &&...args);
     // UNTESTED 含义不明
      __ListNode*    remove();//done
     /**
@@ -291,8 +304,15 @@ public:
      */
     template <class ... Args>
     AS_MACRO __ListNode*		newOneNode(Args &&...args)noexcept;
+    /**
+     * 仅仅初始化data部分，其他部分为nullptr
+     */
+    template <class ... Args>
+    AS_MACRO __ListNode*		newOneNodeOnlyData(Args &&...args)noexcept;
     template <class ... Args>
     AS_MACRO __ListNode*		newOneNodeThrows(Args &&...args);
+    template <class ... Args>
+    AS_MACRO __ListNode*		newOneNodeOnlyDataThrows(Args &&...args);
    AS_MACRO void				freeOneNode(__ListNode *node);
 
     void freeNode(__ListNode * node);//done
@@ -321,8 +341,7 @@ public:
 			ptr >> n;
 			for(size_t i=0;i!=n;++i)
 			{
-				__ListNode *p=smm.getNew();
-				p->initToNull();
+				__ListNode *p=newOneNode();
 				ptr >> p->getData();//写入数据
 				this->append(p);
 			}
@@ -338,6 +357,8 @@ public:
 	{
 		return __EnvTransfer::template sizeofHostType<decltype(root->getData())>() * getSize();
 	}
+private:
+	AS_MACRO void setIfNoLast(__ListNode * p);
 private:
     std::shared_ptr<__Allocator> smm; //共享空间分配代理器
 
@@ -432,6 +453,11 @@ public:
 	using __TreeNode = This;
 public:
 	TreeNode();
+	 template <typename ... Args> // construct T from Args
+	TreeNode(__TreeNode* father,
+			__TreeNode* son,
+			__TreeNode* next,
+			__TreeNode* previous,Args &&...args);
 	TreeNode(const __TreeNode&)=default;
 	__TreeNode & operator=(const __TreeNode&)=default;
 
@@ -647,12 +673,16 @@ public:
      */
     template <class ...Args>
     __TreeNode *		 newOneNode(Args&&...args) noexcept;
+    template <class ...Args>
+    __TreeNode *		 newOneNodeOnlyData(Args&&...args) noexcept;
     /**
      * @brief 创建一个TreeNode，如果为空抛出异常
      * @returns 非空TreeNode，并且已经初始化完毕
      */
     template <class ...Args>
     __TreeNode* 		newOneNodeThrows(Args&&...args);
+    template <class ...Args>
+    __TreeNode* 		newOneNodeOnlyDataThrows(Args&&...args);
 
     /**
      * @brief 将节点及其链接的子节点，相邻节点回收到管理器

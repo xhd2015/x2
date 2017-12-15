@@ -209,6 +209,9 @@ private:
 class SerializationInterface{
 protected:
 	~SerializationInterface()=default;
+	SerializationInterface()=default;
+	template <class __FsEnv>
+	SerializationInterface(SerializerPtr<__FsEnv> &ptr){} //支持从ptr直接构造一个类
 public:
 	enum GlobalCallPolicy{  CALL_BUILTIN, // pod本身
 							CALL_CLASS_METHOD,  // 普通的实现类使用，如果不重载默认使用此
@@ -243,7 +246,7 @@ public:
 //#endif
 };
 
-class DefaultConstructable{}; //一个接口，表明类可以被默认初始化
+//class DefaultConstructable{}; //一个接口，表明类可以被默认初始化
 
 namespace{  //文件局部帮助函数，用于选择要使用的函数
 

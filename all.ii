@@ -63653,14 +63653,11 @@ inline __attribute__((always_inline)) void destruct(T *p)
 {
  p->~T();
 }
-
-
-
-
-template <class __Tp>
+# 30 "include/conceptual/ExtFunctional.h"
+template <class __Up,class __Tp>
 void deleteArray(__Tp p)
 {
- delete [] reinterpret_cast<__Tp*>(p);
+ delete [] reinterpret_cast<__Up*>(p);
 }
 template <class __Tp>
 void deleteSingle(__Tp *p)
@@ -63668,11 +63665,19 @@ void deleteSingle(__Tp *p)
  delete p;
 }
 
+
+
+template <class __Tp>
+void deleteSingle(void *p)
+{
+ delete reinterpret_cast<__Tp>(p);
+}
+
 template <class __Tp>
 std::shared_ptr<__Tp[]> makeSharedArray(size_t size)
 {
  return (std::move(
-   std::shared_ptr<__Tp[]>{ reinterpret_cast<__Tp(*)[]>(new __Tp[size]),deleteArray<__Tp(*)[]>}
+   std::shared_ptr<__Tp[]>{ reinterpret_cast<__Tp(*)[]>(new __Tp[size]),deleteArray<__Tp,__Tp(*)[]>}
    ));
 }
 
@@ -63788,13 +63793,15 @@ class Node{
 
 class ResourceWatcher{
 public:
- using DeleterFunc = std::function<void(void*)>;
+
+ using DeleterFunc = void (*)(void *);
+
 public:
  ResourceWatcher():
   data{},statusGood(true)
  {}
  template <class __T>
- __T* add(__T *obj,DeleterFunc deleter = std::default_delete<__T>())
+ __T* add(__T *obj,DeleterFunc deleter = deleteSingle<__T*>)
  {
   data.push_back(std::make_pair(obj, deleter));
   return obj;
@@ -63804,15 +63811,14 @@ public:
 
 
 
+
  bool fail(bool expr)
  {
-  if(statusGood!=expr && statusGood)
-   statusGood=false;
-  return statusGood;
+  return !(statusGood=expr);
  }
  bool fail()
  {
-  return (statusGood=false);
+  return !(statusGood=false);
  }
  bool succeed()=delete;
  bool succeed(bool expr)=delete;
@@ -64066,6 +64072,9 @@ private:
 class SerializationInterface{
 protected:
  ~SerializationInterface()=default;
+ SerializationInterface()=default;
+ template <class __FsEnv>
+ SerializationInterface(SerializerPtr<__FsEnv> &ptr){}
 public:
  enum GlobalCallPolicy{ CALL_BUILTIN,
        CALL_CLASS_METHOD,
@@ -64100,7 +64109,7 @@ public:
 
 };
 
-class DefaultConstructable{};
+
 
 namespace{
 
@@ -64139,7 +64148,7 @@ namespace{
    static constexpr SerializationInterface::GlobalCallPolicy
     policy = __CallPolicyGetter<ObjectType>::value;
   };
-# 320 "include/conceptual/Serialize.h"
+# 323 "include/conceptual/Serialize.h"
    template <class __EnvTransfer,class __S>
    inline __attribute__((always_inline)) SerializerPtr<__EnvTransfer>&
    __serializeHelper(SerializerPtr<__EnvTransfer>& p,const __S &s,
@@ -64256,7 +64265,7 @@ namespace{
    return __EnvTransfer::template sizeofHostType<typename __PolicyGetter<__S>::ObjectType>();
   }
 }
-# 448 "include/conceptual/Serialize.h"
+# 451 "include/conceptual/Serialize.h"
 template <class __EnvTransfer,class __S>
 inline __attribute__((always_inline)) SerializerPtr<__EnvTransfer>& operator<<(SerializerPtr<__EnvTransfer>& p,const __S &s)
 {
@@ -64495,12 +64504,14 @@ public:
  using This = ListNode<T>;
  using __ListNode = This;
 public:
-
-
-
-
  ListNode();
+
+
+
+
     ListNode(const T& data,__ListNode* next=(0),__ListNode* previous=(0));
+    template <typename ... Args>
+    ListNode(__ListNode *next,__ListNode *previous,Args&&...args);
     ListNode(const __ListNode &)=default;
     __ListNode & operator=(const __ListNode &)=default;
     ~ListNode();
@@ -64567,7 +64578,7 @@ protected:
     __ListNode *previous;
 
 };
-# 230 "include/List.h"
+# 232 "include/List.h"
 template<class T,template <class> class _Allocator>
 class LinkedList : public SerializationInterface
 {
@@ -64600,12 +64611,23 @@ public:
     inline __attribute__((always_inline)) __ListNode* getLast()const;
     __ListNode* append(const T &t);
     template <class ... Args>
-    __ListNode* append(Args &&...args);
+    This& append(Args &&...args);
+
+
+
+
+
     __ListNode* append(__ListNode* p);
+
+
+
     __ListNode* appendHead(__ListNode* p);
-    __ListNode* appendHead(const T &t);
-    template <class ... Args>
-    __ListNode* appendHead(Args &&...args);
+    __ListNode* appendHead(const T &t)=delete;
+
+
+
+    template <class ... TArgs>
+    This& appendHead(TArgs &&...args);
 
      __ListNode* remove();
 
@@ -64632,8 +64654,15 @@ public:
 
     template <class ... Args>
     inline __attribute__((always_inline)) __ListNode* newOneNode(Args &&...args)noexcept;
+
+
+
+    template <class ... Args>
+    inline __attribute__((always_inline)) __ListNode* newOneNodeOnlyData(Args &&...args)noexcept;
     template <class ... Args>
     inline __attribute__((always_inline)) __ListNode* newOneNodeThrows(Args &&...args);
+    template <class ... Args>
+    inline __attribute__((always_inline)) __ListNode* newOneNodeOnlyDataThrows(Args &&...args);
    inline __attribute__((always_inline)) void freeOneNode(__ListNode *node);
 
     void freeNode(__ListNode * node);
@@ -64662,8 +64691,7 @@ public:
    ptr >> n;
    for(size_t i=0;i!=n;++i)
    {
-    __ListNode *p=smm.getNew();
-    p->initToNull();
+    __ListNode *p=newOneNode();
     ptr >> p->getData();
     this->append(p);
    }
@@ -64680,6 +64708,8 @@ public:
   return __EnvTransfer::template sizeofHostType<decltype(root->getData())>() * getSize();
  }
 private:
+ inline __attribute__((always_inline)) void setIfNoLast(__ListNode * p);
+private:
     std::shared_ptr<__Allocator> smm;
 
 
@@ -64689,7 +64719,7 @@ private:
     __ListNode* root;
     __ListNode* last;
 };
-# 373 "include/List.h"
+# 394 "include/List.h"
 template<class _Locateable,int _HowAllocated,
   template <class> class _Allocator>
 class LocateableLinkedList:public LinkedList<_Locateable,_Allocator>
@@ -64707,7 +64737,7 @@ public:
 public:
  using Super::LinkedList;
     ~LocateableLinkedList();
-# 399 "include/List.h"
+# 420 "include/List.h"
     static __ListNode *findFirstStartLen(__ListNode* startNode,__SizeType start,__SizeType len);
     static __ListNode *findFirstLen(__ListNode* startNode,__SizeType len);
     static __ListNode *findFirstStart(__ListNode* startNode,__SizeType start);
@@ -64744,6 +64774,11 @@ public:
  using __TreeNode = This;
 public:
  TreeNode();
+  template <typename ... Args>
+ TreeNode(__TreeNode* father,
+   __TreeNode* son,
+   __TreeNode* next,
+   __TreeNode* previous,Args &&...args);
  TreeNode(const __TreeNode&)=default;
  __TreeNode & operator=(const __TreeNode&)=default;
 
@@ -64827,7 +64862,7 @@ protected:
     __TreeNode *father;
 
 };
-# 543 "include/List.h"
+# 569 "include/List.h"
 template <class T,template <class> class _Allocator>
 class Tree : public SerializationInterface{
 public:
@@ -64839,7 +64874,7 @@ public:
 
  Tree()=delete;
 public:
-# 562 "include/List.h"
+# 588 "include/List.h"
     explicit Tree(const std::shared_ptr<__Allocator>& smm);
     explicit Tree(std::shared_ptr<__Allocator> && smm);
 
@@ -64872,7 +64907,7 @@ public:
     inline __attribute__((always_inline)) This& insertSon(Args&& ... args);
     template <typename ...Args>
     inline __attribute__((always_inline)) This& insertFather( Args&& ... args);
-# 604 "include/List.h"
+# 630 "include/List.h"
     This& startWalk()
     {
      if(curNode!=(0))
@@ -64919,12 +64954,16 @@ public:
 
     template <class ...Args>
     __TreeNode * newOneNode(Args&&...args) noexcept;
+    template <class ...Args>
+    __TreeNode * newOneNodeOnlyData(Args&&...args) noexcept;
 
 
 
 
     template <class ...Args>
     __TreeNode* newOneNodeThrows(Args&&...args);
+    template <class ...Args>
+    __TreeNode* newOneNodeOnlyDataThrows(Args&&...args);
 
 
 
@@ -64936,7 +64975,7 @@ public:
 
 
     size_t getSize()const;
-# 680 "include/List.h"
+# 710 "include/List.h"
 private:
 
 
@@ -64975,7 +65014,7 @@ public:
 
 private:
     std::shared_ptr<__Allocator> smm;
-# 729 "include/List.h"
+# 759 "include/List.h"
     __TreeNode *root;
 
 
@@ -65766,8 +65805,8 @@ public:
 
 
 
-    LinearSourceManager(const std::shared_ptr<__Allocator> &smm,__SizeType start,__SizeType size);
-    LinearSourceManager(std::shared_ptr<__Allocator> &&smm,__SizeType start,__SizeType size);
+    LinearSourceManager(const std::shared_ptr<__Allocator> &smm,__SizeType start=0,__SizeType size = 0);
+    LinearSourceManager(std::shared_ptr<__Allocator> &&smm,__SizeType start=0,__SizeType size = 0);
 
     ~LinearSourceManager();
 
@@ -65955,9 +65994,42 @@ class HighLevelSimpleMemoryManager{
 
 };
 # 11 "include/File.h" 2
-# 26 "include/File.h"
- template <class __FsEnv = EnvTransfer<HOST_BIT>>
- class BaseDescriptor:public SerializationInterface{
+
+
+# 1 "/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++/cassert" 1 3
+# 41 "/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++/cassert" 3
+       
+# 42 "/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++/cassert" 3
+
+
+# 1 "/usr/include/assert.h" 1 3 4
+
+
+
+
+
+
+# 6 "/usr/include/assert.h" 3 4
+extern "C" {
+# 39 "/usr/include/assert.h" 3 4
+void __attribute__((__cdecl__)) __assert (const char *, int, const char *) __attribute__ ((__noreturn__))
+                                 ;
+void __attribute__((__cdecl__)) __assert_func (const char *, int, const char *, const char *) __attribute__ ((__noreturn__))
+                                 ;
+
+
+
+
+
+
+}
+# 44 "/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++/cassert" 2 3
+# 14 "include/File.h" 2
+# 27 "include/File.h"
+
+# 27 "include/File.h"
+template <class __FsEnv = EnvTransfer<HOST_BIT>>
+class BaseDescriptor:public SerializationInterface{
  public:
   using This = BaseDescriptor<__FsEnv>;
   using __BaseDescriptor = This;
@@ -65969,11 +66041,8 @@ class HighLevelSimpleMemoryManager{
   using ClassSerializeType = u8_t;
   enum FileType{ TYPE_FILE=0,TYPE_DIR=1,TYPE_EAP=2};
 
-
-
-
-  using size_t = HostEnv::size_t;
   using __TimeType = size_t;
+  using __SizeType = HostEnv::size_t;
  protected:
   inline __attribute__((always_inline)) BaseDescriptor()=default;
   inline __attribute__((always_inline)) BaseDescriptor(const HostEnv::String& name,__TimeType createdTime,__TimeType lastModefiedTime):
@@ -65984,6 +66053,11 @@ class HighLevelSimpleMemoryManager{
   __BaseDescriptor &operator=(const __BaseDescriptor &bd)=default;
   BaseDescriptor(BaseDescriptor &&)=default;
   __BaseDescriptor &operator=(__BaseDescriptor &&)=default;
+
+  explicit BaseDescriptor(SerializerPtr<__FsEnv> & ptr)
+  {
+   this->This::deserialize(ptr);
+  }
  public:
 
   virtual ~BaseDescriptor()=default;
@@ -66046,8 +66120,19 @@ private:
  using Super = BaseDescriptor<__FsEnv>;
 public:
  using FileType = typename Super::FileType;
+ using __TimeType = typename Super::__TimeType;
+ using __SizeType = typename Super::__SizeType;
 
- using Super::BaseDescriptor;
+ inline __attribute__((always_inline)) DirDescriptor(const HostEnv::String& name,__TimeType createdTime,__TimeType lastModefiedTime):
+      Super(name,createdTime,lastModefiedTime) {}
+ inline __attribute__((always_inline)) DirDescriptor(HostEnv::String&& name,__TimeType createdTime,__TimeType lastModefiedTime):
+  Super(std::move(name),createdTime,lastModefiedTime){}
+ inline __attribute__((always_inline)) DirDescriptor()=default;
+ explicit DirDescriptor(SerializerPtr<__FsEnv> & ptr)
+ {
+  this->This::deserialize(ptr);
+ }
+
  virtual ~DirDescriptor()=default;
  virtual FileType getType()const
  {
@@ -66061,9 +66146,15 @@ private:
  using Super = BaseDescriptor<__FsEnv>;
 public:
  using FileType = typename Super::FileType;
+ using __TimeType = typename Super::__TimeType;
+ using __SizeType = typename Super::__SizeType;
  inline __attribute__((always_inline)) FileDescriptor()=default;
  virtual ~FileDescriptor()=default;
- using Super::BaseDescriptor;
+ FileDescriptor(const HostEnv::String& name,__TimeType createdTime,__TimeType lastModefiedTime,__SizeType fileLen):Super(name,createdTime,lastModefiedTime),fileLen(fileLen){}
+ explicit FileDescriptor(SerializerPtr<__FsEnv> & ptr)
+ {
+  this->This::deserialize(ptr);
+ }
 
  virtual FileType getType()const
  {
@@ -66120,23 +66211,7 @@ private:
 
  HostEnv::Vector<LinearSourceDescriptor> spaces {};
 };
-
-
-
-template <class __FsEnv,class ... Args>
-BaseDescriptor<__FsEnv> *createFileDescriptor(typename BaseDescriptor<__FsEnv>::FileType type,Args&&...args)
-{
- if(type==BaseDescriptor<__FsEnv>::TYPE_FILE)
-  return new FileDescriptor<__FsEnv>(std::forward<Args>(args)...);
- else
-  return new DirDescriptor<__FsEnv>(std::forward<Args>(args)...);
-}
-
-
-
-
-
-
+# 218 "include/File.h"
 template <class __EnvTransfer>
 SerializerPtr<__EnvTransfer>& serialize(SerializerPtr<__EnvTransfer> &ptr,
    const BaseDescriptor<__EnvTransfer> * pfile)
@@ -66176,7 +66251,7 @@ size_t getSerializitionSize(const BaseDescriptor<__EnvTransfer> *pfile)
  return __EnvTransfer::template sizeofHostType<BaseDescriptor<__EnvTransfer>::ClassSerializeType>() +
    pfile->getSerializitionSize();
 }
-# 254 "include/File.h"
+# 265 "include/File.h"
 class X2fsMetaInfo:public SerializationInterface
 {
 public:
@@ -66191,7 +66266,9 @@ public:
  enum{SecSize=512,KiB=2*SecSize,MiB=1024*KiB,GiB=1024*MiB};
  X2fsMetaInfo()=default;
 
-    X2fsMetaInfo(u32_t lbaBaseLow, u32_t lbaBaseHigh,size_t wholeSecnums,u8_t basicSizeType = BASIC_SIZE_TYPE,
+    X2fsMetaInfo(u32_t lbaBaseLow, u32_t lbaBaseHigh,
+        size_t wholeSecnums = 10 + SECNUM_META_CONST + SECNUM_META_CONST,
+        u8_t basicSizeType = BASIC_SIZE_TYPE,
                  size_t reservedSec = SECNUM_RESERVED_CONST,
                  size_t metaSec = SECNUM_META_CONST,
                   u16_t validFlag = VALID_FLAG) :
@@ -66236,8 +66313,12 @@ public:
     {
      return getMetaSec() + getReservedSec();
     }
+
+
+
     size_t getFreeSpaceLength()const
     {
+
      return getWholeSecnums() - getFreeSpaceStart();
     }
 
@@ -66275,7 +66356,7 @@ private:
 
  u16_t validFlag { VALID_FLAG };
 };
-# 379 "include/File.h"
+# 396 "include/File.h"
 template <class __FsEnv>
 class X2fsUtil : public SerializationInterface{
 public:
@@ -66344,6 +66425,11 @@ public:
 
 
  X2fsUtil(u8_t driver,const __X2fsMetaInfo &metainfo);
+
+
+
+
+ X2fsUtil(u8_t driver,SerializerPtr<__FsEnv>& ptr);
 public:
  ~X2fsUtil();
 
@@ -66384,7 +66470,7 @@ public:
 
 
 
- __attribute__((deprecated)) bool mkdir(const char* name);
+
  bool createFile(int argc,const char* argv[],int secSpan);
  bool createDir(int argc,const char* argv[]);
  bool deleteFile(int argc,const char * argv[]);
@@ -66448,10 +66534,10 @@ public:
  FileNode * locatePath(FileNode *base,const char *name)const;
  FileNode * getPathParentNode(int argc,const char * argv[])const;
  FileNode * getPathNode(int argc,const char * argv[])const;
-# 563 "include/File.h"
+# 585 "include/File.h"
  __attribute__((deprecated)) __SizeType
  writeToFile(const char *buf,__SizeType objsize, __SizeType nobj,FileNode *fnode,__SizeType foff=0)=delete;
-# 579 "include/File.h"
+# 601 "include/File.h"
  __SizeType locateILink(__FileDescriptor *fd,__SizeType startILink,__SizeType secPos,__SizeType & retOff);
 
 
@@ -66461,7 +66547,7 @@ public:
 
 
  __SizeType writeToILink(__SizeType ilink,const char *src,__SizeType secPos,__SizeType secLen)=delete;
-# 597 "include/File.h"
+# 619 "include/File.h"
  bool extendFileSecNum(__FileDescriptor* fd,__SizeType extraSec,bool addFileLength=false);
 
 
@@ -66478,14 +66564,14 @@ public:
  __SizeType _writeToFile(const char *buf, __SizeType nsec,__FileDescriptor *fd,__SizeType secPos=0,
    bool updateFileLen=true);
  __SizeType _readFromFile(char *buf,__SizeType nsec,__FileDescriptor *fd,__SizeType secPos=0);
-# 624 "include/File.h"
+# 646 "include/File.h"
  __SizeType _randomWriteFile(char *buf, __SizeType nbyte,__FileDescriptor *fd,__SizeType byteStart=0);
 
 
 
 
  __SizeType _randomReadFile(char *buf, __SizeType nbyte,__FileDescriptor *fd,__SizeType byteStart=0);
-# 640 "include/File.h"
+# 662 "include/File.h"
  bool truncateFile(__FileDescriptor *fd,__SizeType newlen);
 
 
@@ -66506,7 +66592,7 @@ public:
 
  __attribute__((deprecated)) __SizeType randomReadSector(char *buf,__SizeType nbyte,__SizeType bytePos);
  __attribute__((deprecated)) __SizeType randomWriteSector(const char *buf,__SizeType nbyte,__SizeType bytePos);
-# 671 "include/File.h"
+# 693 "include/File.h"
  __attribute__((deprecated)) bool randomWriteOneUnit(const char *buf,__SizeType secPos,__SizeType byteStart,
    __SizeType byteEnd,char *optBuffer=(0));
  __attribute__((deprecated)) bool randomReadOneUnit(char *buf,__SizeType secPos,__SizeType byteStart,
@@ -66544,7 +66630,7 @@ public:
  __attribute__((deprecated)) static void createFile_old(void *base,const char* name,__SizeType secNum);
 
  inline __attribute__((always_inline)) FileTree* getFileTree();
-# 720 "include/File.h"
+# 742 "include/File.h"
  static __SizeType calculateRandomBufferSize(__SizeType startByte,__SizeType numebyte,
    __SizeType *startDiff=(0),
    __SizeType *endDiff=(0),
@@ -66594,7 +66680,7 @@ private:
 
  mutable int processErrno{};
 };
-# 777 "include/File.h"
+# 799 "include/File.h"
 template <class __FsEnv>
 class FileOperation{
 public:
@@ -66849,7 +66935,7 @@ bool X2fsUtil<__FsEnv>::isDirectory(const FileNode *p)
 template <class __FsEnv>
 bool X2fsUtil<__FsEnv>::isFile(const FileNode *p)
 {
- return p && p->getData()->getType()==__FileDescriptor::TYPE_FILE;
+ return p && p->getData()->getType()==FileType::TYPE_FILE;
 }
 template <class __FsEnv>
 typename X2fsUtil<__FsEnv>::FileTree* X2fsUtil<__FsEnv>::getFileTree()
@@ -68459,19 +68545,18 @@ X2fsUtil<__FsEnv>::X2fsUtil(u8_t driver,const __X2fsMetaInfo &metainfo):
    metainfo(metainfo),
    freemm(std::shared_ptr<LLSmm>(new LLSmm()),
      metainfo.getFreeSpaceStart(),metainfo.getFreeSpaceLength()),
-   fileTree(std::shared_ptr<FreeSpaceMM>(new FreeSpaceMM())),
+   fileTree(std::make_shared<FileTreeSMM>()),
    processErrno(This::ERROR_NOERR)
 {
  __BaseDescriptor* rootDir = new __DirDescriptor("",0,0);
- FileNode *head = new FileNode(rootDir);
- fileTree.setHead(head);
+ fileTree.setHead(rootDir);
 }
 template <class __FsEnv>
 X2fsUtil<__FsEnv>::X2fsUtil(u8_t driver,u32_t lbaBase,u32_t lbaHigh):
    driver(driver),
    metainfo(),
    freemm(std::make_shared<LLSmm>()),
-   fileTree(std::make_shared<FreeSpaceMM>()),
+   fileTree(std::make_shared<FileTreeSMM>()),
    processErrno(This::ERROR_NOERR)
  {
 
@@ -68480,7 +68565,7 @@ X2fsUtil<__FsEnv>::X2fsUtil(u8_t driver,u32_t lbaBase,u32_t lbaHigh):
   u16_t metaNum;
   readHeaderBufferInfo(*buffer, reservedNum, metaNum);
 
-  std::shared_ptr<u8_t[]> bufferMeta { new u8_t[metaNum * 512], std::default_delete<u8_t[]>() };
+  auto bufferMeta = makeSharedArray<u8_t>(metaNum * 512);
   HostEnv::readSectors(HostEnv::CUR_SEG,
     *bufferMeta, driver, lbaBase, metaNum, lbaHigh);
 
@@ -68492,6 +68577,16 @@ X2fsUtil<__FsEnv>::X2fsUtil(u8_t driver,u32_t lbaBase,u32_t lbaHigh):
   )
    HostEnv::systemAbort("incorrect metainfo", -2);
  }
+template <class __FsEnv>
+X2fsUtil<__FsEnv>::X2fsUtil(u8_t driver,SerializerPtr<__FsEnv>& ptr):
+driver(driver),
+metainfo(),
+freemm(std::make_shared<LLSmm>()),
+fileTree(std::make_shared<FileTreeSMM>()),
+processErrno(This::ERROR_NOERR)
+{
+ this->deserialize(ptr);
+}
 
 template <class __FsEnv>
 X2fsUtil<__FsEnv>::~X2fsUtil()
@@ -68503,8 +68598,7 @@ X2fsUtil<__FsEnv>::~X2fsUtil()
 template <class __FsEnv>
 void X2fsUtil<__FsEnv>::flush() {
 
- std::shared_ptr<u8_t[]> bufferMeta { new u8_t[512 * metainfo.getMetaSec()] ,
-            std::default_delete<u8_t[]>()};
+ auto bufferMeta = makeSharedArray<u8_t>(512 * metainfo.getMetaSec());
  SerializerPtr<__FsEnv> {*bufferMeta } << *this;
 
 
@@ -68580,16 +68674,18 @@ bool X2fsUtil<__FsEnv>::create(FileNode *p,FileType type,const char *name,__Size
 
  ResourceWatcher wc;
 
- __BaseDescriptor *fd= wc.add(createFileDescriptor(type));
- if(wc.fail(fd==(0)))
-  return false;
- FileNode *fnode =fileTree.newOneNode(fd);
- if(wc.fail(fnode==(0)))
+
+
+
+ FileNode *fnode =fileTree.newOneNode();
+ if(wc.fail(fnode!=(0)))
  {
   this->seterrno(This::ERROR_NEW_NULL);
   return false;
  }
  wc.add(fnode);
+
+ __BaseDescriptor *fd=(0);
 
  if(type==FileType::TYPE_FILE)
  {
@@ -68604,23 +68700,26 @@ bool X2fsUtil<__FsEnv>::create(FileNode *p,FileType type,const char *name,__Size
    this->seterrno(This::ERROR_FILEALLOCSPACE);
    return false;
   }
+  fd = wc.add(new __FileDescriptor(HostEnv::String(name),0,0,secSpan));
+  if(wc.fail(fd!=(0)))
+   return false;
   __FileDescriptor *fileDesc=static_cast<__FileDescriptor*>(fd);
   fileDesc->addSpace({fsecStart,secSpan});
 
  }else if(type==FileType::TYPE_DIR){
-
+  fd = wc.add(new __DirDescriptor(HostEnv::String(name),0,0));
+  if(wc.fail(fd!=(0)))
+   return false;
  }else{
 
   wc.fail();
   this->seterrno(ERROR_UNSUPORTED);
   return false;
  }
+ fnode->setData(fd);
  this->insertNode(p, fnode);
  return true;
 }
-
-
-
 template <class __FsEnv>
 bool X2fsUtil<__FsEnv>::createFile(FileNode *p,const char *name,__SizeType secNum)
 {
@@ -68897,16 +68996,16 @@ void X2fsUtil<__FsEnv>::listNode(int argc,const char * argv[],int maxdeepth)cons
 template <class __FsEnv>
 void X2fsUtil<__FsEnv>::listRoot()const
 {
- FileNode *pfn=static_cast<FileNode *>(this->fileTree.getHead());
+ FileNode *pfn=this->fileTree.getHead();
 
  HostEnv::printf_simple("/:\n");
- pfn=static_cast<FileNode *>(pfn->getSon());
+ pfn=pfn->getSon();
  while(pfn)
  {
   HostEnv::cout << "\t" << pfn->getData()->getName();
   if(This::isFile(pfn))
   {
-   __FileDescriptor *fd=static_cast<__FileDescriptor*>(pfn->getData());
+   __FileDescriptor *fd = static_cast<__FileDescriptor*>(pfn->getData());
    HostEnv::cout << "  " << fd->getFileLen();
   }
   pfn=pfn->getNext();
@@ -68983,7 +69082,7 @@ template <class __FsEnv>
 typename X2fsUtil<__FsEnv>::FileNode * X2fsUtil<__FsEnv>::locatePath(FileNode* base, const char* name)const
 {
  if(!base)return (0);
- FileNode *p= reinterpret_cast<FileNode *>(base->getSon());
+ FileNode *p= base->getSon();
  while(p)
  {
   if( p->getData()->getName().compare(name)==0)break;
@@ -69039,7 +69138,7 @@ typename X2fsUtil<__FsEnv>::__SizeType X2fsUtil<__FsEnv>::locateILink(__FileDesc
  retOff = secPos;
  return startILink;
 }
-# 790 "include/../src/File.cpp"
+# 803 "include/../src/File.cpp"
 template <class __FsEnv>
 bool X2fsUtil<__FsEnv>::extendFileSecNum(__FileDescriptor* fd,__SizeType extraSec,bool addFileLength)
 {
@@ -69301,7 +69400,7 @@ void X2fsUtil<__FsEnv>::mkfs(u8_t driver,const __X2fsMetaInfo &metainfo)
  HostEnv::writeSectors(HostEnv::CUR_SEG,*buffer,
    driver, metainfo.getLbaBaseLow(), 1, metainfo.getLbaBaseHigh());
 }
-# 1061 "include/../src/File.cpp"
+# 1074 "include/../src/File.cpp"
 # 1 "include/../src/File_FileOperation.cpp" 1
 # 26 "include/../src/File_FileOperation.cpp"
 template <class __FsEnv>
@@ -71789,7 +71888,7 @@ void FileOperation<__FsEnv>::refreshCurrentPath()
   p = reinterpret_cast<FileNode*>(p->getDirectFather());
  }
 }
-# 1062 "include/../src/File.cpp" 2
+# 1075 "include/../src/File.cpp" 2
 
 
 
@@ -72247,6 +72346,14 @@ previous((0))
 {
 }
 template<class T>
+template <typename ... Args>
+ListNode<T>::ListNode(__ListNode *next,__ListNode* previous,Args&&...args):
+data(std::forward<Args>(args)...),
+next(next),
+previous(previous)
+{
+}
+template<class T>
 ListNode<T>::ListNode(const T& data,__ListNode* next,__ListNode* previous):
 data(data),
 next(next),
@@ -72365,7 +72472,7 @@ typename ListNode<T>::__ListNode* ListNode<T>::getFirst()const
     }
     return p;
 }
-# 301 "include/../src/List.cpp"
+# 309 "include/../src/List.cpp"
 template<class T,template<class> class _Allocator>
 LinkedList<T,_Allocator>::LinkedList(const std::shared_ptr<__Allocator>& smm):
 smm(),root(newOneNodeThrows()),last(newOneNodeThrows())
@@ -72481,16 +72588,17 @@ typename LinkedList<T,_Allocator>::__ListNode* LinkedList<T,_Allocator>::
 }
 template<class T,template<class> class _Allocator>
 template <class ... Args>
-typename LinkedList<T,_Allocator>::__ListNode* LinkedList<T,_Allocator>::append(Args &&...args)
+typename LinkedList<T,_Allocator>::This& LinkedList<T,_Allocator>::append(Args &&...args)
 {
- this->append(getNew(*smm,std::forward<Args>(args)...));
+ this->append(newOneNodeOnlyData(std::forward<Args>(args)...));
+ return *this;
 }
-template<class T,template<class> class _Allocator>
-typename LinkedList<T,_Allocator>::__ListNode* LinkedList<T,_Allocator>::
-  appendHead(const T& t)
-{
-    return appendHead(new (smm->getNew()) __ListNode(t));
-}
+
+
+
+
+
+
 
 template<class T,template<class> class _Allocator>
 typename LinkedList<T,_Allocator>::__ListNode* LinkedList<T,_Allocator>::
@@ -72523,10 +72631,11 @@ typename LinkedList<T,_Allocator>::__ListNode* LinkedList<T,_Allocator>::
 
 }
 template<class T,template<class> class _Allocator>
-template <class ... Args>
-typename LinkedList<T,_Allocator>::__ListNode* LinkedList<T,_Allocator>::appendHead(Args &&...args)
+template <class ... TArgs>
+typename LinkedList<T,_Allocator>::This& LinkedList<T,_Allocator>::appendHead(TArgs &&...args)
 {
- this->appendHead(getNew(*smm,std::forward<Args>(args)...));
+ this->appendHead(newOneNodeOnlyData(std::forward<TArgs>(args)...));
+ return *this;
 }
 
 template<class T,template<class> class _Allocator>
@@ -72603,6 +72712,17 @@ typename LinkedList<T,_Allocator>::__ListNode*
 LinkedList<T,_Allocator>::newOneNode(Args &&...args)noexcept
 {
  return getNew(*this->smm,std::forward<Args>(args)...);
+
+}
+template<class T,template<class> class _Allocator>
+template <class ... Args>
+typename LinkedList<T,_Allocator>::__ListNode*
+LinkedList<T,_Allocator>::newOneNodeOnlyData(Args &&...args)noexcept
+{
+ return getNew(*this->smm,
+   static_cast<__ListNode*>((0)),
+   static_cast<__ListNode*>((0)),
+   std::forward<Args>(args)...);
 }
 template<class T,template<class> class _Allocator>
 template <class ... Args>
@@ -72611,6 +72731,14 @@ LinkedList<T,_Allocator>::newOneNodeThrows(Args &&...args)
 {
  return getNewThrows(*this->smm,std::forward<Args>(args)...);
 }
+template<class T,template<class> class _Allocator>
+template <class ... Args>
+typename LinkedList<T,_Allocator>::__ListNode*
+LinkedList<T,_Allocator>::newOneNodeOnlyDataThrows(Args &&...args)
+{
+ return getNewThrows(*this->smm,(0),(0),std::forward<Args>(args)...);
+}
+
 template<class T,template<class> class _Allocator>
 void LinkedList<T,_Allocator>::freeOneNode(__ListNode *node)
 {
@@ -72639,7 +72767,7 @@ typename LinkedList<T,_Allocator>::__ListNode*
  root->setNext((0));
  last->setNext((0));
 }
-# 584 "include/../src/List.cpp"
+# 613 "include/../src/List.cpp"
 template<class _Locateable,int _HowAllocated,template <class> class _Allocator>
 LocateableLinkedList<_Locateable,_HowAllocated,_Allocator>::~LocateableLinkedList()
 {
@@ -72662,7 +72790,7 @@ findFirstStartLen(__ListNode* startNode,__SizeType start,__SizeType len)
 
     __ListNode* p=startNode;
     _Locateable tloc(start,len);
-# 619 "include/../src/List.cpp"
+# 648 "include/../src/List.cpp"
     using TEMP_METHOD= SourceLocator<_Locateable,Locator<_Locateable>::LESS,Locator<_Locateable>::IGNORE,Locator<_Locateable>::IGNORE>;
 
     while(p && TEMP_METHOD::meeted(TEMP_METHOD::RELATION_LS_EQ,TEMP_METHOD::RELATION_IGNORE, TEMP_METHOD::RELATION_IGNORE,
@@ -72698,7 +72826,7 @@ findFirstStartLen(__ListNode* startNode,__SizeType start,__SizeType len)
 
      p=This::nextAllocable(p);
     }
-# 669 "include/../src/List.cpp"
+# 698 "include/../src/List.cpp"
     return p;
 }
 
@@ -72779,12 +72907,25 @@ typename LocateableLinkedList<_Locateable,_HowAllocated,_Allocator>::__ListNode*
 {
     return startNode==(0)?(0):startNode->getNext();
 }
-# 758 "include/../src/List.cpp"
+# 787 "include/../src/List.cpp"
 template<class T>
 TreeNode<T>::TreeNode():
 Super(),
 son((0)),
 father((0))
+{
+
+}
+
+template<class T>
+template <typename ... Args>
+TreeNode<T>::TreeNode(__TreeNode* father,
+  __TreeNode* son,
+  __TreeNode* next,
+  __TreeNode* previous,Args &&...args):
+Super(next,previous,std::forward<Args>(args)...),
+son(son),
+father(father)
 {
 
 }
@@ -72800,7 +72941,7 @@ father(father)
 template<class T>
 TreeNode<T>::~TreeNode() {
 }
-# 790 "include/../src/List.cpp"
+# 832 "include/../src/List.cpp"
 template<class T>
 void TreeNode<T>::addSon(__TreeNode* son)
 {
@@ -72921,13 +73062,13 @@ typename TreeNode<T>::__TreeNode* TreeNode<T>::getParent()const {
  }
  return p->getDirectFather();
 }
-# 921 "include/../src/List.cpp"
+# 963 "include/../src/List.cpp"
 # 1 "/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++/cstdio" 1 3
 # 39 "/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++/cstdio" 3
        
 # 40 "/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++/cstdio" 3
-# 922 "include/../src/List.cpp" 2
-# 933 "include/../src/List.cpp"
+# 964 "include/../src/List.cpp" 2
+# 975 "include/../src/List.cpp"
 template<class T,template <class> class _Allocator>
 Tree<T,_Allocator>::Tree(const std::shared_ptr<__Allocator> &smm):
 smm(smm),
@@ -72967,7 +73108,7 @@ typename Tree<T,_Allocator>::__Tree Tree<T,_Allocator>::makeSmmSharedTree()
 {
   return std::move(__Tree{this->smm});
 }
-# 986 "include/../src/List.cpp"
+# 1028 "include/../src/List.cpp"
 template<class T,template <class> class _Allocator>
 Tree<T,_Allocator>::~Tree() {
 
@@ -73128,7 +73269,7 @@ template<class T,template <class> class _Allocator>
 template <typename ...Args>
 void Tree<T,_Allocator>::setHead(Args&& ... args)
 {
- this->setHead(getNewThrows(*smm, std::forward<Args>(args)...));
+ this->setHead(newOneNode( std::forward<Args>(args)...));
 }
 
 template<class T,template <class> class _Allocator>
@@ -73189,11 +73330,33 @@ typename Tree<T,_Allocator>::__TreeNode*Tree<T,_Allocator>::newOneNode(Args&&...
 }
 template<class T,template <class> class _Allocator>
 template <class ...Args>
+typename Tree<T,_Allocator>::__TreeNode*Tree<T,_Allocator>::newOneNodeOnlyData(Args&&...args)noexcept
+{
+ return getNewThrows(*this->smm,
+   static_cast<__TreeNode*>((0)),
+   static_cast<__TreeNode*>((0)),
+   static_cast<__TreeNode*>((0)),
+   static_cast<__TreeNode*>((0)),
+   std::forward<Args>(args)...);
+}
+template<class T,template <class> class _Allocator>
+template <class ...Args>
 typename Tree<T,_Allocator>::__TreeNode*Tree<T,_Allocator>::newOneNodeThrows(Args&&...args)
 {
  return getNewThrows(*this->smm,std::forward<Args>(args)...);
 }
-# 1228 "include/../src/List.cpp"
+template<class T,template <class> class _Allocator>
+template <class ...Args>
+typename Tree<T,_Allocator>::__TreeNode*Tree<T,_Allocator>::newOneNodeOnlyDataThrows(Args&&...args)
+{
+ return getNewThrows(*this->smm,
+   static_cast<__TreeNode*>((0)),
+   static_cast<__TreeNode*>((0)),
+   static_cast<__TreeNode*>((0)),
+   static_cast<__TreeNode*>((0)),
+   std::forward<Args>(args)...);
+}
+# 1292 "include/../src/List.cpp"
 template<class T>
 typename ListNode<T>::__ListNode* ListNode<T>::getNext()const
 {
@@ -73273,7 +73436,7 @@ size_t ListNode<T>::getSerializitionSize()
    __EnvTransfer::template sizeofHostType<decltype(this->next)>()+
    __EnvTransfer::template sizeofHostType<decltype(this->previous)>();
 }
-# 1315 "include/../src/List.cpp"
+# 1379 "include/../src/List.cpp"
 template <class T,template <class> class _Allocator>
 typename LinkedList<T,_Allocator>::__ListNode*
 LinkedList<T,_Allocator>::getHead()const
@@ -73291,7 +73454,12 @@ bool LinkedList<T,_Allocator>::isEmpty()const
 {
  return this->getHead()==(0);
 }
-
+template <class T,template <class> class _Allocator>
+void LinkedList<T,_Allocator>::setIfNoLast(__ListNode * p)
+{
+ if(!this->last->hasNext())
+  this->last->setNext(p);
+}
 
 
 
@@ -74581,197 +74749,145 @@ void secondaryLoaderMain()
 # 96 "src/conceptual/precompiled_most.cpp" 2
 # 3 "src/conceptual/all.cpp" 2
 # 28 "src/conceptual/all.cpp"
-# 1 "src/conceptual/../64/CMDUtil_mkfs.x2fs.cpp" 1
-# 9 "src/conceptual/../64/CMDUtil_mkfs.x2fs.cpp"
-# 1 "/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++/cstdlib" 1 3
-# 39 "/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++/cstdlib" 3
-       
-# 40 "/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++/cstdlib" 3
-# 10 "src/conceptual/../64/CMDUtil_mkfs.x2fs.cpp" 2
-# 1 "/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++/cstdio" 1 3
-# 39 "/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++/cstdio" 3
-       
-# 40 "/usr/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++/cstdio" 3
-# 11 "src/conceptual/../64/CMDUtil_mkfs.x2fs.cpp" 2
-# 19 "src/conceptual/../64/CMDUtil_mkfs.x2fs.cpp"
+# 1 "src/conceptual/../64/CMDUtil_test_serialize.cpp" 1
+# 17 "src/conceptual/../64/CMDUtil_test_serialize.cpp"
 using namespace std;
+enum {Bit = HOST_BIT };
+using __Env = EnvTransfer<Bit>;
 
-CommandOptions opts{
-   {"-s","--basic-size",true,"文件系统的基本尺寸,默认为系统的sizeof(size_t)"},
-   {"","--16",false,"等价于-s 2"},
-   {"","--32",false,"等价于-s 4"},
-   {"","--64",false,"等价于-s 8"},
-   {"-l","--lbalow",true,"lba低32位地址,必须指定"},
-   {"-g","--lbahigh",true,"lba高32位地址，默认为0"},
-   {"-n","--secnum",true,"扇区总数,必须指定"},
-   {"-m","--namesecs",true,"name区总数,0或者默认则为"},
-   {"-d","--dirsecs",true,"dir区总数，0或者默认则为"},
-   {"-f","--freesecs",true,"free区总数,0或者默认则为"},
-   {"-k","--linksecs",true,"link区总数,0或者默认则为"},
-   {"-2","--secdsecs",true,"二级加载器预留扇区数目,默认为0"},
-   {"-h","--help",false,"显示此帮助信息"},
-   {"-v","--version",false,"打印版本号"},
- };
-string helpMsg = opts.makeHelpMessage("格式化分区为x2文件系统",
-  "CMDUtil_mkfs.x2fs [选项]  镜像文件", "");
-
-class MyPorcessor:public CommandProcessor<ParamMkfs>
+size_t depths=0;
+void consum(BaseDescriptor<__Env>* const & i)
 {
-public:
- MyPorcessor(){}
- virtual int onProcessArgOpt(ParamMkfs &pack,__OptPosIterator itopt,__VS_cit itarg) override{
-  if(itopt->equals("-s"))
-  {
-   pack.basicSize = atoi((itarg+1)->c_str());
-  }else if(itopt->equals("--16")){
-   pack.basicSize=2;
-  }else if(itopt->equals("--32")){
-   pack.basicSize=4;
-  }else if(itopt->equals("--64")){
-   pack.basicSize=8;
-  }else if(itopt->equals("-l")){
-   pack.lbaLow=atoi((itarg+1)->c_str());
-   pack.lbaLowSet=true;
-  }else if(itopt->equals("-g")){
-   pack.lbaHigh=atoi((itarg+1)->c_str());
-  }else if(itopt->equals("-n")){
-   pack.wholeSecNum=atoi((itarg+1)->c_str());
-   pack.wholeSecNumSet=true;
-  }else if(itopt->equals("-m")){
-   pack.secSpaces[X2fsMetaInfo::INDEX_NAME]=atoi((itarg+1)->c_str());
-  }else if(itopt->equals("-d")){
-   pack.secSpaces[X2fsMetaInfo::INDEX_DIR]=atoi((itarg+1)->c_str());
-  }else if(itopt->equals("-f")){
-   pack.secSpaces[X2fsMetaInfo::INDEX_FREE]=atoi((itarg+1)->c_str());
-  }else if(itopt->equals("-k")){
-   pack.secSpaces[X2fsMetaInfo::INDEX_LINK]=atoi((itarg+1)->c_str());
-  }else if(itopt->equals("-2")){
-   pack.optional[X2fsMetaInfo::INDEX_OPTIONAL_SECD]=atoi((itarg+1)->c_str());
-  }
-
-  return ERROR_NO_ERROR;
- }
-
- virtual int onProcessArgTarget(ParamMkfs &pack,__VS_cit itarg)override
- {
-  pack.imgFile = *itarg;
-  return ERROR_NO_ERROR;
- }
-
- virtual int onProcessPost(ParamMkfs &pack)override
- {
-  if(pack.imgFile.empty() || !pack.wholeSecNumSet
-    || !pack.lbaLowSet)
-  {
-   return ERROR_ARG_NOT_ENOUGH;
-  }else{
-   return ERROR_NO_ERROR;
-  }
- }
-
-
- virtual int onProcessHelp(ParamMkfs &pack)override
- {
-  cout << helpMsg << endl;
-  return ERROR_NORMAL_EXIT;
- }
- virtual int onProcessVersion(ParamMkfs &pack)override
- {
-  cout << "Version 1.0"<<endl;
-  return ERROR_NORMAL_EXIT;
- }
-};
-
-
-template <class __FsEnv>
-void process(const ParamMkfs & param);
-
-
-
-
-int main(int argc,char *argv[])
+ std::cout << i->getName();
+}
+void beforeSon()
 {
-  vector<string> args(argv+1,argv+argc);
- ParamMkfs param;
- MyPorcessor prep;
- int status=prep.processOptions(opts, args.begin(),args.end(), param);
-
- if(status==MyPorcessor::RETURN_CONTINUE)
- {
-  if(param.basicSize==2)
-  {
-   process<EnvTransfer<32>>(param);
-   status = MyPorcessor::RETURN_DONE;
-  }else if(param.basicSize==4){
-   process<EnvTransfer<32>>(param);
-   status = MyPorcessor::RETURN_DONE;
-  }else if(param.basicSize==8){
-   process<EnvTransfer<64>>( param);
-   status = MyPorcessor::RETURN_DONE;
-  }else{
-   cerr << "Unsupported basic size type:"<<param.basicSize<<endl;
-   status = MyPorcessor::RETURN_ERROR;
-  }
- }
-
- return (status!=MyPorcessor::RETURN_ERROR?
-# 139 "src/conceptual/../64/CMDUtil_mkfs.x2fs.cpp" 3 4
-                                          0 
-# 139 "src/conceptual/../64/CMDUtil_mkfs.x2fs.cpp"
-                                                       : 
-# 139 "src/conceptual/../64/CMDUtil_mkfs.x2fs.cpp" 3 4
-                                                         1
-# 139 "src/conceptual/../64/CMDUtil_mkfs.x2fs.cpp"
-                                                                     );
+ ++depths;
+ std::cout << "\n";
+ for(size_t i=0;i<depths;++i)
+  std::cout << "\t";
+ std::cout << "|";
+}
+void afterSon()
+{
+ --depths;
+}
+void beforeNext()
+{
+ ++depths;
+ std::cout << "\n";
+ for(size_t i=0;i<depths;++i)
+  std::cout << "\t";
+ std::cout <<">";
+}
+void afterNext()
+{
+ --depths;
 
 }
 
-template <class __FsEnv>
-void process(const ParamMkfs & param)
+
+void testPointerSerialize();
+void testABunch();
+void testTree();
+void testX2fsUtil();
+int main()
 {
- using __X2fsUtil = X2fsUtil<__FsEnv>;
- using __X2fsMetaInfo = typename __X2fsUtil::__X2fsMetaInfo;
- __X2fsMetaInfo metainfo;
- metainfo.lbaStartLow = param.lbaLow;
- metainfo.lbaStartHigh = param.lbaHigh;
- metainfo.wholeSecnums =param.wholeSecNum;
- for(size_t i=0;i<metainfo.PARTS_REQUIRED;++i)
-  metainfo.secnums[i]=param.secSpaces[i];
- for(size_t i=0;i<metainfo.PARTS_OPTIONAL;++i)
-  metainfo.optional[i]=param.optional[i];
+ testX2fsUtil();
 
 
 
- std::cout << "information about metainfo"<<std::endl;
- metainfo.dumpInfo();
+ return 0;
+}
+void testX2fsUtil()
+{
+ auto buf = makeSharedArray<char>(1024*50);
+
+ SerializerPtr<__Env> ptr { *buf };
+
+ X2fsMetaInfo metainfo{0,0};
+ u8_t driver = 0;
+ X2fsUtil<__Env> util(driver, metainfo);
+
+ if(!util.mkdir(util.getFileTree()->getHead(),"myFoo"))
+ {
+  cerr << "cannot mkdir" << endl;
+  return;
+ }
+
+ util.mkdir(util.getFileTree()->getHead()->getSon(),"myBar");
+
+ util.listOnNode(util.getFileTree()->getHead(),5);
+ cout << endl;
+
+ ptr << util;
+
+ X2fsUtil<__Env> util2 { driver, ptr=*buf};
+
+ util2.listOnNode(util.getFileTree()->getHead(),5);
+ cout << endl;
+
+}
+
+void testTree()
+{
+ auto buf = makeSharedArray<char>(1024*50);
+
+ SerializerPtr<__Env> ptr { *buf };
+ using __Tree = Tree<BaseDescriptor<__Env>*,MallocToSimple>;
+ __Tree tree(make_shared<__Tree::__Allocator>());
+ tree.setHead(new DirDescriptor<__Env>("root",0,0));
+ tree.startWalk().insertSon(new FileDescriptor<__Env>("file",0,0,3)).endWalk();
+
+ depths=0;
+ tree.dumpInfo(consum, beforeSon, afterSon, beforeNext, afterNext);
+
+ __Tree tree2=tree.makeSmmSharedTree();
+
+ ptr << tree;
+
+
+ ptr = *buf;
+ ptr >> tree2;
+
  std::cout << std::endl;
 
- u8_t driver=HostEnv::addFile(param.imgFile,param.lbaLow);
- if(!__X2fsMetaInfo::checkMetainfo(metainfo))
-  printf("cannot validate metainfo\n");
- else
-  __X2fsUtil::mkfs(driver, metainfo);
-
- printf("re-reading the information to validate....");
- u8_t *buf = static_cast<u8_t*>(HostEnv::malloc(metainfo.metaSec * 512));
- __X2fsMetaInfo readMetainfo;
- HostEnv::readSectors(
-    HostEnv::CUR_SEG, buf,driver , param.lbaLow + __X2fsMetaInfo::SECNUM_RESERVED_CONST,
-    __X2fsMetaInfo::SECNUM_META_CONST, 0);
- SerializerPtr<__FsEnv> ptrMetaNew{buf};
- ptrMetaNew >> readMetainfo;
- if(!__X2fsMetaInfo::checkMetainfo(readMetainfo))
- {
-  printf("validating failed!\n");
- }else{
-  printf("validating succeed!\n");
- }
- HostEnv::flushOutputs();
+ tree2.dumpInfo(consum, beforeSon, afterSon, beforeNext, afterNext);
 
 
- HostEnv::free(buf);
+ ptr = *buf;
+ ptr << FileDescriptor<__Env>("back_file",0,0,2);
+ FileDescriptor<__Env> fd(ptr = *buf);
+ std::cout <<fd.getName() << std::endl;
 
- printf("end.\n");
- HostEnv::flushOutputs();
+}
+void testABunch()
+{
+ auto buf = makeSharedArray<char>(1024*50);
+ enum {Bit = HOST_BIT };
+ using __Env = EnvTransfer<Bit>;
+ SerializerPtr<__Env> ptr { *buf };
+
+ ptr << "hello world";
+
+ SerializerPtr<__Env> {*buf} << "hello";
+ HostEnv::String s;
+ ptr = *buf;
+ ptr >> s;
+ cout << s << endl;
+}
+
+
+
+
+void testPointerSerialize()
+{
+# 168 "src/conceptual/../64/CMDUtil_test_serialize.cpp"
+}
+
+
+void testStringSerialize()
+{
+# 203 "src/conceptual/../64/CMDUtil_test_serialize.cpp"
 }
 # 29 "src/conceptual/all.cpp" 2

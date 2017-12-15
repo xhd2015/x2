@@ -189,19 +189,18 @@ __DEF_X2fsUtil::X2fsUtil(u8_t driver,const __X2fsMetaInfo &metainfo):
 			metainfo(metainfo),//直接复制
 			freemm(std::shared_ptr<LLSmm>(new LLSmm()),
 					metainfo.getFreeSpaceStart(),metainfo.getFreeSpaceLength()),
-			fileTree(std::shared_ptr<FreeSpaceMM>(new FreeSpaceMM())),
+			fileTree(std::make_shared<FileTreeSMM>()),
 			processErrno(This::ERROR_NOERR)
 {
 	__BaseDescriptor* rootDir = new __DirDescriptor("",0,0);//root目录
-	FileNode *head = new FileNode(rootDir);
-	fileTree.setHead(head);
+	fileTree.setHead(rootDir);
 }
 __DEF_X2fsUtil_Template
 __DEF_X2fsUtil::X2fsUtil(u8_t driver,u32_t lbaBase,u32_t lbaHigh): // 必然是经过序列化得到
 			driver(driver),
 			metainfo(),//空
 			freemm(std::make_shared<LLSmm>()),
-			fileTree(std::make_shared<FreeSpaceMM>()),
+			fileTree(std::make_shared<FileTreeSMM>()),
 			processErrno(This::ERROR_NOERR)
 	{
 		// 读取首扇区的信息，然后确定metainfo的所在
@@ -210,7 +209,7 @@ __DEF_X2fsUtil::X2fsUtil(u8_t driver,u32_t lbaBase,u32_t lbaHigh): // 必然是�
 		u16_t metaNum;
 		readHeaderBufferInfo(*buffer, reservedNum, metaNum);
 
-		std::shared_ptr<u8_t[]> bufferMeta { new u8_t[metaNum * CONST_SECSIZE], std::default_delete<u8_t[]>() };
+		auto bufferMeta = makeSharedArray<u8_t>(metaNum * CONST_SECSIZE);
 		HostEnv::readSectors(HostEnv::CUR_SEG,
 				*bufferMeta, driver, lbaBase, metaNum, lbaHigh);
 
@@ -222,6 +221,16 @@ __DEF_X2fsUtil::X2fsUtil(u8_t driver,u32_t lbaBase,u32_t lbaHigh): // 必然是�
 		)
 			HostEnv::systemAbort("incorrect metainfo", -2);
 	}
+__DEF_X2fsUtil_Template
+__DEF_X2fsUtil::X2fsUtil(u8_t driver,SerializerPtr<__FsEnv>& ptr):
+driver(driver),
+metainfo(),//空
+freemm(std::make_shared<LLSmm>()),
+fileTree(std::make_shared<FileTreeSMM>()),
+processErrno(This::ERROR_NOERR)
+{
+	this->deserialize(ptr);
+}
 
 __DEF_X2fsUtil_Template
 __DEF_X2fsUtil::~X2fsUtil()
@@ -233,8 +242,7 @@ __DEF_X2fsUtil::~X2fsUtil()
 __DEF_X2fsUtil_Template
 void __DEF_X2fsUtil::flush() {
 
-	std::shared_ptr<u8_t[]> bufferMeta { new u8_t[CONST_SECSIZE * metainfo.getMetaSec()] ,
-												std::default_delete<u8_t[]>()};
+	auto  bufferMeta = makeSharedArray<u8_t>(CONST_SECSIZE * metainfo.getMetaSec());
 	SerializerPtr<__FsEnv> {*bufferMeta } << *this;
 
 
@@ -310,16 +318,18 @@ bool __DEF_X2fsUtil::create(FileNode *p,FileType type,const char *name,__SizeTyp
 
 	ResourceWatcher wc;
 	// 创建一个节点，分配空间
-	__BaseDescriptor *fd= wc.add(createFileDescriptor(type));
-	if(wc.fail(fd==nullptr))
-		return false;
-	FileNode *fnode =fileTree.newOneNode(fd);
-	if(wc.fail(fnode==nullptr))
+	/**
+	 * 如果任何一步出错，都应当把申请的空间换回去
+	 */
+	FileNode *fnode =fileTree.newOneNode();
+	if(wc.fail(fnode!=nullptr)) // if fnode!=nullptr fails, that is, fnode==nullptr
 	{
 		this->seterrno(This::ERROR_NEW_NULL);
 		return false;
 	}
 	wc.add(fnode);
+
+	__BaseDescriptor *fd=nullptr;
 
 	if(type==FileType::TYPE_FILE)
 	{
@@ -334,23 +344,26 @@ bool __DEF_X2fsUtil::create(FileNode *p,FileType type,const char *name,__SizeTyp
 			this->seterrno(This::ERROR_FILEALLOCSPACE);
 			return false;
 		}
+		fd =  wc.add(new __FileDescriptor(HostEnv::String(name),0,0,secSpan));
+		if(wc.fail(fd!=nullptr))
+			return false;
 		__FileDescriptor *fileDesc=static_cast<__FileDescriptor*>(fd);
 		fileDesc->addSpace({fsecStart,secSpan});
 
 	}else if(type==FileType::TYPE_DIR){
-		// do nothing
+		fd =  wc.add(new __DirDescriptor(HostEnv::String(name),0,0));
+		if(wc.fail(fd!=nullptr))
+			return false;
 	}else{
 		// unsupported now
 		wc.fail();
 		this->seterrno(ERROR_UNSUPORTED);
 		return false;
 	}
+	fnode->setData(fd);
 	this->insertNode(p, fnode);
 	return true;
 }
-/**
- * 如果任何一步出错，都应当把申请的空间换回去
- */
 __DEF_X2fsUtil_Template
 bool __DEF_X2fsUtil::createFile(FileNode *p,const char *name,__SizeType secNum)
 {
@@ -627,16 +640,16 @@ void __DEF_X2fsUtil::listNode(int argc,const char * argv[],int maxdeepth)const
 __DEF_X2fsUtil_Template
 void __DEF_X2fsUtil::listRoot()const
 {
-	FileNode *pfn=static_cast<FileNode *>(this->fileTree.getHead());
+	FileNode *pfn=this->fileTree.getHead();
 
 	HostEnv::printf_simple("/:\n");
-	pfn=static_cast<FileNode *>(pfn->getSon());
+	pfn=pfn->getSon();
 	while(pfn)
 	{
 		HostEnv::cout << "\t" << pfn->getData()->getName();
 		if(This::isFile(pfn))
 		{
-			__FileDescriptor *fd=static_cast<__FileDescriptor*>(pfn->getData());
+			__FileDescriptor *fd = static_cast<__FileDescriptor*>(pfn->getData());
 			HostEnv::cout << "  " << fd->getFileLen();
 		}
 		pfn=pfn->getNext();
@@ -713,7 +726,7 @@ __DEF_X2fsUtil_Template
 typename __DEF_X2fsUtil::FileNode * __DEF_X2fsUtil::locatePath(FileNode* base, const char* name)const
 {
 	if(!base)return nullptr;
-	FileNode *p= reinterpret_cast<FileNode *>(base->getSon());
+	FileNode *p= base->getSon();
 	while(p)
 	{
 		if( p->getData()->getName().compare(name)==0)break;

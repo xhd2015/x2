@@ -15,17 +15,114 @@
 #include <utility>
 
 using namespace std;
+enum {Bit = HOST_BIT };
+using __Env = EnvTransfer<Bit>;
 
-
+size_t depths=0;
+void consum(BaseDescriptor<__Env>* const & i)
+{
+	std::cout << i->getName();
+}
+void beforeSon()
+{
+	++depths;
+	std::cout << "\n";
+	for(size_t i=0;i<depths;++i)
+		std::cout << "\t";
+	std::cout << "|";//son节点打印
+}
+void afterSon()
+{
+	--depths;
+}
+void beforeNext()
+{
+	++depths;
+	std::cout << "\n";
+	for(size_t i=0;i<depths;++i)
+		std::cout << "\t";
+	std::cout <<">";
+}
+void afterNext()
+{
+	--depths;
+//	cout << "}";
+}
 
 
 void testPointerSerialize();
 void testABunch();
+void testTree();
+void testX2fsUtil();
 int main()
 {
+	testX2fsUtil();
+//	testTree();
 //	testPointerSerialize();
-	testABunch();
+//	testABunch();
 	return 0;
+}
+void testX2fsUtil()
+{
+	auto buf = makeSharedArray<char>(1024*50);
+
+	SerializerPtr<__Env> ptr { *buf };
+
+	X2fsMetaInfo metainfo{0,0};
+	u8_t driver = 0;
+	X2fsUtil<__Env> util(driver, metainfo);
+
+	if(!util.mkdir(util.getFileTree()->getHead(),"myFoo"))
+	{
+		cerr << "cannot mkdir" << endl;
+		return;
+	}
+
+	util.mkdir(util.getFileTree()->getHead()->getSon(),"myBar");
+
+	util.listOnNode(util.getFileTree()->getHead(),5);
+	cout << endl;
+
+	ptr << util;
+
+	X2fsUtil<__Env> util2 { driver, ptr=*buf};
+
+	util2.listOnNode(util.getFileTree()->getHead(),5);
+	cout << endl;
+
+}
+// tested good.
+void testTree()
+{
+	auto buf = makeSharedArray<char>(1024*50);
+
+	SerializerPtr<__Env> ptr { *buf };
+	using __Tree = Tree<BaseDescriptor<__Env>*,MallocToSimple>;
+	__Tree tree(make_shared<__Tree::__Allocator>());
+	tree.setHead(new DirDescriptor<__Env>("root",0,0));
+	tree.startWalk().insertSon(new FileDescriptor<__Env>("file",0,0,3)).endWalk();
+
+	depths=0;
+	tree.dumpInfo(consum, beforeSon, afterSon, beforeNext, afterNext);
+
+	__Tree tree2=tree.makeSmmSharedTree();
+
+	ptr << tree;
+
+
+	ptr = *buf;
+	ptr >> tree2;
+
+	std::cout << std::endl;
+
+	tree2.dumpInfo(consum, beforeSon, afterSon, beforeNext, afterNext);
+
+	// 测试从序列化指针构造对象
+	ptr = *buf;
+	ptr << FileDescriptor<__Env>("back_file",0,0,2);
+	FileDescriptor<__Env> fd(ptr = *buf); //从ptr构造
+	std::cout <<fd.getName() << std::endl;
+
 }
 void testABunch()
 {
@@ -108,36 +205,7 @@ void testStringSerialize()
 
 //============测试树的序列化
 // 测试64位，32位序列化Tree是否正确
-//size_t depths=0;
-//void consum(const int &i)
-//{
-//	std::cout << i;
-//}
-//void beforeSon()
-//{
-//	++depths;
-//	std::cout << "\n";
-//	for(size_t i=0;i<depths;++i)
-//		std::cout << "\t";
-//	std::cout << "|";//son节点打印
-//}
-//void afterSon()
-//{
-//	--depths;
-//}
-//void beforeNext()
-//{
-//	++depths;
-//	std::cout << "\n";
-//	for(size_t i=0;i<depths;++i)
-//		std::cout << "\t";
-//	std::cout <<">";
-//}
-//void afterNext()
-//{
-//	--depths;
-////	cout << "}";
-//}
+
 //template <class T>
 //class MySMM:public MallocToSimple<T>
 //{
