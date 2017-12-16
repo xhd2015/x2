@@ -141,21 +141,14 @@ typename SimpleMemoryManager<T>::FullNode *SimpleMemoryManager<T>::getNewNode()
     return rt;
 }
 template <class T>
-void SimpleMemoryManager<T>::withdraw(SimpleMemoryManager<T>::FullNode *t)
+void SimpleMemoryManager<T>::withdraw(SimpleMemoryManager<T>::FullNode *_t)
 {
-	FullNode* _t=reinterpret_cast<FullNode*>(t);
     if(_t && _t->isAlloced())
     {
         _t->setAlloced(false); //如果被标记为可用，就用lastIndex指向之
         curSize--;
         lastIndex = ((_t - start)/sizeof(FullNode)) % len;
     }
-}
-
-template <class T>
-void SimpleMemoryManager<T>::withdraw(T *t)
-{
-	this->withdraw(reinterpret_cast<FullNode*>(t));
 }
 
 
@@ -266,9 +259,9 @@ __DEF_Template_ListNode
 void   __DEF_ListNode::adjustOffset(ptrdiff_t diff)
 {
 	if(this->next!=nullptr)
-		this->next = reinterpret_cast<__ListNode*>(this->next + diff);
+		this->next = reinterpret_cast<__ListNode*>(reinterpret_cast<char*>(this->next) + diff);
 	if(this->previous!=nullptr)
-		this->previous = reinterpret_cast<__ListNode*>(this->previous + diff);
+		this->previous = reinterpret_cast<__ListNode*>(reinterpret_cast<char*>(this->previous) + diff);
 }
 __DEF_Template_ListNode
 void   __DEF_ListNode::initToNull()
@@ -290,7 +283,7 @@ typename __DEF_ListNode::__ListNode*   __DEF_ListNode::getLast()const
 __DEF_Template_ListNode
 typename __DEF_ListNode::__ListNode*    __DEF_ListNode::getFirst()const
 {
-    __ListNode *p=reinterpret_cast<__ListNode*>(this);
+    const __ListNode *p=this;
     while(p->hasPrevious())
     {
         p=p->getPrevious();
@@ -595,10 +588,13 @@ typename __DEF_LinkedList::__ListNode*
 	__DEF_LinkedList::removeAllAfterHead()
 {
 	__ListNode *p=root->getNext();
-	if(!p) return nullptr;
-	p->setPrevious(nullptr);
-	root->setNext(nullptr);
-	last->setNext(nullptr);
+	if(p)
+	{
+		p->setPrevious(nullptr);
+		root->setNext(nullptr);
+		last->setNext(nullptr);
+	}
+	return p;
 }
 #undef __DEF_Template_LinkedList
 #undef __DEF_LinkedList
@@ -903,9 +899,9 @@ void 			__DEF_TreeNode::adjustOffset(ptrdiff_t diff)
 {
 	this->Super::adjustOffset(diff);
 	if(this->father!=nullptr)
-		this->father = reinterpret_cast<__TreeNode*>(this->father + diff);
+		this->father = reinterpret_cast<__TreeNode*>(reinterpret_cast<char*>(this->father) + diff);
 	if(this->son!=nullptr)
-		this->son = reinterpret_cast<__TreeNode*>(this->son + diff);
+		this->son = reinterpret_cast<__TreeNode*>(reinterpret_cast<char*>(this->son) + diff);
 }
 __DEF_Template_TreeNode
 void 			__DEF_TreeNode::initToNull()
@@ -942,10 +938,10 @@ void __DEF_TreeNode::removeFather() {
 
 __DEF_Template_TreeNode
 typename __DEF_TreeNode::__TreeNode* __DEF_TreeNode::getParent()const {//往previous一直遍历，直到是跟，然后返回跟的father
-	__TreeNode *p=reinterpret_cast<__TreeNode*>(this);
+	const __TreeNode *p= this;
 	while(p->hasPrevious())
 	{
-		p=reinterpret_cast<__TreeNode*>(p->getPrevious());
+		p=p->getPrevious();
 	}
 	return p->getDirectFather();
 }
@@ -1119,13 +1115,18 @@ template <class __EnvTransfer>
 //		HostEnv::printf_simple("read sum =%d\n",sum);
 		return ptr;
 	}
+
+// BUG 需要通过遍历的形式来获得真正的大小
 __DEF_Template_Tree
 template <class __EnvTransfer>
 	 size_t __DEF_Tree::getSerializitionSize() // 每一个不一定都是定长的
 {
-	return  __EnvTransfer::template sizeofHostType<size_t>()+
-			getSize() *(
-			::getSerializitionSize<T,__EnvTransfer>()+__EnvTransfer::template sizeofHostType<size_t>()*2) ;
+	// 序列化时，先记录数据，然后记录son,next的数目，然后递归序列化son,next
+	size_t size =  ::getSerializitionSize<__EnvTransfer,size_t>(); // getSize()
+	dumpInfo([&size](const T& t) {
+					size+= ::getSerializitionSize<__EnvTransfer>(t)+__EnvTransfer::template sizeofHostType<size_t>()*2; },
+			doNothing<void>,doNothing<void>,doNothing<void>,doNothing<void>);
+	return size;
 }
 
 #if defined(CODE64)

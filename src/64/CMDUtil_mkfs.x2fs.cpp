@@ -26,11 +26,8 @@ CommandOptions opts{
 			{"-l","--lbalow",true,"lba低32位地址,必须指定"},
 			{"-g","--lbahigh",true,"lba高32位地址，默认为0"},
 			{"-n","--secnum",true,"扇区总数,必须指定"},
-			{"-m","--namesecs",true,"name区总数,0或者默认则为"},
-			{"-d","--dirsecs",true,"dir区总数，0或者默认则为"},
-			{"-f","--freesecs",true,"free区总数,0或者默认则为"},
-			{"-k","--linksecs",true,"link区总数,0或者默认则为"},
-			{"-2","--secdsecs",true,"二级加载器预留扇区数目,默认为0"},
+			{"-r","--reservednum",true,"保留扇区数目"},
+			{"-m","--metanum",true,"元信息区域扇区数目"},
 			{"-h","--help",false,"显示此帮助信息"},
 			{"-v","--version",false,"打印版本号"},
 	};
@@ -58,19 +55,12 @@ public:
 			pack.lbaHigh=atoi((itarg+1)->c_str());
 		}else if(itopt->equals("-n")){
 			pack.wholeSecNum=atoi((itarg+1)->c_str());
-			pack.wholeSecNumSet=true;
+			pack.wholeSecNumSet = true;
+		}else if(itopt->equals("-r")){
+			pack.reserved=atoi((itarg+1)->c_str());
 		}else if(itopt->equals("-m")){
-			pack.secSpaces[X2fsMetaInfo::INDEX_NAME]=atoi((itarg+1)->c_str());
-		}else if(itopt->equals("-d")){
-			pack.secSpaces[X2fsMetaInfo::INDEX_DIR]=atoi((itarg+1)->c_str());
-		}else if(itopt->equals("-f")){
-			pack.secSpaces[X2fsMetaInfo::INDEX_FREE]=atoi((itarg+1)->c_str());
-		}else if(itopt->equals("-k")){
-			pack.secSpaces[X2fsMetaInfo::INDEX_LINK]=atoi((itarg+1)->c_str());
-		}else if(itopt->equals("-2")){
-			pack.optional[X2fsMetaInfo::INDEX_OPTIONAL_SECD]=atoi((itarg+1)->c_str());
+			pack.meta=atoi((itarg+1)->c_str());
 		}
-
 		return ERROR_NO_ERROR;
 	}
 
@@ -144,47 +134,27 @@ template <class __FsEnv>
 void process(const ParamMkfs & param)
 {
 	using __X2fsUtil = X2fsUtil<__FsEnv>;
-	using __X2fsMetaInfo = typename __X2fsUtil::__X2fsMetaInfo;
-	__X2fsMetaInfo metainfo;
-	metainfo.lbaStartLow = param.lbaLow;
-	metainfo.lbaStartHigh = param.lbaHigh;
-	metainfo.wholeSecnums =param.wholeSecNum;
-	for(size_t i=0;i<metainfo.PARTS_REQUIRED;++i)
-		metainfo.secnums[i]=param.secSpaces[i];
-	for(size_t i=0;i<metainfo.PARTS_OPTIONAL;++i)
-		metainfo.optional[i]=param.optional[i];
-
-
+	using __X2fsMetaInfo =X2fsMetaInfo;
+	__X2fsMetaInfo metainfo{
+		param.lbaLow,param.lbaHigh,param.wholeSecNum,
+		param.basicSize,param.reserved,param.meta
+	};
 
 	std::cout << "information about metainfo"<<std::endl;
 	metainfo.dumpInfo();
 	std::cout << std::endl;
 
 	u8_t driver=HostEnv::addFile(param.imgFile,param.lbaLow);
-	if(!__X2fsMetaInfo::checkMetainfo(metainfo))
-		printf("cannot validate metainfo\n");
-	else
-		__X2fsUtil::mkfs(driver, metainfo);
+	__X2fsUtil::mkfs(driver, metainfo);
 
 	printf("re-reading the information to validate....");
-	u8_t *buf = static_cast<u8_t*>(HostEnv::malloc(metainfo.metaSec * CONST_SECSIZE));
-	__X2fsMetaInfo readMetainfo;
-	HostEnv::readSectors(
-				HostEnv::CUR_SEG, buf,driver , param.lbaLow + __X2fsMetaInfo::SECNUM_RESERVED_CONST,
-				__X2fsMetaInfo::SECNUM_META_CONST, 0);
-	SerializerPtr<__FsEnv> ptrMetaNew{buf};
-	ptrMetaNew >> readMetainfo;
-	if(!__X2fsMetaInfo::checkMetainfo(readMetainfo))
+	__X2fsUtil util { driver, metainfo.getLbaBaseLow(), metainfo.getLbaBaseHigh() };
+	if(!util.getMetainfo().isValid())
 	{
 		printf("validating failed!\n");
 	}else{
 		printf("validating succeed!\n");
 	}
-	HostEnv::flushOutputs();
-
-
-	HostEnv::free(buf);
-
 	printf("end.\n");
 	HostEnv::flushOutputs();
 }

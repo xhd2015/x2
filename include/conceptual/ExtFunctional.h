@@ -10,6 +10,7 @@
 #include <def.h>
 #include <type_traits>
 #include <utility>
+#include <memory>
 //#include <bits/unique_ptr.h>
 /**
  * make a function pointer to dtor possible

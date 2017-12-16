@@ -471,7 +471,7 @@ AS_MACRO  SerializerPtr<__EnvTransfer>& operator>>(SerializerPtr<__EnvTransfer>&
  * 全局getSerializitionSize 函数：动态版本
  */
 __DEF_Template_Helper
-AS_MACRO  size_t getSerializitionSize(const __S &s)
+AS_MACRO  size_t getSerializitionSize(__S const &s)
 {
 	return __getSizeHelper<__EnvTransfer,__S>(s,Int2Type<__PolicyGetter<__S>::policy>());
 }
@@ -529,7 +529,7 @@ template <class __EnvTransfer,class __T>
 AS_MACRO  size_t getSerializitionSize(const HostEnv::Vector<__T> &s)
 {
 	size_t size= getSerializitionSize<__EnvTransfer,decltype(s.size())>();
-	for(decltype(size) i=0;i!=size;++i)
+	for(decltype(size) i=0;i!=s.size();++i)
 		size+= getSerializitionSize<__EnvTransfer,__T>(s[i]); //尽量采用指针的方式吗？
 	return size;
 }
@@ -577,10 +577,8 @@ SerializerPtr<__EnvTransfer>& operator>>(SerializerPtr<__EnvTransfer>& p,HostEnv
 template <class __EnvTransfer>
 size_t getSerializitionSize(const HostEnv::String &s)
 {
-	size_t size= getSerializitionSize<__EnvTransfer,decltype(s.size())>();
-	for(decltype(size) i=0;i!=s.size();++i)
-		size += getSerializitionSize<__EnvTransfer,typename HostEnv::String::value_type>(s[i]);
-	return size;
+	return  getSerializitionSize<__EnvTransfer,decltype(s.size())>()+
+			s.size() * ::getSerializitionSize<__EnvTransfer,typename HostEnv::String::value_type>();
 }
 
 #endif /* INCLUDE_CONCEPTUAL_SERIALIZE_H_ */

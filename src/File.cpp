@@ -204,14 +204,16 @@ __DEF_X2fsUtil::X2fsUtil(u8_t driver,u32_t lbaBase,u32_t lbaHigh): // 必然是�
 			processErrno(This::ERROR_NOERR)
 	{
 		// 读取首扇区的信息，然后确定metainfo的所在
-		std::shared_ptr<u8_t[]> buffer{ new u8_t[CONST_SECSIZE], std::default_delete<u8_t[]>() };
+		auto buffer = makeSharedArray<u8_t>(CONST_SECSIZE);
 		u16_t reservedNum;
 		u16_t metaNum;
+		HostEnv::readSectors(HostEnv::CUR_SEG, *buffer,
+				driver, lbaBase, 1,lbaHigh);
 		readHeaderBufferInfo(*buffer, reservedNum, metaNum);
 
 		auto bufferMeta = makeSharedArray<u8_t>(metaNum * CONST_SECSIZE);
 		HostEnv::readSectors(HostEnv::CUR_SEG,
-				*bufferMeta, driver, lbaBase, metaNum, lbaHigh);
+				*bufferMeta, driver, lbaBase + reservedNum, metaNum, lbaHigh);
 
 		// 序列化读到这里
 		SerializerPtr<__FsEnv> {*bufferMeta } >>  *this;
@@ -241,15 +243,25 @@ __DEF_X2fsUtil::~X2fsUtil()
 
 __DEF_X2fsUtil_Template
 void __DEF_X2fsUtil::flush() {
+	auto & util = *this;
 
-	auto  bufferMeta = makeSharedArray<u8_t>(CONST_SECSIZE * metainfo.getMetaSec());
-	SerializerPtr<__FsEnv> {*bufferMeta } << *this;
+	size_t size = util.getSerializitionSize();
+	size_t secNum =  size/CONST_SECSIZE + (size%CONST_SECSIZE==0?0:1);
+	if(secNum > metainfo.getMetaSec()) // 超出长度限制
+		HostEnv::systemAbort("filesystem metainfo sector number not enough", -3);
+	auto buffer=makeSharedArray<u8_t>(secNum * CONST_SECSIZE);
+	SerializerPtr<__FsEnv> { *buffer } << util;
 
+	// 回写meta区信息到驱动器
+	HostEnv::writeSectors(HostEnv::CUR_SEG,*buffer, driver,
+			metainfo.getLbaBaseLow() + metainfo.getReservedSec(), secNum, metainfo.getLbaBaseHigh());
 
-	// 回写其他区信息到驱动器
-	HostEnv::writeSectors(HostEnv::CUR_SEG, *bufferMeta, driver,
-			metainfo.getLbaBaseLow() + metainfo.getReservedSec() ,
-			metainfo.getMetaSec(), metainfo.getLbaBaseHigh());
+	// 先读，后写两个数据到首扇区
+	HostEnv::readSectors(HostEnv::CUR_SEG, *buffer,
+			driver, metainfo.getLbaBaseLow(), 1, metainfo.getLbaBaseHigh());
+	writeHeaderBufferInfo(*buffer,metainfo.getReservedSec(),metainfo.getMetaSec());
+	HostEnv::writeSectors(HostEnv::CUR_SEG,*buffer,
+			driver, metainfo.getLbaBaseLow(), 1, metainfo.getLbaBaseHigh());
 }
 
 __DEF_X2fsUtil_Template
@@ -344,14 +356,14 @@ bool __DEF_X2fsUtil::create(FileNode *p,FileType type,const char *name,__SizeTyp
 			this->seterrno(This::ERROR_FILEALLOCSPACE);
 			return false;
 		}
-		fd =  wc.add(new __FileDescriptor(HostEnv::String(name),0,0,secSpan));
+		fd =  wc.add(new __FileDescriptor(HostEnv::String(name),ctime,ctime,secSpan*CONST_SECSIZE));
 		if(wc.fail(fd!=nullptr))
 			return false;
 		__FileDescriptor *fileDesc=static_cast<__FileDescriptor*>(fd);
 		fileDesc->addSpace({fsecStart,secSpan});
 
 	}else if(type==FileType::TYPE_DIR){
-		fd =  wc.add(new __DirDescriptor(HostEnv::String(name),0,0));
+		fd =  wc.add(new __DirDescriptor(HostEnv::String(name),ctime,ctime));
 		if(wc.fail(fd!=nullptr))
 			return false;
 	}else{
@@ -511,7 +523,7 @@ void __DEF_X2fsUtil::dumpFileInfo(FileNode * fnode)
 __DEF_X2fsUtil_Template
 bool __DEF_X2fsUtil::createFileInRoot(const char* name, __SizeType secNum)
 {
-	return this->createFile(static_cast<FileNode*>(this->fileTree.getHead()), name, secNum);
+	return this->createFile(this->fileTree.getHead(), name, secNum);
 }
 
 __DEF_X2fsUtil_Template
@@ -671,6 +683,7 @@ void __DEF_X2fsUtil::listNode(const FileNode* p)const
 			__FileDescriptor *fd=static_cast<__FileDescriptor*>(pfn->getData());
 			HostEnv::cout << "  " << fd->getFileLen();
 		}
+		HostEnv::cout << HostEnv::endl;
 		pfn=pfn->getNext();
 	}
 }
@@ -733,6 +746,22 @@ typename __DEF_X2fsUtil::FileNode * __DEF_X2fsUtil::locatePath(FileNode* base, c
 		p = p->getNext();
 	}
 	return p;
+}
+__DEF_X2fsUtil_Template
+typename __DEF_X2fsUtil::__FileDescriptor * __DEF_X2fsUtil::locateFile(FileNode *base,const char *name)const
+{
+	FileNode * fnode=locatePath(base, name);
+	if(This::isFile(fnode))
+		return static_cast<__FileDescriptor*>(fnode->getData());
+	return nullptr;
+}
+__DEF_X2fsUtil_Template
+typename __DEF_X2fsUtil::__DirDescriptor * __DEF_X2fsUtil::locateDir(FileNode *base,const char *name)const
+{
+	FileNode * fnode=locatePath(base, name);
+	if(This::isDirectory(fnode))
+		return static_cast<__FileDescriptor*>(fnode->getData());
+	return nullptr;
 }
 __DEF_X2fsUtil_Template
 typename __DEF_X2fsUtil::FileNode * __DEF_X2fsUtil::getPathParentNode(int argc,const char * argv[])const
@@ -825,20 +854,19 @@ typename __DEF_X2fsUtil::__SizeType __DEF_X2fsUtil::_writeToFile(const char *buf
 {
 	if(nsec==0 || fd==nullptr || fd->getType() != __FileDescriptor::TYPE_FILE)return 0;
 
+	// 先定位到开始位置处于的区间(ilinkPos)
 	__SizeType retOff=0;
 	__SizeType ilinkPos = locateILink(fd,0, secPos, retOff);
 	auto & linkarr = fd->getSpaces();
 
-	__SizeType extraSec = 0;
+	__SizeType extraSec = 0; //需要额外扩展的空间
 	if(ilinkPos == linkarr.size())
 	{
 		extraSec = retOff + nsec;
-	}else{
-		extraSec = retOff + nsec - linkarr[ilinkPos].getLimit();
 	}
 	if(extraSec > 0) //需要额外的空间
 	{
-		if(!extendFileSecNum(fd, extraSec, updateFileLen)) // 空间不足以分配
+		if(!extendFileSecNum(fd, extraSec, updateFileLen)) // 扩展链接区间
 			return 0;
 		ilinkPos = locateILink(fd,0, secPos, retOff);//更新数据状态
 	}
@@ -1045,32 +1073,11 @@ bool __DEF_X2fsUtil::truncateFile(__FileDescriptor *fd,__SizeType newlen)
 __DEF_X2fsUtil_Template
 void  __DEF_X2fsUtil::mkfs(u8_t driver,const __X2fsMetaInfo &metainfo)
 {
-	X2fsUtil<__FsEnv> util{ driver, metainfo }; //使用buffered可以进行
-
-	size_t size = util.getSerializitionSize();
-	size_t secNum =  size/CONST_SECSIZE + (size%CONST_SECSIZE==0?0:1);
-	std::shared_ptr<u8_t[]> buffer{ new u8_t[secNum * CONST_SECSIZE], std::default_delete<u8_t[]>()};
-	SerializerPtr<__FsEnv> { *buffer } << util;
-	HostEnv::writeSectors(HostEnv::CUR_SEG,*buffer, driver,
-			metainfo.getLbaBaseLow() + metainfo.getReservedSec(), secNum, metainfo.getLbaBaseHigh());
-
-	// 先读，后写两个数据到首扇区
-	HostEnv::readSectors(HostEnv::CUR_SEG, *buffer,
-			driver, metainfo.getLbaBaseLow(), 1, metainfo.getLbaBaseHigh());
-	writeHeaderBufferInfo(*buffer,metainfo.getReservedSec(),metainfo.getMetaSec());
-	HostEnv::writeSectors(HostEnv::CUR_SEG,*buffer,
-			driver, metainfo.getLbaBaseLow(), 1, metainfo.getLbaBaseHigh());
+	__X2fsUtil util{ driver, metainfo }; //使用buffered可以进行
+	util.flush();
 }
-//template <template <class>class _Allocator>
-//void X2fsUtil::getLinkedList(LinearSourceDescriptor *buffer,int i,LinkedList<LinearSourceDescriptor,_Allocator> &list,__SizeType maxlen)
-//{
-//	while(i < maxlen)
-//	{
-//		list.append(buffer[i]);
-//		i++;
-//	}
-//}
 
+//==class FileOperation
 #include "File_FileOperation.cpp"  //包含实现文件
 
 //===class ManagedObject

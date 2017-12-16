@@ -25,7 +25,7 @@
 
 __DEF_Template_FileOperation
 __DEF_FileOperation::FileOperation(u8_t driver,u32_t lbaAddress):
-	util(driver, lbaAddress),
+	util(driver, lbaAddress,0),
 	curNode(nullptr),
 	lastNode(nullptr)
 {
@@ -125,7 +125,7 @@ bool __DEF_FileOperation::cdFromCur(__Vector_String_cit begin,__Vector_String_ci
 				if(npushed>0)
 					appendPaths.pop_back();
 				--npushed;
-				tempCur= reinterpret_cast<FileNode*>(tempCur->getDirectFather());
+				tempCur= tempCur->getParent();
 			}
 		}else{ //normal locating
 
@@ -268,7 +268,7 @@ void __DEF_FileOperation::read(const __String& fname,__SizeType secStart,__SizeT
 	size_t secnum = (byteLen/CONST_SECSIZE)+(byteLen%CONST_SECSIZE!=0);
 	char *buffer=new char[secnum * CONST_SECSIZE];
 
-	size_t readNum = util._readFromFile(buffer,secnum,util.locatePath(curNode, fname.c_str()), secStart);
+	size_t readNum = util._readFromFile(buffer,secnum,util.locateFile(curNode, fname.c_str()), secStart);
 	HostEnv::printf_simple( "read num is %d\n",readNum );
 	HostEnv::printf_sn(buffer,byteLen);
 	HostEnv::flushOutputs();
@@ -281,7 +281,7 @@ void __DEF_FileOperation::write(const __String& fname,__SizeType start,const cha
 	char *buffer=new char[secnum * CONST_SECSIZE]();
 	for(size_t i=0;i<len;i++)
 		buffer[i]=content[i];
-	size_t writeNum = util._writeToFile(buffer, secnum, util.locatePath(curNode, fname.c_str()), start);
+	size_t writeNum = util._writeToFile(buffer, secnum, util.locateFile(curNode, fname.c_str()), start);
 	HostEnv::printf_simple( "write sec num is %d\n",writeNum );
 	HostEnv::flushOutputs();
 	delete []buffer;
@@ -291,6 +291,8 @@ __DEF_Template_FileOperation
 void __DEF_FileOperation::randwrite(const __String& fname,__SizeType byteStart,
 		const char* content,__SizeType byteLen)
 {
+	if(byteLen==0)
+		byteLen = HostEnv::strlen(content);
 	ManagedObject<char*> mbuf;
 	__SizeType bufSize,startOff,endOff;
 	bufSize=__X2fsUtil::calculateRandomBufferSize(byteStart, byteLen, &startOff, &endOff, CONST_SECSIZE);
@@ -299,7 +301,7 @@ void __DEF_FileOperation::randwrite(const __String& fname,__SizeType byteStart,
 	HostEnv::memcpy(contentBuf + startOff, content,byteLen);
 
 	__SizeType writeNum = util._randomWriteFile(contentBuf, byteLen,
-			util.locatePath(curNode, fname.c_str()), byteStart);
+			util.locateFile(curNode, fname.c_str()), byteStart);
 	HostEnv::printf_simple( "write byte num is %d\n",writeNum );
 	HostEnv::flushOutputs();
 }
@@ -312,7 +314,7 @@ void __DEF_FileOperation::randread(const __String& fname,__SizeType byteStart,__
 
 	char *contentBuf = mbuf.getOnlyBuffer(bufSize);
 	size_t readNum = util._randomReadFile(contentBuf, byteLen,
-			util.locatePath(curNode, fname.c_str()), byteStart);
+			util.locateFile(curNode, fname.c_str()), byteStart);
 	HostEnv::printf_simple( "read byte num is %d\n",readNum );
 	if(readNum!=0)
 		HostEnv::printf_sn(contentBuf+startOff,readNum);
@@ -325,10 +327,11 @@ void __DEF_FileOperation::truncate(const __String & fname,__SizeType newlen)
 	FileNode *fnode;
 	if(checkIsFile(fname, fnode))
 	{
-		__SizeType oldLen = fnode->getData().getFileLen();
-		if(util.truncateFile(fnode, newlen))
+		__FileDescriptor * fd= static_cast<__FileDescriptor*>(fnode->getData());
+		__SizeType oldLen = fd->getFileLen();
+		if(util.truncateFile(fd, newlen))
 		{
-			HostEnv::printf_simple("len:%d --> %d\n",oldLen,fnode->getData().getFileLen());
+			HostEnv::printf_simple("len:%d --> %d\n",oldLen,fd->getFileLen());
 		}else{
 			HostEnv::printf_simple("cannot truncate file.\n");
 		}
@@ -423,11 +426,11 @@ void __DEF_FileOperation::flush()
 #if defined(CODE64)
 #include <fstream>
 __DEF_Template_FileOperation
-typename __DEF_FileOperation::__SizeType __DEF_FileOperation::readSysFileToX2File(const __String &sysFile,__SizeType sysStart,
+typename __DEF_FileOperation::__SizeType __DEF_FileOperation::writeSysFileToX2File(const __String &sysFile,__SizeType sysStart,
 							const __String &x2File,__SizeType x2Start,
 							__SizeType maxLen)
 {
-	FileNode *fnode=util.locatePath(curNode, x2File.c_str());
+	__FileDescriptor *fnode=util.locateFile(curNode, x2File.c_str());
 	if(fnode==nullptr)
 	{
 		// TODO 如果文件不存在就创建
@@ -448,7 +451,7 @@ typename __DEF_FileOperation::__SizeType __DEF_FileOperation::readSysFileToX2Fil
 		fs.close();
 		//文件容量不足
 		HostEnv::printf_simple("error,file not exists or no a single byte is"
-				" available at given position\n");
+				" available at the given position\n");
 		return 0;
 	}
 
@@ -488,13 +491,13 @@ typename __DEF_FileOperation::__SizeType __DEF_FileOperation::readSysFileToX2Fil
 }
 __DEF_Template_FileOperation
 typename __DEF_FileOperation::__SizeType __DEF_FileOperation::
-		writeSysFileFromX2File(const __String &sysFile,__SizeType sysStart,
+		readX2FileToSysFile(const __String &sysFile,__SizeType sysStart,
 							const __String &x2File,__SizeType x2Start,
 							__SizeType maxLen)
 {
-	FileNode *fnode=util.locatePath(curNode, x2File.c_str());
+	__FileDescriptor *fnode=util.locateFile(curNode, x2File.c_str());
 	__SizeType flen;
-	if(fnode==nullptr || (flen=fnode->getData().getFileLen()) <= x2Start)
+	if(fnode==nullptr || (flen=fnode->getFileLen()) <= x2Start)
 	{
 		HostEnv::printf_simple("error,file in x2 not exists or no a single byte is"
 				" available at given position\n");
@@ -541,7 +544,7 @@ __DEF_Template_FileOperation
 bool __DEF_FileOperation::checkIsFile(const __String & fname,FileNode *&fnode)const
 {
 	bool exist=checkExits(fname, fnode) ;
-	if(exist && fnode->getData().getType()!=__FileDescriptor::TYPE_FILE){
+	if(exist && fnode->getData()->getType()!=__FileDescriptor::TYPE_FILE){
 		errorNotAFile(fname);
 		return false;
 	}
@@ -551,7 +554,7 @@ __DEF_Template_FileOperation
 bool __DEF_FileOperation::checkIsDir(const __String & fname,FileNode *&fnode)const
 {
 	bool exist=checkExits(fname, fnode) ;
-	if(exist && fnode->getData().getType()!=__FileDescriptor::TYPE_DIR){
+	if(exist && fnode->getData()->getType()!=__FileDescriptor::TYPE_DIR){
 		errorNotADir(fname);
 		return false;
 	}
@@ -607,9 +610,7 @@ void __DEF_FileOperation::refreshCurrentPath()
 //	vector<string>::size_type i=1;
 	while(p!=head)
 	{
-		__SizeType nlen;
-		char* str=util.getFileNameCstr(p->getData(), nlen);
-		curPath.insert(curPath.begin(),__String(str));
+		curPath.insert(curPath.begin(),p->getData()->getName());
 		p = reinterpret_cast<FileNode*>(p->getDirectFather());
 	}
 }

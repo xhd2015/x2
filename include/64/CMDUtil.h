@@ -38,17 +38,10 @@ struct ParamMkfs{
 	u32_t lbaHigh=0;
 	std::string imgFile{};
 	size_t wholeSecNum{};
+	size_t reserved { X2fsMetaInfo::SECNUM_RESERVED_CONST};
+	size_t meta{ X2fsMetaInfo:: SECNUM_META_CONST };
 	bool wholeSecNumSet=false;
 	bool lbaLowSet=false;
-
-//	size_t secSpaces[4]={
-//			X2fsMetaInfo::FileNameSectionLen/CONST_SECSIZE,
-//			X2fsMetaInfo::DirSectionLen/CONST_SECSIZE,
-//			X2fsMetaInfo::FreeSpaceSectionLen/CONST_SECSIZE,
-//			X2fsMetaInfo::LinkedInfoSectionLen/CONST_SECSIZE,
-//	};
-	size_t optional[1]={0};
-
 };
 
 struct ParamMain{

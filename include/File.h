@@ -38,7 +38,7 @@ class BaseDescriptor:public SerializationInterface{
 		enum FileType{ TYPE_FILE=0,TYPE_DIR=1,TYPE_EAP=2};
 
 		using __TimeType = size_t;
-		using __SizeType = HostEnv::size_t;
+		using __SizeType = size_t;
 	protected:// 不允许构造一个不完整的Descriptor
 		AS_MACRO BaseDescriptor()=default;
 		AS_MACRO BaseDescriptor(const HostEnv::String& name,__TimeType createdTime,__TimeType lastModefiedTime):
@@ -249,9 +249,9 @@ SerializerPtr<__EnvTransfer>&  deserialize(SerializerPtr<__EnvTransfer> &ptr,
 	return pfile->deserialize(ptr);
 }
 template <class __EnvTransfer>
-size_t getSerializitionSize(const BaseDescriptor<__EnvTransfer> *pfile)
+size_t getSerializitionSize(BaseDescriptor<__EnvTransfer> * const &pfile)
 {
-	return __EnvTransfer::template sizeofHostType<BaseDescriptor<__EnvTransfer>::ClassSerializeType>() +
+	return ::getSerializitionSize<__EnvTransfer,typename BaseDescriptor<__EnvTransfer>::ClassSerializeType>() +
 			pfile->getSerializitionSize();
 }
 //==class X2fsMetaInfo
@@ -396,7 +396,7 @@ private:
 template <class __FsEnv>
 class X2fsUtil : public SerializationInterface{
 public:
-	using __SizeType = HostEnv::size_t;
+	using __SizeType = size_t;
 	// DEPRECATED  对齐因为序列化技术提出，已经过时
 //	enum{ __FsAlignment =  __FsEnv::Alignment};
 	using __X2fsMetaInfo = X2fsMetaInfo;
@@ -485,14 +485,15 @@ public:
 	}
 	static void readHeaderBufferInfo(void *buffer,u16_t &reservedNum,u16_t &metaNum)
 	{
-		reservedNum = *reinterpret_cast<u16_t*>(buffer + This::getReservedNumOff()) ;
-		metaNum = *reinterpret_cast<u16_t*>(buffer + This::getMetaNumOff());
+		reservedNum = *(reinterpret_cast<u16_t*>(reinterpret_cast<u8_t*>(buffer) + This::getReservedNumOff())) ;
+		metaNum = *(reinterpret_cast<u16_t*>(reinterpret_cast<u8_t*>(buffer) + This::getMetaNumOff()));
 	}
 	static void writeHeaderBufferInfo(void *buffer,u16_t reservedNum,u16_t metaNum)
 	{
-		*reinterpret_cast<u16_t*>(buffer + This::getReservedNumOff()) = reservedNum;
-		*reinterpret_cast<u16_t*>(buffer + This::getMetaNumOff()) =metaNum;
+		*(reinterpret_cast<u16_t*>(reinterpret_cast<u8_t*>(buffer) + This::getReservedNumOff())) = reservedNum;
+		*(reinterpret_cast<u16_t*>(reinterpret_cast<u8_t*>(buffer) + This::getMetaNumOff())) =metaNum;
 	}
+
 	/**
 	 * 在root根目录下创建一个文件
 	 * @name   文件名
@@ -568,6 +569,11 @@ public:
 	 * @return nullptr to indicate failure
 	 */
 	FileNode * locatePath(FileNode *base,const char *name)const;
+	/**
+	 * @return nullptr if not a file or non-exists
+	 */
+	__FileDescriptor * locateFile(FileNode *base,const char *name)const;
+	__DirDescriptor * locateDir(FileNode *base,const char *name)const;
 	FileNode * getPathParentNode(int argc,const char * argv[])const;
 	FileNode * getPathNode(int argc,const char * argv[])const;
 //	INCOMPLETE FileNode * locatePath(FileNode *base,int argc,const char *argv[],int &errorLevel);
@@ -745,20 +751,30 @@ public:
 			__SizeType unit=CONST_SECSIZE);
 
 public:
-			SerializerPtr<__FsEnv>& serialize(SerializerPtr<__FsEnv> &ptr)const
-			{
-				return ptr << metainfo << freemm << fileTree;
-			}
-			SerializerPtr<__FsEnv>& deserialize(SerializerPtr<__FsEnv> &ptr)
-			{
-				return ptr >> metainfo >> freemm >> fileTree;
-			}
-			size_t getSerializitionSize()
-			{
-				return metainfo.getSerializitionSize<__FsEnv>()+
-						freemm.getSerializitionSize<__FsEnv>()+
-						fileTree.template getSerializitionSize<__FsEnv>();
-			}
+	SerializerPtr<__FsEnv>& serialize(SerializerPtr<__FsEnv> &ptr)const
+	{
+		return ptr << metainfo << freemm << fileTree;
+	}
+	SerializerPtr<__FsEnv>& deserialize(SerializerPtr<__FsEnv> &ptr)
+	{
+		return ptr >> metainfo >> freemm >> fileTree;
+	}
+	size_t getSerializitionSize()
+	{
+		return metainfo.getSerializitionSize<__FsEnv>()+
+				freemm.getSerializitionSize<__FsEnv>()+
+				fileTree.template getSerializitionSize<__FsEnv>();
+	}
+
+	u8_t getDriver() const
+	{
+		return driver;
+	}
+
+	const __X2fsMetaInfo& getMetainfo() const
+	{
+		return metainfo;
+	}
 
 private:
 	/**
@@ -803,7 +819,7 @@ public:
 	//===类型别名
 	using This = FileOperation<__FsEnv>;
     using __FileOperation =This;
-	using __SizeType = HostEnv::size_t;
+	using __SizeType = size_t;
 	using __X2fsUtil  = X2fsUtil<__FsEnv>;
 	using FileNode = typename __X2fsUtil::FileNode;
 	using __FileDescriptor = typename __X2fsUtil::__FileDescriptor;
@@ -915,7 +931,7 @@ public:
 	/**
 	 * 按字节随机写文件
 	 */
-	void randwrite(const __String& fname,__SizeType byteStart,const char* content,__SizeType byteLen);
+	void randwrite(const __String& fname,__SizeType byteStart,const char* content,__SizeType byteLen=0);
 	void randread(const __String& fname,__SizeType byteStart,__SizeType byteLen);
 
 	/**
@@ -935,13 +951,13 @@ public:
 	 *
 	 *  @param maxLen 最大长度，如果设置成0，则表示读取sysFile的剩余长度
 	 */
-	__SizeType readSysFileToX2File(const __String &sysFile,__SizeType sysStart,
+	__SizeType writeSysFileToX2File(const __String &sysFile,__SizeType sysStart,
 								const __String &x2File,__SizeType x2Start,
 								__SizeType maxLen);
 	/** UNTESTED
 	 * @param maxLen 最大长度，如果设为0，则表示读取x2File的剩余长度
 	 */
-	__SizeType writeSysFileFromX2File(const __String &sysFile,__SizeType sysStart,
+	__SizeType readX2FileToSysFile(const __String &sysFile,__SizeType sysStart,
 								const __String &x2File,__SizeType x2Start,
 								__SizeType maxLen);
 #endif
@@ -986,7 +1002,7 @@ class ManagedObject{ // 在析构函数时自动调用，相当于unique_ptr
 public:
 	using This = ManagedObject<T>;
 	using __ManagedObject = This;
-	using __SizeType = HostEnv::size_t;
+	using __SizeType = size_t;
 
 
 	explicit ManagedObject();

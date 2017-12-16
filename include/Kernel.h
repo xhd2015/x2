@@ -184,8 +184,11 @@ public:
 		GPUI_MEM_NEW=0,
 		GPUI_MEM_DELETE=1
 	};
+
+
+
 	enum{
-		EOF=0xffffffff,/*8位，16位通用的EOF*/
+		eof=0xffffffff  ,/*8位，16位通用的EOF*/
 	};
 protected://static statement
 	//reserve a space for theKernel

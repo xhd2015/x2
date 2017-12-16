@@ -5,21 +5,22 @@
 #include <Locator.h>
 #include <def.h>
 #include <conceptual/Serialize.h>
+#include <new>
 //#include <Kernel.h>
 
 #if defined(CODE32)
 //new & delete
-AS_MACRO void*	operator new(size_t size) throw() {return nullptr;}
-AS_MACRO void	operator delete(void *p){}
+//AS_MACRO void*	operator new(size_t size) throw() {return nullptr;}
+//AS_MACRO void	operator delete(void *p){}
 
 //全局方法: placement new和placement delete
 // Default placement versions of operator new.
-AS_MACRO void* operator new(size_t, void* __p){ return __p; };
-AS_MACRO void* operator new[](size_t, void* __p){ return __p; };
+//AS_MACRO void* operator new(size_t, void* __p){ return __p; };
+//AS_MACRO void* operator new[](size_t, void* __p){ return __p; };
 
 // Default placement versions of operator delete.
-AS_MACRO void operator delete  (void*, void*){};
-AS_MACRO void operator delete[](void*, void*){};
+//AS_MACRO void operator delete  (void*, void*){};
+//AS_MACRO void operator delete[](void*, void*){};
 
 
 #elif defined(CODE64)
@@ -228,7 +229,8 @@ public:
 	template <class __EnvTransfer>
 		size_t getSerializitionSize()
 	{
-		return __EnvTransfer::template sizeofHostType<decltype(space)>() + Super::getSerializitionSize();
+		return space.getSerializitionSize<__EnvTransfer>()+
+				 Super::template getSerializitionSize<__EnvTransfer>();
 	}
 
 protected:

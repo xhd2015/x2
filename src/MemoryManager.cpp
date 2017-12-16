@@ -1074,8 +1074,9 @@ SerializerPtr<__EnvTransfer>& __DEF_LinearSourceDescriptor::deserialize(Serializ
 template <class __EnvTransfer>
 constexpr size_t __DEF_LinearSourceDescriptor::getSerializitionSize()
 {
-	return __EnvTransfer::template sizeofHostType<decltype(reinterpret_cast<This*>(nullptr)->start)>()+
-			__EnvTransfer::template sizeofHostType<decltype(reinterpret_cast<This*>(nullptr)->limit)>();
+	This *obj = reinterpret_cast<This*>(nullptr);
+	return ::getSerializitionSize<__EnvTransfer,decltype(obj->start)>()+
+			::getSerializitionSize<__EnvTransfer,decltype(obj->limit)>();
 }
 bool  __DEF_LinearSourceDescriptor::isAllocable()const
 {

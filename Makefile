@@ -82,15 +82,23 @@ fbackup := $(INCLUDE) $(GEN) $(SRC) $(ldvbr) $(ldkernel) $(ldmbr) \
 
 
 #toolchains
-CXX = g++ -fmax-errors=20 -finput-charset=utf8  -save-temps -Weffc++ -Wreorder \
- -Wnon-virtual-dtor -Wmisleading-indentation -Wnarrowing  -Wold-style-cast -Wlogical-not-parentheses \
+CXX = g++ -fmax-errors=20 -finput-charset=utf8  -save-temps \
+ -Wnon-virtual-dtor -Wmisleading-indentation -Wnarrowing -Wlogical-not-parentheses \
  -Winvalid-pch  -Wignored-qualifiers -Wfloat-equal 
 AS = as
 ifeq ($(DEBUG),true)
 	CXX += -g
 	AS += -g
 endif
-CXXSTD := c++17
+# 可能造成其他工程无法编译
+ifeq ($(AGGRESSIVE),false)
+ 	#do nothing
+else #true or others
+	CXX +=  -Weffc++ -Wreorder -Wold-style-cast
+endif
+
+CXXSTD ?= c++17
+
 # CCFLAGS is for all, CCFLAGSXX for CODEXX
 # deprecated,unused vars, will be later checked, th
 CCFLAGS_CHECK_LEVEL_LOW = -Wdeprecated -Wdeprecated-declarations  -Wunused-variable

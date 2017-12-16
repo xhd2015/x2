@@ -25,8 +25,8 @@ CommandOptions opts{
 			{"-i","--x2img",true,"指定选用的x2磁盘镜像"},
 			{"-o","--x2offset",true,"指定x2文件系统的偏移,默认为0"},
 			{"-l","--length",true,"指定系统文件的偏移，默认为0"},
-			{"-f","--fsfile",true,"指定大小,默认为文件长度"},
-			{"-g","--fsoffset",true,"指定系统文件"},
+			{"-f","--fsfile",true,"指定系统文件"},
+			{"-g","--fsoffset",true,"指定大小,默认为文件长度"},
 			{"-c","--cd",true,"在进行操作之前，x2文件系统先切换到目录下"},
 			{"","--lbalow",true,"镜像文件的lba低32位地址"},
 			{"-h","--help",false,"显示此帮助信息"},
@@ -160,9 +160,9 @@ void process(ParamRwfile &p,int& status)
 	{
 		if(p.mode==p.READ)
 		{
-			fop.writeSysFileFromX2File(p.fsfile, p.fsoffset, p.x2file,p.x2offset, p.length);
+			fop.readX2FileToSysFile(p.fsfile, p.fsoffset, p.x2file,p.x2offset, p.length);
 		}else{
-			fop.readSysFileToX2File(p.fsfile, p.fsoffset, p.x2file, p.x2offset, p.length);
+			fop.writeSysFileToX2File(p.fsfile, p.fsoffset, p.x2file, p.x2offset, p.length);
 		}
 	}
 	status = MyPorcessor::RETURN_DONE;

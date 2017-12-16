@@ -79,6 +79,9 @@ void testX2fsUtil()
 	}
 
 	util.mkdir(util.getFileTree()->getHead()->getSon(),"myBar");
+	util.createFileInRoot("file", 3);
+	util.createFileInRoot("file2", 4);
+
 
 	util.listOnNode(util.getFileTree()->getHead(),5);
 	cout << endl;

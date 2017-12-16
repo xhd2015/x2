@@ -98,8 +98,9 @@ public:
      */
     T* getNew();//done
     FullNode *getNewNode();//done
-    void withdraw(FullNode *t);//done
-    void withdraw(T *t);//single free,done
+    void withdraw(FullNode *_t);//done
+    // 不正确的实现
+    DEPRECATED void withdraw(T *t);//single free,done
 
 
     AS_MACRO bool isFull()const;//done
@@ -286,6 +287,7 @@ public:
     __ListNode*    removeHead();//done
     /**
      * 移除头部后面所有的链表，清空root和last
+     * @return 移除后的头部，形成一个链表
      */
     __ListNode*	   removeAllAfterHead();
     void            remove(__ListNode* p);//done
@@ -524,6 +526,7 @@ public:
 
 
     __TreeNode* getParent()const;//往previous一直遍历，直到是根，然后返回根的father,done
+
 
     template <class __EnvTransfer>
     AS_MACRO SerializerPtr<__EnvTransfer>& serialize(SerializerPtr<__EnvTransfer> &ptr)const;

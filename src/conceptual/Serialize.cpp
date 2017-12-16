@@ -190,7 +190,7 @@ void __DEF_SerializerPtr::__serializeByType(__BasicType data,Int2Type<TYPE_POINT
 //	std::cout << "__N" << __N << endl;
 	using __Type = typename Byte2Type<__N>::Type;
 	const char *p=reinterpret_cast<const char*>(data);
-	*reinterpret_cast<__Type*>(ptr)=static_cast<__Type>(reinterpret_cast<HostEnv::size_t>(
+	*reinterpret_cast<__Type*>(ptr)=static_cast<__Type>(reinterpret_cast<size_t>(
 				p==nullptr?nullptr:(p - __EnvTransfer::ptrBase()))  ) ;
 //	const char *p= reinterpret_cast<const char*>(data) - __EnvTransfer::ptrBase();
 //	cout <<static_cast<int>(reinterpret_cast<size_t>(p));

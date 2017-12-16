@@ -11,8 +11,6 @@
 #include <64/CMDUtil.h>
 #include <common/Getopt.h>
 
-#include <macros/all.h>
-
 
 #if defined(CODE64)
 
@@ -142,25 +140,8 @@ void process(ParamMain &p,int& status)
 	u8_t driver=HostEnv::addFile(p.imgFile,p.lbalow);
 	FileOperation<__FsEnv> op(driver,p.lbalow);
 
-	op.mkdir("boot");
-	op.cd("boot");
-	op.touch("x2.kernel.img", 25, 0);
-	op.flush();
-
-	FileOperation<__FsEnv> op2(driver,p.lbalow);
-	op2.ls();
-	return;
-
-//	op.ls();
-//	op.touch("file", 4,0);
-//	op.ls();
-//
-//	op.~FileOperation();
-//
-//	FileOperation<__FsEnv> op2(driver,p.lbalow);
-//	op2.ls();
-//
-//	return;
+	op.touch("file", 4, 0);
+	op.randwrite("file",0,"yesyes");
 
 
 	if(p.cdpath.size()>0)

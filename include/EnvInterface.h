@@ -9,11 +9,11 @@
 #define ENVINTERFACE_H_
 
 #include <def.h>
-#if defined(CODE64)
 #include <cstdlib>
 #include <cstring>
 #include <string>
 #include <vector>
+#if defined(CODE64)
 #include <regex>
 #endif
 
@@ -25,42 +25,8 @@
 //这是一个当前主机的主机环境，所有需要跨平台的类，函数都应当使用这个namespace中的定义
 namespace HostEnv{
 	enum{CUR_SEG = 0x10000u }; //用于段读写
-#if defined(CODE64)
-	using size_t = ::size_t; //定义size_t类型
 
-	/**
-	 * 文件映射到驱动器的一部分，从第二个参数开始
-	 */
-	std::vector<std::pair<std::string,u32_t>> files;
-
-	// c库基本函数
-	using ::memcpy;
-	using ::memmove;
-	using ::memset;
-	using ::malloc;
-	using ::free;
-
-	using ::strcpy;
-	using ::strncpy;
-	using ::strncmp;
-	using ::strlen;
-	using ::memset;
-	using ::memcpy;
-	using ::atoi;
-
-	using ::operator new;
-
-	using String =std::string;
-	template <class T>
-		 using Allocator =typename std::template allocator<T>;
-	template <class T>
-		using Vector = typename std::template vector<T,Allocator<T>>;
-
-	using std::cout;
-	using std::cin;
-	using std::endl;
-	using std::flush;
-
+	//common shared between all arches
 	void *checkOnNullThrows(void *ptr);
 	/**
 	 * 如果不成功，抛出异常
@@ -106,6 +72,46 @@ namespace HostEnv{
 	/**
 	 * atoi对String类型的包装
 	 */
+	int atoi(const String &s);
+
+#if defined(CODE64)
+//	using size_t = ::size_t; //定义size_t类型 //废除，一定是size_t
+
+
+	/**
+	 * 文件映射到驱动器的一部分，从第二个参数开始
+	 */
+	std::vector<std::pair<std::string,u32_t>> files;
+
+	// c库基本函数
+	using ::memcpy;
+	using ::memmove;
+	using ::memset;
+	using ::malloc;
+	using ::free;
+
+	using ::strcpy;
+	using ::strncpy;
+	using ::strncmp;
+	using ::strlen;
+	using ::memset;
+	using ::memcpy;
+	using ::atoi;
+
+	using ::operator new;
+
+	using String =std::string;
+	template <class T>
+		 using Allocator =typename std::template allocator<T>;
+	template <class T>
+		using Vector = typename std::template vector<T,Allocator<T>>;
+
+	using std::cout;
+	using std::cin;
+	using std::endl;
+	using std::flush;
+
+
 	int atoi(const String &s)
 	{
 		return ::atoi(s.c_str());
@@ -278,7 +284,12 @@ namespace HostEnv{
 			return checkOnNullThrows(malloc(size));
 		}
 #elif defined(CODE32)
-
+		using String =std::string;
+		template <class T>
+			 using Allocator =typename std::template allocator<T>;
+		template <class T>
+			using Vector = typename std::template vector<T,Allocator<T>>;
+		using ::operator new;
 #elif defined(CODE32USER)
 
 #elif defined(CODE16)
@@ -290,8 +301,8 @@ namespace HostEnv{
 
 };
 
+// TODO 32位下重新定义
 using HostEnv::operator new; // HostEnv重新定义new
-
 
 
 
